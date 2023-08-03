@@ -14,7 +14,7 @@ import os
 import ase.io
 import scipy
 from ase.units import Hartree, Bohr, mol, kcal
-def jedi_analysis(rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
+def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
     #jedi analysis function
     ###########################
     ##  Matrix Calculations  ##
@@ -79,11 +79,11 @@ def jedi_analysis(rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units
     proc_geom_RIMs = 100 * ( E_RIMs_total - E_geometries ) / E_geometries
  
     if printout:
-        jedi_printout(rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=ase_units)
+        jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=ase_units)
 
     return proc_E_RIMs,E_RIMs, E_RIMs_total, proc_geom_RIMs,delta_q
 
-def jedi_printout(rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False):
+def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False):
     #############################################
     #	    	   Output section	        	#
     #############################################
@@ -107,22 +107,22 @@ def jedi_printout(rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,pr
     # JEDI analysis
     NRIMs=len(rim_list)
     if ase_units==False:
-        print("\n RIM No.       RIM type                    delta_q (au) Percentage    Energy (kcal/mol)")
+        print("\n RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)")
     elif ase_units==True:
-        print("\n RIM No.       RIM type                    delta_q (Å,°) Percentage    Energy (eV)")
+        print("\n RIM No.       RIM type                       indices        delta_q (Å,°) Percentage    Energy (eV)")
     for i in range(NRIMs):
         if rim_list[i][0] == -1 and rim_list[i][1] == -1:
             rim="bond" 
-            ind="%d %d"%(rim_list[i][2],rim_list[i][3])
-            print('%6i%7s%-11s%12s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind,delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+            ind="%s%d %s%d"%(atoms.symbols[rim_list[i][2]],rim_list[i][2],atoms.symbols[rim_list[i][3]],rim_list[i][3])
+            print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind,delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
         elif rim_list[i][0] == -1 :
             rim="bond angle"
-            ind="%d %d %d"%(rim_list[i][1],rim_list[i][2],rim_list[i][3])
-            print('%6i%7s%-11s%12s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+            ind="%s%d %s%d %s%d"%(atoms.symbols[rim_list[i][1]],rim_list[i][1],atoms.symbols[rim_list[i][2]],rim_list[i][2],atoms.symbols[rim_list[i][3]],rim_list[i][3])
+            print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
         else:
             rim="dihedral"
-            ind="%d %d %d %d"%(rim_list[i][0],rim_list[i][1],rim_list[i][2],rim_list[i][3])
-            print('%6i%7s%-11s%12s%17.7f%9.1f%17.7f' % (i+1, " ", rim,ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+            ind="%s%d %s%d %s%d %s%d"%(atoms.symbols[rim_list[i][0]],rim_list[i][0],atoms.symbols[rim_list[i][1]],rim_list[i][1],atoms.symbols[rim_list[i][2]],rim_list[i][2],atoms.symbols[rim_list[i][3]],rim_list[i][3])
+            print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim,ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
 
 
 @jsonable('jedi')
@@ -234,7 +234,7 @@ class Jedi:
 
 
         #run the analysis
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
         
         if indices:
             
@@ -242,7 +242,7 @@ class Jedi:
             E_RIMs_total=sum(self.E_RIMs)
             proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
             
-        jedi_printout(self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+        jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
         pass
         
 
@@ -1217,7 +1217,7 @@ display update on ''')
         E_geometries=all_E_geometries[0]
 
         
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atoms,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
         self.post_process(indices)
         E_RIMs_total=sum(self.E_RIMs)
         proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
