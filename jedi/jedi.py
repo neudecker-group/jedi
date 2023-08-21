@@ -306,7 +306,7 @@ class Jedi:
                                 hbond_ls.append([i[1], j])
             if len(hbond_ls)>0:
                 self.hbond=hbond_ls
-              #  bl=np.vstack((bl,hbond_ls))
+                bl=np.vstack((bl,hbond_ls))
                 hbond_ls=np.array(hbond_ls)  
                 hbond_ls=np.atleast_2d(hbond_ls)     
             
@@ -418,7 +418,8 @@ class Jedi:
                             
                         else:
                             try:
-                                mol.get_dihedral(int(single_TA_Atom_0),int(torsionable_row[0]),int(torsionable_row[1]),int(single_TA_Atom_3),mic=True)
+                                if round(mol.get_dihedral(int(single_TA_Atom_0),int(torsionable_row[0]),int(torsionable_row[1]),int(single_TA_Atom_3),mic=True),3) in [0.0,180.0,360.0]:
+                                    continue
                                 if row_index==0:
                                     da = np.array([single_TA_Atom_0,  torsionable_row[0], torsionable_row[1], single_TA_Atom_3])
                                     da_flag=True
@@ -1132,15 +1133,15 @@ color Axes Labels 32
                      #   mol.write('xF.xyz')
 
              
-        # Store the maximum energy in a variable for later call
-                # if filename == "vmd_all.tcl":
-                #     if not modus == "all":  # only do this, when the user didn't call the --v flag 
-                #         max_energy = float(np.nanmax(bond_E_array, axis=0)[2])  # maximum energy in one bond
-                #         for row in bond_E_array: 
-                          
-                #             if max_energy in row:
-                #                 atom_1_max_energy = int(row[0])
-                #                 atom_2_max_energy = int(row[1])
+       # Store the maximum energy in a variable for later call
+                if filename == "vmd_all.tcl":
+                    #if not modus == "all":  # only do this, when the user didn't call the --v flag 
+                    max_energy = float(np.nanmax(bond_E_array, axis=0)[2])  # maximum energy in one bond
+                    for row in bond_E_array: 
+                        
+                        if max_energy in row:
+                            atom_1_max_energy = int(row[0])
+                            atom_2_max_energy = int(row[1])
 
         # Generate the binning windows by splitting bond_E_array into N_colors equal windows
             if filename == "vmd_all.tcl":
@@ -1326,11 +1327,11 @@ display update on ''')
         E_geometries=all_E_geometries[0]
 
         
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atoms,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atomsF,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
         self.post_process(indices,hbond=hbond)
         E_RIMs_total=sum(self.E_RIMs)
         proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
-        jedi_printout(self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+        jedi_printout(self.atomsF,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
           
     
 
