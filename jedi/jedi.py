@@ -123,6 +123,9 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
             rim="dihedral"
             ind="%s%d %s%d %s%d %s%d"%(atoms.symbols[rim_list[i][0]],rim_list[i][0],atoms.symbols[rim_list[i][1]],rim_list[i][1],atoms.symbols[rim_list[i][2]],rim_list[i][2],atoms.symbols[rim_list[i][3]],rim_list[i][3])
             print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim,ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+    
+    from . import quotes
+    
 
 
 @jsonable('jedi')
@@ -803,7 +806,7 @@ class Jedi:
             #       'N': [0.0, 0.0, 1.0],
             #       'O': [1.0, 0.0, 0.0],
             #       'S': [1.0, 1.0, 0.0]}
-        from ase.jedi.colors import colors 
+        from .colors import colors 
         if des_colors!=None:
             for i in des_colors:
                 colors[i]=des_colors[i]
