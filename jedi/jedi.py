@@ -123,6 +123,9 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
             rim="dihedral"
             ind="%s%d %s%d %s%d %s%d"%(atoms.symbols[rim_list[i][0]],rim_list[i][0],atoms.symbols[rim_list[i][1]],rim_list[i][1],atoms.symbols[rim_list[i][2]],rim_list[i][2],atoms.symbols[rim_list[i][3]],rim_list[i][3])
             print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim,ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+    
+    from . import quotes
+    
 
 
 @jsonable('jedi')
@@ -211,7 +214,7 @@ class Jedi:
                                                 list))
         return cl
 
-    def run(self,indices=None,ase_units=False,hbond=True):
+    def run(self,indices=None,ase_units=False,hbond=False):
         self.ase_units=ase_units
         # get necessary data
         self.indices=np.arange(0,len(self.atoms0))
@@ -238,7 +241,7 @@ class Jedi:
         
         if indices:
             
-            self.post_process(indices)
+            self.post_process(indices,hbond=hbond)
             E_RIMs_total=sum(self.E_RIMs)
             proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
             
@@ -249,7 +252,7 @@ class Jedi:
 
 
 
-    def get_rims(self,mol,hbond=True):
+    def get_rims(self,mol,hbond=False):
         
         ###bondlengths####
         mol = mol
@@ -275,9 +278,10 @@ class Jedi:
         #hbonds
         if hbond==True:
             from ase.data.vdw import vdw_radii
-            hpartner=['N','O','F']
+            hpartner=['N','O','C','F']
             hpartner_ls=[]
             hcutoff={('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
+                     ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6]),
             ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
             ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9])}
     
@@ -291,8 +295,8 @@ class Jedi:
                 if mol.symbols[i[0]]=='H' and mol.symbols[i[1]] in hpartner:
                     for j in hpartner_ls:  
                         if j != i[1]:                   
-                            if mol.get_distance(i[0],j,mic=True)and  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
-                                & mol.get_angle(i[1],i[0],j)>90:
+                            if mol.get_distance(i[0],j,mic=True)<  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
+                                and mol.get_angle(i[1],i[0],j,mic=True)>90:
                                 
                                 hbond_ls.append([i[0], j])
                     
@@ -300,7 +304,7 @@ class Jedi:
                     for j in hpartner_ls:   
                         if j != i[0]:       
                         
-                            if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j) >90:
+                            if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j,mic=True) >90:
                         
                                 hbond_ls.append([i[1], j])
             if len(hbond_ls)>0:
@@ -417,7 +421,8 @@ class Jedi:
                             
                         else:
                             try:
-                                mol.get_dihedral(int(single_TA_Atom_0),int(torsionable_row[0]),int(torsionable_row[1]),int(single_TA_Atom_3),mic=True)
+                                if round(mol.get_dihedral(int(single_TA_Atom_0),int(torsionable_row[0]),int(torsionable_row[1]),int(single_TA_Atom_3),mic=True),3) in [0.0,180.0,360.0]:
+                                    continue
                                 if row_index==0:
                                     da = np.array([single_TA_Atom_0,  torsionable_row[0], torsionable_row[1], single_TA_Atom_3])
                                     da_flag=True
@@ -435,7 +440,7 @@ class Jedi:
             
         return rim_list
     
-    def get_common_rims(self,hbond=True):
+    def get_common_rims(self,hbond=False):
         rim_atoms0=self.get_rims(self.atoms0,hbond=hbond)
         rim_atomsF=self.get_rims(self.atomsF,hbond=hbond)
         rim_atoms0v=rim_atoms0.view([('', rim_atoms0.dtype)] * rim_atoms0.shape[1]).ravel()
@@ -708,7 +713,7 @@ class Jedi:
         
         return delta_q
 
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True):
+    def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True):
         #########################
         #       Basic stuff     #
         #########################
@@ -716,6 +721,8 @@ class Jedi:
             unit="kcal/mol"
         elif self.ase_units==True:
             unit="eV"
+
+
         rim_list = self.rim_list
         self.atomsF.write('xF.xyz')
         if  len(self.proc_E_RIMs) == 0:
@@ -799,7 +806,7 @@ class Jedi:
             #       'N': [0.0, 0.0, 1.0],
             #       'O': [1.0, 0.0, 0.0],
             #       'S': [1.0, 1.0, 0.0]}
-        from ase.jedi.colors import colors 
+        from .colors import colors 
         if des_colors!=None:
             for i in des_colors:
                 colors[i]=des_colors[i]
@@ -960,16 +967,46 @@ color Axes Labels 32
                                     bond_E_array[j][2] = (float(1)/3) * E_da[i]
                         
                 if (filename == "vmd_all.tcl" and self.hbond != None):
-                    print(bond_E_array[:,2][len(bl)-len(self.hbond)-1:len(bl)])
+                    
                     hbond_E=sum(bond_E_array[:,2][len(bl)-len(self.hbond):len(bl)])
                     
+                translate={}                        # the new indices need to get the same values as the original ones inside the cell
+                for i in range(len(bond_E_array)):
+                    translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]                
                 
+                if len(self.indices)<len(self.atomsF):
+                    p_rim=self.rim_list.copy()
+                    p_indices=self.indices
+                    self.indices=range(len(self.atomsF))
+                    rim=self.get_common_rims(hbond=self.hbond!=None)
+                    
+                    b=np.where(rim[:,1]>-1)[0][0]
+                    
+                    rim=rim[:,[2,3]]
+                    rim=np.ascontiguousarray(rim)
+                    a=np.array(bl).view([('', np.array(bl).dtype)] * np.array(bl).shape[1]).ravel()
+                
+                    
+                    
+                    b=np.array(rim).view([('', np.array(bl).dtype)] * np.array(bl).shape[1]).ravel()
+                    
+                    
+                    rim=np.setxor1d(a, b) 
+                    #print(rim)       
+                    rim=rim.view(np.array(bl).dtype).reshape(-1, 2)
+                 
+                    nan=np.full((len(rim),1),np.nan)         #nan for special color (black)
+                    rim=np.hstack((rim,nan))              #stack for later vmd visualization
+                    bond_E_array=np.vstack((bond_E_array,rim))
+                    self.rim_list=p_rim
+                    self.indices=p_indices
         # get bonds that reach out of the unit cell
                 if pbc_flag==True:
-                    
-                    cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
+                    from ase.data.vdw import vdw_radii
+                    cutoff=[ vdw_radii[atom.number] * 0.9 for atom in self.atomsF]
+                    #cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
                     ex_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
-
+                    #print(ase.geometry.get_distances(self.atomsF.positions,self.atomsF.positions,cell=self.atomsF.cell,pbc=self.atomsF.pbc)[1].shape)
                     ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('S',a=self.atomsF,cutoff=cutoff)))
                     ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('D',a=self.atomsF,cutoff=cutoff)))
 
@@ -981,88 +1018,160 @@ color Axes Labels 32
                     bond_E_array_app=np.zeros([len(atoms_ex_cell),3])  # bond list has to be appended
                     translate={}                        # the new indices need to get the same values as the original ones inside the cell
                     for i in range(len(bond_E_array)):
-                        translate[(bond_E_array[i,0],bond_E_array[i,1])]=bond_E_array[i,2]
-
+                        translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]
+                    
                     for i in range(len(atoms_ex_cell)):
                         pos_ex_atom=mol.get_positions()[int(atoms_ex_cell[i,0])]+atoms_ex_cell[i,5:8]       # get positions of cell external atoms by adding the vector
-                        mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object
                         #ex_indx=np.append(ex_indx,atoms_ex_cell[i,1])            
                         original_rim=[int(atoms_ex_cell[i,0]),int(atoms_ex_cell[i,1])]                      # get the indices of the corresponding atoms inside the cell
                         original_rim.sort()                                                                 # needs to be sorted because rim list only covers one direction                           
                         try:
-                            bond_E_array_app[i,0:3]=[atoms_ex_cell[i,0],len(self.atomsF)+i,translate[tuple(original_rim)]]                          # add to bond list with auxillary index
+                            bond_E_array_app[i,0:3]=[atoms_ex_cell[i,0],len(mol),translate[tuple(original_rim)]]                          # add to bond list with auxillary index
+                            mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object
+                        
                         except:
-                            bond_E_array_app[i,0:3]=[atoms_ex_cell[i,0],len(self.atomsF)+i,np.nan]  #if partial analysis not analyzed bonds get a different color
+                            #bond_E_array_app[i,0:3]=[atoms_ex_cell[i,0],len(self.atomsF)+i,np.nan]  #if partial analysis not analyzed bonds get a different color
+                            pass    
+                    bond_E_array_app=bond_E_array_app[~np.all(bond_E_array_app == 0, axis=1)]
+
                     bond_E_array=np.vstack((bond_E_array,bond_E_array_app))
-                
+                    
+                    
                     mol.write('xF.xyz')
    
 ########################## get left out bonds ########################
 
-                if len(self.indices)< len(self.atomsF):
-                    cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
-                    add_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
-                    add_bl=add_bl[add_bl[:,0]<add_bl[:,1]]  #get rid of doubles
-                    leftouts=np.arange(0,len(self.atomsF))   # get index of left outs
-                    leftouts=np.delete(leftouts,self.indices) #by deleting the chosen indices
-                    add_bl=add_bl[np.any([np.in1d(add_bl[:,0], leftouts),  np.in1d(add_bl[:,1], leftouts)],axis=0)]   # get the left out bonds
-                    nan=np.full((len(add_bl),1),np.nan)         #nan for special color (black)
-                    add_bl=np.hstack((add_bl,nan))              #stack for later vmd visualization
-                    bond_E_array=np.vstack((bond_E_array,add_bl))
+                # if len(self.indices)< len(self.atomsF):
+                #     cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
+                #     add_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
+                #     add_bl=add_bl[add_bl[:,0]<add_bl[:,1]]  #get rid of doubles
+                #     leftouts=np.arange(0,len(self.atomsF))   # get index of left outs
+                #     leftouts=np.delete(leftouts,self.indices) #by deleting the chosen indices
+                #     add_bl=add_bl[np.any([np.in1d(add_bl[:,0], leftouts),  np.in1d(add_bl[:,1], leftouts)],axis=0)]   # get the left out bonds
+                #     nan=np.full((len(add_bl),1),np.nan)         #nan for special color (black)
+                #     add_bl=np.hstack((add_bl,nan))              #stack for later vmd visualization
+                #     bond_E_array=np.vstack((bond_E_array,add_bl))
+
+                    # if self.hbond!=None:
+                    #     from ase.data.vdw import vdw_radii
+                    #     hpartner=['N','O','C','F']
+                    #     hpartner_ls=[]
+                    #     hcutoff={('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
+                    #             ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6]),
+                    #     ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
+                    #     ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9])}
+                
+                    #     hbond_ls=[]
+                    #     for i in range(len(mol)):
+                    #         if mol.symbols[i] in hpartner:
+                    #             hpartner_ls.append(i)
+                        
+                    #     for i in bond_E_array:
+                        
+                    #         if mol.symbols[int(i[0])]=='H' and mol.symbols[int(i[1])] in hpartner:
+                    #             for j in hpartner_ls:  
+                    #                 if j != int(i[1]):                   
+                    #                     if mol.get_distance(int(i[0]),int(j),mic=True)<  hcutoff[(mol.symbols[int(i[0])], mol.symbols[int(j)])] \
+                    #                         and mol.get_angle(int(i[1]),int(i[0]),int(j),mic=True)>90:
+                                            
+                    #                         hbond_ls.append([int(i[0]), int(j)])
+                                
+                    #         elif mol.symbols[int(i[0])] in hpartner and mol.symbols[int(i[1])]=='H':
+                    #             for j in hpartner_ls:   
+                    #                 if j != int(i[0]):       
+                                    
+                    #                     if mol.get_distance(int(i[1]),int(j),mic=True) < hcutoff[(mol.symbols[int(i[1])], mol.symbols[int(j)])] and mol.get_angle(int(i[0]),int(i[1]),int(j),mic=True) >90:
+                                    
+                    #                         hbond_ls.append([int(i[1]), int(j)])
+                    #     if len(hbond_ls)>0:
+                    #         hbond_ls=np.array(hbond_ls)
+                    #         a=hbond_ls.view([('', hbond_ls.dtype)] * hbond_ls.shape[1]).ravel()
+                    #         b=np.array(self.hbond).view([('', np.array(self.hbond).dtype)] * np.array(self.hbond).shape[1]).ravel()
+                    #         hbond_ls=np.setxor1d(a, b)
+                            
+                    #         hbond_ls=hbond_ls.view(np.array(self.hbond).dtype).reshape(-1, 2)
+                    
+                    #     #  bl=np.vstack((bl,hbond_ls))
+                    #         hbond_ls=np.array(hbond_ls)  
+                    #         hbond_ls=np.atleast_2d(hbond_ls)     
+                        
+                    #     nan=np.full((len(hbond_ls),1),np.nan)         #nan for special color (black)
+                    #     hbond_ls=np.hstack((hbond_ls,nan))              #stack for later vmd visualization
+                    #     bond_E_array=np.vstack((bond_E_array,hbond_ls))
+                           
+
+                    # if pbc_flag==True:
+                    #     from ase.data.vdw import vdw_radii
+                    #     cutoff=[ vdw_radii[atom.number] * 0.9 for atom in self.atomsF]
+                    #     #cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
+                    #     ex_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
+                    #     #print(ase.geometry.get_distances(self.atomsF.positions,self.atomsF.positions,cell=self.atomsF.cell,pbc=self.atomsF.pbc)[1].shape)
+                    #     ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('S',a=self.atomsF,cutoff=cutoff)))
+                    #     ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('D',a=self.atomsF,cutoff=cutoff)))
+
+                    #     bond_ex_cell=ex_bl[(ex_bl[:,2]!=0) | (ex_bl[:,3]!=0) |(ex_bl[:,4]!=0)]          #determines which nearest neighbors are outside the unit cell
+                    #     atoms_ex_cell=bond_ex_cell                    #[np.unique(bond_ex_cell[:,1:5],return_index=True,axis=0)[1]]  # neglects double mentioned
+                    #     mol=self.atomsF.copy()                   # a extended cell is needed for vmd since it does not show intercellular bonds
+                    #     mol.wrap()                              #wrap molecule important for atoms close to the boundaries
+                    #     #ex_indx=np.array([])                # auxillary indices are used
+                    #     bond_E_array_app=np.zeros([len(atoms_ex_cell),3])  # bond list has to be appended
+                    #     translate={}                        # the new indices need to get the same values as the original ones inside the cell
+                    #     for i in range(len(bond_E_array)):
+                    #         translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]
+                        
+                    #     for i in range(len(atoms_ex_cell)):
+                    #         pos_ex_atom=mol.get_positions()[int(atoms_ex_cell[i,0])]+atoms_ex_cell[i,5:8]       # get positions of cell external atoms by adding the vector
+                    #         #ex_indx=np.append(ex_indx,atoms_ex_cell[i,1])            
+                    #         original_rim=[int(atoms_ex_cell[i,0]),int(atoms_ex_cell[i,1])]                      # get the indices of the corresponding atoms inside the cell
+                    #         original_rim.sort()                                                                 # needs to be sorted because rim list only covers one direction                           
+                    #         try:
+                    #             bond_E_array_app[i,0:3]=[atoms_ex_cell[i,0],len(mol),translate[tuple(original_rim)]]                          # add to bond list with auxillary index
+                    #             mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object
+                            
+                    #         except:
+                    #             #bond_E_array_app[i,0:3]=[atoms_ex_cell[i,0],len(self.atomsF)+i,np.nan]  #if partial analysis not analyzed bonds get a different color
+                    #             pass      
+                    #     bond_E_array=np.vstack((bond_E_array,bond_E_array_app))
+                    
+                     #   mol.write('xF.xyz')
 
              
-        # Store the maximum energy in a variable for later call
+       # Store the maximum energy in a variable for later call
                 if filename == "vmd_all.tcl":
-                    if not modus == "all":  # only do this, when the user didn't call the --v flag 
-                        max_energy = float(np.nanmax(bond_E_array, axis=0)[2])  # maximum energy in one bond
-                        for row in bond_E_array: 
-                          
-                            if max_energy in row:
-                                atom_1_max_energy = int(row[0])
-                                atom_2_max_energy = int(row[1])
+                    #if not modus == "all":  # only do this, when the user didn't call the --v flag 
+                    max_energy = float(np.nanmax(bond_E_array, axis=0)[2])  # maximum energy in one bond
+                    for row in bond_E_array: 
+                        
+                        if max_energy in row:
+                            atom_1_max_energy = int(row[0])
+                            atom_2_max_energy = int(row[1])
 
         # Generate the binning windows by splitting bond_E_array into N_colors equal windows
             if filename == "vmd_all.tcl":
-                if modus == "all":
-                    if man_strain == None:
-                        print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
-                    else:
-                        binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
+                if man_strain != None:
+                    binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
                 else: 
                     binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "vmd_bl.tcl":
-                if modus == "bl":
-                    if man_strain == None:
-                        print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
-                    else:
-                        binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
+                if man_strain != None:
+                    binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
                 else: 
                     binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "vmd_ba.tcl":
-                if modus == "ba":
-                    if man_strain == None:
-                        print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
-                    else:
-                        binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
+                if man_strain != None:
+                    binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
                 else: 
                     binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "vmd_da.tcl":
-                if modus == "da":
-                    if man_strain == None:
-                        print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
-                    else:
-                        binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
+                if man_strain != None:
+                    binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
                 
-            else: 
-                binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
-                
+                else: 
+                    binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+            
     
             f = open(filename, 'a')
             if pbc_flag==True:
@@ -1073,9 +1182,12 @@ color Axes Labels 32
             f.write("\n\n# Adding a representation with the appropriate colorID for each bond")
                 # Calculate which binning_windows value is closest to the bond-percentage and do the output
             if self.hbond != None:
-                lim=len(bond_E_array)-len(self.hbond)
+                lih=len(self.hbond)#-len(self.hbond)
+                lim=len(bond_E_array)
+               
             else:
                 lim=len(bond_E_array)
+                lih=len(bl)-len(bond_E_array)
             for i in range(lim):
                 if np.isnan(bond_E_array[i][2]):
                     colorID = 32                       #black
@@ -1085,13 +1197,14 @@ color Axes Labels 32
                 f.write('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top bonds"))
                 f.write('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
                 f.write('\n%s%i%s%i%s%i%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", bond_E_array[i][0], " ", bond_E_array[i][1], "}\n"))
-            for i in range(lim,len(bond_E_array)):
+            for i in range(len(bl)-lih,len(bond_E_array)):
               
                 if np.isnan(bond_E_array[i][2]):
                     colorID = 32                       #black
                 else:
                     colorID = np.abs( binning_windows - bond_E_array[i][2] ).argmin() + 1
-                f.write('\nset x [[atomselect top "index %d %d"] get {x y z}]'%(self.hbond[i-len(bond_E_array)][0],self.hbond[i-len(bond_E_array)][1]))
+                   
+                f.write('\nset x [[atomselect top "index %d %d"] get {x y z}]'%(bond_E_array[i][0],bond_E_array[i][1]))
                 f.write('\nset a [lindex $x 0] ')
                 f.write('\nset b [lindex $x 1] ')
                 f.write('\ndraw  color %d'%(colorID))
@@ -1177,7 +1290,7 @@ display update on ''')
         pass
 
 
-    def partial_analysis(self,indices,ase_units=False):   
+    def partial_analysis(self,indices,ase_units=False,hbond=False):   
         #for calculation with partial hessian
         self.ase_units=ase_units
         self.indices=np.arange(0,len(self.atoms0)).tolist()
@@ -1193,7 +1306,7 @@ display update on ''')
         self.H=H
         
 
-        self.rim_list=self.get_common_rims()
+        self.rim_list=self.get_common_rims(hbond=hbond)
       
         rim_list=self.rim_list
         if len(rim_list)==0:
@@ -1217,24 +1330,29 @@ display update on ''')
         E_geometries=all_E_geometries[0]
 
         
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atoms,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
-        self.post_process(indices)
+        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atomsF,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.post_process(indices,hbond=hbond)
         E_RIMs_total=sum(self.E_RIMs)
         proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
-        jedi_printout(self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+        jedi_printout(self.atomsF,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
           
     
 
             
       
-    def post_process(self,indices):             #a function to get segments of all full analysis for better understanding of local strain
+    def post_process(self,indices,hbond=False):             #a function to get segments of all full analysis for better understanding of local strain
         #get rims with only the considered atoms
         self.indices=indices
         rim_list=self.rim_list
-        rim_l=self.get_common_rims()
+        rim_l=self.get_common_rims(hbond=hbond)
         a=np.vstack((rim_list,rim_l ))
-        x,z=np.unique(a,return_counts=True,axis=0)
+        x,indx,z=np.unique(a,return_counts=True,axis=0,return_index=True)
+     
+        z=z[indx.argsort()]
+      
+
         ind=np.where(z>1)[0]
+   
         self.E_RIMs=np.array(self.E_RIMs)[ind]
         self.delta_q=self.delta_q[ind]
         E_RIMs_total=sum(self.E_RIMs)
