@@ -52,20 +52,16 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
 
 
     # Get the energy stored in every RIM (take care to get the right multiplication for a diatomic molecule)
-    E_RIMs = []
+    
     if B.ndim == 1:
-        E_current = 0.5 * delta_q[0] * H_q * delta_q[0]
-        E_RIMs.append(E_current)
+        E_RIMs = np.array([0.5 * delta_q[0] * H_q * delta_q[0]])
+        
     else:
-        for i in range(NRIMs):
-            E_current = 0
-            for j in range(NRIMs):
-                E_current += 0.5 * delta_q[i] * H_q[i,j] * delta_q[j]
-            E_RIMs.append(E_current)
+        E_RIMs = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)          
     # Get the percentage of the energy stored in every RIM
     proc_E_RIMs = []
-    for i in range(NRIMs):
-        proc_E_RIMs.append( 100 * E_RIMs[i] / E_RIMs_total )
+
+    proc_E_RIMs = 100 * E_RIMs / E_RIMs_total 
     if ase_units==True:
         b=np.where(rim_list[:,1]>-1)[0][0]
         delta_q[0:b]*=Bohr
@@ -105,24 +101,33 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
 
 
     # JEDI analysis
-    NRIMs=len(rim_list)
+
     if ase_units==False:
         print("\n RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)")
     elif ase_units==True:
         print("\n RIM No.       RIM type                       indices        delta_q (Å,°) Percentage    Energy (eV)")
-    for i in range(NRIMs):
-        if rim_list[i][0] == -1 and rim_list[i][1] == -1:
-            rim="bond" 
-            ind="%s%d %s%d"%(atoms.symbols[rim_list[i][2]],rim_list[i][2],atoms.symbols[rim_list[i][3]],rim_list[i][3])
-            print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind,delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        elif rim_list[i][0] == -1 :
-            rim="bond angle"
-            ind="%s%d %s%d %s%d"%(atoms.symbols[rim_list[i][1]],rim_list[i][1],atoms.symbols[rim_list[i][2]],rim_list[i][2],atoms.symbols[rim_list[i][3]],rim_list[i][3])
-            print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        else:
-            rim="dihedral"
-            ind="%s%d %s%d %s%d %s%d"%(atoms.symbols[rim_list[i][0]],rim_list[i][0],atoms.symbols[rim_list[i][1]],rim_list[i][1],atoms.symbols[rim_list[i][2]],rim_list[i][2],atoms.symbols[rim_list[i][3]],rim_list[i][3])
-            print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim,ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+    i = 0
+
+    for k in rim_list[0]:
+        rim="bond" 
+        ind="%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
+        print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+        i+=1
+    for k in rim_list[1]:
+        rim="dipole" 
+        ind="%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
+        print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+        i+=1
+    for k in rim_list[2]:
+        rim="bond angle" 
+        ind="%s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2])
+        print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+        i+=1
+    for k in rim_list[3]:
+        rim="dihedral" 
+        ind="%s%d %s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2], atoms.symbols[k[3]], k[3])
+        print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+        i+=1
     from . import quotes
 
 @jsonable('jedi')
@@ -269,8 +274,8 @@ class Jedi:
 
         if  len(indices)!=len(mol):
             bl=bl[np.all([np.in1d(bl[:,0], indices),  np.in1d(bl[:,1], indices)],axis=0)]
-        nan=np.full((len(bl),2),-1)         #setup array for rims nan used to be able to stack bl with ba and da and to distinguish them
-        rim_list=np.hstack((nan,bl))
+
+        rim_list=[bl]
         
         #hbonds
         if hbond==True:
@@ -308,10 +313,9 @@ class Jedi:
                 bl=np.vstack((bl,hbond_ls))
                 hbond_ls=np.array(hbond_ls)  
                 hbond_ls=np.atleast_2d(hbond_ls)     
-            
-                nan=np.full((len(hbond_ls),2),-1)
-                nan=np.hstack((nan,hbond_ls))
-                rim_list=np.vstack((rim_list,nan))  
+                rim_list.append(hbond_ls) 
+            else:
+                rim_list.append(np.array([])) 
             
         ########find angles
         #create array containing all angles (ba)
@@ -343,7 +347,9 @@ class Jedi:
         
             nan=np.full((len(ba),1),-1)
             nan=np.hstack((nan,ba))
-            rim_list=np.vstack((rim_list,nan))
+            rim_list.append(ba)
+        else:
+            rim_list.append(np.atleast_2d([])) 
            
             
 
@@ -430,7 +436,9 @@ class Jedi:
                                 continue
                 
             if da_flag==True:
-                rim_list=np.vstack((rim_list,da))
+                rim_list.append(da)
+            else:
+                rim_list.append(np.atleast_2d([])) 
  
             
         return rim_list
@@ -438,18 +446,23 @@ class Jedi:
     def get_common_rims(self,hbond=True):
         rim_atoms0=self.get_rims(self.atoms0,hbond=hbond)
         rim_atomsF=self.get_rims(self.atomsF,hbond=hbond)
-        rim_atoms0v=rim_atoms0.view([('', rim_atoms0.dtype)] * rim_atoms0.shape[1]).ravel()
-        rim_atomsFv=rim_atomsF.view([('', rim_atomsF.dtype)] * rim_atomsF.shape[1]).ravel()
         
-        rim_l,ind,z=np.intersect1d(rim_atoms0v, rim_atomsFv,return_indices=True)
-      
-        #if len(self.indices) < len(self.atoms0)  :
-        rim_l=rim_l[ind.argsort()]
-     
-        rim_l=rim_l.view(rim_atoms0.dtype).reshape(-1, rim_atoms0.shape[1])
-        self.rim_list=rim_l
+        for i in range(len(rim_atoms0)):
+            if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
+                break
+            else:
+                rim_atoms0v=rim_atoms0[i].view([('', rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
+                rim_atomsFv=rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()
+                
+                rim_l,ind,z=np.intersect1d(rim_atoms0v, rim_atomsFv,return_indices=True)
+            
+                #if len(self.indices) < len(self.atoms0)  :
+                rim_l=rim_l[ind.argsort()]
+            
+                rim_atoms0[i]=rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
+                self.rim_list=rim_atoms0
         
-        return rim_l#np.intersect1d(rim_atoms0v, rim_atomsFv).view(rim_atoms0.dtype).reshape(-1, rim_atoms0.shape[1])
+        return rim_atoms0#np.intersect1d(rim_atoms0v, rim_atomsFv).view(rim_atoms0.dtype).reshape(-1, rim_atoms0.shape[1])
     
     def get_hessian(self):
         hessian = self.modes._hessian2d
@@ -462,162 +475,195 @@ class Jedi:
             indices=np.arange(0,len(mol))
         if  len(self.rim_list) == 0:
             self.get_common_rims()
-        rim_list = self.rim_list 
-        rim_size=np.size(rim_list,axis=0)
+
+        rim_size=sum([np.shape(l)[0] for l in self.rim_list])
         #NCart_coords = 3*len(mol)
+        
         column = 0
         b = np.zeros([int(len(indices)*3), int(rim_size)], dtype=float)
-    
-        for q in rim_list:  # for loop for all redunant internal coordinates
+
+        # for loop for all redunant internal coordinates
+        
+
+        for q in self.rim_list[0]:
             row = 0  # Initilization of columns to specifiy position in B-Matrix
-            if len(q) == 0:  
-                break
         
             ########  Section for stretches  #########
-            if (q[0]) == -1 and (q[1]) == -1:
             
-                BL = []
-                BL = [int(q[2]), int(q[3])]  # create list of involved atoms
-                q_i, q_j = BL
             
-                u=mol.get_distance(q_i,q_j,mic=True,vector=True)
-                for NAtom in indices:  # for-loop of Number of Atoms (3N)
-                    # for-loop of cartesian coordinates of each Atom (x, y and z)
-                    for q in BL:
-                        if NAtom == q:  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
-                                        # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
-
-                            # if-/elif-statement for the right sign-factor (see [1])
-                            if q == q_i:
-                                
-                                b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
-                                
-                                b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
-                            elif q == q_j:
-                                
-                                b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
-               
-                                b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
-                                
-                    row += 3
-                column += 1
-                
-                
-
-
-                
-        #################ba###############################
-
-            elif (q[0]) == -1:
-                BA = []
-                row = 0
-                
-                center_atom = int(q[2])  # define center_atom (redundant step)
-                BA = [int(q[1]), int(q[2]), int(q[3])]  # create list of involved atoms
-                q_i, q_j, q_k = BA
-                u = mol.get_distance(q_i,q_j,mic=True,vector=True)
-                v = mol.get_distance(q_k,q_j,mic=True,vector=True)
-
-
+            BL = []
+            BL = [int(q[0]), int(q[1])]  # create list of involved atoms
+            q_i, q_j = BL
         
-                def get_B_matrix_angles_derivatives(u,v):
-                    
-                    
-                    angle = ase.geometry.get_angles(u,v) # angle between v and u
+            u=mol.get_distance(q_i,q_j,mic=True,vector=True)
+            for NAtom in indices:  # for-loop of Number of Atoms (3N)
+                # for-loop of cartesian coordinates of each Atom (x, y and z)
+                for q in BL:
+                    if NAtom == q:  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
+                                    # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
 
-                    if angle == 180:
-                        (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v],cell=None,pbc=None)
-                        nu = u / lu
-                        nv = v / lv
-                        if (np.arccos(np.dot(nu, (np.array([1, -1, 1]))))) == np.pi:
-                            w = np.cross(nu, ([-1, 1, 1]))
-                        else: 
-                            w = np.cross(nu, ([1, -1, 1]))
-
-                        
-                        nw = w / np.linalg.norm(w)
-                        d_ba1 = (((np.cross(nu, nw))/np.linalg.norm(u)))
-                        d_ba2 = (-1 * ((np.cross(nu, nw))/np.linalg.norm(u))) + (-1 * ((np.cross(nw, nv))/np.linalg.norm(v))) # equation to calculate dBA/dx [1]                
-                        d_ba3 = ((np.cross(nw, nv))/np.linalg.norm(v))
-                        d_ba=np.array([[d_ba1[0], d_ba2[0], d_ba3[0]]])
-                        
-                    else:
-                        d_ba=np.radians(ase.geometry.get_angles_derivatives(u,v))
-        
-                    return d_ba*Bohr
-                
-                for NAtom in indices:  # for-loop of Number of Atoms 
-
-                    for q in BA:
-                        if NAtom == q:  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
-                                        # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
-                            b_j = 0
-                            if q == q_j:  # if-Statements for sign-factors
-                                b_j =  get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][1] # Q-Chem defines BA as m-o-n, where the atomnr. in the middle is the center-atom
-                                b[row:row+3, column] = -b_j                                # making it possible to define the center atom as RIM[2]
-                            elif q == q_i:
-                                b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][0]
-                                b[row:row+3, column] = -b_j
-                            elif q == q_k:
-                                b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][2]
-                                b[row:row+3, column] = -b_j
-                    row += 3
-                column += 1
-
-
-
-
-            elif q[0] > -1:
-                
-                DA = []
-                row = 0
-        
-                DA = [int(q[0]), int(q[1]), int(q[2]), int(q[3])]  # create list of involved atoms
-                q_i, q_j, q_k, q_l = DA
-
-                u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
-                w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
-                v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
-
-                
-                #DA.sort()  # sort list of involved atoms (sorted list necessary for correct stacking of B-Matrix Elements)
-                for NAtom in indices:  # for-loop of Number of Atoms (3N)
-                    
-                    for q in DA:
-                        
-                        if NAtom == q:  # derivative of redundant internal coordinate w/ respect to cartesian coordinates is not equal zero
-                                        # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
-                            b_k = 0
-                        
-                            if q == q_i:  # if-Statements for sign-factors
-                                b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][0])*Bohr
-                                b[row:row+3, column] = b_k
-                                u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
-                                w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
-                                v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
+                        # if-/elif-statement for the right sign-factor (see [1])
+                        if q == q_i:
                             
-                            elif q == q_j:
-                                b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][1])*Bohr
-                                b[row:row+3, column] = b_k
-                                u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
-                                w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
-                                v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
-                                
-                            elif q == q_k:
-                                b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][2])*Bohr
-                                b[row:row+3, column] = b_k
-                                u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
-                                w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
-                                v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
+                            b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
                             
-                            elif q == q_l:
-                                b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][3])*Bohr
-                                b[row:row+3, column] = b_k
-                                u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
-                                w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
-                                v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
-                    row += 3
-                column += 1
+                            b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
+                        elif q == q_j:
+                            
+                            b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
+            
+                            b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
+                            
+                row += 3
+            column += 1
+        for q in self.rim_list[1]:
+            row = 0  # Initilization of columns to specifiy position in B-Matrix
+        
+            ########  Section for stretches  #########
+            
+            
+            BL = []
+            BL = [int(q[0]), int(q[1])]  # create list of involved atoms
+            q_i, q_j = BL
+        
+            u=mol.get_distance(q_i,q_j,mic=True,vector=True)
+            for NAtom in indices:  # for-loop of Number of Atoms (3N)
+                # for-loop of cartesian coordinates of each Atom (x, y and z)
+                for q in BL:
+                    if NAtom == q:  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
+                                    # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
+
+                        # if-/elif-statement for the right sign-factor (see [1])
+                        if q == q_i:
+                            
+                            b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
+                            
+                            b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
+                        elif q == q_j:
+                            
+                            b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
+            
+                            b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
+                            
+                row += 3
+            column += 1
+
+
+
+            
+    #################ba###############################
+
+        
+        for q in self.rim_list[2]:
+            BA = []
+            row = 0
+            
+            center_atom = int(q[1])  # define center_atom (redundant step)
+            BA = [int(q[0]), int(q[1]), int(q[2])]  # create list of involved atoms
+            q_i, q_j, q_k = BA
+            u = mol.get_distance(q_i,q_j,mic=True,vector=True)
+            v = mol.get_distance(q_k,q_j,mic=True,vector=True)
+
+
+    
+            def get_B_matrix_angles_derivatives(u,v):
+                
+                
+                angle = ase.geometry.get_angles(u,v) # angle between v and u
+
+                if angle == 180:
+                    (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v],cell=None,pbc=None)
+                    nu = u / lu
+                    nv = v / lv
+                    if (np.arccos(np.dot(nu, (np.array([1, -1, 1]))))) == np.pi:
+                        w = np.cross(nu, ([-1, 1, 1]))
+                    else: 
+                        w = np.cross(nu, ([1, -1, 1]))
+
+                    
+                    nw = w / np.linalg.norm(w)
+                    d_ba1 = (((np.cross(nu, nw))/np.linalg.norm(u)))
+                    d_ba2 = (-1 * ((np.cross(nu, nw))/np.linalg.norm(u))) + (-1 * ((np.cross(nw, nv))/np.linalg.norm(v))) # equation to calculate dBA/dx [1]                
+                    d_ba3 = ((np.cross(nw, nv))/np.linalg.norm(v))
+                    d_ba=np.array([[d_ba1[0], d_ba2[0], d_ba3[0]]])
+                    
+                else:
+                    d_ba=np.radians(ase.geometry.get_angles_derivatives(u,v))
+    
+                return d_ba*Bohr
+            
+            for NAtom in indices:  # for-loop of Number of Atoms 
+
+                for q in BA:
+                    if NAtom == q:  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
+                                    # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
+                        b_j = 0
+                        if q == q_j:  # if-Statements for sign-factors
+                            b_j =  get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][1] # Q-Chem defines BA as m-o-n, where the atomnr. in the middle is the center-atom
+                            b[row:row+3, column] = -b_j                                # making it possible to define the center atom as RIM[2]
+                        elif q == q_i:
+                            b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][0]
+                            b[row:row+3, column] = -b_j
+                        elif q == q_k:
+                            b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][2]
+                            b[row:row+3, column] = -b_j
+                row += 3
+            column += 1
+
+
+
+
+
+        for q in self.rim_list[3]:
+            DA = []
+            row = 0
+    
+            DA = [int(q[0]), int(q[1]), int(q[2]), int(q[3])]  # create list of involved atoms
+            q_i, q_j, q_k, q_l = DA
+
+            u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
+            w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
+            v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
+
+            
+            #DA.sort()  # sort list of involved atoms (sorted list necessary for correct stacking of B-Matrix Elements)
+            for NAtom in indices:  # for-loop of Number of Atoms (3N)
+                
+                for q in DA:
+                    
+                    if NAtom == q:  # derivative of redundant internal coordinate w/ respect to cartesian coordinates is not equal zero
+                                    # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
+                        b_k = 0
+                    
+                        if q == q_i:  # if-Statements for sign-factors
+                            b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][0])*Bohr
+                            b[row:row+3, column] = b_k
+                            u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
+                            w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
+                            v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
+                        
+                        elif q == q_j:
+                            b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][1])*Bohr
+                            b[row:row+3, column] = b_k
+                            u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
+                            w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
+                            v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
+                            
+                        elif q == q_k:
+                            b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][2])*Bohr
+                            b[row:row+3, column] = b_k
+                            u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
+                            w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
+                            v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
+                        
+                        elif q == q_l:
+                            b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][3])*Bohr
+                            b[row:row+3, column] = b_k
+                            u = np.copy(np.atleast_2d(mol.get_distance(q_i,q_j,mic=True,vector=True))) #####copy needed because derivative function rewrites vector variable as normed vector
+                            w = np.copy(np.atleast_2d(mol.get_distance(q_k,q_l,mic=True,vector=True)))
+                            v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
+                row += 3
+            column += 1
 
         B = np.transpose(b)
         self.B = B
@@ -641,7 +687,7 @@ class Jedi:
             len(self.rim_list)
         except:
             self.get_common_rims()
-        rim_list = self.rim_list
+        
         if  len(self.B) == 0:
             self.get_b_matrix()
         B = self.B
@@ -649,54 +695,53 @@ class Jedi:
         qF = []
         dq_da = []
 
-        for q_index, q in enumerate(rim_list):  # for loop for all redunant internal coordinates
+  # for loop for all redunant internal coordinates
+          
+
+        for q in self.rim_list[0]:
+            q0.append(self.atoms0.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
             
-            if len(q) == 0:  # no redundant internal coordinates, prints user-info (see line 75)
-                break
+            qF.append(self.atomsF.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
+        for q in self.rim_list[1]:
+            q0.append(self.atoms0.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
             
+            qF.append(self.atomsF.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)                    
 
-            if q[0] == -1 and q[1] == -1:
-                q0.append(self.atoms0.get_distance(int(q[2]),int(q[3]),mic=True)/Bohr)
-                
-                qF.append(self.atomsF.get_distance(int(q[2]),int(q[3]),mic=True)/Bohr)
-
-            elif q[0] == -1:
-                
-                q0.append(np.radians(self.atoms0.get_angle(int(q[1]),int(q[2]),int(q[3]),mic=True)))
-                qF.append(np.radians(self.atomsF.get_angle(int(q[1]),int(q[2]),int(q[3]),mic=True)))
-            elif  q[0] > -1:
-   
-                q0_preliminary=np.radians(self.atoms0.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
-                qF_preliminary=np.radians(self.atomsF.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
-                
-                delta_x = self.atomsF.get_positions()-self.atoms0.get_positions()
+        for q in self.rim_list[2]:
+            q0.append(np.radians(self.atoms0.get_angle(int(q[0]),int(q[1]),int(q[2]),mic=True)))
+            qF.append(np.radians(self.atomsF.get_angle(int(q[0]),int(q[1]),int(q[2]),mic=True)))
+        for q in self.rim_list[3]:
+            q0_preliminary=np.radians(self.atoms0.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
+            qF_preliminary=np.radians(self.atomsF.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
+            
+            delta_x = self.atomsF.get_positions()-self.atoms0.get_positions()
 
 
-                delta_x_list = delta_x.flatten().tolist()
-                #for partial analysis
-                if len(delta_x_list) != len(indices)*3 & len(indices)!=0:
-                    indx=np.vstack((np.array(indices),np.array(indices)+1,np.array(indices)+2)).T.ravel()
-                    delta_x_list=np.array([delta_x_list[i] for i in indx]) 
+            delta_x_list = delta_x.flatten().tolist()
+            #for partial analysis
+            if len(delta_x_list) != len(indices)*3 & len(indices)!=0:
+                indx=np.vstack((np.array(indices),np.array(indices)+1,np.array(indices)+2)).T.ravel()
+                delta_x_list=np.array([delta_x_list[i] for i in indx]) 
 
 #                check_dihedral = np.dot(B, delta_x_list)
 
-                #dq_da.append(np.sign(check_dihedral[q_index])*min((360-abs(qF_preliminary-q0_preliminary)),abs(qF_preliminary-q0_preliminary)))
-                q0_final = q0_preliminary
-                qF_final = qF_preliminary
-                dda=qF_preliminary-q0_preliminary
-                if 2*np.pi-abs(dda)<abs(dda):
-                    dda=(2*np.pi-abs(dda))*-np.sign(dda)
-                dq_da.append(dda)
-         
-                # if ( check_dihedral[q_index] < 0 ) and ( ( qF_preliminary - q0_preliminary ) > 0 ):
-                #     q0_final = -q0_preliminary
-                #     qF_final = -qF_preliminary
-                # elif ( check_dihedral[q_index] > 0 ) and ( ( qF_preliminary - q0_preliminary ) < 0 ):
-                #     q0_final = -q0_preliminary
-                #     qF_final = -qF_preliminary
+            #dq_da.append(np.sign(check_dihedral[q_index])*min((360-abs(qF_preliminary-q0_preliminary)),abs(qF_preliminary-q0_preliminary)))
+            q0_final = q0_preliminary
+            qF_final = qF_preliminary
+            dda=qF_preliminary-q0_preliminary
+            if 2*np.pi-abs(dda)<abs(dda):
+                dda=(2*np.pi-abs(dda))*-np.sign(dda)
+            dq_da.append(dda)
+    
+            # if ( check_dihedral[q_index] < 0 ) and ( ( qF_preliminary - q0_preliminary ) > 0 ):
+            #     q0_final = -q0_preliminary
+            #     qF_final = -qF_preliminary
+            # elif ( check_dihedral[q_index] > 0 ) and ( ( qF_preliminary - q0_preliminary ) < 0 ):
+            #     q0_final = -q0_preliminary
+            #     qF_final = -qF_preliminary
 
-                # q0.append(q0_final)
-                # qF.append(qF_final)
+            # q0.append(q0_final)
+            # qF.append(qF_final)
         delta_q = np.subtract(qF, q0)
      
         try:
@@ -731,48 +776,49 @@ class Jedi:
         da = []
         ba_flag=False
         da_flag=False
-        for i in rim_list:
-        # Bond lengths (a molecule has at least one bond):
+        for i in rim_list[0]:
+        # Bond lengths (a molecule has at least one bond):    
+            numbers = [int(i[0]),int(i[1])]
+            bl.append(numbers)
+            if 'vmd_bl.tcl' not in file_list:
+                open('vmd_bl.tcl', 'w').close()
+                file_list.append('vmd_bl.tcl')
+                
+        for i in rim_list[1]:
+        # hbonds (a molecule has at least one bond):    
+            numbers = [int(i[0]),int(i[1])]
+            bl.append(numbers)
+            
 
-            if i[0] == -1 and (i[1]) == -1:
-
-                
-                numbers = [int(i[2]),int(i[3])]
-                bl.append(numbers)
-                if 'vmd_bl.tcl' not in file_list:
-                    open('vmd_bl.tcl', 'w').close()
-                    file_list.append('vmd_bl.tcl')
-                
-                
 
             # Bond angles:
 
-            elif i[0] == -1 :
-                ba_flag = True
+        for i in rim_list[2]:
+            ba_flag = True
                 
 
 
-                numbers = [int(i[1]),int(i[2]),int(i[3])]
-                ba.append(numbers)
-                if 'vmd_ba.tcl' not in file_list:
-                    open('vmd_ba.tcl', 'w').close()
-                    file_list.append('vmd_ba.tcl')
-                # All (for this, at least bond angles have to be present):
-                    open('vmd_all.tcl', 'w').close()
-                    file_list.append('vmd_all.tcl')
+            numbers = [int(i[0]),int(i[1]),int(i[2])]
+            ba.append(numbers)
+            if 'vmd_ba.tcl' not in file_list:
+                open('vmd_ba.tcl', 'w').close()
+                file_list.append('vmd_ba.tcl')
+            # All (for this, at least bond angles have to be present):
+                open('vmd_all.tcl', 'w').close()
+                file_list.append('vmd_all.tcl')
                 
             # Dihedral angles:
 
-            elif i[0] != -1 :
-                da_flag = True
-                
-        
+        for i in rim_list[3]:
+            da_flag = True
+            
+    
 
-                numbers = [int(n) for n in i]
-                da.append(numbers)
-                if 'vmd_da.tcl' not in file_list:
-                    open('vmd_da.tcl', 'w').close()
-                    file_list.append('vmd_da.tcl')
+            numbers = [int(n) for n in i]
+            da.append(numbers)
+            if 'vmd_da.tcl' not in file_list:
+                open('vmd_da.tcl', 'w').close()
+                file_list.append('vmd_da.tcl')
 
 
         # E_RIMs_perc
@@ -799,7 +845,7 @@ class Jedi:
             #       'N': [0.0, 0.0, 1.0],
             #       'O': [1.0, 0.0, 0.0],
             #       'S': [1.0, 1.0, 0.0]}
-        from ase.jedi.colors import colors 
+        from .colors import colors 
         if des_colors!=None:
             for i in des_colors:
                 colors[i]=des_colors[i]
@@ -1217,13 +1263,12 @@ display update on ''')
         E_geometries=all_E_geometries[0]
 
         
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atoms,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atomsF,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
         self.post_process(indices)
         E_RIMs_total=sum(self.E_RIMs)
         proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
-        jedi_printout(self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
-          
-    
+        jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+        
 
             
       
@@ -1232,9 +1277,14 @@ display update on ''')
         self.indices=indices
         rim_list=self.rim_list
         rim_l=self.get_common_rims()
-        a=np.vstack((rim_list,rim_l ))
-        x,z=np.unique(a,return_counts=True,axis=0)
-        ind=np.where(z>1)[0]
+        ind=[]
+        for i in range(4):
+            rim_list[i]=np.vstack((rim_list[i],rim_l[i]))
+            x,z=np.unique(rim_list[i],return_counts=True,axis=0)
+            ind.append(np.where(z>1)[0])                                        #get indices where ric is in both sets
+        for i in range(1,4):
+            ind[i]=ind[i]+np.sum([p.shape[0] for p in self.rim_list[0:i]])      # get correct indices for the stacked array
+        ind=np.hstack(ind)
         self.E_RIMs=np.array(self.E_RIMs)[ind]
         self.delta_q=self.delta_q[ind]
         E_RIMs_total=sum(self.E_RIMs)
