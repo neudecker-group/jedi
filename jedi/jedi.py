@@ -280,11 +280,12 @@ class Jedi:
         #hbonds
         if hbond==True:
             from ase.data.vdw import vdw_radii
-            hpartner=['N','O','F']
+            hpartner=['N','O','F','C']
             hpartner_ls=[]
             hcutoff={('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
             ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
-            ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9])}
+            ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9]),
+            ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6])}
     
             hbond_ls=[]
             for i in range(len(mol)):
@@ -296,8 +297,8 @@ class Jedi:
                 if mol.symbols[i[0]]=='H' and mol.symbols[i[1]] in hpartner:
                     for j in hpartner_ls:  
                         if j != i[1]:                   
-                            if mol.get_distance(i[0],j,mic=True)and  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
-                                & mol.get_angle(i[1],i[0],j)>90:
+                            if mol.get_distance(i[0],j,mic=True)<  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
+                                and mol.get_angle(i[1],i[0],j)>90:
                                 
                                 hbond_ls.append([i[0], j])
                     
@@ -313,9 +314,11 @@ class Jedi:
                 bl=np.vstack((bl,hbond_ls))
                 hbond_ls=np.array(hbond_ls)  
                 hbond_ls=np.atleast_2d(hbond_ls)     
-                rim_list.append(hbond_ls) 
+                rim_list.append(hbond_ls)
             else:
                 rim_list.append(np.array([])) 
+        if hbond==False:    
+            rim_list.append(np.array([])) 
             
         ########find angles
         #create array containing all angles (ba)
@@ -349,7 +352,7 @@ class Jedi:
             nan=np.hstack((nan,ba))
             rim_list.append(ba)
         else:
-            rim_list.append(np.atleast_2d([])) 
+            rim_list.append(np.array([])) 
            
             
 
@@ -423,7 +426,8 @@ class Jedi:
                             
                         else:
                             try:
-                                mol.get_dihedral(int(single_TA_Atom_0),int(torsionable_row[0]),int(torsionable_row[1]),int(single_TA_Atom_3),mic=True)
+                                if round(mol.get_angle(int(single_TA_Atom_0),int(torsionable_row[0]),int(torsionable_row[1]),mic=True)) in [0.0,180.0,360.0] or round(mol.get_angle(int(torsionable_row[0]),int(torsionable_row[1]),int(single_TA_Atom_3),mic=True)) in [0.0,180.0,360.0] :    
+                                    continue
                                 if row_index==0:
                                     da = np.array([single_TA_Atom_0,  torsionable_row[0], torsionable_row[1], single_TA_Atom_3])
                                     da_flag=True
@@ -438,7 +442,9 @@ class Jedi:
             if da_flag==True:
                 rim_list.append(da)
             else:
-                rim_list.append(np.atleast_2d([])) 
+                rim_list.append(np.array([]))  
+        else:  
+            rim_list.append(np.array([])) 
  
             
         return rim_list
@@ -1005,56 +1011,91 @@ color Axes Labels 32
                                 if np.isnan(bond_E_array[j][2] ):
                                     bond_E_array[j][2] = (float(1)/3) * E_da[i]
                         
-                if (filename == "vmd_all.tcl" and self.hbond != None):
-                    print(bond_E_array[:,2][len(bl)-len(self.hbond)-1:len(bl)])
-                    hbond_E=sum(bond_E_array[:,2][len(bl)-len(self.hbond):len(bl)])
+                if (filename == "vmd_all.tcl" and rim_list[1].shape[0] != 0):
                     
+                    hbond_E=sum(bond_E_array[:,2][len(bl)-len(self.hbond):len(bl)])
+
+                hbond_E_array=bond_E_array[len(rim_list[0]):len(bl)]
+                bond_E_array=bond_E_array[0:len(rim_list[0])]
+                    
+                # translate={}                        # the new indices need to get the same values as the original ones inside the cell
+                # for i in range(len(bond_E_array)):
+                #     translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]                
                 
+                if len(self.indices)<len(self.atomsF):
+                    p_rim=self.rim_list.copy()
+                    p_indices=self.indices
+                    self.indices=range(len(self.atomsF))
+                    
+                    rim=self.get_common_rims(hbond=rim_list[1].shape[0] != 0)
+          
+                    for i in range(2):
+                        if rim[i].shape[0] == 0:
+                            break
+                        #print(rim[i])
+                        rim[i]=np.ascontiguousarray(rim[i])
+                        a=np.array(rim_list[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
+                    
+                        
+                        
+                        b=np.array(rim[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
+                        
+                        
+                        rim[i]=np.setxor1d(a, b) 
+                        #print(rim)       
+                        rim[i]=rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)
+                    
+                        nan=np.full((len(rim[i]),1),np.nan)         #nan for special color (black)
+                        rim[i]=np.hstack((rim[i],nan))              #stack for later vmd visualization
+                    bond_E_array=np.vstack((bond_E_array,rim[0]))
+                    try:
+                        hbond_E_array=np.vstack((hbond_E_array,rim[1]))
+                    except:
+                        pass
+                    self.rim_list=p_rim
+                    self.indices=p_indices
         # get bonds that reach out of the unit cell
                 if pbc_flag==True:
-                    
-                    cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
+                    from ase.data.vdw import vdw_radii
+                    cutoff=[ vdw_radii[atom.number] * 0.9 for atom in self.atomsF]
+                    #cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
                     ex_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
-
+                    #print(ase.geometry.get_distances(self.atomsF.positions,self.atomsF.positions,cell=self.atomsF.cell,pbc=self.atomsF.pbc)[1].shape)
                     ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('S',a=self.atomsF,cutoff=cutoff)))
                     ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('D',a=self.atomsF,cutoff=cutoff)))
 
                     bond_ex_cell=ex_bl[(ex_bl[:,2]!=0) | (ex_bl[:,3]!=0) |(ex_bl[:,4]!=0)]          #determines which nearest neighbors are outside the unit cell
                     atoms_ex_cell=bond_ex_cell                    #[np.unique(bond_ex_cell[:,1:5],return_index=True,axis=0)[1]]  # neglects double mentioned
                     mol=self.atomsF.copy()                   # a extended cell is needed for vmd since it does not show intercellular bonds
-                    mol.wrap()                              #wrap molecule important for atoms close to the boundaries
+                    #mol.wrap()                              #wrap molecule important for atoms close to the boundaries
                     #ex_indx=np.array([])                # auxillary indices are used
                     bond_E_array_app=np.zeros([len(atoms_ex_cell),3])  # bond list has to be appended
                     translate={}                        # the new indices need to get the same values as the original ones inside the cell
+                    htranslate={}
                     for i in range(len(bond_E_array)):
-                        translate[(bond_E_array[i,0],bond_E_array[i,1])]=bond_E_array[i,2]
-
+                        translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]
+                    for i in range(len(hbond_E_array)):
+                        htranslate[(np.min([hbond_E_array[i,0],hbond_E_array[i,1]]),np.max([hbond_E_array[i,0],hbond_E_array[i,1]]))]=hbond_E_array[i,2]
+                    
                     for i in range(len(atoms_ex_cell)):
                         pos_ex_atom=mol.get_positions()[int(atoms_ex_cell[i,0])]+atoms_ex_cell[i,5:8]       # get positions of cell external atoms by adding the vector
-                        mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object
                         #ex_indx=np.append(ex_indx,atoms_ex_cell[i,1])            
                         original_rim=[int(atoms_ex_cell[i,0]),int(atoms_ex_cell[i,1])]                      # get the indices of the corresponding atoms inside the cell
                         original_rim.sort()                                                                 # needs to be sorted because rim list only covers one direction                           
                         try:
-                            bond_E_array_app[i,0:3]=[atoms_ex_cell[i,0],len(self.atomsF)+i,translate[tuple(original_rim)]]                          # add to bond list with auxillary index
+                            bond_E_array=np.vstack((bond_E_array,[atoms_ex_cell[i,0],len(mol),translate[tuple(original_rim)]]))                          # add to bond list with auxillary index
+                            mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object
+                        
                         except:
-                            bond_E_array_app[i,0:3]=[atoms_ex_cell[i,0],len(self.atomsF)+i,np.nan]  #if partial analysis not analyzed bonds get a different color
-                    bond_E_array=np.vstack((bond_E_array,bond_E_array_app))
-                
+                            try:
+                                hbond_E_array=np.vstack((hbond_E_array,[atoms_ex_cell[i,0],len(mol),htranslate[tuple(original_rim)]]))                          # add to bond list with auxillary index
+                                mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))
+                            except:
+                                pass
+                            pass    
+                    
+                    
                     mol.write('xF.xyz')
-   
-########################## get left out bonds ########################
-
-                if len(self.indices)< len(self.atomsF):
-                    cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
-                    add_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
-                    add_bl=add_bl[add_bl[:,0]<add_bl[:,1]]  #get rid of doubles
-                    leftouts=np.arange(0,len(self.atomsF))   # get index of left outs
-                    leftouts=np.delete(leftouts,self.indices) #by deleting the chosen indices
-                    add_bl=add_bl[np.any([np.in1d(add_bl[:,0], leftouts),  np.in1d(add_bl[:,1], leftouts)],axis=0)]   # get the left out bonds
-                    nan=np.full((len(add_bl),1),np.nan)         #nan for special color (black)
-                    add_bl=np.hstack((add_bl,nan))              #stack for later vmd visualization
-                    bond_E_array=np.vstack((bond_E_array,add_bl))
 
              
         # Store the maximum energy in a variable for later call
@@ -1223,7 +1264,7 @@ display update on ''')
         pass
 
 
-    def partial_analysis(self,indices,ase_units=False):   
+    def partial_analysis(self,indices,hbond=False,ase_units=False):   
         #for calculation with partial hessian
         self.ase_units=ase_units
         self.indices=np.arange(0,len(self.atoms0)).tolist()
@@ -1239,7 +1280,7 @@ display update on ''')
         self.H=H
         
 
-        self.rim_list=self.get_common_rims()
+        self.rim_list=self.get_common_rims(hbond=hbond)
       
         rim_list=self.rim_list
         if len(rim_list)==0:
