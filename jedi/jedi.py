@@ -298,7 +298,7 @@ class Jedi:
                     for j in hpartner_ls:  
                         if j != i[1]:                   
                             if mol.get_distance(i[0],j,mic=True)<  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
-                                and mol.get_angle(i[1],i[0],j)>90:
+                                and mol.get_angle(i[1],i[0],j,mic=True)>90:
                                 
                                 hbond_ls.append([i[0], j])
                     
@@ -306,7 +306,7 @@ class Jedi:
                     for j in hpartner_ls:   
                         if j != i[0]:       
                         
-                            if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j) >90:
+                            if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j,mic=True) >90:
                         
                                 hbond_ls.append([i[1], j])
             if len(hbond_ls)>0:
@@ -319,7 +319,7 @@ class Jedi:
                 rim_list.append(np.array([])) 
         if hbond==False:    
             rim_list.append(np.array([])) 
-            
+        
         ########find angles
         #create array containing all angles (ba)
         ba_flag=False
@@ -446,7 +446,7 @@ class Jedi:
         else:  
             rim_list.append(np.array([])) 
  
-            
+        
         return rim_list
     
     def get_common_rims(self,hbond=True):
@@ -922,7 +922,34 @@ color Axes Labels 32
         
         # Welcome
         print("\n\nCreating tcl scripts for generating color-coded structures in VMD...")
-
+        if len(self.indices)<len(self.atomsF):
+            p_rim=self.rim_list.copy()
+            p_indices=self.indices
+            self.indices=range(len(self.atomsF))
+            
+            rim=self.get_common_rims(hbond=rim_list[1].shape[0] != 0)
+    
+            for i in range(2):
+                if rim[i].shape[0] == 0:
+                    break
+                #print(rim[i])
+                rim[i]=np.ascontiguousarray(rim[i])
+                a=np.array(rim_list[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
+            
+                
+                
+                b=np.array(rim[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
+                
+                
+                rim[i]=np.setxor1d(a, b) 
+                #print(rim)       
+                rim[i]=rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)
+            
+                nan=np.full((len(rim[i]),1),np.nan)         #nan for special color (black)
+                rim[i]=np.hstack((rim[i],nan))              #stack for later vmd visualization
+        bond_E_array_app=rim
+        self.rim_list=p_rim
+        self.indices=p_indices
         # Achieve the binning for bl, ba, da an all simultaneously
         sum_energy = 0  # variable to add up all energies in the molecule
         for filename in file_list:
@@ -1023,37 +1050,13 @@ color Axes Labels 32
                 #     translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]                
                 
                 if len(self.indices)<len(self.atomsF):
-                    p_rim=self.rim_list.copy()
-                    p_indices=self.indices
-                    self.indices=range(len(self.atomsF))
                     
-                    rim=self.get_common_rims(hbond=rim_list[1].shape[0] != 0)
-          
-                    for i in range(2):
-                        if rim[i].shape[0] == 0:
-                            break
-                        #print(rim[i])
-                        rim[i]=np.ascontiguousarray(rim[i])
-                        a=np.array(rim_list[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
-                    
-                        
-                        
-                        b=np.array(rim[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
-                        
-                        
-                        rim[i]=np.setxor1d(a, b) 
-                        #print(rim)       
-                        rim[i]=rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)
-                    
-                        nan=np.full((len(rim[i]),1),np.nan)         #nan for special color (black)
-                        rim[i]=np.hstack((rim[i],nan))              #stack for later vmd visualization
-                    bond_E_array=np.vstack((bond_E_array,rim[0]))
+                    bond_E_array=np.vstack((bond_E_array,bond_E_array_app[0]))
                     try:
-                        hbond_E_array=np.vstack((hbond_E_array,rim[1]))
+                        hbond_E_array=np.vstack((hbond_E_array,bond_E_array_app[1]))
                     except:
                         pass
-                    self.rim_list=p_rim
-                    self.indices=p_indices
+
         # get bonds that reach out of the unit cell
                 if pbc_flag==True:
                     from ase.data.vdw import vdw_radii
@@ -1067,13 +1070,12 @@ color Axes Labels 32
                     bond_ex_cell=ex_bl[(ex_bl[:,2]!=0) | (ex_bl[:,3]!=0) |(ex_bl[:,4]!=0)]          #determines which nearest neighbors are outside the unit cell
                     atoms_ex_cell=bond_ex_cell                    #[np.unique(bond_ex_cell[:,1:5],return_index=True,axis=0)[1]]  # neglects double mentioned
                     mol=self.atomsF.copy()                   # a extended cell is needed for vmd since it does not show intercellular bonds
-                    #mol.wrap()                              #wrap molecule important for atoms close to the boundaries
-                    #ex_indx=np.array([])                # auxillary indices are used
-                    bond_E_array_app=np.zeros([len(atoms_ex_cell),3])  # bond list has to be appended
+                    mol.wrap()                              #wrap molecule important for atoms close to the boundaries
+                    
                     translate={}                        # the new indices need to get the same values as the original ones inside the cell
-                    htranslate={}
                     for i in range(len(bond_E_array)):
                         translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]
+                    htranslate={}
                     for i in range(len(hbond_E_array)):
                         htranslate[(np.min([hbond_E_array[i,0],hbond_E_array[i,1]]),np.max([hbond_E_array[i,0],hbond_E_array[i,1]]))]=hbond_E_array[i,2]
                     
@@ -1087,6 +1089,7 @@ color Axes Labels 32
                             mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object
                         
                         except:
+                            
                             try:
                                 hbond_E_array=np.vstack((hbond_E_array,[atoms_ex_cell[i,0],len(mol),htranslate[tuple(original_rim)]]))                          # add to bond list with auxillary index
                                 mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))
@@ -1097,7 +1100,7 @@ color Axes Labels 32
                     
                     mol.write('xF.xyz')
 
-             
+          
         # Store the maximum energy in a variable for later call
                 if filename == "vmd_all.tcl":
                     if not modus == "all":  # only do this, when the user didn't call the --v flag 
@@ -1159,26 +1162,24 @@ color Axes Labels 32
                 f.write("\npbc box -color 32")
             f.write("\n\n# Adding a representation with the appropriate colorID for each bond")
                 # Calculate which binning_windows value is closest to the bond-percentage and do the output
-            if self.hbond != None:
-                lim=len(bond_E_array)-len(self.hbond)
-            else:
-                lim=len(bond_E_array)
-            for i in range(lim):
-                if np.isnan(bond_E_array[i][2]):
+            
+        
+            for i, b in enumerate(bond_E_array):
+                if np.isnan(b[2]):
                     colorID = 32                       #black
                 else:
-                    colorID = np.abs( binning_windows - bond_E_array[i][2] ).argmin() + 1
+                    colorID = np.abs( binning_windows - b[2] ).argmin() + 1
                 f.write('\nmol addrep top')
                 f.write('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top bonds"))
                 f.write('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
-                f.write('\n%s%i%s%i%s%i%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", bond_E_array[i][0], " ", bond_E_array[i][1], "}\n"))
-            for i in range(lim,len(bond_E_array)):
+                f.write('\n%s%i%s%i%s%i%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", b[0], " ", b[1], "}\n"))
+            for i in hbond_E_array:
               
-                if np.isnan(bond_E_array[i][2]):
+                if np.isnan(i[2]):
                     colorID = 32                       #black
                 else:
-                    colorID = np.abs( binning_windows - bond_E_array[i][2] ).argmin() + 1
-                f.write('\nset x [[atomselect top "index %d %d"] get {x y z}]'%(self.hbond[i-len(bond_E_array)][0],self.hbond[i-len(bond_E_array)][1]))
+                    colorID = np.abs( binning_windows - i[2] ).argmin() + 1
+                f.write('\nset x [[atomselect top "index %d %d"] get {x y z}]'%(i[0],i[1]))
                 f.write('\nset a [lindex $x 0] ')
                 f.write('\nset b [lindex $x 1] ')
                 f.write('\ndraw  color %d'%(colorID))
@@ -1317,15 +1318,27 @@ display update on ''')
         #get rims with only the considered atoms
         self.indices=indices
         rim_list=self.rim_list
-        rim_l=self.get_common_rims()
+       
+        rim_p=self.get_common_rims(hbond=rim_list[1].shape[0] != 0)
+       
         ind=[]
+        rim_list_c=[]
+       
         for i in range(4):
-            rim_list[i]=np.vstack((rim_list[i],rim_l[i]))
-            x,z=np.unique(rim_list[i],return_counts=True,axis=0)
+            
+            if rim_list[i].shape==(0,):
+                rim_list_c.append([])
+            
+            else:
+                rim_list_c.append(np.vstack((rim_list[i],rim_p[i])))
+            
+            x,z=np.unique(rim_list_c[-1],return_counts=True,axis=0)
             ind.append(np.where(z>1)[0])                                        #get indices where ric is in both sets
-        for i in range(1,4):
-            ind[i]=ind[i]+np.sum([p.shape[0] for p in self.rim_list[0:i]])      # get correct indices for the stacked array
+        for i in range(4):
+            ind[i]=ind[i]+np.sum([p.shape[0] for p in rim_list[0:i]])      # get correct indices for the stacked array
         ind=np.hstack(ind)
+        ind=ind.astype(int)
+
         self.E_RIMs=np.array(self.E_RIMs)[ind]
         self.delta_q=self.delta_q[ind]
         E_RIMs_total=sum(self.E_RIMs)
