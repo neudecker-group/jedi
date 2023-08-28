@@ -775,7 +775,7 @@ class Jedi:
         pbc_flag=True
         if box==True and self.atomsF.get_pbc().any()==True:
             pbc_flag=True
-        # Check whether we need to write vmd_ba.tcl, vmd_da.tcl and vmd_all.tcl and read basic stuff
+        # Check whether we need to write ba, da and all and read basic stuff
         file_list = []
         bl = []
         ba = []
@@ -786,9 +786,9 @@ class Jedi:
         # Bond lengths (a molecule has at least one bond):    
             numbers = [int(i[0]),int(i[1])]
             bl.append(numbers)
-            if 'vmd_bl.tcl' not in file_list:
-                open('vmd_bl.tcl', 'w').close()
-                file_list.append('vmd_bl.tcl')
+            if 'bl' not in file_list:
+                open('bl', 'w').close()
+                file_list.append('bl')
                 
         for i in rim_list[1]:
         # hbonds (a molecule has at least one bond):    
@@ -806,12 +806,12 @@ class Jedi:
 
             numbers = [int(i[0]),int(i[1]),int(i[2])]
             ba.append(numbers)
-            if 'vmd_ba.tcl' not in file_list:
-                open('vmd_ba.tcl', 'w').close()
-                file_list.append('vmd_ba.tcl')
+            if 'ba' not in file_list:
+                open('ba', 'w').close()
+                file_list.append('ba')
             # All (for this, at least bond angles have to be present):
-                open('vmd_all.tcl', 'w').close()
-                file_list.append('vmd_all.tcl')
+                open('all', 'w').close()
+                file_list.append('all')
                 
             # Dihedral angles:
 
@@ -822,9 +822,9 @@ class Jedi:
 
             numbers = [int(n) for n in i]
             da.append(numbers)
-            if 'vmd_da.tcl' not in file_list:
-                open('vmd_da.tcl', 'w').close()
-                file_list.append('vmd_da.tcl')
+            if 'da' not in file_list:
+                open('da', 'w').close()
+                file_list.append('da')
 
 
         # E_RIMs_perc
@@ -834,7 +834,7 @@ class Jedi:
         E_RIMs = self.E_RIMs
         # Write some basic stuff to the tcl scripts
         for filename in file_list:
-            if filename == "vmd_bl.tcl" or filename == "vmd_ba.tcl" or filename == "vmd_da.tcl" or filename == "vmd_all.tcl":
+            if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
                 f = open(filename, 'w')
                 f.write('# Load a molecule\nmol new xF.xyz\n\n')
                 f.write('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
@@ -871,7 +871,7 @@ class Jedi:
 
         # Generate the color-code and write it to the tcl scripts
         for filename in file_list:
-            if filename == "vmd_bl.tcl" or filename == "vmd_ba.tcl" or filename == "vmd_da.tcl" or filename == "vmd_all.tcl":
+            if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
                 f = open(filename, 'a')
 
                 for i in range(N_colors):
@@ -927,7 +927,7 @@ color Axes Labels 32
             p_indices=self.indices
             self.indices=range(len(self.atomsF))
             
-            rim=self.get_common_rims(hbond=rim_list[1].shape[0] != 0)
+            rim=self.get_common_rims(hbond=rim_list[1].shape[0] != 0).copy()
     
             for i in range(2):
                 if rim[i].shape[0] == 0:
@@ -935,37 +935,75 @@ color Axes Labels 32
                 #print(rim[i])
                 rim[i]=np.ascontiguousarray(rim[i])
                 a=np.array(rim_list[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
-            
-                
-                
                 b=np.array(rim[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
-                
-                
                 rim[i]=np.setxor1d(a, b) 
                 #print(rim)       
                 rim[i]=rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)
-            
                 nan=np.full((len(rim[i]),1),np.nan)         #nan for special color (black)
                 rim[i]=np.hstack((rim[i],nan))              #stack for later vmd visualization
-        bond_E_array_app=rim
-        self.rim_list=p_rim
-        self.indices=p_indices
+            bond_E_array_app=rim
+            # self.rim_list=p_rim
+            self.indices=p_indices
+        
+        
+                # get bonds that reach out of the unit cell
+        if pbc_flag==True:
+            bond_E_array_pbc = [np.empty((0,2)),np.empty((0,2))]
+            bond_E_array_pbc_trans = [np.empty((0,2)),np.empty((0,2))]
+            from ase.data.vdw import vdw_radii
+            cutoff=[ vdw_radii[atom.number] * 0.9 for atom in self.atomsF]      
+            ex_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
+            ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('S',a=self.atomsF,cutoff=cutoff)))
+            ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('D',a=self.atomsF,cutoff=cutoff)))
+            atoms_ex_cell=ex_bl[(ex_bl[:,2]!=0) | (ex_bl[:,3]!=0) |(ex_bl[:,4]!=0)]          #determines which nearest neighbors are outside the unit cell                    
+            mol=self.atomsF.copy()                   # a extended cell is needed for vmd since it does not show intercellular bonds
+            mol.wrap()                              #wrap molecule important for atoms close to the boundaries
+            
+                   # check if bond or hbond
+            
+            bondscheck = self.rim_list[0][:,(0,1)]
+            if self.rim_list[1].shape[0] != 0:
+                hbondcheck = self.rim_list[1][:,(0,1)]
+            
+            for i in range(len(atoms_ex_cell)):
+                pos_ex_atom=mol.get_positions()[int(atoms_ex_cell[i,0])]+atoms_ex_cell[i,5:8]       # get positions of cell external atoms by adding the vector
+                #if pos_ex_atom in mol.positions:
+                original_rim=[int(atoms_ex_cell[i,0]),int(atoms_ex_cell[i,1])]                      # get the indices of the corresponding atoms inside the cell
+                original_rim.sort()                                                                 # needs to be sorted because rim list only covers one direction                 
+                if     len(np.where(np.all(mol.positions==pos_ex_atom,axis=1))[0])>0:
+                    ex_ind=  np.where(np.all(mol.positions==pos_ex_atom,axis=1))[0][0]
+                else:
+                    ex_ind=len(mol)  
+                    if len(np.where(np.all(original_rim==bondscheck,axis=1))[0])>0 or (self.rim_list[1].shape[0] != 0 and len(np.where(np.all(original_rim==hbondcheck,axis=1))[0])>0):
+                        mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object     
+                          
+                if len(np.where(np.all(original_rim==bondscheck,axis=1))[0])>0:
+                    
+                    bond_E_array_pbc[0]=np.append(bond_E_array_pbc[0],[[atoms_ex_cell[i,0],ex_ind]],axis=0)                          # add to bond list with auxillary index
+                    bond_E_array_pbc_trans[0]=np.append(bond_E_array_pbc_trans[0],[original_rim],axis=0)
+                    
+                elif self.rim_list[1].shape[0] != 0 and len(np.where(np.all(original_rim==hbondcheck,axis=1))[0])>0:
+                    bond_E_array_pbc[1]=np.append(bond_E_array_pbc[1],[[atoms_ex_cell[i,0],ex_ind]],axis=0)                          # add to bond list with auxillary index
+                    bond_E_array_pbc_trans[1]=np.append(bond_E_array_pbc_trans[1],[original_rim],axis=0)
+            
+            
+            mol.write('xF.xyz')
         # Achieve the binning for bl, ba, da an all simultaneously
         sum_energy = 0  # variable to add up all energies in the molecule
         for filename in file_list:
-            if filename == "vmd_bl.tcl" or filename == "vmd_ba.tcl" or filename == "vmd_da.tcl" or filename == "vmd_all.tcl":
+            if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
 
         # Create an array that stores the bond connectivity as the first two entries. The energy will be added as the third entry.
-                bond_E_array = np.full((len(bl),3),np.nan)
+                E_array = np.full((len(bl),3),np.nan)
                 for i in range(len(bl)):
-                    bond_E_array[i][0] = bl[i][0]
-                    bond_E_array[i][1] = bl[i][1]
+                    E_array[i][0] = bl[i][0]
+                    E_array[i][1] = bl[i][1]
 
         # Create an array that stores only the energies in the coordinate of interest and print some information
         # Get rid of ridiculously small values and treat diatomic molecules explicitly
         # (in order to create a unified picture, we have to create all these arrays in any case)
         # Bonds
-                if filename == "vmd_bl.tcl" or filename == "vmd_all.tcl":
+                if filename == "bl" or filename == "all":
                     if len(bl) == 1:
                         E_bl_perc = E_RIMs_perc[0]
                         E_bl = E_RIMs
@@ -974,58 +1012,58 @@ color Axes Labels 32
                         E_bl = E_RIMs[0:len(bl)]
                         if E_bl_perc.max() <= 0.001:
                             E_bl_perc = np.zeros(len(bl))
-                    if filename == "vmd_bl.tcl":
+                    if filename == "bl":
                         print("\nProcessing bond lengths...")
                         print("%s%6.2f%s" % ("Maximum energy in a bond length:      ", E_bl_perc.max(), '%'))
                         print("%s%6.2f%s" % ("Total energy in the bond lengths:     ", E_bl_perc.sum(),'%'))
 
         # Bendings
-                if (filename == "vmd_ba.tcl" and ba_flag == True) or (filename == "vmd_all.tcl" and ba_flag == True):
+                if (filename == "ba" and ba_flag == True) or (filename == "all" and ba_flag == True):
                     E_ba_perc = E_RIMs_perc[len(bl):len(bl)+len(ba)]
                     E_ba = E_RIMs[len(bl):len(bl)+len(ba)]
                     if E_ba_perc.max() <= 0.001:
                         E_ba_perc = np.zeros(len(ba))
-                    if filename == "vmd_ba.tcl":
+                    if filename == "ba":
                         print("\nProcessing bond angles...")
                         print("%s%6.2f%s" % ("Maximum energy in a bond angle:       ", E_ba_perc.max(), '%'))
                         print("%s%6.2f%s" % ("Total energy in the bond angles:      ", E_ba_perc.sum(),'%'))
 
         # Torsions (handle stdout separately)
-                if (filename == "vmd_da.tcl" and da_flag == True ) or (filename == "vmd_all.tcl" and da_flag == True):
+                if (filename == "da" and da_flag == True ) or (filename == "all" and da_flag == True):
                     E_da_perc = E_RIMs_perc[len(bl)+len(ba):len(bl)+len(ba)+len(da)]
                     E_da = E_RIMs[len(bl)+len(ba):len(bl)+len(ba)+len(da)]
                     if E_da_perc.max() <= 0.001:
                         E_da_perc = np.zeros(len(da))
-                if filename == "vmd_da.tcl" and da_flag == True:
+                if filename == "da" and da_flag == True:
                     print("\nProcessing dihedral angles...")
                     print("%s%6.2f%s" % ("Maximum energy in a dihedral angle:   ", E_da_perc.max(), '%'))
                     print("%s%6.2f%s" % ("Total energy in the dihedral angles:  ", E_da_perc.sum(),'%'))
 
         # Map onto the bonds (create "all" on the fly and treat diatomic molecules explicitly)
         # Bonds (trivial)
-                if filename == "vmd_bl.tcl" or filename == "vmd_all.tcl":
+                if filename == "bl" or filename == "all":
                     for i in range(len(bl)):
                         if len(bl) == 1:
-                            bond_E_array[i][2] = E_bl[i]
+                            E_array[i][2] = E_bl[i]
                         else:
-                            bond_E_array[i][2] = E_bl[i]
+                            E_array[i][2] = E_bl[i]
                 
                             
         # Bendings
-                if (filename == "vmd_ba.tcl" and ba_flag == True) or (filename == "vmd_all.tcl" and ba_flag == True):
+                if (filename == "ba" and ba_flag == True) or (filename == "all" and ba_flag == True):
                     for i in range(len(ba)):
                         for j in range(len(bl)):
                             if ((ba[i][0] == bl[j][0] and ba[i][1] == bl[j][1]) or  # look for the right connectivity
                                 (ba[i][0] == bl[j][1] and ba[i][1] == bl[j][0]) or
                                 (ba[i][1] == bl[j][0] and ba[i][2] == bl[j][1]) or
                                 (ba[i][1] == bl[j][1] and ba[i][2] == bl[j][0])):
-                                bond_E_array[j][2] += 0.5 * E_ba[i]
-                                if np.isnan(bond_E_array[j][2] ):
-                                    bond_E_array[j][2] = 0.5 * E_ba[i]
+                                E_array[j][2] += 0.5 * E_ba[i]
+                                if np.isnan(E_array[j][2] ):
+                                    E_array[j][2] = 0.5 * E_ba[i]
                                 
 
         # Torsions
-                if (filename == "vmd_da.tcl" and da_flag == True) or ( filename == "vmd_all.tcl" and da_flag == True ):
+                if (filename == "da" and da_flag == True) or ( filename == "all" and da_flag == True ):
                     for i in range(len(da)):
                         for j in range(len(bl)):
                             if ((da[i][0] == bl[j][0] and da[i][1] == bl[j][1]) or 
@@ -1034,16 +1072,16 @@ color Axes Labels 32
                                 (da[i][1] == bl[j][1] and da[i][2] == bl[j][0]) or
                                 (da[i][2] == bl[j][0] and da[i][3] == bl[j][1]) or
                                 (da[i][2] == bl[j][1] and da[i][3] == bl[j][0])):
-                                bond_E_array[j][2] += (float(1)/3) * E_da[i]
+                                E_array[j][2] += (float(1)/3) * E_da[i]
                                 if np.isnan(bond_E_array[j][2] ):
-                                    bond_E_array[j][2] = (float(1)/3) * E_da[i]
+                                    E_array[j][2] = (float(1)/3) * E_da[i]
                         
-                if (filename == "vmd_all.tcl" and rim_list[1].shape[0] != 0):
+                if (filename == "all" and rim_list[1].shape[0] != 0):
                     
-                    hbond_E=sum(bond_E_array[:,2][len(bl)-len(self.hbond):len(bl)])
+                    hbond_E=sum(E_array[:,2][len(bl)-len(self.hbond):len(bl)])
 
-                hbond_E_array=bond_E_array[len(rim_list[0]):len(bl)]
-                bond_E_array=bond_E_array[0:len(rim_list[0])]
+                hbond_E_array=E_array[len(rim_list[0]):len(bl)]
+                bond_E_array=E_array[0:len(rim_list[0])]
                     
                 # translate={}                        # the new indices need to get the same values as the original ones inside the cell
                 # for i in range(len(bond_E_array)):
@@ -1059,99 +1097,77 @@ color Axes Labels 32
 
         # get bonds that reach out of the unit cell
                 if pbc_flag==True:
-                    from ase.data.vdw import vdw_radii
-                    cutoff=[ vdw_radii[atom.number] * 0.9 for atom in self.atomsF]
-                    #cutoff=ase.neighborlist.natural_cutoffs(self.atomsF,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
-                    ex_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
-                    #print(ase.geometry.get_distances(self.atomsF.positions,self.atomsF.positions,cell=self.atomsF.cell,pbc=self.atomsF.pbc)[1].shape)
-                    ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('S',a=self.atomsF,cutoff=cutoff)))
-                    ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('D',a=self.atomsF,cutoff=cutoff)))
-
-                    bond_ex_cell=ex_bl[(ex_bl[:,2]!=0) | (ex_bl[:,3]!=0) |(ex_bl[:,4]!=0)]          #determines which nearest neighbors are outside the unit cell
-                    atoms_ex_cell=bond_ex_cell                    #[np.unique(bond_ex_cell[:,1:5],return_index=True,axis=0)[1]]  # neglects double mentioned
-                    mol=self.atomsF.copy()                   # a extended cell is needed for vmd since it does not show intercellular bonds
-                    mol.wrap()                              #wrap molecule important for atoms close to the boundaries
-                    
-                    translate={}                        # the new indices need to get the same values as the original ones inside the cell
+                    translate={}                        # the new bonds need to get the same values as the original ones inside the cell
                     for i in range(len(bond_E_array)):
                         translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]
                     htranslate={}
                     for i in range(len(hbond_E_array)):
                         htranslate[(np.min([hbond_E_array[i,0],hbond_E_array[i,1]]),np.max([hbond_E_array[i,0],hbond_E_array[i,1]]))]=hbond_E_array[i,2]
                     
-                    for i in range(len(atoms_ex_cell)):
-                        pos_ex_atom=mol.get_positions()[int(atoms_ex_cell[i,0])]+atoms_ex_cell[i,5:8]       # get positions of cell external atoms by adding the vector
-                        #ex_indx=np.append(ex_indx,atoms_ex_cell[i,1])            
-                        original_rim=[int(atoms_ex_cell[i,0]),int(atoms_ex_cell[i,1])]                      # get the indices of the corresponding atoms inside the cell
+                    for i in range(len(bond_E_array_pbc[0])):         
+                        original_rim=bond_E_array_pbc_trans[0][i]                    # get the indices of the corresponding atoms inside the cell
+                        bond_E_array=np.vstack((bond_E_array,[int(bond_E_array_pbc[0][i][0]),int(bond_E_array_pbc[0][i][1]),translate[tuple(original_rim)]]))                          # add to bond list with auxillary index
+                    for i in range(len(bond_E_array_pbc[1])):
+                        original_rim=[int(bond_E_array_pbc_trans[1][i][0]),int(bond_E_array_pbc_trans[1][i][1])]                      # get the indices of the corresponding atoms inside the cell
                         original_rim.sort()                                                                 # needs to be sorted because rim list only covers one direction                           
-                        try:
-                            bond_E_array=np.vstack((bond_E_array,[atoms_ex_cell[i,0],len(mol),translate[tuple(original_rim)]]))                          # add to bond list with auxillary index
-                            mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object
-                        
-                        except:
-                            
-                            try:
-                                hbond_E_array=np.vstack((hbond_E_array,[atoms_ex_cell[i,0],len(mol),htranslate[tuple(original_rim)]]))                          # add to bond list with auxillary index
-                                mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))
-                            except:
-                                pass
-                            pass    
+                        hbond_E_array=np.vstack((hbond_E_array,[int(bond_E_array_pbc[1][i][0]),int(bond_E_array_pbc[1][i][1]),htranslate[tuple(original_rim)]]))  
+  
                     
-                    
-                    mol.write('xF.xyz')
+  
 
-          
-        # Store the maximum energy in a variable for later call
-                if filename == "vmd_all.tcl":
-                    if not modus == "all":  # only do this, when the user didn't call the --v flag 
-                        max_energy = float(np.nanmax(bond_E_array, axis=0)[2])  # maximum energy in one bond
-                        for row in bond_E_array: 
-                          
-                            if max_energy in row:
-                                atom_1_max_energy = int(row[0])
-                                atom_2_max_energy = int(row[1])
+
+              
+    # Store the maximum energy in a variable for later call
+            if filename == "all":
+                if not modus == "all":  # only do this, when the user didn't call the --v flag 
+                    max_energy = float(np.nanmax(E_array, axis=0)[2])  # maximum energy in one bond
+                    for row in E_array: 
+                        
+                        if max_energy in row:
+                            atom_1_max_energy = int(row[0])
+                            atom_2_max_energy = int(row[1])
 
         # Generate the binning windows by splitting bond_E_array into N_colors equal windows
-            if filename == "vmd_all.tcl":
+            if filename == "all":
                 if modus == "all":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
                         binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
-            elif filename == "vmd_bl.tcl":
+            elif filename == "bl":
                 if modus == "bl":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
                         binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
-            elif filename == "vmd_ba.tcl":
+            elif filename == "ba":
                 if modus == "ba":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
                         binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
-            elif filename == "vmd_da.tcl":
+            elif filename == "da":
                 if modus == "da":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
                         binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
                 
             else: 
-                binning_windows = np.linspace( 0, np.nanmax(bond_E_array, axis=0)[2], num=N_colors )
+                binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
     
             f = open(filename, 'a')
@@ -1186,13 +1202,13 @@ color Axes Labels 32
                 f.write('\ndraw line  $a $b width 3 style dashed' )
 
             f.close()
-
+            
         #colorbar
             if colorbar==True:
                 min=0
             
                 if man_strain==None:
-                    max=np.nanmax(bond_E_array, axis=0)[2]
+                    max=np.nanmax(E_array, axis=0)[2]
                 else:
                     max=man_strain
                 f = open(filename, 'a')
@@ -1255,7 +1271,10 @@ draw text " $coord_x [expr $coord_y + $step_size] $use_z"   "{unit}"
 mol top $old_top
 display update on ''')
                 f.close()
-
+            
+            
+            f = open(f'E_{filename}', 'a')
+            f.write(f'{E_array}')
         if not man_strain:
             print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
             print(f"Maximum energy in bond between atoms {atom_1_max_energy} and {atom_2_max_energy}: {float(max_energy):.3f} {unit}.")
