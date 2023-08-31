@@ -170,9 +170,44 @@ def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIM
         print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
         i+=1
     from . import quotes
+
+def get_hbonds(mol):
+    cutoff=ase.neighborlist.natural_cutoffs(mol,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
+    bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
+
+    bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
+    bl, counts = np.unique(bl,return_counts=True,axis=0)
+    from ase.data.vdw import vdw_radii
+    hpartner=['N','O','F','C']
+    hpartner_ls=[]
+    hcutoff={('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
+    ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
+    ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9]),
+    ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6])}    #save the maximum distances for given pairs to be taken account as interactions
+    hbond_ls=[]                                    #create a list to store all the bonds
+    for i in range(len(mol)):
+        if mol.symbols[i] in hpartner:              #check atoms indices of N F O elements
+            hpartner_ls.append(i)
+    for i in bl:   
+        if mol.symbols[i[0]]=='H' and mol.symbols[i[1]] in hpartner:                            
+            for j in hpartner_ls:  
+                if j != i[1]:                   
+                    if mol.get_distance(i[0],j,mic=True)<  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
+                        and mol.get_angle(i[1],i[0],j,mic=True)>90:                        
+                        hbond_ls.append([i[0], j])            
+        elif mol.symbols[i[0]] in hpartner and mol.symbols[i[1]]=='H':
+            for j in hpartner_ls:   
+                if j != i[0]:                      
+                    if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j,mic=True) >90:                
+                        hbond_ls.append([i[1], j])
+    if len(hbond_ls)>0:
+        hbond_ls=np.array(hbond_ls)  
+        hbond_ls=np.atleast_2d(hbond_ls)     
+    return hbond_ls
+
 @jsonable('jedi')
 class Jedi:
-    def __init__(self, atoms0, atomsF, modes): #indices=None
+    def __init__(self, atoms0, atomsF, modes, hbond=None): #indices=None
         self.atoms0 = atoms0        #ref state
         self.atomsF = atomsF        #strained state
         self.modes = modes          #VibrationsData object
@@ -185,7 +220,7 @@ class Jedi:
         self.part_rim_list=None     #rim list for election of atoms
         self.indices=None           #indices to chose special atoms
         self.E_RIMs=None            #list of energies stored in the rims
-        self.hbond=None             #list of hbonds
+        self.hbond=hbond             #list of hbonds
         self.ase_units=False
     def todict(self) -> Dict[str, Any]:
         return {'atoms0': self.atoms0,
@@ -305,8 +340,6 @@ class Jedi:
 
         bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
         bl, counts = np.unique(bl,return_counts=True,axis=0)
-        #if self.indices != None:
-          #  bl[np.any([np.in1d(bl[:,3], self.indices),  np.in1d(bl[:,2], self.indices)],axis=0)] take only bl with desired atoms
         if ~ np.all(counts==1):
             print('unit cell too small hessian not calculated for self interaction \
                    jedi analysis for a finite system consisting of the cell will be conducted')
@@ -318,45 +351,46 @@ class Jedi:
         rim_list=[bl]
         
         #hbonds
-        if hbond==True:
-            from ase.data.vdw import vdw_radii
-            hpartner=['N','O','F','C']
-            hpartner_ls=[]
-            hcutoff={('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
-            ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
-            ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9]),
-            ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6])}
+        #defined as intermolecular interaction X-H⋅⋅⋅Y with a distance of max 0.9 the sum of the vdw radii and a angle of minimum 90°
+        if self.hbond!=[]:
+            # from ase.data.vdw import vdw_radii
+            # hpartner=['N','O','F','C']
+            # hpartner_ls=[]
+            # hcutoff={('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
+            # ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
+            # ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9]),
+            # ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6])}    #save the maximum distances for given pairs to be taken account as interactions
     
-            hbond_ls=[]
-            for i in range(len(mol)):
-                if mol.symbols[i] in hpartner:
-                    hpartner_ls.append(i)
+            # hbond_ls=[]                                    #create a list to store all the bonds
+            # for i in range(len(mol)):
+            #     if mol.symbols[i] in hpartner:              #check atoms indices of N F O elements
+            #         hpartner_ls.append(i)
 
-            for i in bl:
+            # for i in bl:
             
-                if mol.symbols[i[0]]=='H' and mol.symbols[i[1]] in hpartner:
-                    for j in hpartner_ls:  
-                        if j != i[1]:                   
-                            if mol.get_distance(i[0],j,mic=True)<  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
-                                and mol.get_angle(i[1],i[0],j,mic=True)>90:
+            #     if mol.symbols[i[0]]=='H' and mol.symbols[i[1]] in hpartner:                            
+            #         for j in hpartner_ls:  
+            #             if j != i[1]:                   
+            #                 if mol.get_distance(i[0],j,mic=True)<  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
+            #                     and mol.get_angle(i[1],i[0],j,mic=True)>90:
                                 
-                                hbond_ls.append([i[0], j])
+            #                     hbond_ls.append([i[0], j])
                     
-                elif mol.symbols[i[0]] in hpartner and mol.symbols[i[1]]=='H':
-                    for j in hpartner_ls:   
-                        if j != i[0]:       
+            #     elif mol.symbols[i[0]] in hpartner and mol.symbols[i[1]]=='H':
+            #         for j in hpartner_ls:   
+            #             if j != i[0]:       
                         
-                            if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j,mic=True) >90:
+            #                 if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j,mic=True) >90:
                         
-                                hbond_ls.append([i[1], j])
-            if len(hbond_ls)>0:
-                self.hbond=hbond_ls
-                bl=np.vstack((bl,hbond_ls))
-                hbond_ls=np.array(hbond_ls)  
-                hbond_ls=np.atleast_2d(hbond_ls)     
-                rim_list.append(hbond_ls)
-            else:
-                rim_list.append(np.array([])) 
+            #                     hbond_ls.append([i[1], j])
+            # if len(hbond_ls)>0:
+            #     self.hbond=hbond_ls
+                bl=np.vstack((bl,self.hbond))
+                # hbond_ls=np.array(hbond_ls)  
+                # hbond_ls=np.atleast_2d(hbond_ls)     
+                rim_list.append(self.hbond)
+            # else:
+            #     rim_list.append(np.array([])) 
         if hbond==False:    
             rim_list.append(np.array([])) 
         
