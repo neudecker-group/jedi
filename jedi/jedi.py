@@ -130,6 +130,46 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
         i+=1
     from . import quotes
 
+def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False,file='total'):
+    #############################################
+    #	    	   Output section	        	#
+    #############################################
+    f = open(file, 'w')
+    # Header
+   
+    print(" ************************************************",file=f)
+    print(" *                 JEDI ANALYSIS                *",file=f)
+    print(" *       Judgement of Energy DIstribution       *",file=f)
+    print(" ************************************************\n",file=f)
+    
+    # Comparison of total energies
+    if ase_units==False:
+        print("                   Strain Energy (kcal/mol)  Deviation (%)",file=f)
+    elif ase_units==True:
+        print("                   Strain Energy (eV)        Deviation (%)",file=f)
+    print("      Geometries     " + "%.8f" % E_geometries + "                  -",file=f)
+    print('%5s%16.8f%21.2f' % (" Red. Int. Modes", E_RIMs_total, proc_geom_RIMs),file=f)
+
+
+    # JEDI analysis
+
+    if ase_units==False:
+        print("\n RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)",file=f)
+    elif ase_units==True:
+        print("\n RIM No.       RIM type                       indices       Percentage    Energy (eV)",file=f)
+    i = 0
+
+    for k in rim_list[0]:
+        rim="bond" 
+        ind="%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
+        print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
+        i+=1
+    for k in rim_list[1]:
+        rim="dipole" 
+        ind="%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
+        print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
+        i+=1
+    from . import quotes
 @jsonable('jedi')
 class Jedi:
     def __init__(self, atoms0, atomsF, modes): #indices=None
@@ -787,7 +827,7 @@ class Jedi:
             numbers = [int(i[0]),int(i[1])]
             bl.append(numbers)
             if 'bl' not in file_list:
-                open('bl', 'w').close()
+     
                 file_list.append('bl')
                 
         for i in rim_list[1]:
@@ -807,10 +847,10 @@ class Jedi:
             numbers = [int(i[0]),int(i[1]),int(i[2])]
             ba.append(numbers)
             if 'ba' not in file_list:
-                open('ba', 'w').close()
+
                 file_list.append('ba')
             # All (for this, at least bond angles have to be present):
-                open('all', 'w').close()
+            
                 file_list.append('all')
                 
             # Dihedral angles:
@@ -823,7 +863,7 @@ class Jedi:
             numbers = [int(n) for n in i]
             da.append(numbers)
             if 'da' not in file_list:
-                open('da', 'w').close()
+          
                 file_list.append('da')
 
 
@@ -835,7 +875,7 @@ class Jedi:
         # Write some basic stuff to the tcl scripts
         for filename in file_list:
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
-                f = open(filename, 'w')
+                f = open(f'{filename}.vmd', 'w')
                 f.write('# Load a molecule\nmol new xF.xyz\n\n')
                 f.write('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
                 f.write('# Change the drawing method of the first graphical representation to CPK\nmol modstyle 0 top cpk\n')
@@ -868,12 +908,12 @@ class Jedi:
 
 
 
-
+        
         # Generate the color-code and write it to the tcl scripts
         for filename in file_list:
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
-                f = open(filename, 'a')
-
+                f = open(f'{filename}.vmd', 'a')
+                colorbar_colors = []
                 for i in range(N_colors):
                     R_value = float(i)/(N_colors/2)
                     if R_value > 1:
@@ -889,7 +929,7 @@ class Jedi:
                     B_value = 0
 
                     f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
-
+                    colorbar_colors.append((R_value, G_value, B_value))
                 # add color codes of "standard" atoms
                 for j in range(N_colors_atoms):
                     f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", N_colors+j+1, float(colors[symbols[j]][0]), float(colors[symbols[j]][1]), float(colors[symbols[j]][2]), "\n"))
@@ -1170,7 +1210,7 @@ color Axes Labels 32
                 binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
     
-            f = open(filename, 'a')
+            f = open(f'{filename}.vmd', 'a')
             if pbc_flag==True:
              
                 f.write("\n\n# Adding a pbc box")
@@ -1211,7 +1251,7 @@ color Axes Labels 32
                     max=np.nanmax(E_array, axis=0)[2]
                 else:
                     max=man_strain
-                f = open(filename, 'a')
+                f = open(f'{filename}.vmd', 'a')
                 f.write(f'''\n		display update off
 display resetview
 variable bar_mol
@@ -1272,9 +1312,24 @@ mol top $old_top
 display update on ''')
                 f.close()
             
-            
-            f = open(f'E_{filename}', 'a')
-            f.write(f'{E_array}')
+            # total strain in the bonds
+            proc_geom_RIMs = 100 * ( sum(E_array[:,2]) - self.energies[0]) / self.energies[0]
+            jedi_printout_bonds(self.atoms0,self.rim_list[0:2],self.energies[0], sum(E_array[:,2]), proc_geom_RIMs,100*E_array[:,2]/sum(E_array[:,2]), E_array[:,2],ase_units=self.ase_units, file=f'E_{filename}')
+            import matplotlib.pyplot as plt
+            from matplotlib.colorbar import ColorbarBase
+            from matplotlib.colors import LinearSegmentedColormap, Normalize
+
+            fig = plt.figure()
+            ax = fig.add_axes([0.05, 0.08, 0.1, 0.9])
+            cmap_name = 'my_list'
+            cmap = LinearSegmentedColormap.from_list(cmap_name, colorbar_colors, N=N_colors)
+            cb = ColorbarBase(ax, orientation='vertical', 
+                                        cmap=cmap,
+                                        norm=Normalize(min,max),
+                                        label=unit,
+                                        ticks=np.linspace(min, max, 8))
+
+            plt.savefig(f'{filename}colorbar', bbox_inches='tight')
         if not man_strain:
             print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
             print(f"Maximum energy in bond between atoms {atom_1_max_energy} and {atom_2_max_energy}: {float(max_energy):.3f} {unit}.")
