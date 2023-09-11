@@ -760,6 +760,8 @@ class Jedi:
         #########################
         #       Basic stuff     #
         #########################
+        if man_strain is not None and modus is None:
+            print('\nPlease set a modus otherwise man_strain will be neglected')
         if self.ase_units == False:
             unit = "kcal/mol"
         elif self.ase_units == True:
@@ -1087,7 +1089,8 @@ color Axes Labels 32
                     for i in range(len(bond_E_array_pbc[1])):
                         original_rim=[int(bond_E_array_pbc_trans[1][i][0]),int(bond_E_array_pbc_trans[1][i][1])]                      # get the indices of the corresponding atoms inside the cell
                         original_rim.sort()                                                                 # needs to be sorted because rim list only covers one direction                           
-                        custom_E_array=np.vstack((custom_E_array,[int(bond_E_array_pbc[1][i][0]),int(bond_E_array_pbc[1][i][1]),ctranslate[tuple(original_rim)]]))  
+                        custom_E_array=np.vstack((custom_E_array,[int(bond_E_array_pbc[1][i][0]),int(bond_E_array_pbc[1][i][1]),ctranslate[tuple(original_rim)]])) 
+                  
   
                     
   
@@ -1183,11 +1186,42 @@ color Axes Labels 32
         #colorbar
             if colorbar==True:
                 min=0
-            
-                if man_strain==None:
-                    max=np.nanmax(E_array, axis=0)[2]
-                else:
-                    max=man_strain
+                if filename == "all":
+                    if modus == "all":
+                        if man_strain == None:
+                            max = np.nanmax(E_array, axis=0)[2]
+                        else:
+                            max = man_strain
+                    else:
+                        max = np.nanmax(E_array, axis=0)[2]    
+                    
+                elif filename == "bl":
+                    if modus == "bl":
+                        if man_strain == None:
+                            max = np.nanmax(E_array, axis=0)[2]
+                        else:
+                            max = man_strain
+                    else:
+                        max = np.nanmax(E_array, axis=0)[2] 
+                    
+                elif filename == "ba":
+                    if modus == "ba":
+                        if man_strain == None:
+                            max = np.nanmax(E_array, axis=0)[2]
+                        else:
+                            max = man_strain
+                    else:
+                        max = np.nanmax(E_array, axis=0)[2] 
+                    
+                elif filename == "da":
+                    if modus == "da":
+                        if man_strain == None:
+                            max = np.nanmax(E_array, axis=0)[2]
+                        else:
+                            max = man_strain
+                    else:
+                        max = np.nanmax(E_array, axis=0)[2] 
+
                 f = open(f'{filename}.vmd', 'a')
                 f.write(f'''\n		display update off
 display resetview
@@ -1345,12 +1379,13 @@ display update on ''')
                 rim_list_c.append(np.vstack((rim_list[i],rim_p[i])))
             
             x,z=np.unique(rim_list_c[-1],return_counts=True,axis=0)
+            
             ind.append(np.where(z>1)[0])                                        #get indices where ric is in both sets
         for i in range(4):
             ind[i]=ind[i]+np.sum([p.shape[0] for p in rim_list[0:i]])      # get correct indices for the stacked array
         ind = np.hstack(ind)
         ind = ind.astype(int)
-
+        
         self.E_RIMs = np.array(self.E_RIMs)[ind]
         self.delta_q = self.delta_q[ind]
         E_RIMs_total = sum(self.E_RIMs)
