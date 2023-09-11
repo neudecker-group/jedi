@@ -62,15 +62,16 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
     proc_E_RIMs = []
 
     proc_E_RIMs = 100 * E_RIMs / E_RIMs_total 
+
     if ase_units==True:
         b=np.where(rim_list[:,1]>-1)[0][0]
-        delta_q[0:b]*=Bohr
-        delta_q[b::]=np.degrees(delta_q[b::])
+        delta_q[0:b] *= Bohr
+        delta_q[b::] = np.degrees(delta_q[b::])
         E_RIMs=np.array(E_RIMs)*Hartree
-        E_RIMs_total*=Hartree
-    elif ase_units==False:
+        E_RIMs_total *= Hartree
+    elif ase_units == False:
         E_RIMs=np.array(E_RIMs)/kcal*mol*Hartree
-        E_RIMs_total*=mol/kcal*Hartree
+        E_RIMs_total *= mol/kcal*Hartree
 
     proc_geom_RIMs = 100 * ( E_RIMs_total - E_geometries ) / E_geometries
  
@@ -92,9 +93,9 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
     print(" ************************************************\n")
     
     # Comparison of total energies
-    if ase_units==False:
+    if ase_units == False:
         print("                   Strain Energy (kcal/mol)  Deviation (%)")
-    elif ase_units==True:
+    elif ase_units == True:
         print("                   Strain Energy (eV)        Deviation (%)")
     print("      Geometries     " + "%.8f" % E_geometries + "                  -" )
     print('%5s%16.8f%21.2f' % (" Red. Int. Modes", E_RIMs_total, proc_geom_RIMs))
@@ -102,35 +103,35 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
 
     # JEDI analysis
 
-    if ase_units==False:
+    if ase_units == False:
         print("\n RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)")
-    elif ase_units==True:
+    elif ase_units == True:
         print("\n RIM No.       RIM type                       indices        delta_q (Å,°) Percentage    Energy (eV)")
     i = 0
 
     for k in rim_list[0]:
-        rim="bond" 
-        ind="%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
+        rim = "bond" 
+        ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
         print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        i+=1
+        i += 1
     for k in rim_list[1]:
-        rim="dipole" 
-        ind="%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
+        rim = "custom" 
+        ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
         print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        i+=1
+        i += 1
     for k in rim_list[2]:
-        rim="bond angle" 
-        ind="%s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2])
+        rim = "bond angle" 
+        ind = "%s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2])
         print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        i+=1
+        i += 1
     for k in rim_list[3]:
-        rim="dihedral" 
-        ind="%s%d %s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2], atoms.symbols[k[3]], k[3])
+        rim = "dihedral" 
+        ind = "%s%d %s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2], atoms.symbols[k[3]], k[3])
         print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        i+=1
-    from . import quotes
+        i += 1
+    from . import quotes #quotes from star wars
 
-def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False,file='total'):
+def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False,file='total'): #total strain in bonds after adding contributions of stretching angles and dihedral angles
     #############################################
     #	    	   Output section	        	#
     #############################################
@@ -151,45 +152,45 @@ def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIM
     print('%5s%16.8f%21.2f' % (" Red. Int. Modes", E_RIMs_total, proc_geom_RIMs),file=f)
 
 
-    # JEDI analysis
+    # strain in the bonds
 
-    if ase_units==False:
+    if ase_units == False:
         print("\n RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)",file=f)
-    elif ase_units==True:
+    elif ase_units == True:
         print("\n RIM No.       RIM type                       indices       Percentage    Energy (eV)",file=f)
     i = 0
 
     for k in rim_list[0]:
-        rim="bond" 
-        ind="%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
+        rim = "bond" 
+        ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
         print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
-        i+=1
+        i += 1
     for k in rim_list[1]:
-        rim="dipole" 
-        ind="%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
+        rim = "custom" 
+        ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
         print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
-        i+=1
+        i += 1
     from . import quotes
 
 def get_hbonds(mol):
     cutoff=ase.neighborlist.natural_cutoffs(mol,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
     bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
 
-    bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
-    bl, counts = np.unique(bl,return_counts=True,axis=0)
+    bl=bl[bl[:,0]<bl[:,1]]      #remove double mentioned 
+    bl = np.unique(bl,axis=0)
     from ase.data.vdw import vdw_radii
-    hpartner=['N','O','F','C']
-    hpartner_ls=[]
-    hcutoff={('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
+    hpartner = ['N','O','F','C']
+    hpartner_ls = []
+    hcutoff = {('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
     ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
     ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9]),
     ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6])}    #save the maximum distances for given pairs to be taken account as interactions
-    hbond_ls=[]                                    #create a list to store all the bonds
+    hbond_ls = []                                    #create a list to store all the bonds
     for i in range(len(mol)):
         if mol.symbols[i] in hpartner:              #check atoms indices of N F O elements
             hpartner_ls.append(i)
     for i in bl:   
-        if mol.symbols[i[0]]=='H' and mol.symbols[i[1]] in hpartner:                            
+        if mol.symbols[i[0]] == 'H' and mol.symbols[i[1]] in hpartner:                            
             for j in hpartner_ls:  
                 if j != i[1]:                   
                     if mol.get_distance(i[0],j,mic=True)<  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
@@ -200,14 +201,15 @@ def get_hbonds(mol):
                 if j != i[0]:                      
                     if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j,mic=True) >90:                
                         hbond_ls.append([i[1], j])
-    if len(hbond_ls)>0:
-        hbond_ls=np.array(hbond_ls)  
-        hbond_ls=np.atleast_2d(hbond_ls)     
+    if len(hbond_ls) > 0:
+        hbond_ls = np.array(hbond_ls)
+        hbond_ls = np.sort(hbond_ls, axis=1)
+        hbond_ls = np.atleast_2d(hbond_ls)     
     return hbond_ls
 
 @jsonable('jedi')
 class Jedi:
-    def __init__(self, atoms0, atomsF, modes, hbond=None): #indices=None
+    def __init__(self, atoms0, atomsF, modes): #indices=None
         self.atoms0 = atoms0        #ref state
         self.atomsF = atomsF        #strained state
         self.modes = modes          #VibrationsData object
@@ -217,11 +219,11 @@ class Jedi:
         self.H = None               #cartesian Hessian of ref state
         self.energies = None        #energies of the geometries 
         self.proc_E_RIMs = None     #list of procentual energy stored in single RIMs
-        self.part_rim_list=None     #rim list for election of atoms
-        self.indices=None           #indices to chose special atoms
-        self.E_RIMs=None            #list of energies stored in the rims
-        self.hbond=hbond             #list of hbonds
-        self.ase_units=False
+        self.part_rim_list = None     #rim list for election of atoms
+        self.indices = None           #indices to chose special atoms
+        self.E_RIMs = None            #list of energies stored in the rims
+        self.custom_bonds = None        #list of custom added bonds
+        self.ase_units = False
     def todict(self) -> Dict[str, Any]:
         return {'atoms0': self.atoms0,
                 'atomsF': self.atomsF,
@@ -234,7 +236,7 @@ class Jedi:
                 'indices': self.indices,
                 'E_RIMS': self.E_RIMs,
                 'proc_E_RIMS': self.proc_E_RIMs,
-                'hbond': self.hbond}
+                'custom_bonds': self.custom_bonds}
     @classmethod
     def fromdict(cls, data: Dict[str, Any]) -> 'Jedi':
         # mypy is understandably suspicious of data coming from a dict that
@@ -286,16 +288,16 @@ class Jedi:
             assert isinstance(data['proc_E_RIMS'], (collections.abc.Sequence,
                                                 np.ndarray))
             cl.proc_E_RIMs = data['proc_E_RIMS']
-        if data['hbond'] is not None:
-            assert isinstance(data['hbond'], (collections.abc.Sequence,
+        if data['custom_bonds'] is not None:
+            assert isinstance(data['custom_bonds'], (collections.abc.Sequence,
                                                 list))
         return cl
 
-    def run(self,indices=None,ase_units=False,hbond=True):
-        self.ase_units=ase_units
+    def run(self,indices=None,ase_units=False):
+        self.ase_units = ase_units
         # get necessary data
         self.indices=np.arange(0,len(self.atoms0))
-        self.get_common_rims(hbond=hbond)
+        self.get_common_rims()
         rim_list = self.rim_list
         self.get_b_matrix()
         B = self.B
@@ -307,20 +309,19 @@ class Jedi:
             
             raise ValueError('Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis')
         try:
-            all_E_geometries= self.get_energies()
+            all_E_geometries = self.get_energies()
         except:
-            all_E_geometries= self.energies
+            all_E_geometries = self.energies
         E_geometries=all_E_geometries[0]
 
 
         #run the analysis
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
         
-        if indices:
-            
+        if indices:          #get only rims of interest  
             self.post_process(indices)
-            E_RIMs_total=sum(self.E_RIMs)
-            proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
+            E_RIMs_total = sum(self.E_RIMs)
+            proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
             
         jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
         pass
@@ -329,70 +330,38 @@ class Jedi:
 
 
 
-    def get_rims(self,mol,hbond=True):
+    def get_rims(self,mol):
         
         ###bondlengths####
         mol = mol
 
-        indices=self.indices
-        cutoff=ase.neighborlist.natural_cutoffs(mol,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
-        bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
+        indices = self.indices
+        cutoff = ase.neighborlist.natural_cutoffs(mol,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
+        bl = np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
 
         bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
         bl, counts = np.unique(bl,return_counts=True,axis=0)
-        if ~ np.all(counts==1):
+        if ~ np.all(counts == 1):
             print('unit cell too small hessian not calculated for self interaction \
                    jedi analysis for a finite system consisting of the cell will be conducted')
-        bl=np.atleast_2d(bl)
+        bl = np.atleast_2d(bl)
 
-        if  len(indices)!=len(mol):
-            bl=bl[np.all([np.in1d(bl[:,0], indices),  np.in1d(bl[:,1], indices)],axis=0)]
+        if  len(indices) != len(mol):
+            bl = bl[np.all([np.in1d(bl[:,0], indices),  np.in1d(bl[:,1], indices)],axis=0)]
 
-        rim_list=[bl]
+        rim_list = [bl]
         
-        #hbonds
-        #defined as intermolecular interaction X-H⋅⋅⋅Y with a distance of max 0.9 the sum of the vdw radii and a angle of minimum 90°
-        if self.hbond!=[]:
-            # from ase.data.vdw import vdw_radii
-            # hpartner=['N','O','F','C']
-            # hpartner_ls=[]
-            # hcutoff={('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
-            # ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
-            # ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9]),
-            # ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6])}    #save the maximum distances for given pairs to be taken account as interactions
-    
-            # hbond_ls=[]                                    #create a list to store all the bonds
-            # for i in range(len(mol)):
-            #     if mol.symbols[i] in hpartner:              #check atoms indices of N F O elements
-            #         hpartner_ls.append(i)
-
-            # for i in bl:
-            
-            #     if mol.symbols[i[0]]=='H' and mol.symbols[i[1]] in hpartner:                            
-            #         for j in hpartner_ls:  
-            #             if j != i[1]:                   
-            #                 if mol.get_distance(i[0],j,mic=True)<  hcutoff[(mol.symbols[i[0]], mol.symbols[j])] \
-            #                     and mol.get_angle(i[1],i[0],j,mic=True)>90:
-                                
-            #                     hbond_ls.append([i[0], j])
-                    
-            #     elif mol.symbols[i[0]] in hpartner and mol.symbols[i[1]]=='H':
-            #         for j in hpartner_ls:   
-            #             if j != i[0]:       
-                        
-            #                 if mol.get_distance(i[1],j,mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])] and mol.get_angle(i[0],i[1],j,mic=True) >90:
-                        
-            #                     hbond_ls.append([i[1], j])
-            # if len(hbond_ls)>0:
-            #     self.hbond=hbond_ls
-                bl=np.vstack((bl,self.hbond))
-                # hbond_ls=np.array(hbond_ls)  
-                # hbond_ls=np.atleast_2d(hbond_ls)     
-                rim_list.append(self.hbond)
-            # else:
-            #     rim_list.append(np.array([])) 
-        if hbond==False:    
+      
+        #possibility of adding custom bonds like hbonds, long range interactions
+        if self.custom_bonds is not None:
+            try:
+                bl=np.vstack((bl,self.custom_bonds))
+            except:
+                ValueError('custom bonds not in the correct format. 2D array needed with shape (x,2)')    
+            rim_list.append(self.custom_bonds)
+        if self.custom_bonds is None:
             rim_list.append(np.array([])) 
+
         
         ########find angles
         #create array containing all angles (ba)
@@ -410,15 +379,15 @@ class Jedi:
                             if atom not in connecting_atom: 
                                 other_atoms.append(atom)
                         if row_index==0:
-                            ba=np.array([other_atoms[0], connecting_atom[0], other_atoms[1]])
-                            ba_flag=True
+                            ba = np.array([other_atoms[0], connecting_atom[0], other_atoms[1]])
+                            ba_flag = True
                         else:
-                            ba=np.vstack((ba, [other_atoms[0], connecting_atom[0], other_atoms[1]])) # add bondlengths to dataframe
-                        row_index+=1
-        ######sort needed?########## 
+                            ba = np.vstack((ba, [other_atoms[0], connecting_atom[0], other_atoms[1]])) # add bondlengths to dataframe
+                        row_index += 1
         
-        if ba_flag==True :      
-            ba=np.atleast_2d(ba)     
+        
+        if ba_flag == True :      
+            ba = np.atleast_2d(ba)     
             ba = ba[ba[:, 1].argsort()]  #sort by atom2
             ba = ba[ba[:, 0].argsort(kind='mergesort')]  # sort by atom1
         
@@ -434,7 +403,7 @@ class Jedi:
 
 
         tb_flag=False
-        row_index=0
+        row_index = 0
         #create dataframe containing list of all bonds with torsion angles (df_torsionable_bonds)
         for self_index, self_row in enumerate(bl): # iterates through rows of bonds
             bond_partner1 = False # if both bond partners are set to True, no terminal bond. Thus, possible torsion around bond.
@@ -448,18 +417,18 @@ class Jedi:
                         bond_partner2 = True # Set to True if neighbouring atom
 
                     if bond_partner1 == True and bond_partner2 == True: # if both bond partners are set to True, no terminal bond. Thus, possible torsion around bond.
-                        if row_index==0:
+                        if row_index == 0:
                             torsionable_bonds=np.array([self_row[0],self_row[1]])
-                            tb_flag=True
+                            tb_flag = True
                         else:
                             torsionable_bonds=np.vstack((torsionable_bonds, [self_row[0],self_row[1]]))
                         bond_partner1 = False
                         bond_partner2 = False
-                        row_index+=1              
+                        row_index += 1              
                         break
-        if tb_flag==True:    
-            da_flag=False
-            torsionable_bonds=np.atleast_2d(torsionable_bonds)
+        if tb_flag == True:    
+            da_flag = False
+            torsionable_bonds = np.atleast_2d(torsionable_bonds)
             row_index = 0
             for torsionable_row in torsionable_bonds:
                 TA_Atoms_0 = [] 
@@ -500,12 +469,12 @@ class Jedi:
                             
                         else:
                             try:
-                                if round(mol.get_angle(int(single_TA_Atom_0),int(torsionable_row[0]),int(torsionable_row[1]),mic=True)) in [0.0,180.0,360.0] or round(mol.get_angle(int(torsionable_row[0]),int(torsionable_row[1]),int(single_TA_Atom_3),mic=True)) in [0.0,180.0,360.0] :    
+                                if round(mol.get_angle(int(single_TA_Atom_0),int(torsionable_row[0]),int(torsionable_row[1]),mic=True)) in [0.0,180.0,360.0] or \
+                                    round(mol.get_angle(int(torsionable_row[0]),int(torsionable_row[1]),int(single_TA_Atom_3),mic=True)) in [0.0,180.0,360.0] :    #check for linear angles
                                     continue
-                                if row_index==0:
+                                if row_index == 0:
                                     da = np.array([single_TA_Atom_0,  torsionable_row[0], torsionable_row[1], single_TA_Atom_3])
-                                    da_flag=True
-                                    
+                                    da_flag=True    
                                 else:
                                     da = np.vstack((da,[single_TA_Atom_0,  torsionable_row[0], torsionable_row[1], single_TA_Atom_3]))
                                   
@@ -523,26 +492,24 @@ class Jedi:
         
         return rim_list
     
-    def get_common_rims(self,hbond=True):
-        rim_atoms0=self.get_rims(self.atoms0,hbond=hbond)
-        rim_atomsF=self.get_rims(self.atomsF,hbond=hbond)
+    def get_common_rims(self):
+        rim_atoms0 = self.get_rims(self.atoms0)
+        rim_atomsF = self.get_rims(self.atomsF)
         
         for i in range(len(rim_atoms0)):
             if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
                 break
             else:
-                rim_atoms0v=rim_atoms0[i].view([('', rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
-                rim_atomsFv=rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()
+                rim_atoms0v = rim_atoms0[i].view([('', rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
+                rim_atomsFv = rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()    #get a viable input for np.intersect1d()
                 
-                rim_l,ind,z=np.intersect1d(rim_atoms0v, rim_atomsFv,return_indices=True)
+                rim_l,ind,z = np.intersect1d(rim_atoms0v, rim_atomsFv,return_indices=True)    #get the rims that exist in both structures
+                rim_l = rim_l[ind.argsort()]                                      
             
-                #if len(self.indices) < len(self.atoms0)  :
-                rim_l=rim_l[ind.argsort()]
-            
-                rim_atoms0[i]=rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
-                self.rim_list=rim_atoms0
+                rim_atoms0[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
+                self.rim_list = rim_atoms0
         
-        return rim_atoms0#np.intersect1d(rim_atoms0v, rim_atomsFv).view(rim_atoms0.dtype).reshape(-1, rim_atoms0.shape[1])
+        return rim_atoms0
     
     def get_hessian(self):
         hessian = self.modes._hessian2d
@@ -551,22 +518,18 @@ class Jedi:
     
     def get_b_matrix(self,indices=None):
         mol = self.atoms0
-        if indices==None:
-            indices=np.arange(0,len(mol))
+        if indices == None:
+            indices = np.arange(0,len(mol))
         if  len(self.rim_list) == 0:
             self.get_common_rims()
 
-        rim_size=sum([np.shape(l)[0] for l in self.rim_list])
-        #NCart_coords = 3*len(mol)
-        
-        column = 0
-        b = np.zeros([int(len(indices)*3), int(rim_size)], dtype=float)
+        rim_size = sum([np.shape(l)[0] for l in self.rim_list])
+        b = np.zeros([int(len(indices)*3), int(rim_size)], dtype=float)   #shape of B-matrix (NCarts,NRIMs)
 
-        # for loop for all redunant internal coordinates
-        
-
+        # get all derivatives 
+        column = 0 # Initilization of columns to specifiy position in B-Matrix
         for q in self.rim_list[0]:
-            row = 0  # Initilization of columns to specifiy position in B-Matrix
+            row = 0  # Initilization of rows to specifiy position in B-Matrix
         
             ########  Section for stretches  #########
             
@@ -575,54 +538,44 @@ class Jedi:
             BL = [int(q[0]), int(q[1])]  # create list of involved atoms
             q_i, q_j = BL
         
-            u=mol.get_distance(q_i,q_j,mic=True,vector=True)
-            for NAtom in indices:  # for-loop of Number of Atoms (3N)
-                # for-loop of cartesian coordinates of each Atom (x, y and z)
+            u = mol.get_distance(q_i,q_j,mic=True,vector=True)
+            for NAtom in indices:  # for-loop of Number of Atoms 
+               
                 for q in BL:
                     if NAtom == q:  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
                                     # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
 
                         # if-/elif-statement for the right sign-factor (see [1])
                         if q == q_i:
-                            
                             b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
-                            
                             b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
-                        elif q == q_j:
-                            
+                        elif q == q_j:  
                             b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
-            
-                            b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
-                            
+                            b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i           
                 row += 3
             column += 1
-        for q in self.rim_list[1]:
-            row = 0  # Initilization of columns to specifiy position in B-Matrix
-        
-            ########  Section for stretches  #########
-            
-            
-            BL = []
-            BL = [int(q[0]), int(q[1])]  # create list of involved atoms
-            q_i, q_j = BL
-        
-            u=mol.get_distance(q_i,q_j,mic=True,vector=True)
-            for NAtom in indices:  # for-loop of Number of Atoms (3N)
-                # for-loop of cartesian coordinates of each Atom (x, y and z)
-                for q in BL:
-                    if NAtom == q:  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
-                                    # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
 
-                        # if-/elif-statement for the right sign-factor (see [1])
+        for q in self.rim_list[1]:
+            row = 0  # Initilization of rows to specifiy position in B-Matrix
+        
+            ########  Section for custom stretches  #########
+            
+            
+            CL = []
+            CL = [int(q[0]), int(q[1])]  # create list of involved atoms
+            q_i, q_j = CL
+        
+            u = mol.get_distance(q_i,q_j,mic=True,vector=True)
+            for NAtom in indices:  # for-loop of Number of Atoms
+               
+                for q in CL:
+                    if NAtom == q:
+                        # if-/elif-statement for the right sign-factor 
                         if q == q_i:
-                            
                             b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
-                            
                             b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
                         elif q == q_j:
-                            
                             b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
-            
                             b[row:row+3, column] = b_i  # change value of zero array at specified position to b_i
                             
                 row += 3
@@ -636,9 +589,8 @@ class Jedi:
         
         for q in self.rim_list[2]:
             BA = []
-            row = 0
-            
-            center_atom = int(q[1])  # define center_atom (redundant step)
+            row = 0 # Initilization of rows to specifiy position in B-Matrix
+    
             BA = [int(q[0]), int(q[1]), int(q[2])]  # create list of involved atoms
             q_i, q_j, q_k = BA
             u = mol.get_distance(q_i,q_j,mic=True,vector=True)
@@ -646,12 +598,10 @@ class Jedi:
 
 
     
-            def get_B_matrix_angles_derivatives(u,v):
-                
-                
+            def get_B_matrix_angles_derivatives(u,v): 
                 angle = ase.geometry.get_angles(u,v) # angle between v and u
 
-                if angle == 180:
+                if angle == 180:   #an auxilliary vector is used if linear angles are existing
                     (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v],cell=None,pbc=None)
                     nu = u / lu
                     nv = v / lv
@@ -659,8 +609,7 @@ class Jedi:
                         w = np.cross(nu, ([-1, 1, 1]))
                     else: 
                         w = np.cross(nu, ([1, -1, 1]))
-
-                    
+ 
                     nw = w / np.linalg.norm(w)
                     d_ba1 = (((np.cross(nu, nw))/np.linalg.norm(u)))
                     d_ba2 = (-1 * ((np.cross(nu, nw))/np.linalg.norm(u))) + (-1 * ((np.cross(nw, nv))/np.linalg.norm(v))) # equation to calculate dBA/dx [1]                
@@ -675,12 +624,11 @@ class Jedi:
             for NAtom in indices:  # for-loop of Number of Atoms 
 
                 for q in BA:
-                    if NAtom == q:  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
-                                    # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
+                    if NAtom == q:               
                         b_j = 0
                         if q == q_j:  # if-Statements for sign-factors
-                            b_j =  get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][1] # Q-Chem defines BA as m-o-n, where the atomnr. in the middle is the center-atom
-                            b[row:row+3, column] = -b_j                                # making it possible to define the center atom as RIM[2]
+                            b_j =  get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][1] 
+                            b[row:row+3, column] = -b_j                                
                         elif q == q_i:
                             b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][0]
                             b[row:row+3, column] = -b_j
@@ -696,7 +644,7 @@ class Jedi:
 
         for q in self.rim_list[3]:
             DA = []
-            row = 0
+            row = 0 # Initilization of rows to specifiy position in B-Matrix
     
             DA = [int(q[0]), int(q[1]), int(q[2]), int(q[3])]  # create list of involved atoms
             q_i, q_j, q_k, q_l = DA
@@ -706,13 +654,11 @@ class Jedi:
             v = np.copy(np.atleast_2d(mol.get_distance(q_j,q_k,mic=True,vector=True)))
 
             
-            #DA.sort()  # sort list of involved atoms (sorted list necessary for correct stacking of B-Matrix Elements)
-            for NAtom in indices:  # for-loop of Number of Atoms (3N)
+            for NAtom in indices:  # for-loop of Number of Atoms 
                 
                 for q in DA:
                     
-                    if NAtom == q:  # derivative of redundant internal coordinate w/ respect to cartesian coordinates is not equal zero
-                                    # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
+                    if NAtom == q:              
                         b_k = 0
                     
                         if q == q_i:  # if-Statements for sign-factors
@@ -762,7 +708,6 @@ class Jedi:
         
     def get_delta_q(self):
 
-        indices=self.indices
         try:
             len(self.rim_list)
         except:
@@ -775,137 +720,102 @@ class Jedi:
         qF = []
         dq_da = []
 
-  # for loop for all redunant internal coordinates
+  # for loops for all redunant internal coordinates
           
-
+        #bonds
         for q in self.rim_list[0]:
             q0.append(self.atoms0.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
-            
             qF.append(self.atomsF.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
+        #custom bonds
         for q in self.rim_list[1]:
             q0.append(self.atoms0.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
-            
             qF.append(self.atomsF.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)                    
-
+        #angles
         for q in self.rim_list[2]:
             q0.append(np.radians(self.atoms0.get_angle(int(q[0]),int(q[1]),int(q[2]),mic=True)))
             qF.append(np.radians(self.atomsF.get_angle(int(q[0]),int(q[1]),int(q[2]),mic=True)))
+        #dihedral angles    
         for q in self.rim_list[3]:
             q0_preliminary=np.radians(self.atoms0.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
             qF_preliminary=np.radians(self.atomsF.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
             
-            delta_x = self.atomsF.get_positions()-self.atoms0.get_positions()
-
-
-            delta_x_list = delta_x.flatten().tolist()
-            #for partial analysis
-            if len(delta_x_list) != len(indices)*3 & len(indices)!=0:
-                indx=np.vstack((np.array(indices),np.array(indices)+1,np.array(indices)+2)).T.ravel()
-                delta_x_list=np.array([delta_x_list[i] for i in indx]) 
-
-#                check_dihedral = np.dot(B, delta_x_list)
-
-            #dq_da.append(np.sign(check_dihedral[q_index])*min((360-abs(qF_preliminary-q0_preliminary)),abs(qF_preliminary-q0_preliminary)))
-            q0_final = q0_preliminary
-            qF_final = qF_preliminary
+        # get the smallest absolute value of the two possible rotational directions
             dda=qF_preliminary-q0_preliminary
             if 2*np.pi-abs(dda)<abs(dda):
-                dda=(2*np.pi-abs(dda))*-np.sign(dda)
+                dda = (2*np.pi-abs(dda))*-np.sign(dda)
             dq_da.append(dda)
     
-            # if ( check_dihedral[q_index] < 0 ) and ( ( qF_preliminary - q0_preliminary ) > 0 ):
-            #     q0_final = -q0_preliminary
-            #     qF_final = -qF_preliminary
-            # elif ( check_dihedral[q_index] > 0 ) and ( ( qF_preliminary - q0_preliminary ) < 0 ):
-            #     q0_final = -q0_preliminary
-            #     qF_final = -qF_preliminary
-
-            # q0.append(q0_final)
-            # qF.append(qF_final)
         delta_q = np.subtract(qF, q0)
      
         try:
             delta_q=np.append(delta_q,dq_da)
         except:
             pass
-        #delta_q=np.abs(delta_q)
+
         self.delta_q = delta_q
         
         return delta_q
 
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True):
+    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True): #get vmd scripts
         #########################
         #       Basic stuff     #
         #########################
-        if self.ase_units==False:
-            unit="kcal/mol"
-        elif self.ase_units==True:
-            unit="eV"
+        if self.ase_units == False:
+            unit = "kcal/mol"
+        elif self.ase_units == True:
+            unit = "eV"
         rim_list = self.rim_list
         self.atomsF.write('xF.xyz')
         if  len(self.proc_E_RIMs) == 0:
             self.run()
         proc_E_RIMs = self.proc_E_RIMs
-        pbc_flag=True
-        if box==True and self.atomsF.get_pbc().any()==True:
+        pbc_flag =  True
+        if box == True and self.atomsF.get_pbc().any() == True:
             pbc_flag=True
         # Check whether we need to write ba, da and all and read basic stuff
         file_list = []
         bl = []
         ba = []
         da = []
-        ba_flag=False
-        da_flag=False
+        ba_flag = False
+        da_flag = False
+
         for i in rim_list[0]:
         # Bond lengths (a molecule has at least one bond):    
             numbers = [int(i[0]),int(i[1])]
             bl.append(numbers)
             if 'bl' not in file_list:
-     
                 file_list.append('bl')
                 
         for i in rim_list[1]:
-        # hbonds (a molecule has at least one bond):    
+        # custom bonds    
             numbers = [int(i[0]),int(i[1])]
             bl.append(numbers)
             
-
-
-            # Bond angles:
-
+        # Bond angles:
         for i in rim_list[2]:
-            ba_flag = True
-                
-
-
+            ba_flag = True    
             numbers = [int(i[0]),int(i[1]),int(i[2])]
             ba.append(numbers)
             if 'ba' not in file_list:
-
                 file_list.append('ba')
             # All (for this, at least bond angles have to be present):
-            
                 file_list.append('all')
                 
-            # Dihedral angles:
-
+        # Dihedral angles:
         for i in rim_list[3]:
             da_flag = True
-            
-    
-
             numbers = [int(n) for n in i]
             da.append(numbers)
             if 'da' not in file_list:
-          
                 file_list.append('da')
 
 
         # E_RIMs_perc
 
         E_RIMs_perc = np.array(proc_E_RIMs)
-
         E_RIMs = self.E_RIMs
+
         # Write some basic stuff to the tcl scripts
         for filename in file_list:
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
@@ -921,26 +831,16 @@ class Jedi:
 
         # Define colorcodes for various atomtypes
 
-            # colors = {'C': [0.5, 0.5, 0.5],        
-            #       'N': [0.0, 0.0, 1.0],
-            #       'O': [1.0, 0.0, 0.0],
-            #       'S': [1.0, 1.0, 0.0]}
         from .colors import colors 
         if des_colors!=None:
             for i in des_colors:
-                colors[i]=des_colors[i]
+                colors[i]=des_colors[i]         #desired colors overwrite the standard ones
             
         symbols=np.unique(self.atomsF.get_chemical_symbols())
-        symbols=symbols[symbols!='H']
+        symbols=symbols[symbols!='H']           #get all symbols except H, H is white
         
         N_colors_atoms=len(symbols)
         N_colors = 32 -N_colors_atoms-1           #vmd only supports 32 colors for modcolor
-
-
-
-  
-
-
 
         
         # Generate the color-code and write it to the tcl scripts
@@ -948,11 +848,12 @@ class Jedi:
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
                 f = open(f'{filename}.vmd', 'a')
                 colorbar_colors = []
+
+                #get green to red gradient
                 for i in range(N_colors):
                     R_value = float(i)/(N_colors/2)
                     if R_value > 1:
                         R_value = 1
-
                     if N_colors % 2 == 0:
                         G_value = 2 - float(i+1)/(N_colors/2)
                     if N_colors % 2 != 0:
@@ -964,9 +865,12 @@ class Jedi:
 
                     f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
                     colorbar_colors.append((R_value, G_value, B_value))
-                # add color codes of "standard" atoms
+
+                # add color codes of atoms
                 for j in range(N_colors_atoms):
                     f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", N_colors+j+1, float(colors[symbols[j]][0]), float(colors[symbols[j]][1]), float(colors[symbols[j]][2]), "\n"))
+
+                #add color code for axes and box
                 f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))#black
                 f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1039, float(1), float(0), float(0), "\n"))#red
                 f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1038, float(0), float(1), float(0), "\n"))#green
@@ -978,6 +882,7 @@ color Axes Z 1037
 color Axes Origin 1036
 color Axes Labels 32
 ''')
+                #define color of atoms with the color code above
                 for j in range(N_colors_atoms):
                     f.write('\n\nmol representation cpk 0.7 0.0 30 5')
                     f.write('\nmol addrep top') 	
@@ -1001,30 +906,30 @@ color Axes Labels 32
             p_indices=self.indices
             self.indices=range(len(self.atomsF))
             
-            rim=self.get_common_rims(hbond=rim_list[1].shape[0] != 0).copy()
+            rim=self.get_common_rims().copy()
     
             for i in range(2):
                 if rim[i].shape[0] == 0:
                     break
-                #print(rim[i])
+
                 rim[i]=np.ascontiguousarray(rim[i])
                 a=np.array(rim_list[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
                 b=np.array(rim[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
-                rim[i]=np.setxor1d(a, b) 
-                #print(rim)       
+                rim[i]=np.setxor1d(a, b)      
                 rim[i]=rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)
                 nan=np.full((len(rim[i]),1),np.nan)         #nan for special color (black)
                 rim[i]=np.hstack((rim[i],nan))              #stack for later vmd visualization
             bond_E_array_app=rim
-            # self.rim_list=p_rim
+            
             self.indices=p_indices
         
         
-                # get bonds that reach out of the unit cell
+        # get bonds that reach out of the unit cell
         if pbc_flag==True:
             bond_E_array_pbc = [np.empty((0,2)),np.empty((0,2))]
-            bond_E_array_pbc_trans = [np.empty((0,2)),np.empty((0,2))]
-            from ase.data.vdw import vdw_radii
+            bond_E_array_pbc_trans = [np.empty((0,2)),np.empty((0,2))] #initialize list
+            
+            from ase.data.vdw import vdw_radii #for long range bonds
             cutoff=[ vdw_radii[atom.number] * 0.9 for atom in self.atomsF]      
             ex_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
             ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('S',a=self.atomsF,cutoff=cutoff)))
@@ -1033,11 +938,10 @@ color Axes Labels 32
             mol=self.atomsF.copy()                   # a extended cell is needed for vmd since it does not show intercellular bonds
             mol.wrap()                              #wrap molecule important for atoms close to the boundaries
             
-                   # check if bond or hbond
-            
+            # check if bond or custom bond
             bondscheck = self.rim_list[0][:,(0,1)]
             if self.rim_list[1].shape[0] != 0:
-                hbondcheck = self.rim_list[1][:,(0,1)]
+                customcheck = self.rim_list[1][:,(0,1)]
             
             for i in range(len(atoms_ex_cell)):
                 pos_ex_atom=mol.get_positions()[int(atoms_ex_cell[i,0])]+atoms_ex_cell[i,5:8]       # get positions of cell external atoms by adding the vector
@@ -1048,7 +952,7 @@ color Axes Labels 32
                     ex_ind=  np.where(np.all(mol.positions==pos_ex_atom,axis=1))[0][0]
                 else:
                     ex_ind=len(mol)  
-                    if len(np.where(np.all(original_rim==bondscheck,axis=1))[0])>0 or (self.rim_list[1].shape[0] != 0 and len(np.where(np.all(original_rim==hbondcheck,axis=1))[0])>0):
+                    if len(np.where(np.all(original_rim==bondscheck,axis=1))[0])>0 or (self.rim_list[1].shape[0] != 0 and len(np.where(np.all(original_rim==customcheck,axis=1))[0])>0):
                         mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i,1])],position=pos_ex_atom))  # append to the virtual atoms object     
                           
                 if len(np.where(np.all(original_rim==bondscheck,axis=1))[0])>0:
@@ -1056,14 +960,17 @@ color Axes Labels 32
                     bond_E_array_pbc[0]=np.append(bond_E_array_pbc[0],[[atoms_ex_cell[i,0],ex_ind]],axis=0)                          # add to bond list with auxillary index
                     bond_E_array_pbc_trans[0]=np.append(bond_E_array_pbc_trans[0],[original_rim],axis=0)
                     
-                elif self.rim_list[1].shape[0] != 0 and len(np.where(np.all(original_rim==hbondcheck,axis=1))[0])>0:
+                elif self.rim_list[1].shape[0] != 0 and len(np.where(np.all(original_rim==customcheck,axis=1))[0])>0:
                     bond_E_array_pbc[1]=np.append(bond_E_array_pbc[1],[[atoms_ex_cell[i,0],ex_ind]],axis=0)                          # add to bond list with auxillary index
                     bond_E_array_pbc_trans[1]=np.append(bond_E_array_pbc_trans[1],[original_rim],axis=0)
             
             
-            mol.write('xF.xyz')
+            mol.write('xF.xyz') #save the modified structure with auxilliary atoms for vmd
+
+        if len(self.indices)<len(self.atomsF):
+            self.rim_list=p_rim                 #restore the partial rim list
+
         # Achieve the binning for bl, ba, da an all simultaneously
-        sum_energy = 0  # variable to add up all energies in the molecule
         for filename in file_list:
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
 
@@ -1152,31 +1059,27 @@ color Axes Labels 32
                         
                 if (filename == "all" and rim_list[1].shape[0] != 0):
                     
-                    hbond_E=sum(E_array[:,2][len(bl)-len(self.hbond):len(bl)])
+                    custom_E=sum(E_array[:,2][len(bl)-len(self.custom_bonds):len(bl)])
 
-                hbond_E_array=E_array[len(rim_list[0]):len(bl)]
+                custom_E_array=E_array[len(rim_list[0]):len(bl)]
                 bond_E_array=E_array[0:len(rim_list[0])]
-                    
-                # translate={}                        # the new indices need to get the same values as the original ones inside the cell
-                # for i in range(len(bond_E_array)):
-                #     translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]                
+                                   
                 
-                if len(self.indices)<len(self.atomsF):
-                    
-                    bond_E_array=np.vstack((bond_E_array,bond_E_array_app[0]))
+                if len(self.indices)<len(self.atomsF):   
+                    bond_E_array=np.vstack((bond_E_array,bond_E_array_app[0]))          # stack bonds that were neglected before to show the whole structure 
                     try:
-                        hbond_E_array=np.vstack((hbond_E_array,bond_E_array_app[1]))
+                        custom_E_array=np.vstack((custom_E_array,bond_E_array_app[1]))
                     except:
                         pass
 
-        # get bonds that reach out of the unit cell
+        # get energies for bonds that reach out of the unit cell
                 if pbc_flag==True:
                     translate={}                        # the new bonds need to get the same values as the original ones inside the cell
                     for i in range(len(bond_E_array)):
                         translate[(np.min([bond_E_array[i,0],bond_E_array[i,1]]),np.max([bond_E_array[i,0],bond_E_array[i,1]]))]=bond_E_array[i,2]
-                    htranslate={}
-                    for i in range(len(hbond_E_array)):
-                        htranslate[(np.min([hbond_E_array[i,0],hbond_E_array[i,1]]),np.max([hbond_E_array[i,0],hbond_E_array[i,1]]))]=hbond_E_array[i,2]
+                    ctranslate={}
+                    for i in range(len(custom_E_array)):
+                        ctranslate[(np.min([custom_E_array[i,0],custom_E_array[i,1]]),np.max([custom_E_array[i,0],custom_E_array[i,1]]))]=custom_E_array[i,2]
                     
                     for i in range(len(bond_E_array_pbc[0])):         
                         original_rim=bond_E_array_pbc_trans[0][i]                    # get the indices of the corresponding atoms inside the cell
@@ -1184,7 +1087,7 @@ color Axes Labels 32
                     for i in range(len(bond_E_array_pbc[1])):
                         original_rim=[int(bond_E_array_pbc_trans[1][i][0]),int(bond_E_array_pbc_trans[1][i][1])]                      # get the indices of the corresponding atoms inside the cell
                         original_rim.sort()                                                                 # needs to be sorted because rim list only covers one direction                           
-                        hbond_E_array=np.vstack((hbond_E_array,[int(bond_E_array_pbc[1][i][0]),int(bond_E_array_pbc[1][i][1]),htranslate[tuple(original_rim)]]))  
+                        custom_E_array=np.vstack((custom_E_array,[int(bond_E_array_pbc[1][i][0]),int(bond_E_array_pbc[1][i][1]),ctranslate[tuple(original_rim)]]))  
   
                     
   
@@ -1263,7 +1166,7 @@ color Axes Labels 32
                 f.write('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top bonds"))
                 f.write('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
                 f.write('\n%s%i%s%i%s%i%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", b[0], " ", b[1], "}\n"))
-            for i in hbond_E_array:
+            for i in custom_E_array:
               
                 if np.isnan(i[2]):
                     colorID = 32                       #black
@@ -1349,6 +1252,8 @@ display update on ''')
             # total strain in the bonds
             proc_geom_RIMs = 100 * ( sum(E_array[:,2]) - self.energies[0]) / self.energies[0]
             jedi_printout_bonds(self.atoms0,self.rim_list[0:2],self.energies[0], sum(E_array[:,2]), proc_geom_RIMs,100*E_array[:,2]/sum(E_array[:,2]), E_array[:,2],ase_units=self.ase_units, file=f'E_{filename}')
+            
+            #highresolution colorbar with matplotlib
             import matplotlib.pyplot as plt
             from matplotlib.colorbar import ColorbarBase
             from matplotlib.colors import LinearSegmentedColormap, Normalize
@@ -1364,32 +1269,32 @@ display update on ''')
                                         ticks=np.linspace(min, max, 8))
 
             plt.savefig(f'{filename}colorbar', bbox_inches='tight')
+
         if not man_strain:
             print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
             print(f"Maximum energy in bond between atoms {atom_1_max_energy} and {atom_2_max_energy}: {float(max_energy):.3f} {unit}.")
            
-        if self.hbond:
-            print(f"\nTotal energy in hbonds: {hbond_E} {unit}")
+        if self.custom_bonds is not None:
+            print(f"\nTotal energy custom bonds: {custom_E} {unit}")
         pass
 
 
-    def partial_analysis(self,indices,hbond=False,ase_units=False):   
+    def partial_analysis(self,indices,ase_units=False):   
         #for calculation with partial hessian
-        self.ase_units=ase_units
-        self.indices=np.arange(0,len(self.atoms0)).tolist()
+        self.ase_units = ase_units
+        self.indices = np.arange(0,len(self.atoms0)).tolist()
         self.get_hessian()
         if 3*len(indices)<len(self.H):
             raise ValueError('to little indices for the given hessian')
         
         #make the hessian for the complete system by filling zeros
-        H=np.zeros((3*len(self.atoms0),3*len(self.atoms0)))
+        H = np.zeros((3*len(self.atoms0),3*len(self.atoms0)))
         for i in range(len(indices)):
             for j in range(len(indices)):
                 H[indices[i]*3:indices[i]*3+3,indices[j]*3:indices[j]*3+3]=self.H[i*3:i*3+3,j*3:j*3+3]
-        self.H=H
-        
+        self.H = H
 
-        self.rim_list=self.get_common_rims(hbond=hbond)
+        self.rim_list=self.get_common_rims()
       
         rim_list=self.rim_list
         if len(rim_list)==0:
@@ -1402,18 +1307,19 @@ display update on ''')
             if i not in indices:
                 B[:,i*3:i*3+3]=0
 
-        self.delta_q=self.get_delta_q()
+        self.delta_q = self.get_delta_q()
         delta_q = self.delta_q
                     
         H_cart = self.H 
         try:
-            all_E_geometries= self.get_energies()
+            all_E_geometries = self.get_energies()
         except:
-            all_E_geometries= self.energies
-        E_geometries=all_E_geometries[0]
+            all_E_geometries = self.energies
+        E_geometries = all_E_geometries[0]
 
         
         self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atomsF,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        #get values of rims inside the substructure
         self.post_process(indices)
         E_RIMs_total=sum(self.E_RIMs)
         proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
@@ -1427,16 +1333,14 @@ display update on ''')
         self.indices=indices
         rim_list=self.rim_list
        
-        rim_p=self.get_common_rims(hbond=rim_list[1].shape[0] != 0)
+        rim_p=self.get_common_rims() #get rimlist of substructure
        
         ind=[]
-        rim_list_c=[]
+        rim_list_c=[] #preparing for stacking rim_list to be able to use np.unique
        
-        for i in range(4):
-            
-            if rim_list[i].shape==(0,):
+        for i in range(4):   #rim_list is always of length 4
+            if rim_list[i].shape == (0,):
                 rim_list_c.append([])
-            
             else:
                 rim_list_c.append(np.vstack((rim_list[i],rim_p[i])))
             
@@ -1444,13 +1348,15 @@ display update on ''')
             ind.append(np.where(z>1)[0])                                        #get indices where ric is in both sets
         for i in range(4):
             ind[i]=ind[i]+np.sum([p.shape[0] for p in rim_list[0:i]])      # get correct indices for the stacked array
-        ind=np.hstack(ind)
-        ind=ind.astype(int)
+        ind = np.hstack(ind)
+        ind = ind.astype(int)
 
-        self.E_RIMs=np.array(self.E_RIMs)[ind]
-        self.delta_q=self.delta_q[ind]
-        E_RIMs_total=sum(self.E_RIMs)
-        self.proc_E_RIMs=np.array(self.E_RIMs)/E_RIMs_total*100
+        self.E_RIMs = np.array(self.E_RIMs)[ind]
+        self.delta_q = self.delta_q[ind]
+        E_RIMs_total = sum(self.E_RIMs)
+        self.proc_E_RIMs = np.array(self.E_RIMs)/E_RIMs_total*100
         pass
 
+    def add_custom_bonds(self, bonds):
+        self.custom_bonds = bonds   # additional bonds for analysis of non covalent interactions
 
