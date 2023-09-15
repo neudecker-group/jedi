@@ -1056,8 +1056,9 @@ color Axes Labels 32
                                 (da[i][2] == bl[j][0] and da[i][3] == bl[j][1]) or
                                 (da[i][2] == bl[j][1] and da[i][3] == bl[j][0])):
                                 E_array[j][2] += (float(1)/3) * E_da[i]
-                                if np.isnan(bond_E_array[j][2] ):
+                                if np.isnan(E_array[j][2]):
                                     E_array[j][2] = (float(1)/3) * E_da[i]
+                                
                         
                 if (filename == "all" and rim_list[1].shape[0] != 0):
                     
@@ -1301,8 +1302,8 @@ display update on ''')
                                         norm=Normalize(min,max),
                                         label=unit,
                                         ticks=np.linspace(min, max, 8))
-
-            plt.savefig(f'{filename}colorbar', bbox_inches='tight')
+            
+            fig.savefig(f'{filename}colorbar', bbox_inches='tight')
 
         if not man_strain:
             print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
