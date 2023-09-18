@@ -1058,7 +1058,7 @@ color Axes Labels 32
                                 E_array[j][2] += (float(1)/3) * E_da[i]
                                 if np.isnan(E_array[j][2]):
                                     E_array[j][2] = (float(1)/3) * E_da[i]
-                                
+                               
                         
                 if (filename == "all" and rim_list[1].shape[0] != 0):
                     
@@ -1113,42 +1113,43 @@ color Axes Labels 32
                 if modus == "all":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
-                        binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
+                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "bl":
                 if modus == "bl":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
-                        binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
+                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "ba":
                 if modus == "ba":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
-                        binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
+                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "da":
                 if modus == "da":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
-                        binning_windows = np.linspace( 0, float(man_strain), num=N_colors )
-                
+                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), float(man_strain), num=N_colors )
+                else: 
+                    binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
             else: 
-                binning_windows = np.linspace( 0, np.nanmax(E_array, axis=0)[2], num=N_colors )
+                binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
     
             f = open(f'{filename}.vmd', 'a')
@@ -1186,7 +1187,7 @@ color Axes Labels 32
             
         #colorbar
             if colorbar==True:
-                min=0
+                min=np.min([0.0,np.nanmin(E_array, axis=0)[2]])
                 if filename == "all":
                     if modus == "all":
                         if man_strain == None:
@@ -1222,7 +1223,7 @@ color Axes Labels 32
                             max = man_strain
                     else:
                         max = np.nanmax(E_array, axis=0)[2] 
-
+                    
                 f = open(f'{filename}.vmd', 'a')
                 f.write(f'''\n		display update off
 display resetview
