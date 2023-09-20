@@ -1324,11 +1324,11 @@ display update on ''')
             raise ValueError('to little indices for the given hessian')
         
         #make the hessian for the complete system by filling zeros
-        H = np.zeros((3*len(self.atoms0),3*len(self.atoms0)))
-        for i in range(len(indices)):
-            for j in range(len(indices)):
-                H[indices[i]*3:indices[i]*3+3,indices[j]*3:indices[j]*3+3]=self.H[i*3:i*3+3,j*3:j*3+3]
-        self.H = H
+        # H = np.zeros((3*len(self.atoms0),3*len(self.atoms0)))
+        # for i in range(len(indices)):
+        #     for j in range(len(indices)):
+        #         H[indices[i]*3:indices[i]*3+3,indices[j]*3:indices[j]*3+3]=self.H[i*3:i*3+3,j*3:j*3+3]
+        # self.H = H
 
         self.rim_list=self.get_common_rims()
       
@@ -1342,7 +1342,8 @@ display update on ''')
         for i in range(len(self.H)):
             if i not in indices:
                 B[:,i*3:i*3+3]=0
-
+        indices= np.array([[i*3,i*3+1,i*3+2] for i in indices]).ravel()
+        B=np.take(self.B, indices,axis=1)
         self.delta_q = self.get_delta_q()
         delta_q = self.delta_q
                     
