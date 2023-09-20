@@ -1063,6 +1063,9 @@ color Axes Labels 32
                 if (filename == "all" and rim_list[1].shape[0] != 0):
                     
                     custom_E=sum(E_array[:,2][len(bl)-len(self.custom_bonds):len(bl)])
+                elif (filename == "all" and rim_list[1].shape[0] == 0):  
+                    
+                    custom_E=np.nan
 
                 custom_E_array=E_array[len(rim_list[0]):len(bl)]
                 bond_E_array=E_array[0:len(rim_list[0])]
@@ -1323,15 +1326,17 @@ display update on ''')
         if 3*len(indices)<len(self.H):
             raise ValueError('to little indices for the given hessian')
         
-        #make the hessian for the complete system by filling zeros
-        # H = np.zeros((3*len(self.atoms0),3*len(self.atoms0)))
-        # for i in range(len(indices)):
-        #     for j in range(len(indices)):
-        #         H[indices[i]*3:indices[i]*3+3,indices[j]*3:indices[j]*3+3]=self.H[i*3:i*3+3,j*3:j*3+3]
-        # self.H = H
+
+        if self.custom_bonds is not None:
+            custom_bonds=self.custom_bonds.copy()
+            cbonds_flag = True
+            self.custom_bonds=self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
 
         self.rim_list=self.get_common_rims()
-      
+        
+        
+        
+
         rim_list=self.rim_list
         if len(rim_list)==0:
             raise ValueError('Chosen indexlist has no rims')
@@ -1342,8 +1347,9 @@ display update on ''')
         for i in range(len(self.H)):
             if i not in indices:
                 B[:,i*3:i*3+3]=0
-        indices= np.array([[i*3,i*3+1,i*3+2] for i in indices]).ravel()
-        B=np.take(self.B, indices,axis=1)
+        ind= np.array([[i*3,i*3+1,i*3+2] for i in indices]).ravel()
+        B=np.take(self.B, ind,axis=1)
+        
         self.delta_q = self.get_delta_q()
         delta_q = self.delta_q
                     
@@ -1362,6 +1368,8 @@ display update on ''')
         proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
         jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
         
+        if cbonds_flag == True:
+            self.custom_bonds=custom_bonds #restore the user input
 
             
       
@@ -1369,7 +1377,10 @@ display update on ''')
         #get rims with only the considered atoms
         self.indices=indices
         rim_list=self.rim_list
-       
+        if self.custom_bonds is not None:
+            custom_bonds=self.custom_bonds.copy()
+            cbonds_flag = True
+            self.custom_bonds=self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]        
         rim_p=self.get_common_rims() #get rimlist of substructure
        
         ind=[]
@@ -1393,6 +1404,8 @@ display update on ''')
         self.delta_q = self.delta_q[ind]
         E_RIMs_total = sum(self.E_RIMs)
         self.proc_E_RIMs = np.array(self.E_RIMs)/E_RIMs_total*100
+        if cbonds_flag == True:
+            self.custom_bonds=custom_bonds #restore the user input
         pass
 
     def add_custom_bonds(self, bonds):
