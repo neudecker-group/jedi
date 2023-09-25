@@ -1326,7 +1326,7 @@ display update on ''')
         if 3*len(indices)<len(self.H):
             raise ValueError('to little indices for the given hessian')
         
-
+        cbonds_flag = False
         if self.custom_bonds is not None:
             custom_bonds=self.custom_bonds.copy()
             cbonds_flag = True
@@ -1377,6 +1377,7 @@ display update on ''')
         #get rims with only the considered atoms
         self.indices=indices
         rim_list=self.rim_list
+        cbonds_flag = False
         if self.custom_bonds is not None:
             custom_bonds=self.custom_bonds.copy()
             cbonds_flag = True
