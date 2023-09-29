@@ -12,7 +12,7 @@ from ase.atoms import Atom
 from ase.utils import jsonable
 import os
 import ase.io
-import scipy
+import warnings
 from ase.units import Hartree, Bohr, mol, kcal
 def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
     #jedi analysis function
@@ -45,7 +45,7 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
         H_q = B_transp_plus.dot( H_cart ).dot( B_plus )
     else:
         H_q = P.dot( B_transp_plus ).dot( H_cart ).dot( B_plus ).dot( P )
-    np.savetxt('Hq',H_q)
+    
     # Calculate the total energies in RIMs and its deviation from E_geometries
     E_RIMs_total = 0.5 * np.transpose( delta_q ).dot( H_q ).dot( delta_q )
 
@@ -757,6 +757,11 @@ class Jedi:
         return delta_q
 
     def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True): #get vmd scripts
+        try:
+            os.mkdir('vmd')
+        except:
+            pass
+        os.chdir('vmd')
         #########################
         #       Basic stuff     #
         #########################
@@ -1290,7 +1295,10 @@ display update on ''')
             
             # total strain in the bonds
             proc_geom_RIMs = 100 * ( sum(E_array[:,2]) - self.energies[0]) / self.energies[0]
-            jedi_printout_bonds(self.atoms0,self.rim_list[0:2],self.energies[0], sum(E_array[:,2]), proc_geom_RIMs,100*E_array[:,2]/sum(E_array[:,2]), E_array[:,2],ase_units=self.ase_units, file=f'E_{filename}')
+            percent=100*E_array[:,2]/sum(E_array[:,2])
+            warnings.filterwarnings('ignore')
+            percent=100*E_array[:,2]/sum(E_array[:,2])
+            jedi_printout_bonds(self.atoms0,self.rim_list[0:2],self.energies[0], sum(E_array[:,2]), proc_geom_RIMs,percent, E_array[:,2],ase_units=self.ase_units, file=f'E_{filename}')
             
             #highresolution colorbar with matplotlib
             import matplotlib.pyplot as plt
