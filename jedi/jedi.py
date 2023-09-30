@@ -15,6 +15,27 @@ import ase.io
 import warnings
 from ase.units import Hartree, Bohr, mol, kcal
 def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
+    '''
+    analysis of stored strain energy in redundant internal modes
+    atoms: class 
+        an ASE Atoms object to determine the atomic species of the indices
+    rim_list: list
+        a list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals
+    B: np array
+        B matrix
+    H_cart: np array
+        Hessian in cartesian coordinates
+    delta_q: np array
+        array of deformations along the RICs
+    E_geometries: float
+        energy difference between the geometries
+    printout: bool
+        flag to print the output
+    ase_units: bool
+        flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians 
+    Returns:
+        proc_E_RIMs,E_RIMs, E_RIMs_total, proc_geom_RIMs,delta_q
+    '''
     #jedi analysis function
     ###########################
     ##  Matrix Calculations  ##
@@ -81,6 +102,27 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
     return proc_E_RIMs,E_RIMs, E_RIMs_total, proc_geom_RIMs,delta_q
 
 def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False):
+    '''
+    printout of analysis of stored strain energy in redundant internal modes
+    Parameters:
+
+    atoms: class
+        an ASE Atoms object to determine the atomic species of the indices
+    rim_list: list
+        a list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals
+    delta_q: np array
+        array of deformations along the RICs
+    E_geometries: float
+        energy difference between the geometries
+    E_RIMs_total: float
+        calculated total strain energy by jedi
+    proc_geom_RIMs: float
+        percentage deviation between calculated total energies 
+    proc_E_RIMs: array
+        array of energy stored in each RIC
+    ase_units: bool
+        flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians 
+    '''
     #############################################
     #	    	   Output section	        	#
     #############################################
@@ -129,9 +171,32 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
         ind = "%s%d %s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2], atoms.symbols[k[3]], k[3])
         print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
         i += 1
-    from . import quotes #quotes from star wars
+    from . import quotes
+    print(quotes.quotes())
 
 def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False,file='total'): #total strain in bonds after adding contributions of stretching angles and dihedral angles
+    '''
+    printout of analysis of stored strain energy in the bonds
+    atoms: class
+        an ASE Atoms object to determine the atomic species of the indices
+    rim_list: list
+        a list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals
+    delta_q: np array
+        array of deformations along the RICs
+    E_geometries: float
+        energy difference between the geometries
+    E_RIMs_total: float
+        calculated total strain energy by jedi
+    proc_geom_RIMs: float
+        percentage deviation between calculated total energies 
+    proc_E_RIMs: np array
+        array of energy stored in each RIC
+    ase_units: bool
+        flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians 
+    file: string
+        file to store the output
+
+    '''
     #############################################
     #	    	   Output section	        	#
     #############################################
@@ -171,8 +236,17 @@ def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIM
         print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
         i += 1
     from . import quotes
+    print(quotes.quotes())
 
 def get_hbonds(mol):
+    '''
+    get all hbonds in a structure
+    defined as X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90° and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y
+    mol: class
+        structure of which the hbonds should be determined
+    returns
+        2D array of indices
+    '''
     cutoff=ase.neighborlist.natural_cutoffs(mol,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
     bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
 
@@ -210,6 +284,15 @@ def get_hbonds(mol):
 @jsonable('jedi')
 class Jedi:
     def __init__(self, atoms0, atomsF, modes): #indices=None
+        '''
+
+        atoms0: class
+            Atoms object of relaxed structure with calculated energy
+        atomsF: class
+            Atoms object of strained structure with calculated energy
+        modes: class
+            VibrationsData object with hessian of relaxed structure 
+        '''
         self.atoms0 = atoms0        #ref state
         self.atomsF = atomsF        #strained state
         self.modes = modes          #VibrationsData object
@@ -225,6 +308,9 @@ class Jedi:
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
     def todict(self) -> Dict[str, Any]:
+        '''make it saveable with .write()
+
+        '''
         return {'atoms0': self.atoms0,
                 'atomsF': self.atomsF,
                 #'modes': self.modes,
@@ -239,6 +325,9 @@ class Jedi:
                 'custom_bonds': self.custom_bonds}
     @classmethod
     def fromdict(cls, data: Dict[str, Any]) -> 'Jedi':
+        '''make it readable with .read()
+
+        '''
         # mypy is understandably suspicious of data coming from a dict that
         # holds mixed types, but it can see if we sanity-check with 'assert'
         assert isinstance(data['atoms0'], Atoms)
@@ -294,6 +383,16 @@ class Jedi:
         return cl
 
     def run(self,indices=None,ase_units=False):
+        """run the analysis
+
+        Parameters:
+
+        indices: lst
+            list of indices of a substructure if desired
+        ase_units: 
+            flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians 
+
+        """
         self.ase_units = ase_units
         # get necessary data
         self.indices=np.arange(0,len(self.atoms0))
@@ -331,7 +430,9 @@ class Jedi:
 
 
     def get_rims(self,mol):
-        
+        '''get the redundant internal coordinates
+
+        ''' 
         ###bondlengths####
         mol = mol
 
@@ -493,6 +594,9 @@ class Jedi:
         return rim_list
     
     def get_common_rims(self):
+        '''get only the RICs in both structures bond breaks cannot be analysed logically
+
+        '''  
         rim_atoms0 = self.get_rims(self.atoms0)
         rim_atomsF = self.get_rims(self.atomsF)
         
@@ -512,11 +616,16 @@ class Jedi:
         return rim_atoms0
     
     def get_hessian(self):
+        '''calls the hessian from the VibrationsData object
+        ''' 
         hessian = self.modes._hessian2d
         self.H = hessian /(Hartree/Bohr**2)
         return hessian
     
     def get_b_matrix(self,indices=None):
+        '''calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions
+
+        '''  
         mol = self.atoms0
         if indices == None:
             indices = np.arange(0,len(mol))
@@ -697,6 +806,10 @@ class Jedi:
         return B
 
     def get_energies(self):
+        '''calls the energies of the Atoms object
+        returns [energy difference, energy of atoms0, energy of atomsF]
+
+        ''' 
         e0 = self.atoms0.calc.get_potential_energy()
         eF = self.atomsF.calc.get_potential_energy()
         if self.ase_units==False:
@@ -707,6 +820,9 @@ class Jedi:
         return [deltaE, eF, e0]
         
     def get_delta_q(self):
+        '''get the strain in RICs substracts the values of the relaxed structure from the strained structure
+        returns np array of the values
+        '''
 
         try:
             len(self.rim_list)
@@ -757,6 +873,21 @@ class Jedi:
         return delta_q
 
     def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True): #get vmd scripts
+        '''generates vmd scripts and files to save the values for the color coding
+        des_colors: dict
+            key: order number, value: [R,G,B]
+        box: boolean
+            True: draw box
+            False: ignore box
+        man_strain: float
+            reference value for the strain energy used in the color scale
+            default: 'None'
+        modus: str
+            defines where to use the man_strain
+            default: 'None' 
+        colorbar: boolean
+            draw colorbar or not
+        '''
         try:
             os.mkdir('vmd')
         except:
@@ -1326,7 +1457,12 @@ display update on ''')
         pass
 
 
-    def partial_analysis(self,indices,ase_units=False):   
+    def partial_analysis(self,indices,ase_units=False):  
+        '''
+        analyse a substructure with given indices
+        indices: np.2Darray
+            list of indices of atoms in desired substructure
+        ''' 
         #for calculation with partial hessian
         self.ase_units = ase_units
         self.indices = np.arange(0,len(self.atoms0)).tolist()
@@ -1382,6 +1518,11 @@ display update on ''')
             
       
     def post_process(self,indices):             #a function to get segments of all full analysis for better understanding of local strain
+        '''
+        get only the values of RICs inside a defined substructure
+        indices: np.2Darray
+            list of indices of atoms in desired substructure
+        '''
         #get rims with only the considered atoms
         self.indices=indices
         rim_list=self.rim_list
@@ -1419,4 +1560,5 @@ display update on ''')
 
     def add_custom_bonds(self, bonds):
         self.custom_bonds = bonds   # additional bonds for analysis of non covalent interactions
-
+        '''bonds: np 2d array
+            add custom bonds after creating the object'''

@@ -1,6 +1,9 @@
 from ase.io.gaussian import *
 from ase.vibrations.vibrations import VibrationsData
 def read_gaussian_out(fd, index=-1):
+    '''
+    modified for reading gaussian geometry optimizations
+    '''
     configs = []
     atoms = None
     energy = None
@@ -114,7 +117,16 @@ def read_gaussian_out(fd, index=-1):
     
     return configs[index]
 
-def get_vibrations(label,atoms):
+def get_vibrations(label,atoms,indices=None):
+    '''
+    read hessian 
+    label: str
+        filename w/o .log
+    atoms: class
+        structure of which the frequency analysis was performed
+    '''
+    if indices==None:
+        indices = range(len(atoms))
     _re_hessblock = re.compile(r'^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$')
     output = label+'.log'
     with open(output,'r') as fd:

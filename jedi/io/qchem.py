@@ -11,7 +11,7 @@ from ase.atoms import Atoms
 from ase.calculators.singlepoint import SinglePointCalculator
 
 def read(filename):
-
+    '''read qchem out file'''
     energy=None
     forces=None
     dipole=None
@@ -103,6 +103,12 @@ def read(filename):
     return atoms
 
 def get_vibrations(label, atoms):
+    '''read hessian 
+    label: str
+        filename w/o .log
+    atoms: class
+        structure of which the frequency analysis was performed
+    '''
     filename = label + '.out'
 
     with open(filename, 'r') as fileobj:
@@ -157,6 +163,9 @@ class QChemDynamics:
     special_keywords: Dict[str, str] = dict()
 
     def __init__(self, atoms, calc=None):
+        '''for optimizations
+        atoms: class
+            Structure with qchem calculator'''
         self.atoms = atoms
         if calc is not None:
             self.calc = calc
@@ -226,7 +235,7 @@ class QChemDynamics:
 
 
 class QChemOptimizer(QChemDynamics):
-
+    '''allowing ase to use Qchem geometry optimizations'''
     keywords = {'jobtype':'opt'}
 
 
