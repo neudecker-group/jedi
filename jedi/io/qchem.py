@@ -165,7 +165,7 @@ class QChemDynamics:
     def __init__(self, atoms, calc=None):
         '''for optimizations
         atoms: class
-            Structure with qchem calculator'''
+            Structure with QChem calculator'''
         self.atoms = atoms
         if calc is not None:
             self.calc = calc
@@ -235,7 +235,10 @@ class QChemDynamics:
 
 
 class QChemOptimizer(QChemDynamics):
-    '''allowing ase to use Qchem geometry optimizations'''
+    '''allowing ase to use Qchem geometry optimizations
+    
+    atoms: class
+        Structure with QChem calculator'''
     keywords = {'jobtype':'opt'}
 
 

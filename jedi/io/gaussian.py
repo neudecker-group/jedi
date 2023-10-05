@@ -120,6 +120,7 @@ def read_gaussian_out(fd, index=-1):
 def get_vibrations(label,atoms,indices=None):
     '''
     read hessian 
+    
     label: str
         filename w/o .log
     atoms: class

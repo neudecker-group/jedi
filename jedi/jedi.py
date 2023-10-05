@@ -235,8 +235,7 @@ def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIM
         ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
         print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
         i += 1
-    from . import quotes
-    print(quotes.quotes())
+
 
 def get_hbonds(mol):
     '''
@@ -924,7 +923,9 @@ class Jedi:
             bl.append(numbers)
             if 'bl' not in file_list:
                 file_list.append('bl')
-                
+            # All (to sum up the values with angles and dihedrals:
+                file_list.append('all')   
+
         for i in rim_list[1]:
         # custom bonds    
             numbers = [int(i[0]),int(i[1])]
@@ -937,8 +938,6 @@ class Jedi:
             ba.append(numbers)
             if 'ba' not in file_list:
                 file_list.append('ba')
-            # All (for this, at least bond angles have to be present):
-                file_list.append('all')
                 
         # Dihedral angles:
         for i in rim_list[3]:
@@ -1039,24 +1038,24 @@ color Axes Labels 32
         
         # Welcome
         print("\n\nCreating tcl scripts for generating color-coded structures in VMD...")
-        if len(self.indices)<len(self.atomsF):
-            p_rim=self.rim_list.copy()
+        if len(self.indices)<len(self.atomsF):  #if there are only values for a substructure
+            p_rim=self.rim_list.copy()          #store rims that were analyzed
             p_indices=self.indices
             self.indices=range(len(self.atomsF))
             
-            rim=self.get_common_rims().copy()
+            rim=self.get_common_rims().copy()   #get rims of whole structure to show the whole structure
     
             for i in range(2):
                 if rim[i].shape[0] == 0:
                     break
 
-                rim[i]=np.ascontiguousarray(rim[i])
+                rim[i]=np.ascontiguousarray(rim[i]) 
                 a=np.array(rim_list[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
                 b=np.array(rim[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
                 rim[i]=np.setxor1d(a, b)      
-                rim[i]=rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)
+                rim[i]=rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)  #get unconsidered rims
                 nan=np.full((len(rim[i]),1),np.nan)         #nan for special color (black)
-                rim[i]=np.hstack((rim[i],nan))              #stack for later vmd visualization
+                rim[i]=np.hstack((rim[i],nan))              #stack unanalyzed rims for later vmd visualization
             bond_E_array_app=rim
             
             self.indices=p_indices
@@ -1239,13 +1238,12 @@ color Axes Labels 32
               
     # Store the maximum energy in a variable for later call
             if filename == "all":
-                if not modus == "all":  # only do this, when the user didn't call the --v flag 
-                    max_energy = float(np.nanmax(E_array, axis=0)[2])  # maximum energy in one bond
-                    for row in E_array: 
-                        
-                        if max_energy in row:
-                            atom_1_max_energy = int(row[0])
-                            atom_2_max_energy = int(row[1])
+                max_energy = float(np.nanmax(E_array, axis=0)[2])  # maximum energy in one bond
+                for row in E_array: 
+                    
+                    if max_energy in row:
+                        atom_1_max_energy = int(row[0])
+                        atom_2_max_energy = int(row[1])
 
         # Generate the binning windows by splitting bond_E_array into N_colors equal windows
             if filename == "all":

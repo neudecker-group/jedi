@@ -188,5 +188,8 @@ class OrcaDynamics:
 
 
 class OrcaOptimizer(OrcaDynamics):
-    '''allowing ase to use Qchem geometry optimizations'''
+    '''allowing ase to use Qchem geometry optimizations
+    
+    atoms: class
+        Structure with orca calculator'''
     keywords = {'task':'opt'}
