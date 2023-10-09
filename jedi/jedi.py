@@ -85,7 +85,7 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
     proc_E_RIMs = 100 * E_RIMs / E_RIMs_total 
 
     if ase_units==True:
-        b=np.where(rim_list[:,1]>-1)[0][0]
+        b=np.shape(rim_list[0])[0]+np.shape(rim_list[1])[0] #border between lengths and angles
         delta_q[0:b] *= Bohr
         delta_q[b::] = np.degrees(delta_q[b::])
         E_RIMs=np.array(E_RIMs)*Hartree
