@@ -1433,18 +1433,18 @@ display update on ''')
             import matplotlib.pyplot as plt
             from matplotlib.colorbar import ColorbarBase
             from matplotlib.colors import LinearSegmentedColormap, Normalize
-
+            plt.rc('font', size=20)
             fig = plt.figure()
             ax = fig.add_axes([0.05, 0.08, 0.1, 0.9])
             cmap_name = 'my_list'
             cmap = LinearSegmentedColormap.from_list(cmap_name, colorbar_colors, N=N_colors)
             cb = ColorbarBase(ax, orientation='vertical', 
                                         cmap=cmap,
-                                        norm=Normalize(min,max),
+                                        norm=Normalize(round(min,3),round(max,3)),
                                         label=unit,
-                                        ticks=np.linspace(min, max, 8))
+                                        ticks=np.round_(np.linspace(min, max, 8),decimals=3))
             
-            fig.savefig(f'{filename}colorbar', bbox_inches='tight')
+            fig.savefig(f'{filename}colorbar.pdf', bbox_inches='tight')
 
         if not man_strain:
             print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")

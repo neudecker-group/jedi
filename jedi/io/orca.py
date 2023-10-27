@@ -58,7 +58,7 @@ def read(filename):
 
     return atoms
 
-def get_vibrations(label,atoms,indices):
+def get_vibrations(label,atoms,indices=None):
     '''read hessian 
     label: str
         filename w/o .log
