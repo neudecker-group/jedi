@@ -1,0 +1,14 @@
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     1.03887339                  -
+ Red. Int. Modes      0.00435773               -99.58
+
+ RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)
+     1       bond                                H0 C7     28.8        0.0012548
+     2       bond                                C1 N4     18.7        0.0008139
+     3       bond                                C1 H6     31.8        0.0013854
+     4       bond                               C7 N10     20.7        0.0009036

@@ -1,0 +1,205 @@
+# Load a molecule
+mol new xF.xyz
+
+# Change bond radii and various resolution parameters
+mol representation cpk 0.8 0.0 30 5
+mol representation bonds 0.2 30
+
+# Change the drawing method of the first graphical representation to CPK
+mol modstyle 0 top cpk
+# Color only H atoms white
+mol modselect 0 top {name H}
+# Change the color of the graphical representation 0 to white
+color change rgb 0 1.00 1.00 1.00
+mol modcolor 0 top {colorid 0}
+# The background should be white ("blue" has the colorID 0, which we have changed to white)
+color Display Background blue
+
+# Define the other colorIDs
+color change rgb    1  0.000000  1.000000  0.000000
+color change rgb    2  0.066667  1.000000  0.000000
+color change rgb    3  0.133333  1.000000  0.000000
+color change rgb    4  0.200000  1.000000  0.000000
+color change rgb    5  0.266667  1.000000  0.000000
+color change rgb    6  0.333333  1.000000  0.000000
+color change rgb    7  0.400000  1.000000  0.000000
+color change rgb    8  0.466667  1.000000  0.000000
+color change rgb    9  0.533333  1.000000  0.000000
+color change rgb   10  0.600000  1.000000  0.000000
+color change rgb   11  0.666667  1.000000  0.000000
+color change rgb   12  0.733333  1.000000  0.000000
+color change rgb   13  0.800000  1.000000  0.000000
+color change rgb   14  0.866667  1.000000  0.000000
+color change rgb   15  0.933333  1.000000  0.000000
+color change rgb   16  1.000000  0.933333  0.000000
+color change rgb   17  1.000000  0.866667  0.000000
+color change rgb   18  1.000000  0.800000  0.000000
+color change rgb   19  1.000000  0.733333  0.000000
+color change rgb   20  1.000000  0.666667  0.000000
+color change rgb   21  1.000000  0.600000  0.000000
+color change rgb   22  1.000000  0.533333  0.000000
+color change rgb   23  1.000000  0.466667  0.000000
+color change rgb   24  1.000000  0.400000  0.000000
+color change rgb   25  1.000000  0.333333  0.000000
+color change rgb   26  1.000000  0.266667  0.000000
+color change rgb   27  1.000000  0.200000  0.000000
+color change rgb   28  1.000000  0.133333  0.000000
+color change rgb   29  1.000000  0.066667  0.000000
+color change rgb   30  1.000000  0.000000  0.000000
+color change rgb   31  0.564706  0.564706  0.564706
+color change rgb   32  0.000000  0.000000  0.000000
+color change rgb 1039  1.000000  0.000000  0.000000
+color change rgb 1038  0.000000  1.000000  0.000000
+color change rgb 1037  0.000000  0.000000  1.000000
+color change rgb 1036  0.250000  0.750000  0.750000
+color Axes X 1039
+color Axes Y 1038
+color Axes Z 1037
+color Axes Origin 1036
+color Axes Labels 32
+
+
+mol representation cpk 0.7 0.0 30 5
+mol addrep top
+mol modstyle 1 top cpk
+mol modcolor 1 top {colorid 31}
+mol modselect 1 top {name C}
+
+# Adding a pbc box
+pbc set {0.000000 0.000000 0.000000 90.000000 90.000000 90.000000}
+pbc box -color 32
+
+# Adding a representation with the appropriate colorID for each bond
+mol addrep top
+mol modstyle 2 top bonds
+mol modcolor 2 top {colorid 22}
+mol modselect 2 top {index 0 1}
+
+mol addrep top
+mol modstyle 3 top bonds
+mol modcolor 3 top {colorid 22}
+mol modselect 3 top {index 0 2}
+
+mol addrep top
+mol modstyle 4 top bonds
+mol modcolor 4 top {colorid 30}
+mol modselect 4 top {index 0 4}
+
+mol addrep top
+mol modstyle 5 top bonds
+mol modcolor 5 top {colorid 14}
+mol modselect 5 top {index 0 6}
+
+mol addrep top
+mol modstyle 6 top bonds
+mol modcolor 6 top {colorid 22}
+mol modselect 6 top {index 1 2}
+
+mol addrep top
+mol modstyle 7 top bonds
+mol modcolor 7 top {colorid 30}
+mol modselect 7 top {index 1 3}
+
+mol addrep top
+mol modstyle 8 top bonds
+mol modcolor 8 top {colorid 14}
+mol modselect 8 top {index 1 7}
+
+mol addrep top
+mol modstyle 9 top bonds
+mol modcolor 9 top {colorid 30}
+mol modselect 9 top {index 2 5}
+
+mol addrep top
+mol modstyle 10 top bonds
+mol modcolor 10 top {colorid 14}
+mol modselect 10 top {index 2 8}
+
+mol addrep top
+mol modstyle 11 top bonds
+mol modcolor 11 top {colorid 22}
+mol modselect 11 top {index 3 4}
+
+mol addrep top
+mol modstyle 12 top bonds
+mol modcolor 12 top {colorid 22}
+mol modselect 12 top {index 3 5}
+
+mol addrep top
+mol modstyle 13 top bonds
+mol modcolor 13 top {colorid 14}
+mol modselect 13 top {index 3 9}
+
+mol addrep top
+mol modstyle 14 top bonds
+mol modcolor 14 top {colorid 22}
+mol modselect 14 top {index 4 5}
+
+mol addrep top
+mol modstyle 15 top bonds
+mol modcolor 15 top {colorid 14}
+mol modselect 15 top {index 4 10}
+
+mol addrep top
+mol modstyle 16 top bonds
+mol modcolor 16 top {colorid 14}
+mol modselect 16 top {index 5 11}
+
+		display update off
+display resetview
+variable bar_mol
+
+
+
+set old_top [molinfo top]
+set bar_mol [mol new]
+mol top $bar_mol
+
+#bar can be fixed with mol fix 'molid of the bar' 
+
+
+
+# We want to draw relative to the location of the top mol so that the bar 
+# will always show up nicely.
+set center [molinfo $old_top get center]
+set center [regsub -all {[{}]} $center ""]
+set center [split $center]
+set min 0.0
+set max 0.781331812589335
+set length 30.0
+set width [expr $length / 6]
+
+# draw the color bar
+set start_y [expr 1 + [lindex $center 1] ]
+
+set use_x [expr 1 + [lindex $center 0] ]
+
+set use_z [expr 1+ [lindex $center 2 ]]
+
+set step [expr $length / 30]
+
+set label_num 8
+
+for {set colorid 1 } { $colorid <= 30 } {incr colorid 1 } {
+    draw color $colorid
+    set cur_y [ expr $start_y + ($colorid -0.5 ) * $step ]
+    draw line "$use_x $cur_y $use_z"  "[expr $use_x+$width] $cur_y $use_z" width 10000
+}
+
+# draw the labels
+set coord_x [expr (1.1*$width)+$use_x];
+set step_size [expr $length / $label_num]
+set color_step [expr 30/$label_num]
+set value_step [expr ($max - $min ) / double ($label_num)]
+
+for {set i 0} {$i <= $label_num } { incr i 1} {
+    set cur_color_id 32
+    draw color $cur_color_id
+    set coord_y [expr $start_y+$i * $step_size ]
+    set cur_text [expr $min + $i * $value_step ]
+    draw text  " $coord_x $coord_y $use_z"  [format %6.3f  $cur_text]
+}
+draw text " $coord_x [expr $coord_y + $step_size] $use_z"   "kcal/mol"
+# re-set top
+mol top $old_top
+display update on 

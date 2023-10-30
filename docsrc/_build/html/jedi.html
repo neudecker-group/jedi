@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>jedi package &mdash; test  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="setup module" href="setup.html" />
+    <link rel="prev" title="test" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0b750a" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/Logo_JEDI_dark_grey.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">test</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">jedi package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-jedi.colors">jedi.colors module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-jedi">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html">setup module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0b750a" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">test</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">test</a></li>
+      <li class="breadcrumb-item active">jedi package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/jedi.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jedi-package">
+<h1>jedi package<a class="headerlink" href="#jedi-package" title="Permalink to this headline"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="jedi.jedi.jedi_analysis">
+<span class="sig-prename descclassname"><span class="pre">jedi.jedi.</span></span><span class="sig-name descname"><span class="pre">jedi_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rim_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H_cart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_geometries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">printout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.jedi_analysis" title="Permalink to this definition"></a></dt>
+<dd><p>analysis of stored strain energy in redundant internal modes
+atoms: an ASE Atoms object to determine the atomic species of the indices
+rim_list: a list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals
+B: B matrix
+H_cart: Hessian in cartesian coordinates
+delta_q: array of deformations along the RICs
+E_geometries: energy difference between the geometries
+printout: flag to print the output
+ase_units: flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians</p>
+</dd></dl>
+
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-jedi.colors">
+<span id="jedi-colors-module"></span><h2>jedi.colors module<a class="headerlink" href="#module-jedi.colors" title="Permalink to this headline"></a></h2>
+<span class="target" id="module-jedi.quotes"></span></section>
+<section id="module-jedi">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-jedi" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="jedi.Jedi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.</span></span><span class="sig-name descname"><span class="pre">Jedi</span></span><a class="headerlink" href="#jedi.Jedi" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.jedi.</span></span><span class="sig-name descname"><span class="pre">Jedi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomsF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hbond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi" title="Permalink to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.ase_objtype">
+<span class="sig-name descname"><span class="pre">ase_objtype</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'jedi'</span></em><a class="headerlink" href="#jedi.jedi.Jedi.ase_objtype" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.fromdict">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#jedi.jedi.Jedi" title="jedi.jedi.Jedi"><span class="pre">jedi.jedi.Jedi</span></a></span></span><a class="headerlink" href="#jedi.jedi.Jedi.fromdict" title="Permalink to this definition"></a></dt>
+<dd><p>make it readable with .read()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.get_b_matrix">
+<span class="sig-name descname"><span class="pre">get_b_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.get_b_matrix" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.get_common_rims">
+<span class="sig-name descname"><span class="pre">get_common_rims</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hbond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.get_common_rims" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.get_delta_q">
+<span class="sig-name descname"><span class="pre">get_delta_q</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.get_delta_q" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.get_energies">
+<span class="sig-name descname"><span class="pre">get_energies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.get_energies" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.get_hessian">
+<span class="sig-name descname"><span class="pre">get_hessian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.get_hessian" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.get_rims">
+<span class="sig-name descname"><span class="pre">get_rims</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hbond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.get_rims" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.partial_analysis">
+<span class="sig-name descname"><span class="pre">partial_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hbond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.partial_analysis" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.post_process" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.read">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.read" title="Permalink to this definition"></a></dt>
+<dd><p>Read new instance from JSON file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hbond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.run" title="Permalink to this definition"></a></dt>
+<dd><p>run the analysis
+indices: list of indices of a substructure if desired
+ase_units: flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.todict">
+<span class="sig-name descname"><span class="pre">todict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#jedi.jedi.Jedi.todict" title="Permalink to this definition"></a></dt>
+<dd><p>make it saveable with .write()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.vmd_gen">
+<span class="sig-name descname"><span class="pre">vmd_gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">des_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">man_strain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modus</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.vmd_gen" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.jedi.Jedi.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#jedi.jedi.Jedi.write" title="Permalink to this definition"></a></dt>
+<dd><p>Write to JSON file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="test" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="setup.html" class="btn btn-neutral float-right" title="setup module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, ad.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

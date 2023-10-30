@@ -1,0 +1,55 @@
+
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     1.03887339                  -
+ Red. Int. Modes      1.81141745                74.36
+
+ RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                H0 C7        0.0036337     -0.4       -0.0064859
+     2       bond                                C1 N4       -0.0014106     -0.5       -0.0093197
+     3       bond                                C1 H6        0.0038157     -0.4       -0.0068151
+     4       bond                                C2 N3       -0.0011021     -0.4       -0.0073573
+     5       bond                                C2 H5        0.0038761     -0.4       -0.0071131
+     6       bond                               C7 N10       -0.0014904     -0.5       -0.0098071
+     7       bond                                C8 N9       -0.0011691     -0.4       -0.0077929
+     8       bond                               C8 H11        0.0037580     -0.4       -0.0067964
+     9       custom                              H0 N4       -0.0954041     25.3        0.4576227
+    10       custom                             H6 N10       -0.0981170     26.1        0.4728589
+    11       custom                              H5 N9       -0.0993735     26.7        0.4837967
+    12       custom                             N3 H11       -0.0949621     25.3        0.4586267
+    13       bond angle                      H0 C7 N10       -0.0000001      0.0        0.0000000
+    14       bond angle                       C1 N4 H0       -0.0000004     -0.0       -0.0000000
+    15       bond angle                      C1 H6 N10       -0.0000003      0.0        0.0000000
+    16       bond angle                      C2 N3 H11       -0.0000002     -0.0       -0.0000000
+    17       bond angle                       C2 H5 N9       -0.0000002     -0.0       -0.0000000
+    18       bond angle                       N3 C2 H5       -0.0000001     -0.0       -0.0000000
+    19       bond angle                       N4 C1 H6       -0.0000001     -0.0       -0.0000000
+    20       bond angle                       C7 H0 N4       -0.0000003     -0.0       -0.0000000
+    21       bond angle                      C7 N10 H6       -0.0000004     -0.0       -0.0000000
+    22       bond angle                       C8 N9 H5       -0.0000004     -0.0       -0.0000000
+    23       bond angle                      C8 H11 N3       -0.0000002     -0.0       -0.0000000
+    24       bond angle                      N9 C8 H11       -0.0000001     -0.0       -0.0000000
+"No reward is worth this." (Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:       26.71%
+Total energy in the bond lengths:     100.00%
+
+Processing bond angles...
+Maximum energy in a bond angle:         0.00%
+Total energy in the bond angles:        0.00%
+
+Adding all energies for the stretch, bending and torsion of the bond with maximum strain...
+Maximum energy in bond between atoms 5 and 9: 0.484 kcal/mol.
+
+Total energy custom bonds: 1.872905069340037 kcal/mol

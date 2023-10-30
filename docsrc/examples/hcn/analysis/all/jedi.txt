@@ -1,0 +1,40 @@
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     1.03887339                  -
+ Red. Int. Modes      0.00814935               -99.22
+
+ RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                H0 C7        0.0036337     15.3        0.0012507
+     2       bond                                C1 N4       -0.0014106     10.0        0.0008112
+     3       bond                                C1 H6        0.0038157     16.9        0.0013810
+     4       bond                                C2 N3       -0.0011021      6.2        0.0005021
+     5       bond                                C2 H5        0.0038761     17.4        0.0014141
+     6       bond                               C7 N10       -0.0014904     11.1        0.0009007
+     7       bond                                C8 N9       -0.0011691      6.9        0.0005614
+     8       bond                               C8 H11        0.0037580     16.3        0.0013281
+     9       bond angle                      H0 C7 N10       -0.0000001      0.0        0.0000000
+    10       bond angle                       N3 C2 H5       -0.0000001     -0.0       -0.0000000
+    11       bond angle                       N4 C1 H6       -0.0000001     -0.0       -0.0000000
+    12       bond angle                      N9 C8 H11       -0.0000001     -0.0       -0.0000000
+"We have - ungh! - powerful friends. You're going to regret this." "...I'm sure." (Princess Leia and Jabba the Hutt)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:       17.35%
+Total energy in the bond lengths:     100.00%
+
+Processing bond angles...
+Maximum energy in a bond angle:         0.00%
+Total energy in the bond angles:        0.00%
+
+Adding all energies for the stretch, bending and torsion of the bond with maximum strain...
+Maximum energy in bond between atoms 2 and 5: 0.001 kcal/mol.

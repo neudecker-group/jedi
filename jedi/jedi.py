@@ -237,7 +237,7 @@ def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIM
         i += 1
 
 
-def get_hbonds(mol):
+def get_hbonds(mol,covf=1.3,vdwf=0.9):
     '''
     get all hbonds in a structure
     defined as X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90° and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y
@@ -246,7 +246,7 @@ def get_hbonds(mol):
     returns
         2D array of indices
     '''
-    cutoff=ase.neighborlist.natural_cutoffs(mol,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
+    cutoff=ase.neighborlist.natural_cutoffs(mol,mult=covf)   ## cutoff for covalent bonds see Bakken et al.
     bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
 
     bl=bl[bl[:,0]<bl[:,1]]      #remove double mentioned 
@@ -254,10 +254,10 @@ def get_hbonds(mol):
     from ase.data.vdw import vdw_radii
     hpartner = ['N','O','F','C']
     hpartner_ls = []
-    hcutoff = {('H','N'):0.9*(vdw_radii[1]+vdw_radii[7]),
-    ('H','O'):0.9*(vdw_radii[1]+vdw_radii[8]),
-    ('H','F'):0.9*(vdw_radii[1]+vdw_radii[9]),
-    ('H','C'):0.9*(vdw_radii[1]+vdw_radii[6])}    #save the maximum distances for given pairs to be taken account as interactions
+    hcutoff = {('H','N'):vdwf*(vdw_radii[1]+vdw_radii[7]),
+    ('H','O'):vdwf*(vdw_radii[1]+vdw_radii[8]),
+    ('H','F'):vdwf*(vdw_radii[1]+vdw_radii[9]),
+    ('H','C'):vdwf*(vdw_radii[1]+vdw_radii[6])}    #save the maximum distances for given pairs to be taken account as interactions
     hbond_ls = []                                    #create a list to store all the bonds
     for i in range(len(mol)):
         if mol.symbols[i] in hpartner:              #check atoms indices of N F O elements
@@ -306,6 +306,8 @@ class Jedi:
         self.E_RIMs = None            #list of energies stored in the rims
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
+        self.vdwf=0.9
+        self.covf=1.3
     def todict(self) -> Dict[str, Any]:
         '''make it saveable with .write()
 
@@ -436,7 +438,7 @@ class Jedi:
         mol = mol
 
         indices = self.indices
-        cutoff = ase.neighborlist.natural_cutoffs(mol,mult=1.3)   ## cutoff for covalent bonds see Bakken et al.
+        cutoff = ase.neighborlist.natural_cutoffs(mol,mult=self.covf)   ## cutoff for covalent bonds see Bakken et al.
         bl = np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
 
         bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
@@ -705,11 +707,11 @@ class Jedi:
             v = mol.get_distance(q_k,q_j,mic=True,vector=True)
 
 
-    
+            
             def get_B_matrix_angles_derivatives(u,v): 
                 angle = ase.geometry.get_angles(u,v) # angle between v and u
 
-                if angle == 180:   #an auxilliary vector is used if linear angles are existing
+                if angle == 180 or angle==0:   #an auxilliary vector is used if linear angles are existing
                     (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v],cell=None,pbc=None)
                     nu = u / lu
                     nv = v / lv
@@ -725,8 +727,8 @@ class Jedi:
                     d_ba=np.array([[d_ba1[0], d_ba2[0], d_ba3[0]]])
                     
                 else:
+                    
                     d_ba=np.radians(ase.geometry.get_angles_derivatives(u,v))
-    
                 return d_ba*Bohr
             
             for NAtom in indices:  # for-loop of Number of Atoms 
@@ -1067,7 +1069,7 @@ color Axes Labels 32
             bond_E_array_pbc_trans = [np.empty((0,2)),np.empty((0,2))] #initialize list
             
             from ase.data.vdw import vdw_radii #for long range bonds
-            cutoff=[ vdw_radii[atom.number] * 0.9 for atom in self.atomsF]      
+            cutoff=[ vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]      
             ex_bl=np.vstack(ase.neighborlist.neighbor_list('ij',a=self.atomsF,cutoff=cutoff)).T 
             ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('S',a=self.atomsF,cutoff=cutoff)))
             ex_bl=np.hstack((ex_bl,ase.neighborlist.neighbor_list('D',a=self.atomsF,cutoff=cutoff)))
@@ -1250,43 +1252,43 @@ color Axes Labels 32
                 if modus == "all":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
-                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), float(man_strain), num=N_colors )
+                        binning_windows = np.linspace(0, float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "bl":
                 if modus == "bl":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
-                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), float(man_strain), num=N_colors )
+                        binning_windows = np.linspace(0, float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "ba":
                 if modus == "ba":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
-                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), float(man_strain), num=N_colors )
+                        binning_windows = np.linspace(0, float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
             elif filename == "da":
                 if modus == "da":
                     if man_strain == None:
                         print(f"modus {modus} was called, but no maximum strain is given.")
-                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                        binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                     else:
-                        binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), float(man_strain), num=N_colors )
+                        binning_windows = np.linspace(0, float(man_strain), num=N_colors )
                 else: 
-                    binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                    binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
             else: 
-                binning_windows = np.linspace( np.min([0.0,np.nanmin(E_array, axis=0)[2]]), np.nanmax(E_array, axis=0)[2], num=N_colors )
+                binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
     
             f = open(f'{filename}.vmd', 'a')
@@ -1324,7 +1326,7 @@ color Axes Labels 32
             
         #colorbar
             if colorbar==True:
-                min=np.min([0.0,np.nanmin(E_array, axis=0)[2]])
+                min=0.000
                 if filename == "all":
                     if modus == "all":
                         if man_strain == None:
@@ -1440,7 +1442,7 @@ display update on ''')
             cmap = LinearSegmentedColormap.from_list(cmap_name, colorbar_colors, N=N_colors)
             cb = ColorbarBase(ax, orientation='vertical', 
                                         cmap=cmap,
-                                        norm=Normalize(round(min,3),round(max,3)),
+                                        norm=Normalize(min,round(max,3)),
                                         label=unit,
                                         ticks=np.round_(np.linspace(min, max, 8),decimals=3))
             
@@ -1560,3 +1562,12 @@ display update on ''')
         self.custom_bonds = bonds   # additional bonds for analysis of non covalent interactions
         '''bonds: np 2d array
             add custom bonds after creating the object'''
+
+    def set_bond_params(self,covf,vdwf):
+        '''covf: float
+            factor for  covalent radii to determine covalent bonds
+        vdwf: float
+            factor for vdw radii to get the upper limit of the custom bond lengths'''
+        self.covf=covf
+        self.vdwf=vdwf
+

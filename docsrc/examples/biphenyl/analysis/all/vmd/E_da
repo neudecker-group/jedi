@@ -1,0 +1,33 @@
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     3.13090823                  -
+ Red. Int. Modes      0.00000000              -100.00
+
+ RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)
+     1       bond                                C0 C1      0.0        0.0000000
+     2       bond                                C0 C5      0.0        0.0000000
+     3       bond                                C0 C9      0.0        0.0000000
+     4       bond                                C1 C2     77.4        0.0000000
+     5       bond                               C1 H12      0.0        0.0000000
+     6       bond                                C2 C3    481.5        0.0000000
+     7       bond                               C2 H13    404.1        0.0000000
+     8       bond                                C3 C4   -448.2       -0.0000000
+     9       bond                               C3 H14     33.3        0.0000000
+    10       bond                                C4 C5   -162.0       -0.0000000
+    11       bond                               C4 H15   -286.2       -0.0000000
+    12       bond                               C5 H16      0.0        0.0000000
+    13       bond                                C6 C7      0.0        0.0000000
+    14       bond                               C6 C11      0.0        0.0000000
+    15       bond                               C6 H17      0.0        0.0000000
+    16       bond                                C7 C8      0.0        0.0000000
+    17       bond                               C7 H18      0.0        0.0000000
+    18       bond                                C8 C9      0.0        0.0000000
+    19       bond                               C8 H19      0.0        0.0000000
+    20       bond                               C9 C10      0.0        0.0000000
+    21       bond                              C10 C11      0.0        0.0000000
+    22       bond                              C10 H20      0.0        0.0000000
+    23       bond                              C11 H21      0.0        0.0000000

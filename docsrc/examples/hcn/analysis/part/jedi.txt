@@ -1,0 +1,35 @@
+
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     1.03887339                  -
+ Red. Int. Modes      0.00435773               -99.58
+
+ RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                H0 C7        0.0036337     28.8        0.0012548
+     2       bond                                C1 N4       -0.0014106     18.7        0.0008139
+     3       bond                                C1 H6        0.0038157     31.8        0.0013854
+     4       bond                               C7 N10       -0.0014904     20.7        0.0009036
+     5       bond angle                      H0 C7 N10       -0.0000001      0.0        0.0000000
+     6       bond angle                       N4 C1 H6       -0.0000001     -0.0       -0.0000000
+"Keep your distance, Chewie, but don't, y'know, look like you're keeping your distance." (Grumbled questioning bark) "...I don't know. Fly casual." (Han Solo and Chewbacca)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:       31.79%
+Total energy in the bond lengths:     100.00%
+
+Processing bond angles...
+Maximum energy in a bond angle:         0.00%
+Total energy in the bond angles:        0.00%
+
+Adding all energies for the stretch, bending and torsion of the bond with maximum strain...
+Maximum energy in bond between atoms 1 and 6: 0.001 kcal/mol.

@@ -1,0 +1,37 @@
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     104.87594925                  -
+ Red. Int. Modes      9.23654420               -91.19
+
+ RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)
+     1       bond                                C0 C1      5.4        0.4995761
+     2       bond                               C0 C13      1.8        0.1655017
+     3       bond                               C0 C17      4.0        0.3651648
+     4       bond                                C1 C6      1.8        0.1637046
+     5       bond                                C1 C8      3.8        0.3542590
+     6       bond                                C2 C3      5.4        0.4994388
+     7       bond                               C2 C13      4.0        0.3650802
+     8       bond                               C2 C15      1.8        0.1655416
+     9       bond                                C3 C8      1.8        0.1639706
+    10       bond                               C3 C10      3.8        0.3541276
+    11       bond                                C4 C5      5.4        0.4995633
+    12       bond                               C4 C15      4.0        0.3651228
+    13       bond                               C4 C17      1.8        0.1652094
+    14       bond                                C5 C6      3.8        0.3542306
+    15       bond                               C5 C10      1.8        0.1640139
+    16       bond                                C6 C7      5.6        0.5131083
+    17       bond                               C7 C12      1.8        0.1640398
+    18       bond                               C7 C14      3.8        0.3542073
+    19       bond                                C8 C9      5.6        0.5131778
+    20       bond                               C9 C14      1.8        0.1636848
+    21       bond                               C9 C16      3.8        0.3541784
+    22       bond                              C10 C11      5.6        0.5130461
+    23       bond                              C11 C12      3.8        0.3541528
+    24       bond                              C11 C16      1.8        0.1639577
+    25       bond                              C12 C13      5.4        0.4994082
+    26       bond                              C14 C15      5.4        0.4995404
+    27       bond                              C16 C17      5.4        0.4995375
