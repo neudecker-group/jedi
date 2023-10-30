@@ -133,13 +133,16 @@ def read_gaussian_out(fd, index=-1):
 
 def get_vibrations(label,atoms,indices=None):
     '''
-    read hessian 
-    
+    Read hessian.
+
     label: str
-        filename w/o .log
+        filename w/o .log.
     atoms: class
-        structure of which the frequency analysis was performed
-    '''
+        Structure of which the frequency analysis was performed.
+
+    Returns:
+        VibrationsData object.
+            '''
     if indices==None:
         indices = range(len(atoms))
     _re_hessblock = re.compile(r'^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$')

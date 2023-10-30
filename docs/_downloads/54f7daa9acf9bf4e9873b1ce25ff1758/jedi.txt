@@ -1,0 +1,143 @@
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     3.13090823                  -
+ Red. Int. Modes      3.72017302                18.82
+
+ RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                C0 C1        0.0000000      0.0        0.0000000
+     2       bond                                C0 C5        0.0000000      0.0        0.0000000
+     3       bond                                C0 C9        0.0000000      0.0        0.0000000
+     4       bond                                C1 C2        0.0000000      0.0        0.0000000
+     5       bond                               C1 H12        0.0000000      0.0        0.0000000
+     6       bond                                C2 C3        0.0000000      0.0        0.0000000
+     7       bond                               C2 H13        0.0000000      0.0        0.0000000
+     8       bond                                C3 C4        0.0000000      0.0        0.0000000
+     9       bond                               C3 H14        0.1889726    100.0        3.7201730
+    10       bond                                C4 C5        0.0000000      0.0        0.0000000
+    11       bond                               C4 H15        0.0000000      0.0        0.0000000
+    12       bond                               C5 H16        0.0000000      0.0        0.0000000
+    13       bond                                C6 C7        0.0000000      0.0        0.0000000
+    14       bond                               C6 C11        0.0000000      0.0        0.0000000
+    15       bond                               C6 H17        0.0000000      0.0        0.0000000
+    16       bond                                C7 C8        0.0000000      0.0        0.0000000
+    17       bond                               C7 H18        0.0000000      0.0        0.0000000
+    18       bond                                C8 C9        0.0000000      0.0        0.0000000
+    19       bond                               C8 H19        0.0000000      0.0        0.0000000
+    20       bond                               C9 C10        0.0000000      0.0        0.0000000
+    21       bond                              C10 C11        0.0000000      0.0        0.0000000
+    22       bond                              C10 H20        0.0000000      0.0        0.0000000
+    23       bond                              C11 H21        0.0000000      0.0        0.0000000
+    24       bond angle                       C0 C1 C2        0.0000000      0.0        0.0000000
+    25       bond angle                      C0 C1 H12        0.0000000      0.0        0.0000000
+    26       bond angle                      C0 C5 H16        0.0000000      0.0        0.0000000
+    27       bond angle                       C0 C5 C4        0.0000000      0.0        0.0000000
+    28       bond angle                       C0 C9 C8        0.0000000      0.0        0.0000000
+    29       bond angle                      C0 C9 C10        0.0000000      0.0        0.0000000
+    30       bond angle                       C1 C0 C5        0.0000000      0.0        0.0000000
+    31       bond angle                       C1 C0 C9        0.0000000      0.0        0.0000000
+    32       bond angle                       C1 C2 C3        0.0000000      0.0        0.0000000
+    33       bond angle                      C1 C2 H13        0.0000000      0.0        0.0000000
+    34       bond angle                      C2 C1 H12        0.0000000      0.0        0.0000000
+    35       bond angle                      C2 C3 H14        0.0000000      0.0        0.0000000
+    36       bond angle                       C2 C3 C4        0.0000000      0.0        0.0000000
+    37       bond angle                      C3 C2 H13        0.0000000      0.0        0.0000000
+    38       bond angle                       C3 C4 C5        0.0000000      0.0        0.0000000
+    39       bond angle                      C3 C4 H15        0.0000000      0.0        0.0000000
+    40       bond angle                      C4 C3 H14       -0.0000000     -0.0       -0.0000000
+    41       bond angle                      C4 C5 H16        0.0000000      0.0        0.0000000
+    42       bond angle                       C5 C0 C9        0.0000000      0.0        0.0000000
+    43       bond angle                      C5 C4 H15        0.0000000      0.0        0.0000000
+    44       bond angle                      C6 C7 H18        0.0000000      0.0        0.0000000
+    45       bond angle                       C6 C7 C8        0.0000000      0.0        0.0000000
+    46       bond angle                     C6 C11 C10        0.0000000      0.0        0.0000000
+    47       bond angle                     C6 C11 H21        0.0000000      0.0        0.0000000
+    48       bond angle                      C7 C6 C11        0.0000000      0.0        0.0000000
+    49       bond angle                      C7 C6 H17        0.0000000      0.0        0.0000000
+    50       bond angle                      C7 C8 H19        0.0000000      0.0        0.0000000
+    51       bond angle                       C7 C8 C9        0.0000000      0.0        0.0000000
+    52       bond angle                      C8 C7 H18        0.0000000      0.0        0.0000000
+    53       bond angle                      C8 C9 C10        0.0000000      0.0        0.0000000
+    54       bond angle                      C9 C8 H19        0.0000000      0.0        0.0000000
+    55       bond angle                     C9 C10 H20        0.0000000      0.0        0.0000000
+    56       bond angle                     C9 C10 C11        0.0000000      0.0        0.0000000
+    57       bond angle                    C10 C11 H21        0.0000000      0.0        0.0000000
+    58       bond angle                     C11 C6 H17        0.0000000      0.0        0.0000000
+    59       bond angle                    C11 C10 H20        0.0000000      0.0        0.0000000
+    60       dihedral                      C5 C0 C1 C2        0.0000000      0.0        0.0000000
+    61       dihedral                     C5 C0 C1 H12        0.0000000      0.0        0.0000000
+    62       dihedral                      C9 C0 C1 C2        0.0000000      0.0        0.0000000
+    63       dihedral                     C9 C0 C1 H12        0.0000000      0.0        0.0000000
+    64       dihedral                      C1 C0 C5 C4        0.0000000      0.0        0.0000000
+    65       dihedral                     C1 C0 C5 H16        0.0000000      0.0        0.0000000
+    66       dihedral                      C9 C0 C5 C4        0.0000000      0.0        0.0000000
+    67       dihedral                     C9 C0 C5 H16        0.0000000      0.0        0.0000000
+    68       dihedral                      C1 C0 C9 C8        0.0000000      0.0        0.0000000
+    69       dihedral                     C1 C0 C9 C10        0.0000000      0.0        0.0000000
+    70       dihedral                      C5 C0 C9 C8        0.0000000      0.0        0.0000000
+    71       dihedral                     C5 C0 C9 C10        0.0000000      0.0        0.0000000
+    72       dihedral                      C0 C1 C2 C3        0.0000000      0.0        0.0000000
+    73       dihedral                     C0 C1 C2 H13        0.0000000      0.0        0.0000000
+    74       dihedral                     H12 C1 C2 C3        0.0000000      0.0        0.0000000
+    75       dihedral                    H12 C1 C2 H13        0.0000000      0.0        0.0000000
+    76       dihedral                      C1 C2 C3 C4        0.0000000      0.0        0.0000000
+    77       dihedral                     C1 C2 C3 H14        0.0000000      0.0        0.0000000
+    78       dihedral                     H13 C2 C3 C4        0.0000000      0.0        0.0000000
+    79       dihedral                    H13 C2 C3 H14        0.0000000      0.0        0.0000000
+    80       dihedral                      C2 C3 C4 C5        0.0000000      0.0        0.0000000
+    81       dihedral                     C2 C3 C4 H15        0.0000000      0.0        0.0000000
+    82       dihedral                     H14 C3 C4 C5       -0.0000000     -0.0       -0.0000000
+    83       dihedral                    H14 C3 C4 H15       -0.0000000     -0.0       -0.0000000
+    84       dihedral                      C3 C4 C5 C0        0.0000000      0.0        0.0000000
+    85       dihedral                     C3 C4 C5 H16        0.0000000      0.0        0.0000000
+    86       dihedral                     H15 C4 C5 C0        0.0000000      0.0        0.0000000
+    87       dihedral                    H15 C4 C5 H16        0.0000000      0.0        0.0000000
+    88       dihedral                     C11 C6 C7 C8        0.0000000      0.0        0.0000000
+    89       dihedral                    C11 C6 C7 H18        0.0000000      0.0        0.0000000
+    90       dihedral                     H17 C6 C7 C8        0.0000000      0.0        0.0000000
+    91       dihedral                    H17 C6 C7 H18        0.0000000      0.0        0.0000000
+    92       dihedral                    C7 C6 C11 C10        0.0000000      0.0        0.0000000
+    93       dihedral                    C7 C6 C11 H21        0.0000000      0.0        0.0000000
+    94       dihedral                   H17 C6 C11 C10        0.0000000      0.0        0.0000000
+    95       dihedral                   H17 C6 C11 H21        0.0000000      0.0        0.0000000
+    96       dihedral                      C6 C7 C8 C9        0.0000000      0.0        0.0000000
+    97       dihedral                     C6 C7 C8 H19        0.0000000      0.0        0.0000000
+    98       dihedral                     H18 C7 C8 C9        0.0000000      0.0        0.0000000
+    99       dihedral                    H18 C7 C8 H19        0.0000000      0.0        0.0000000
+   100       dihedral                      C7 C8 C9 C0        0.0000000      0.0        0.0000000
+   101       dihedral                     C7 C8 C9 C10        0.0000000      0.0        0.0000000
+   102       dihedral                     H19 C8 C9 C0        0.0000000      0.0        0.0000000
+   103       dihedral                    H19 C8 C9 C10        0.0000000      0.0        0.0000000
+   104       dihedral                    C0 C9 C10 C11        0.0000000      0.0        0.0000000
+   105       dihedral                    C0 C9 C10 H20        0.0000000      0.0        0.0000000
+   106       dihedral                    C8 C9 C10 C11        0.0000000      0.0        0.0000000
+   107       dihedral                    C8 C9 C10 H20        0.0000000      0.0        0.0000000
+   108       dihedral                    C9 C10 C11 C6        0.0000000      0.0        0.0000000
+   109       dihedral                   C9 C10 C11 H21        0.0000000      0.0        0.0000000
+   110       dihedral                   H20 C10 C11 C6        0.0000000      0.0        0.0000000
+   111       dihedral                  H20 C10 C11 H21        0.0000000      0.0        0.0000000
+"This is some rescue!" (Princess Leia)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+
+Processing bond angles...
+Maximum energy in a bond angle:         0.00%
+Total energy in the bond angles:        0.00%
+
+Processing dihedral angles...
+Maximum energy in a dihedral angle:     0.00%
+Total energy in the dihedral angles:    0.00%
+
+Adding all energies for the stretch, bending and torsion of the bond with maximum strain...
+Maximum energy in bond between atoms 3 and 14: 3.720 kcal/mol.

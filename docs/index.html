@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to JEDI, the Judgement of Energy Distribution Analysis &mdash; test  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0b750a" >
+
+          
+          
+          <a href="#">
+            
+              <img src="_static/Logo_JEDI_dark_grey.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Set Up:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html#building-guide">Building Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="preparation/preparation.html">Input Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Further Analysis</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="jedi.html">Jedi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/utils.html">Utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0b750a" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">test</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Welcome to JEDI, the Judgement of Energy Distribution Analysis</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-jedi-the-judgement-of-energy-distribution-analysis">
+<h1>Welcome to JEDI, the Judgement of Energy Distribution Analysis<a class="headerlink" href="#welcome-to-jedi-the-judgement-of-energy-distribution-analysis" title="Permalink to this headline"></a></h1>
+<p>The JEDI Analysis (Judgement of Energy Distribution Analysis) is a quantum chemical strain analysis tool for the distribution of strain
+mechanically deformed molecules. JEDI is developed in Python. Currently, the main contributor to JEDI is the <a class="reference external" href="https://www.uni-bremen.de/institut-fuer-physikalische-und-theoretische-chemie">Institute for physical and theoretical Chemistry</a>,
+respectively the <a class="reference external" href="https://www.uni-bremen.de/ag-neudecker/">AG Neudecker</a> of the University of Bremen (<a class="reference external" href="https://www.uni-bremen.de/ag-neudecker">https://www.uni-bremen.de/ag-neudecker</a>).</p>
+<section id="introduction-and-overview">
+<h2>Introduction and Overview<a class="headerlink" href="#introduction-and-overview" title="Permalink to this headline"></a></h2>
+<p>Based on the harmonic approximation, the JEDI Analysis calculates the strain energy for each bond, bending and torsion in a molecule, thus allowing the
+identification of the mechanically most strained regions in a molecule as well as the rationalization of mechanochemical processes.</p>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
+<p>JEDI can be used in three different applications.</p>
+<section id="mechanically-deformed-molecules">
+<h3>Mechanically deformed Molecules<a class="headerlink" href="#mechanically-deformed-molecules" title="Permalink to this headline"></a></h3>
+<p>When a molecule is stretched, some internal modes store more energy than others.
+This leads to particularly large displacements of certain modes and to the preconditioning
+of selected bonds for rupture. Using the JEDI analysis the mechanochemical properties can be investigated.</p>
+</section>
+<section id="excited-state">
+<h3>Excited State<a class="headerlink" href="#excited-state" title="Permalink to this headline"></a></h3>
+<p>Besides the description of mechanical deformation in the ground state, the JEDI
+analysis can be used in the electronically excited state to quantify the energy gained by
+relaxation on the excited state potential energy surface (PES). For this, the harmonic
+approximation needs to be applicable on the excited state PES of interest. The physical
+process that is described by the excited state JEDI analysis is fundamentally different
+from the ground state variant. While in the ground state JEDI analysis the distribution of
+stress energy in a mechanically deformed molecule is analyzed, i.e. energy is expended for
+deformation, the excited state JEDI analysis quantifies the energy gained by the relaxation
+of each internal mode upon relaxation on the excited state PES, i.e. energy becomes
+available.</p>
+</section>
+<section id="adsorbed-molecules">
+<h3>Adsorbed molecules<a class="headerlink" href="#adsorbed-molecules" title="Permalink to this headline"></a></h3>
+<p>When a molecule adsorbs onto a surface, the geometry of the adsorbate changes as compared
+to the relaxed molecule in the gas phase. As JEDI allows force analysis for only a
+subset of atoms, it is possible to quantify the strain build up within an adsorbtion.</p>
+</section>
+</section>
+<section id="literature">
+<h2>Literature<a class="headerlink" href="#literature" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><ol class="upperalpha simple" start="20">
+<li><p>Stauch, A. Dreuw, J. Chem. Phys. 140, 134107 (2014)</p></li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="20">
+<li><p>Stauch, A. Dreuw, J. Chem. Phys. 143, 074118 (2015)</p></li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="20">
+<li><p>Stauch, A. Dreuw, Acc. Chem. Res. 50, 1041-1048 (2017)</p></li>
+</ol>
+</li>
+<li><ol class="upperalpha simple" start="20">
+<li><p>Stauch, A. Dreuw, J. Chem. Phys. 7, 1298-1302 (2016)</p></li>
+</ol>
+</li>
+</ul>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline"></a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Set Up:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html#building-guide">Building Guide</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="preparation/preparation.html">Input Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Further Analysis</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="jedi.html">Jedi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/utils.html">Utilities</a></li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="setup.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, ad.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

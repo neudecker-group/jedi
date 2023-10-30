@@ -1,0 +1,84 @@
+
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     -2.24050612                  -
+ Red. Int. Modes      0.01581685              -100.71
+
+ RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                C0 C1       -0.0048639     18.0        0.0028504
+     2       bond                                C0 C5       -0.0048567     17.9        0.0028366
+     3       bond                                C0 H6        0.0014279      1.2        0.0001959
+     4       bond                                C1 C2        0.0016778     -1.2       -0.0001845
+     5       bond                                C1 H7       -0.0029290      5.9        0.0009263
+     6       bond                                C2 C3       -0.0048579     17.9        0.0028387
+     7       bond                                C2 H8       -0.0029319      5.9        0.0009266
+     8       bond                                C3 C4       -0.0048641     18.0        0.0028468
+     9       bond                                C3 H9        0.0014290      1.2        0.0001971
+    10       bond                                C4 C5        0.0016790     -1.2       -0.0001837
+    11       bond                               C4 H10       -0.0029293      5.9        0.0009264
+    12       bond                               C5 H11       -0.0029335      5.9        0.0009271
+    13       bond angle                       C0 C1 C2        0.0003543      0.0        0.0000043
+    14       bond angle                       C0 C1 H7        0.0019172      0.4        0.0000616
+    15       bond angle                      C0 C5 H11        0.0019179      0.4        0.0000614
+    16       bond angle                       C0 C5 C4        0.0003504      0.0        0.0000041
+    17       bond angle                       C1 C0 C5       -0.0007051      0.1        0.0000167
+    18       bond angle                       C1 C0 H6        0.0003544      0.0        0.0000041
+    19       bond angle                       C1 C2 H8       -0.0022687      0.6        0.0000995
+    20       bond angle                       C1 C2 C3        0.0003511      0.0        0.0000042
+    21       bond angle                       C2 C1 H7       -0.0022715      0.6        0.0001005
+    22       bond angle                       C2 C3 C4       -0.0007049      0.1        0.0000168
+    23       bond angle                       C2 C3 H9        0.0003511      0.0        0.0000041
+    24       bond angle                       C3 C2 H8        0.0019176      0.4        0.0000612
+    25       bond angle                       C3 C4 C5        0.0003542      0.0        0.0000042
+    26       bond angle                      C3 C4 H10        0.0019178      0.4        0.0000622
+    27       bond angle                       C4 C3 H9        0.0003539      0.0        0.0000043
+    28       bond angle                      C4 C5 H11       -0.0022683      0.6        0.0000991
+    29       bond angle                       C5 C0 H6        0.0003506      0.0        0.0000042
+    30       bond angle                      C5 C4 H10       -0.0022720      0.6        0.0001007
+    31       dihedral                      C5 C0 C1 C2       -0.0000002      0.0        0.0000000
+    32       dihedral                      C5 C0 C1 H7       -0.0000001      0.0        0.0000000
+    33       dihedral                      H6 C0 C1 C2       -0.0000001     -0.0       -0.0000000
+    34       dihedral                      H6 C0 C1 H7        0.0000001     -0.0       -0.0000000
+    35       dihedral                      C1 C0 C5 C4        0.0000003      0.0        0.0000000
+    36       dihedral                     C1 C0 C5 H11       -0.0000001     -0.0       -0.0000000
+    37       dihedral                      H6 C0 C5 C4        0.0000002     -0.0       -0.0000000
+    38       dihedral                     H6 C0 C5 H11       -0.0000002     -0.0       -0.0000000
+    39       dihedral                      C0 C1 C2 C3        0.0000002      0.0        0.0000000
+    40       dihedral                      C0 C1 C2 H8       -0.0000001     -0.0       -0.0000000
+    41       dihedral                      H7 C1 C2 C3       -0.0000000     -0.0       -0.0000000
+    42       dihedral                      H7 C1 C2 H8       -0.0000002     -0.0       -0.0000000
+    43       dihedral                      C1 C2 C3 C4       -0.0000002     -0.0       -0.0000000
+    44       dihedral                      C1 C2 C3 H9       -0.0000002     -0.0       -0.0000000
+    45       dihedral                      H8 C2 C3 C4        0.0000001      0.0        0.0000000
+    46       dihedral                      H8 C2 C3 H9        0.0000001      0.0        0.0000000
+    47       dihedral                      C2 C3 C4 C5        0.0000002     -0.0       -0.0000000
+    48       dihedral                     C2 C3 C4 H10       -0.0000001      0.0        0.0000000
+    49       dihedral                      H9 C3 C4 C5        0.0000002     -0.0       -0.0000000
+    50       dihedral                     H9 C3 C4 H10       -0.0000001      0.0        0.0000000
+    51       dihedral                      C3 C4 C5 C0       -0.0000003      0.0        0.0000000
+    52       dihedral                     C3 C4 C5 H11        0.0000001     -0.0       -0.0000000
+    53       dihedral                     H10 C4 C5 C0       -0.0000000      0.0        0.0000000
+    54       dihedral                    H10 C4 C5 H11        0.0000004     -0.0       -0.0000000
+"Laugh it up, fuzzball!" (Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:       18.02%
+Total energy in the bond lengths:      95.49%
+
+Processing bond angles...
+Maximum energy in a bond angle:         0.64%
+Total energy in the bond angles:        4.51%
+
+Processing dihedral angles...
+Maximum energy in a dihedral angle:     0.00%
+Total energy in the dihedral angles:    0.00%

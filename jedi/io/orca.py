@@ -11,9 +11,9 @@ from ase.atoms import Atoms
 from ase.calculators.singlepoint import SinglePointCalculator
 
 def read(filename):
-    '''read orca outputs
-    filename str
-        filename'''
+    '''Read orca outputs.
+
+    filename: str'''
     energy=None
     forces=None
     dipole=None
@@ -59,13 +59,16 @@ def read(filename):
     return atoms
 
 def get_vibrations(label,atoms,indices=None):
-    '''read hessian 
+    '''Read hessian.
+
     label: str
-        filename w/o .log
+        Filename w/o .log.
     atoms: class
-        structure of which the frequency analysis was performed
+        Structure of which the frequency analysis was performed.
     indices: lst
-        indices of unconstrained atoms 
+        Indices of unconstrained atoms.
+    Returns:
+        VibrationsData object. 
     '''
     if indices==None:
         indices = range(len(atoms))
@@ -120,7 +123,7 @@ class OrcaDynamics:
     special_keywords: Dict[str, str] = dict()
 
     def __init__(self, atoms, calc=None):
-        '''for optimizations
+        '''
         atoms: class
             Structure with orca calculator'''
         self.atoms = atoms
@@ -188,8 +191,8 @@ class OrcaDynamics:
 
 
 class OrcaOptimizer(OrcaDynamics):
-    '''allowing ase to use Qchem geometry optimizations
+    '''
+    Allowing ase to use Orca geometry optimizations
     
-    atoms: class
-        Structure with orca calculator'''
+    '''
     keywords = {'task':'opt'}
