@@ -310,6 +310,10 @@ class Jedi:
         self.ase_units = False
         self.vdwf=0.9
         self.covf=1.3
+
+        if np.any(np.round(atoms0.cell, 4) != np.round(atomsF.cell, 4)): #jedi does not work for pbc systems that change their cell shape
+            raise GeneratorExit
+        
     def todict(self) -> Dict[str, Any]:
         '''make it saveable with .write()
 
@@ -879,7 +883,7 @@ class Jedi:
         
         return delta_q
 
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True): #get vmd scripts
+    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True,label='vmd'): #get vmd scripts
         '''Generates vmd scripts and files to save the values for the color coding
 
         Args:
@@ -898,10 +902,10 @@ class Jedi:
                 draw colorbar or not
         '''
         try:
-            os.mkdir('vmd')
+            os.mkdir(label)
         except:
             pass
-        os.chdir('vmd')
+        os.chdir(label)
         #########################
         #       Basic stuff     #
         #########################
@@ -1237,6 +1241,8 @@ color Axes Labels 32
                         bond_E_array=np.vstack((bond_E_array,[int(bond_E_array_pbc[0][i][0]),int(bond_E_array_pbc[0][i][1]),translate[tuple(original_rim)]]))                          # add to bond list with auxillary index
                     for i in range(len(bond_E_array_pbc[1])):
                         original_rim=[int(bond_E_array_pbc_trans[1][i][0]),int(bond_E_array_pbc_trans[1][i][1])]                      # get the indices of the corresponding atoms inside the cell
+                        custom_E_array= np.delete(custom_E_array, np.where((custom_E_array[:, 0]  == original_rim[0]) & (
+                         custom_E_array[:, 1]  == original_rim[1]) )[0], axis=0)
                         original_rim.sort()                                                                 # needs to be sorted because rim list only covers one direction                           
                         custom_E_array=np.vstack((custom_E_array,[int(bond_E_array_pbc[1][i][0]),int(bond_E_array_pbc[1][i][1]),ctranslate[tuple(original_rim)]])) 
                   
@@ -1462,6 +1468,7 @@ display update on ''')
            
         if self.custom_bonds is not None:
             print(f"\nTotal energy custom bonds: {custom_E} {unit}")
+        os.chdir('..')
         pass
 
 
