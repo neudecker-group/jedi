@@ -254,12 +254,11 @@ def get_hbonds(mol,covf=1.3,vdwf=0.9):
     bl=bl[bl[:,0]<bl[:,1]]      #remove double mentioned 
     bl = np.unique(bl,axis=0)
     from ase.data.vdw import vdw_radii
-    hpartner = ['N','O','F','C']
+    hpartner = ['N','O','F']
     hpartner_ls = []
     hcutoff = {('H','N'):vdwf*(vdw_radii[1]+vdw_radii[7]),
     ('H','O'):vdwf*(vdw_radii[1]+vdw_radii[8]),
-    ('H','F'):vdwf*(vdw_radii[1]+vdw_radii[9]),
-    ('H','C'):vdwf*(vdw_radii[1]+vdw_radii[6])}    #save the maximum distances for given pairs to be taken account as interactions
+    ('H','F'):vdwf*(vdw_radii[1]+vdw_radii[9])}  #save the maximum distances for given pairs to be taken account as interactions
     hbond_ls = []                                    #create a list to store all the bonds
     for i in range(len(mol)):
         if mol.symbols[i] in hpartner:              #check atoms indices of N F O elements
