@@ -16,7 +16,7 @@ import warnings
 from ase.units import Hartree, Bohr, mol, kcal
 def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
     '''
-    Analysis of strain energy stored in redundant internal modes.
+    Analysis of strain energy stored in redundant internal coordinates.
 
     atoms: class 
         An ASE Atoms object to determine the atomic species of the indices.
@@ -104,7 +104,7 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
 
 def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False):
     '''
-    Printout of analysis of stored strain energy in redundant internal modes.
+    Printout of analysis of stored strain energy in redundant internal coordinates.
 
     atoms: class
         An ASE Atoms object to determine the atomic species of the indices.
@@ -139,16 +139,16 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
         print("                   Strain Energy (kcal/mol)  Deviation (%)")
     elif ase_units == True:
         print("                   Strain Energy (eV)        Deviation (%)")
-    print("      Geometries     " + "%.8f" % E_geometries + "                  -" )
-    print('%5s%16.8f%21.2f' % (" Red. Int. Modes", E_RIMs_total, proc_geom_RIMs))
+    print("      Ab initio     " + "%.8f" % E_geometries + "                  -" )
+    print('%5s%16.8f%21.2f' % (" JEDI           ", E_RIMs_total, proc_geom_RIMs))
 
 
     # JEDI analysis
 
     if ase_units == False:
-        print("\n RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)")
+        print("\n RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)")
     elif ase_units == True:
-        print("\n RIM No.       RIM type                       indices        delta_q (Å,°) Percentage    Energy (eV)")
+        print("\n RIC No.       RIC type                       indices        delta_q (Å,°) Percentage    Energy (eV)")
     i = 0
 
     for k in rim_list[0]:
@@ -214,16 +214,16 @@ def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIM
         print("                   Strain Energy (kcal/mol)  Deviation (%)",file=f)
     elif ase_units==True:
         print("                   Strain Energy (eV)        Deviation (%)",file=f)
-    print("      Geometries     " + "%.8f" % E_geometries + "                  -",file=f)
-    print('%5s%16.8f%21.2f' % (" Red. Int. Modes", E_RIMs_total, proc_geom_RIMs),file=f)
+    print("      Ab initio     " + "%.8f" % E_geometries + "                  -",file=f)
+    print('%5s%16.8f%21.2f' % (" JEDI           ", E_RIMs_total, proc_geom_RIMs),file=f)
 
 
     # strain in the bonds
 
     if ase_units == False:
-        print("\n RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)",file=f)
+        print("\n RIC No.       RIC type                       indices       Percentage    Energy (kcal/mol)",file=f)
     elif ase_units == True:
-        print("\n RIM No.       RIM type                       indices       Percentage    Energy (eV)",file=f)
+        print("\n RIC No.       RIC type                       indices       Percentage    Energy (eV)",file=f)
     i = 0
 
     for k in rim_list[0]:
