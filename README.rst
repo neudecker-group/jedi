@@ -22,6 +22,10 @@ Add ``~/jedi`` to your $PYTHONPATH environment variable
 
 
 
+Tutorial
+------------
+
+A tutorial is available here: https://neudecker-group.github.io/jedi/
 
 
 
