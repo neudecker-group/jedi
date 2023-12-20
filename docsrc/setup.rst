@@ -51,7 +51,7 @@ Python
 ------
 
 
-JEDI runs with ``Python 3.7``. Check, if it is installed with
+JEDI runs with ``Python 3.7``. Check if it is installed with
 
 .. code-block:: console
 
@@ -100,7 +100,7 @@ Clone the JEDI repository to your local machine with ``git`` from GitHub:
 
 .. code-block:: console
     
-    git clone https://github.com/henrwang/jedi.git
+    git clone https://github.com/neudecker-group/jedi.git
 
 This clones the JEDI repository to a local folder ``jedi``. 
 
