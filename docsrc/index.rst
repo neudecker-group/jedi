@@ -2,59 +2,45 @@
 Welcome to JEDI, the Judgement of Energy Distribution Analysis
 ========================================================================
 
-The JEDI (Judgement of Energy Distribution Analysis) analysis is a quantum chemical strain analysis tool for the distribution of strain
-mechanically deformed molecules. JEDI is developed in Python. Currently, the main contributor to JEDI is the `Institute for physical and theoretical Chemistry 
-<https://www.uni-bremen.de/institut-fuer-physikalische-und-theoretische-chemie>`_, 
-respectively the `AG Neudecker <https://www.uni-bremen.de/ag-neudecker/>`_ of the University of Bremen (https://www.uni-bremen.de/ag-neudecker). 
+The JEDI (Judgement of Energy DIstribution) analysis is a quantum chemical analysis tool for the distribution of strain mechanically deformed systems. JEDI is implemented in Python. Currently, the main contributor to JEDI is the `AG Neudecker <https://www.uni-bremen.de/ag-neudecker/>`_ from the University of Bremen (https://www.uni-bremen.de/en/neudecker-group). 
 
 Introduction and Overview
 =========================
-Based on the harmonic approximation, the JEDI Analysis calculates the strain energy for each bond, bending and torsion in a molecule, thus allowing the
-identification of the mechanically most strained regions in a molecule as well as the rationalization of mechanochemical processes.
+Based on the harmonic approximation, the JEDI analysis calculates the strain energy for each bond, bending and torsion in a molecule or an extended system, thus allowing the identification of the mechanically most strained regions in the system as well as the rationalization of mechanochemical processes.
 
 
 Usage
 ======
 
-JEDI can be used in three different applications.
+JEDI can be used in various application scenarios, some of which are:
 
-Mechanically deformed Molecules
+Mechanically Deformed Molecules
 -------------------------------
-When a molecule is stretched, some internal modes store more energy than others. 
-This leads to particularly large displacements of certain modes and to the preconditioning 
-of selected bonds for rupture. Using the JEDI analysis the mechanochemical properties can be investigated.
-
-Excited State 
--------------
-Besides the description of mechanical deformation in the ground state, the JEDI
-analysis can be used in the electronically excited state to quantify the energy gained by
-relaxation on the excited state potential energy surface (PES). For this, the harmonic
-approximation needs to be applicable on the excited state PES of interest. The physical
-process that is described by the excited state JEDI analysis is fundamentally different
-from the ground state variant. While in the ground state JEDI analysis the distribution of
-stress energy in a mechanically deformed molecule is analyzed, i.e. energy is expended for
-deformation, the excited state JEDI analysis quantifies the energy gained by the relaxation
-of each internal mode upon relaxation on the excited state PES, i.e. energy becomes
-available.
+When a molecule or a periodic system is deformed, e.g., due to mechanical stretching or hydrostatic compression, some internal coordinates store more energy than others. This leads to particularly large displacements of certain coordinates such as the stretching of bond lengths, and to the preconditioning of selected bonds for rupture. Using the JEDI analysis the mechanochemical properties of the system can be investigated.
 
 
 Adsorbed molecules
 ------------------
-When a molecule adsorbs onto a surface, the geometry of the adsorbate changes as compared 
-to the relaxed molecule in the gas phase. As JEDI allows force analysis for only a 
-subset of atoms, it is possible to quantify the strain build up within an adsorbtion. 
+When a molecule adsorbs onto a surface, the geometry of the adsorbate changes as compared to the relaxed molecule in the gas phase. As JEDI allows strain analysis for only a subset of atoms, it is possible to quantify the strain due to adsorbtion. 
 
-Literature
-=============
 
+Dynamical Strain Analyses
+-------------------------
+During an Ab Initio Molecular Dynamics (AIMD) simulation, JEDI can quantify the potential energy part of the strain due to, e.g., stretching and compression. In this scenario, each time step is considered as a deformed geometry. Dynamical strain analyses using JEDI enable the creation of color-coded movies showing the propagation of strain in dynamical mechanochemical processes.
+
+
+How to Cite JEDI
+================
+
+When using JEDI, please cite the following papers:
 
 * T. Stauch, A. Dreuw, J. Chem. Phys. 140, 134107 (2014)
 
-* T. Stauch, A. Dreuw, J. Chem. Phys. 143, 074118 (2015)
-
 * T. Stauch, A. Dreuw, Acc. Chem. Res. 50, 1041-1048 (2017)
 
-* T. Stauch, A. Dreuw, J. Chem. Phys. 7, 1298-1302 (2016)
+Details on the theoretical background of JEDI are given in
+
+* T. Stauch, A. Dreuw, J. Chem. Phys. 143, 074118 (2015)
 
 
 Documentation
