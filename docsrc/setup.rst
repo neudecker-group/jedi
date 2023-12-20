@@ -6,7 +6,7 @@ Git
 ---
 
 `Git <https://git-scm.com/>`_ is used as version control system for JEDI. 
-Thus it is also used to clone the `JEDI source code repository <https://github.com/henrwang/jedi>`_ 
+Thus it is also used to clone the `JEDI source code repository <https://github.com/neudecker-group/jedi>`_ 
 from `Github <https://github.com/>`_ to a local system where JEDI should be installed. 
 
 ------
