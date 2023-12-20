@@ -27,6 +27,7 @@ Citation
 If you use JEDI, please cite the following papers:
 
 T. Stauch, A. Dreuw, J. Chem. Phys. 140, 134107 (2014)
+
 T. Stauch, A. Dreuw, Acc. Chem. Res. 50, 1041-1048 (2017)
 
 The theoretical background of JEDI is discussed in detail in
