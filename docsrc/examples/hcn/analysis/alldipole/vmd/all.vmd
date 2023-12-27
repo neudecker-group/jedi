@@ -72,7 +72,7 @@ mol modcolor 2 top {colorid 31}
 mol modselect 2 top {name N}
 
 # Adding a pbc box
-pbc set {3.394040 4.726810 8.119020 90.000000 90.000000 90.000000}
+pbc set {3.394040 4.726810 8.219020 90.000000 90.000000 90.000000}
 pbc box -color 32
 
 # Adding a representation with the appropriate colorID for each bond
@@ -98,7 +98,7 @@ mol modselect 6 top {index 2 3}
 
 mol addrep top
 mol modstyle 7 top bonds
-mol modcolor 7 top {colorid 1}
+mol modcolor 7 top {colorid 29}
 mol modselect 7 top {index 2 5}
 
 mol addrep top
@@ -129,32 +129,27 @@ mol modselect 12 top {index 7 14}
 set x [[atomselect top "index 0 4"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 27
+draw  color 1
 draw line  $a $b width 3 style dashed
 set x [[atomselect top "index 6 10"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 28
+draw  color 1
 draw line  $a $b width 3 style dashed
 set x [[atomselect top "index 5 9"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 29
-draw line  $a $b width 3 style dashed
-set x [[atomselect top "index 3 11"] get {x y z}]
-set a [lindex $x 0] 
-set b [lindex $x 1] 
-draw  color 28
+draw  color 5
 draw line  $a $b width 3 style dashed
 set x [[atomselect top "index 3 13"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 28
+draw  color 1
 draw line  $a $b width 3 style dashed
 set x [[atomselect top "index 11 15"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 28
+draw  color 1
 draw line  $a $b width 3 style dashed
 		display update off
 display resetview
@@ -176,7 +171,7 @@ set center [molinfo $old_top get center]
 set center [regsub -all {[{}]} $center ""]
 set center [split $center]
 set min 0.0
-set max 0.48379671456520124
+set max 2.910703441615687
 set length 30.0
 set width [expr $length / 6]
 

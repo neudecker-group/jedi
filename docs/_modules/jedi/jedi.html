@@ -100,25 +100,26 @@
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Hartree</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">mol</span><span class="p">,</span> <span class="n">kcal</span>
 <div class="viewcode-block" id="jedi_analysis"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.jedi_analysis">[docs]</a><span class="k">def</span> <span class="nf">jedi_analysis</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">H_cart</span><span class="p">,</span><span class="n">delta_q</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span><span class="n">printout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    analysis of stored strain energy in redundant internal modes</span>
+<span class="sd">    Analysis of strain energy stored in redundant internal coordinates.</span>
+
 <span class="sd">    atoms: class </span>
-<span class="sd">        an ASE Atoms object to determine the atomic species of the indices</span>
+<span class="sd">        An ASE Atoms object to determine the atomic species of the indices.</span>
 <span class="sd">    rim_list: list</span>
-<span class="sd">        a list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals</span>
+<span class="sd">        A list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals.</span>
 <span class="sd">    B: np array</span>
-<span class="sd">        B matrix</span>
+<span class="sd">        B matrix.</span>
 <span class="sd">    H_cart: np array</span>
-<span class="sd">        Hessian in cartesian coordinates</span>
+<span class="sd">        Hessian in cartesian coordinates.</span>
 <span class="sd">    delta_q: np array</span>
-<span class="sd">        array of deformations along the RICs</span>
+<span class="sd">        Array of deformations along the RICs.</span>
 <span class="sd">    E_geometries: float</span>
-<span class="sd">        energy difference between the geometries</span>
+<span class="sd">        Energy difference between the geometries.</span>
 <span class="sd">    printout: bool</span>
-<span class="sd">        flag to print the output</span>
+<span class="sd">        Flag to print the output.</span>
 <span class="sd">    ase_units: bool</span>
-<span class="sd">        flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians </span>
+<span class="sd">        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians.</span>
 <span class="sd">    Returns:</span>
-<span class="sd">        proc_E_RIMs,E_RIMs, E_RIMs_total, proc_geom_RIMs,delta_q</span>
+<span class="sd">        Analysis of RIMs.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="c1">#jedi analysis function</span>
     <span class="c1">###########################</span>
@@ -187,25 +188,24 @@
 
 <div class="viewcode-block" id="jedi_printout"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.jedi_printout">[docs]</a><span class="k">def</span> <span class="nf">jedi_printout</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">delta_q</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">,</span><span class="n">proc_E_RIMs</span><span class="p">,</span> <span class="n">E_RIMs</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    printout of analysis of stored strain energy in redundant internal modes</span>
-<span class="sd">    Parameters:</span>
+<span class="sd">    Printout of analysis of stored strain energy in redundant internal coordinates.</span>
 
 <span class="sd">    atoms: class</span>
-<span class="sd">        an ASE Atoms object to determine the atomic species of the indices</span>
+<span class="sd">        An ASE Atoms object to determine the atomic species of the indices.</span>
 <span class="sd">    rim_list: list</span>
-<span class="sd">        a list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals</span>
+<span class="sd">        A list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals.</span>
 <span class="sd">    delta_q: np array</span>
-<span class="sd">        array of deformations along the RICs</span>
+<span class="sd">        Array of deformations along the RICs.</span>
 <span class="sd">    E_geometries: float</span>
-<span class="sd">        energy difference between the geometries</span>
+<span class="sd">        Energy difference between the geometries.</span>
 <span class="sd">    E_RIMs_total: float</span>
-<span class="sd">        calculated total strain energy by jedi</span>
+<span class="sd">        Calculated total strain energy by jedi.</span>
 <span class="sd">    proc_geom_RIMs: float</span>
-<span class="sd">        percentage deviation between calculated total energies </span>
+<span class="sd">        Percentage deviation between calculated total energies.</span>
 <span class="sd">    proc_E_RIMs: array</span>
-<span class="sd">        array of energy stored in each RIC</span>
+<span class="sd">        Array of energy stored in each RIC.</span>
 <span class="sd">    ase_units: bool</span>
-<span class="sd">        flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians </span>
+<span class="sd">        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians. </span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="c1">#############################################</span>
     <span class="c1">#	    	   Output section	        	#</span>
@@ -223,16 +223,16 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;                   Strain Energy (kcal/mol)  Deviation (%)&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">ase_units</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;                   Strain Energy (eV)        Deviation (%)&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;      Geometries     &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%.8f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">E_geometries</span> <span class="o">+</span> <span class="s2">&quot;                  -&quot;</span> <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%5s%16.8f%21.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot; Red. Int. Modes&quot;</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;      Ab initio     &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%.8f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">E_geometries</span> <span class="o">+</span> <span class="s2">&quot;                  -&quot;</span> <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%5s%16.8f%21.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot; JEDI           &quot;</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">))</span>
 
 
     <span class="c1"># JEDI analysis</span>
 
     <span class="k">if</span> <span class="n">ase_units</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">ase_units</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> RIM No.       RIM type                       indices        delta_q (Å,°) Percentage    Energy (eV)&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> RIC No.       RIC type                       indices        delta_q (Å,°) Percentage    Energy (eV)&quot;</span><span class="p">)</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rim_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -260,25 +260,26 @@
 
 <div class="viewcode-block" id="jedi_printout_bonds"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.jedi_printout_bonds">[docs]</a><span class="k">def</span> <span class="nf">jedi_printout_bonds</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">,</span><span class="n">proc_E_RIMs</span><span class="p">,</span> <span class="n">E_RIMs</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">):</span> <span class="c1">#total strain in bonds after adding contributions of stretching angles and dihedral angles</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    printout of analysis of stored strain energy in the bonds</span>
+<span class="sd">    Printout of analysis of stored strain energy in the bonds.</span>
+
 <span class="sd">    atoms: class</span>
-<span class="sd">        an ASE Atoms object to determine the atomic species of the indices</span>
+<span class="sd">        An ASE Atoms object to determine the atomic species of the indices.</span>
 <span class="sd">    rim_list: list</span>
-<span class="sd">        a list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals</span>
+<span class="sd">        A list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals.</span>
 <span class="sd">    delta_q: np array</span>
-<span class="sd">        array of deformations along the RICs</span>
+<span class="sd">        Array of deformations along the RICs.</span>
 <span class="sd">    E_geometries: float</span>
-<span class="sd">        energy difference between the geometries</span>
+<span class="sd">        Energy difference between the geometries.</span>
 <span class="sd">    E_RIMs_total: float</span>
-<span class="sd">        calculated total strain energy by jedi</span>
+<span class="sd">        Calculated total strain energy by jedi.</span>
 <span class="sd">    proc_geom_RIMs: float</span>
-<span class="sd">        percentage deviation between calculated total energies </span>
+<span class="sd">        Percentage deviation between calculated total energies.</span>
 <span class="sd">    proc_E_RIMs: np array</span>
-<span class="sd">        array of energy stored in each RIC</span>
+<span class="sd">        Array of energy stored in each RIC.</span>
 <span class="sd">    ase_units: bool</span>
-<span class="sd">        flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians </span>
+<span class="sd">        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians. </span>
 <span class="sd">    file: string</span>
-<span class="sd">        file to store the output</span>
+<span class="sd">        File to store the output.</span>
 
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="c1">#############################################</span>
@@ -297,16 +298,16 @@
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;                   Strain Energy (kcal/mol)  Deviation (%)&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">ase_units</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;                   Strain Energy (eV)        Deviation (%)&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;      Geometries     &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%.8f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">E_geometries</span> <span class="o">+</span> <span class="s2">&quot;                  -&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%5s%16.8f%21.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot; Red. Int. Modes&quot;</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">),</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;      Ab initio     &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%.8f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">E_geometries</span> <span class="o">+</span> <span class="s2">&quot;                  -&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%5s%16.8f%21.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot; JEDI           &quot;</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">),</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
 
 
     <span class="c1"># strain in the bonds</span>
 
     <span class="k">if</span> <span class="n">ase_units</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> RIC No.       RIC type                       indices       Percentage    Energy (kcal/mol)&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">ase_units</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> RIM No.       RIM type                       indices       Percentage    Energy (eV)&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> RIC No.       RIC type                       indices       Percentage    Energy (eV)&quot;</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rim_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -323,12 +324,13 @@
 
 <div class="viewcode-block" id="get_hbonds"><a class="viewcode-back" href="../../utils/hbond.html#jedi.jedi.get_hbonds">[docs]</a><span class="k">def</span> <span class="nf">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">covf</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span><span class="n">vdwf</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    get all hbonds in a structure</span>
-<span class="sd">    defined as X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90° and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y</span>
+<span class="sd">    Get all hbonds in a structure.</span>
+<span class="sd">    Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90° and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.</span>
+
 <span class="sd">    mol: class</span>
-<span class="sd">        structure of which the hbonds should be determined</span>
-<span class="sd">    returns</span>
-<span class="sd">        2D array of indices</span>
+<span class="sd">        Structure of which the hbonds should be determined.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        2D array of indices.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">cutoff</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">natural_cutoffs</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mult</span><span class="o">=</span><span class="n">covf</span><span class="p">)</span>   <span class="c1">## cutoff for covalent bonds see Bakken et al.</span>
     <span class="n">bl</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">neighbor_list</span><span class="p">(</span><span class="s1">&#39;ij&#39;</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="n">mol</span><span class="p">,</span><span class="n">cutoff</span><span class="o">=</span><span class="n">cutoff</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>   <span class="c1">#determine covalent bonds</span>
@@ -336,12 +338,11 @@
     <span class="n">bl</span><span class="o">=</span><span class="n">bl</span><span class="p">[</span><span class="n">bl</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="n">bl</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]]</span>      <span class="c1">#remove double mentioned </span>
     <span class="n">bl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">bl</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="kn">from</span> <span class="nn">ase.data.vdw</span> <span class="kn">import</span> <span class="n">vdw_radii</span>
-    <span class="n">hpartner</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">,</span><span class="s1">&#39;F&#39;</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">]</span>
+    <span class="n">hpartner</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">,</span><span class="s1">&#39;F&#39;</span><span class="p">]</span>
     <span class="n">hpartner_ls</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">hcutoff</span> <span class="o">=</span> <span class="p">{(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;N&#39;</span><span class="p">):</span><span class="n">vdwf</span><span class="o">*</span><span class="p">(</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">7</span><span class="p">]),</span>
     <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">):</span><span class="n">vdwf</span><span class="o">*</span><span class="p">(</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">8</span><span class="p">]),</span>
-    <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;F&#39;</span><span class="p">):</span><span class="n">vdwf</span><span class="o">*</span><span class="p">(</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">9</span><span class="p">]),</span>
-    <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">):</span><span class="n">vdwf</span><span class="o">*</span><span class="p">(</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">6</span><span class="p">])}</span>    <span class="c1">#save the maximum distances for given pairs to be taken account as interactions</span>
+    <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;F&#39;</span><span class="p">):</span><span class="n">vdwf</span><span class="o">*</span><span class="p">(</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">9</span><span class="p">])}</span>  <span class="c1">#save the maximum distances for given pairs to be taken account as interactions</span>
     <span class="n">hbond_ls</span> <span class="o">=</span> <span class="p">[]</span>                                    <span class="c1">#create a list to store all the bonds</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mol</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">mol</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">hpartner</span><span class="p">:</span>              <span class="c1">#check atoms indices of N F O elements</span>
@@ -370,11 +371,11 @@
         <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="sd">        atoms0: class</span>
-<span class="sd">            Atoms object of relaxed structure with calculated energy</span>
+<span class="sd">            Atoms object of relaxed structure with calculated energy.</span>
 <span class="sd">        atomsF: class</span>
-<span class="sd">            Atoms object of strained structure with calculated energy</span>
+<span class="sd">            Atoms object of strained structure with calculated energy.</span>
 <span class="sd">        modes: class</span>
-<span class="sd">            VibrationsData object with hessian of relaxed structure </span>
+<span class="sd">            VibrationsData object with hessian of relaxed structure.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span> <span class="o">=</span> <span class="n">atoms0</span>        <span class="c1">#ref state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span> <span class="o">=</span> <span class="n">atomsF</span>        <span class="c1">#strained state</span>
@@ -392,6 +393,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vdwf</span><span class="o">=</span><span class="mf">0.9</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">covf</span><span class="o">=</span><span class="mf">1.3</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">atoms0</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="mi">4</span><span class="p">)):</span> <span class="c1">#jedi does not work for pbc systems that change their cell shape</span>
+            <span class="k">raise</span> <span class="ne">GeneratorExit</span>
+        
 <div class="viewcode-block" id="Jedi.todict"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.todict">[docs]</a>    <span class="k">def</span> <span class="nf">todict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
         <span class="sd">&#39;&#39;&#39;make it saveable with .write()</span>
 
@@ -468,15 +473,15 @@
         <span class="k">return</span> <span class="n">cl</span></div>
 
 <div class="viewcode-block" id="Jedi.run"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;run the analysis</span>
+        <span class="sd">&quot;&quot;&quot;Runs the analysis. Calls all necessary functions to get the needed values.</span>
 
-<span class="sd">        Parameters:</span>
-
-<span class="sd">        indices: lst</span>
-<span class="sd">            list of indices of a substructure if desired</span>
-<span class="sd">        ase_units: </span>
-<span class="sd">            flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians </span>
-
+<span class="sd">        Args:</span>
+<span class="sd">            indices: </span>
+<span class="sd">                list of indices of a substructure if desired</span>
+<span class="sd">            ase_units: boolean</span>
+<span class="sd">                flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Indices, strain, energy in every RIM</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">=</span> <span class="n">ase_units</span>
         <span class="c1"># get necessary data</span>
@@ -515,7 +520,7 @@
 
 
 <div class="viewcode-block" id="Jedi.get_rims"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_rims">[docs]</a>    <span class="k">def</span> <span class="nf">get_rims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mol</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;get the redundant internal coordinates</span>
+        <span class="sd">&#39;&#39;&#39;Gets the redundant internal coordinates</span>
 
 <span class="sd">        &#39;&#39;&#39;</span> 
         <span class="c1">###bondlengths####</span>
@@ -679,7 +684,7 @@
         <span class="k">return</span> <span class="n">rim_list</span></div>
     
 <div class="viewcode-block" id="Jedi.get_common_rims"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_common_rims">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_rims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;get only the RICs in both structures bond breaks cannot be analysed logically</span>
+        <span class="sd">&#39;&#39;&#39;Get only the RICs in both structures bond breaks cannot be analysed logically</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>  
         <span class="n">rim_atoms0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_rims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span><span class="p">)</span>
@@ -701,14 +706,14 @@
         <span class="k">return</span> <span class="n">rim_atoms0</span></div>
     
 <div class="viewcode-block" id="Jedi.get_hessian"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_hessian">[docs]</a>    <span class="k">def</span> <span class="nf">get_hessian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;calls the hessian from the VibrationsData object</span>
+        <span class="sd">&#39;&#39;&#39;Calls the hessian from the VibrationsData object</span>
 <span class="sd">        &#39;&#39;&#39;</span> 
         <span class="n">hessian</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">_hessian2d</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">hessian</span> <span class="o">/</span><span class="p">(</span><span class="n">Hartree</span><span class="o">/</span><span class="n">Bohr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hessian</span></div>
     
 <div class="viewcode-block" id="Jedi.get_b_matrix"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_b_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_b_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions</span>
+        <span class="sd">&#39;&#39;&#39;Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>  
         <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span>
@@ -891,8 +896,10 @@
         <span class="k">return</span> <span class="n">B</span></div>
 
 <div class="viewcode-block" id="Jedi.get_energies"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_energies">[docs]</a>    <span class="k">def</span> <span class="nf">get_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;calls the energies of the Atoms object</span>
-<span class="sd">        returns [energy difference, energy of atoms0, energy of atomsF]</span>
+        <span class="sd">&#39;&#39;&#39;Calls the energies of the Atoms objects.</span>
+
+<span class="sd">            Returns: </span>
+<span class="sd">                [energy difference, energy of atoms0, energy of atomsF]</span>
 
 <span class="sd">        &#39;&#39;&#39;</span> 
         <span class="n">e0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
@@ -906,7 +913,9 @@
         
 <div class="viewcode-block" id="Jedi.get_delta_q"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_delta_q">[docs]</a>    <span class="k">def</span> <span class="nf">get_delta_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;get the strain in RICs substracts the values of the relaxed structure from the strained structure</span>
-<span class="sd">        returns np array of the values</span>
+<span class="sd">        </span>
+<span class="sd">            Returns: </span>
+<span class="sd">                2D array of the values.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -957,27 +966,29 @@
         
         <span class="k">return</span> <span class="n">delta_q</span></div>
 
-<div class="viewcode-block" id="Jedi.vmd_gen"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.vmd_gen">[docs]</a>    <span class="k">def</span> <span class="nf">vmd_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">des_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">box</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">man_strain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">modus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span> <span class="c1">#get vmd scripts</span>
-        <span class="sd">&#39;&#39;&#39;generates vmd scripts and files to save the values for the color coding</span>
-<span class="sd">        des_colors: dict</span>
-<span class="sd">            key: order number, value: [R,G,B]</span>
-<span class="sd">        box: boolean</span>
-<span class="sd">            True: draw box</span>
-<span class="sd">            False: ignore box</span>
-<span class="sd">        man_strain: float</span>
-<span class="sd">            reference value for the strain energy used in the color scale</span>
-<span class="sd">            default: &#39;None&#39;</span>
-<span class="sd">        modus: str</span>
-<span class="sd">            defines where to use the man_strain</span>
-<span class="sd">            default: &#39;None&#39; </span>
-<span class="sd">        colorbar: boolean</span>
-<span class="sd">            draw colorbar or not</span>
+<div class="viewcode-block" id="Jedi.vmd_gen"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.vmd_gen">[docs]</a>    <span class="k">def</span> <span class="nf">vmd_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">des_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">box</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">man_strain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">modus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;vmd&#39;</span><span class="p">):</span> <span class="c1">#get vmd scripts</span>
+        <span class="sd">&#39;&#39;&#39;Generates vmd scripts and files to save the values for the color coding</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            des_colors: (dict)</span>
+<span class="sd">                key: order number, value: [R,G,B]</span>
+<span class="sd">            box: boolean</span>
+<span class="sd">                True: draw box</span>
+<span class="sd">                False: ignore box</span>
+<span class="sd">            man_strain: float</span>
+<span class="sd">                reference value for the strain energy used in the color scale</span>
+<span class="sd">                default: &#39;None&#39;</span>
+<span class="sd">            modus: str</span>
+<span class="sd">                defines where to use the man_strain</span>
+<span class="sd">                default: &#39;None&#39; </span>
+<span class="sd">            colorbar: boolean</span>
+<span class="sd">                draw colorbar or not</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;vmd&#39;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;vmd&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
         <span class="c1">#########################</span>
         <span class="c1">#       Basic stuff     #</span>
         <span class="c1">#########################</span>
@@ -1313,6 +1324,8 @@
                         <span class="n">bond_E_array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">bond_E_array</span><span class="p">,[</span><span class="nb">int</span><span class="p">(</span><span class="n">bond_E_array_pbc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">bond_E_array_pbc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span><span class="n">translate</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">original_rim</span><span class="p">)]]))</span>                          <span class="c1"># add to bond list with auxillary index</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bond_E_array_pbc</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
                         <span class="n">original_rim</span><span class="o">=</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">bond_E_array_pbc_trans</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">bond_E_array_pbc_trans</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])]</span>                      <span class="c1"># get the indices of the corresponding atoms inside the cell</span>
+                        <span class="n">custom_E_array</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">custom_E_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">custom_E_array</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>  <span class="o">==</span> <span class="n">original_rim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span>
+                         <span class="n">custom_E_array</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>  <span class="o">==</span> <span class="n">original_rim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                         <span class="n">original_rim</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>                                                                 <span class="c1"># needs to be sorted because rim list only covers one direction                           </span>
                         <span class="n">custom_E_array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">custom_E_array</span><span class="p">,[</span><span class="nb">int</span><span class="p">(</span><span class="n">bond_E_array_pbc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span><span class="nb">int</span><span class="p">(</span><span class="n">bond_E_array_pbc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span><span class="n">ctranslate</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">original_rim</span><span class="p">)]]))</span> 
                   
@@ -1538,14 +1551,17 @@
            
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Total energy custom bonds: </span><span class="si">{</span><span class="n">custom_E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">)</span>
         <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="Jedi.partial_analysis"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.partial_analysis">[docs]</a>    <span class="k">def</span> <span class="nf">partial_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>  
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        analyse a substructure with given indices</span>
-<span class="sd">        indices: np.2Darray</span>
-<span class="sd">            list of indices of atoms in desired substructure</span>
+<span class="sd">        Analyse a substructure with given indices. </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            indices: </span>
+<span class="sd">                list of indices of atoms in desired substructure</span>
 <span class="sd">        &#39;&#39;&#39;</span> 
         <span class="c1">#for calculation with partial hessian</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">=</span> <span class="n">ase_units</span>
@@ -1604,8 +1620,12 @@
 <div class="viewcode-block" id="Jedi.post_process"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="p">):</span>             <span class="c1">#a function to get segments of all full analysis for better understanding of local strain</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        get only the values of RICs inside a defined substructure</span>
-<span class="sd">        indices: np.2Darray</span>
-<span class="sd">            list of indices of atoms in desired substructure</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            indices: </span>
+<span class="sd">                list of indices of atoms in desired substructure</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Values for analyzed RIMs in the defined substructure</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="c1">#get rims with only the considered atoms</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="o">=</span><span class="n">indices</span>
@@ -1644,14 +1664,21 @@
 
     <span class="k">def</span> <span class="nf">add_custom_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bonds</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span> <span class="o">=</span> <span class="n">bonds</span>   <span class="c1"># additional bonds for analysis of non covalent interactions</span>
-        <span class="sd">&#39;&#39;&#39;bonds: np 2d array</span>
-<span class="sd">            add custom bonds after creating the object&#39;&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39;Add custom bonds after creating the object.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            bonds: </span>
+<span class="sd">                2Darray</span>
+<span class="sd">            &#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="Jedi.set_bond_params"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.set_bond_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_bond_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">covf</span><span class="p">,</span><span class="n">vdwf</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;covf: float</span>
-<span class="sd">            factor for  covalent radii to determine covalent bonds</span>
-<span class="sd">        vdwf: float</span>
-<span class="sd">            factor for vdw radii to get the upper limit of the custom bond lengths&#39;&#39;&#39;</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            covf: </span>
+<span class="sd">                float factor for  covalent radii to determine covalent bonds</span>
+<span class="sd">            vdwf: </span>
+<span class="sd">                float factor for vdw radii to get the upper limit of the custom bond lengths</span>
+<span class="sd">            &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">covf</span><span class="o">=</span><span class="n">covf</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vdwf</span><span class="o">=</span><span class="n">vdwf</span></div></div>
 

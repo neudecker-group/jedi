@@ -97,25 +97,25 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="jedi.io.orca.read">
 <span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.read" title="Permalink to this definition"></a></dt>
-<dd><p>read orca outputs
-filename str</p>
-<blockquote>
-<div><p>filename</p>
-</div></blockquote>
+<dd><p>Read orca outputs.</p>
+<p>filename: str</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="jedi.io.orca.get_vibrations">
 <span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">get_vibrations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#get_vibrations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.get_vibrations" title="Permalink to this definition"></a></dt>
-<dd><p>read hessian
-label: str</p>
-<blockquote>
-<div><p>filename w/o .log</p>
-</div></blockquote>
+<dd><p>Read hessian.</p>
 <dl class="simple">
-<dt>atoms: class</dt><dd><p>structure of which the frequency analysis was performed</p>
+<dt>label: str</dt><dd><p>Filename w/o .log.</p>
 </dd>
-<dt>indices: lst</dt><dd><p>indices of unconstrained atoms</p>
+<dt>atoms: class</dt><dd><p>Structure of which the frequency analysis was performed.</p>
+</dd>
+<dt>indices: lst</dt><dd><p>Indices of unconstrained atoms.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>VibrationsData object.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -123,16 +123,11 @@ label: str</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="jedi.io.orca.OrcaOptimizer">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">OrcaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#OrcaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.OrcaOptimizer" title="Permalink to this definition"></a></dt>
-<dd><p>allowing ase to use Qchem geometry optimizations</p>
+<dd><p>Allowing ase to use Orca geometry optimizations</p>
 <dl class="simple">
 <dt>atoms: class</dt><dd><p>Structure with orca calculator</p>
 </dd>
 </dl>
-<p>for optimizations
-atoms: class</p>
-<blockquote>
-<div><p>Structure with orca calculator</p>
-</div></blockquote>
 </dd></dl>
 
 </section>

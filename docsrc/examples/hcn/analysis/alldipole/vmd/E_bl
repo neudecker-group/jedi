@@ -4,19 +4,19 @@
  ************************************************
 
                    Strain Energy (kcal/mol)  Deviation (%)
-      Geometries     1.03887339                  -
- Red. Int. Modes      1.81141750                74.36
+      Ab initio     2.86357217                  -
+ JEDI                 3.33517046                16.47
 
- RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)
-     1       bond                                H0 C7     -0.4       -0.0064859
-     2       bond                                C1 N4     -0.5       -0.0093197
-     3       bond                                C1 H6     -0.4       -0.0068151
-     4       bond                                C2 N3     -0.4       -0.0073573
-     5       bond                                C2 H5     -0.4       -0.0071131
-     6       bond                               C7 N10     -0.5       -0.0098071
-     7       bond                                C8 N9     -0.4       -0.0077929
-     8       bond                               C8 H11     -0.4       -0.0067964
-     9       custom                              H0 N4     25.3        0.4576227
-    10       custom                             H6 N10     26.1        0.4728589
-    11       custom                              H5 N9     26.7        0.4837967
-    12       custom                             N3 H11     25.3        0.4586267
+ RIC No.       RIC type                       indices       Percentage    Energy (kcal/mol)
+     1       bond                                H0 C7      0.0        0.0000000
+     2       bond                                C1 N4      0.0        0.0000000
+     3       bond                                C1 H6      0.0        0.0000000
+     4       bond                                C2 N3      0.0        0.0000000
+     5       bond                                C2 H5     87.0        2.9020917
+     6       bond                               C7 N10      0.0        0.0000000
+     7       bond                                C8 N9      0.0        0.0000000
+     8       bond                               C8 H11      0.0        0.0000000
+     9       custom                              H0 N4      0.0        0.0000000
+    10       custom                             H6 N10      0.0        0.0000000
+    11       custom                              H5 N9     13.3        0.4447575
+    12       custom                             N3 H11     -0.4       -0.0116787

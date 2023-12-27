@@ -1,0 +1,11 @@
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.02568935                  -
+ JEDI                 0.02569675                 0.03
+
+ RIC No.       RIC type                       indices       Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1    100.0        0.0256967

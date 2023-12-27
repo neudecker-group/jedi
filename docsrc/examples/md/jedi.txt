@@ -1,0 +1,1155 @@
+      Step     Time          Energy          fmax
+BFGS:    0 14:49:48        0.440344         3.251800
+BFGS:    1 14:49:48        0.264361         0.347497
+BFGS:    2 14:49:48        0.262860         0.080535
+BFGS:    3 14:49:48        0.262777         0.001453
+0.26313728257648883
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00830589                  -
+ JEDI                 0.00821070                -1.15
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0080703    100.0        0.0082107
+"So what I told you was true... from a certain point of view." "...A certain point of view?!" (Obi-Wan Kenobi and Luke Skywalker)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26337404143266485
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01376568                  -
+ JEDI                 0.01368310                -0.60
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0104182    100.0        0.0136831
+"Remember... The Force will be with you, always." (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26281547478306155
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00088483                  -
+ JEDI                 0.00093142                 5.27
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0027181    100.0        0.0009314
+"You don't have to do this to impress me." (Princess Leia)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26330286515557444
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01212432                  -
+ JEDI                 0.01221670                 0.76
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0098441    100.0        0.0122167
+"I'll never join you." (Luke Skywalker)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2628791644971076
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00235355                  -
+ JEDI                 0.00228533                -2.90
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0042577    100.0        0.0022853
+"Boy, it's lucky you have these compartments." "I use them for smuggling. I never thought I'd be smuggling myself in 'em." (Luke Skywalker and Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26350807492336403
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01685657                  -
+ JEDI                 0.01679035                -0.39
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0115407    100.0        0.0167904
+"I'll never join you." (Luke Skywalker)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26280420367144486
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00062491                  -
+ JEDI                 0.00058764                -5.96
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0021590    100.0        0.0005876
+"...I think I just blasted it." (Luke Skywalker)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2632332740105594
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01051951                  -
+ JEDI                 0.01061581                 0.92
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0091765    100.0        0.0106158
+"He is as clumsy as he is stupid." (Darth Vader)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26277707891849755
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     -0.00000060                  -
+ JEDI                 0.00000042              -169.37
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0000576    100.0        0.0000004
+"How you doin', Chewbecca? Still hanging around with this loser?" (Lando Calrissian)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.263212617830185
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01004316                  -
+ JEDI                 0.00994932                -0.93
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0088838    100.0        0.0099493
+"Aren't you a little short for a Stormtrooper?" (Princess Leia)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2628718331771418
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00218448                  -
+ JEDI                 0.00211831                -3.03
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0040992    100.0        0.0021183
+"You are unwise to lower your defenses!" (Darth Vader)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2634585674832519
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01571490                  -
+ JEDI                 0.01579211                 0.49
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0111923    100.0        0.0157921
+"If you strike me down, I will become more powerful than you could possibly imagine." (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26295566546627525
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00411770                  -
+ JEDI                 0.00403416                -2.03
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0056569    100.0        0.0040342
+"Shut him up or shut him down." (Han Solo about C-3PO)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2631574162825734
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00877019                  -
+ JEDI                 0.00867507                -1.08
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0082954    100.0        0.0086751
+"We seem to be made to suffer. It's our lot in life." (C-3PO)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2627939891275035
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00038936                  -
+ JEDI                 0.00035990                -7.56
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0016896    100.0        0.0003599
+"They're getting closer." "...Oh yeah? Watch this." (Long pause ... the engine sputters and dies.) (Princess Leia and Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2628859057149373
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00250900                  -
+ JEDI                 0.00258153                 2.89
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0045252    100.0        0.0025815
+"Noooo! That's not true! That's impossible." (Luke Skywalker)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26398257678323445
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.02779884                  -
+ JEDI                 0.02777707                -0.08
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0148438    100.0        0.0277771
+"Who's the more foolish; the fool, or the fool who follows him?" (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2631557015617514
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00873064                  -
+ JEDI                 0.00882883                 1.12
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0083686    100.0        0.0088288
+"You've never heard of the Millennium Falcon? It's the ship that made the Kessel run in less than 12 parsecs." (Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26399971790299537
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.02819412                  -
+ JEDI                 0.02822843                 0.12
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0149639    100.0        0.0282284
+"If you strike me down, I will become more powerful than you could possibly imagine." (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2638911005268374
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.02568935                  -
+ JEDI                 0.02569675                 0.03
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0142771    100.0        0.0256967
+"I love you." "I know." (Princess Leia and Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26285975444723375
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00190594                  -
+ JEDI                 0.00197095                 3.41
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0039540    100.0        0.0019710
+"It could be worse." (Garbage creature growls) "It's worse." (Princess Leia and Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26367478471708217
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.02070098                  -
+ JEDI                 0.02074521                 0.21
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0128280    100.0        0.0207452
+"Laugh it up, fuzzball!" (Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2630836523681255
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00706915                  -
+ JEDI                 0.00697489                -1.33
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0074382    100.0        0.0069749
+"May the Force be with you." (Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2636805208372883
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.02083326                  -
+ JEDI                 0.02079575                -0.18
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0128436    100.0        0.0207957
+"The circle is now complete." (Darth Vader)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2627771665884291
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00000142                  -
+ JEDI                 0.00000041               -71.16
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0000570    100.0        0.0000004
+"RRRRRRRRRRR!" (Chewbacca)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2630907946007517
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00723385                  -
+ JEDI                 0.00733121                 1.35
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0076259    100.0        0.0073312
+"He's the brains, sweetheart!" (Han Solo, indicating Luke)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2627830270235354
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00013656                  -
+ JEDI                 0.00011942               -12.56
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0009733    100.0        0.0001194
+"How you doin', Chewbecca? Still hanging around with this loser?" (Lando Calrissian)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2631459899736248
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00850669                  -
+ JEDI                 0.00841150                -1.12
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0081684    100.0        0.0084115
+"Use the Force, Luke." (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2631117669817833
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00771749                  -
+ JEDI                 0.00762253                -1.23
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0077759    100.0        0.0076225
+"Try not. Do... or do not. There is no try." (Yoda)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26343399161167635
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01514816                  -
+ JEDI                 0.01522830                 0.53
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0109907    100.0        0.0152283
+"You'll find I'm full of surprises!" (Luke Skywalker)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26289589930912083
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00273946                  -
+ JEDI                 0.00281444                 2.74
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0047249    100.0        0.0028144
+"You will never find a more wretched hive of scum and villainy. We must be cautious." (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2635103964743952
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01691010                  -
+ JEDI                 0.01684422                -0.39
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0115592    100.0        0.0168442
+"Laugh it up, fuzzball!" (Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26528491764956175
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.05783153                  -
+ JEDI                 0.05833281                 0.87
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0215108    100.0        0.0583328
+"I'll never join you." (Luke Skywalker)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26347847323929874
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01617393                  -
+ JEDI                 0.01624865                 0.46
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0113530    100.0        0.0162487
+"How you doin', Chewbecca? Still hanging around with this loser?" (Lando Calrissian)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26515615650656277
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.05486223                  -
+ JEDI                 0.05444272                -0.76
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0207812    100.0        0.0544427
+"I assure you, Lord Vader. My men are working as fast as they can." "Perhaps I can find new ways to motivate them." (Tiaan Jerjerrod and Darth Vader)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2628763319422107
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00228823                  -
+ JEDI                 0.00235820                 3.06
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0043250    100.0        0.0023582
+"Ungh. And I thought they smelled bad on the outside." (Luke Skywalker)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26426735539634105
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.03436599                  -
+ JEDI                 0.03447622                 0.32
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0165371    100.0        0.0344762
+"You've never heard of the Millennium Falcon? It's the ship that made the Kessel run in less than 12 parsecs." (Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.265368035364012
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.05974827                  -
+ JEDI                 0.06028762                 0.90
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0218683    100.0        0.0602876
+"That's no moon." (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26294415243144575
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00385220                  -
+ JEDI                 0.00393660                 2.19
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0055881    100.0        0.0039366
+"Boy, it's lucky you have these compartments." "I use them for smuggling. I never thought I'd be smuggling myself in 'em." (Luke Skywalker and Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2670590159696129
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.09874321                  -
+ JEDI                 0.09734039                -1.42
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0277873    100.0        0.0973404
+"Use the Force, Luke." (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26399285383348037
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.02803583                  -
+ JEDI                 0.02801153                -0.09
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0149063    100.0        0.0280115
+"No reward is worth this." (Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2668275435681853
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.09340533                  -
+ JEDI                 0.09473678                 1.43
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0274132    100.0        0.0947368
+"What have you done?! I'm BACKWARDS." (C-3PO)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2704333507144201
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.17655722                  -
+ JEDI                 0.18063829                 2.31
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0378534    100.0        0.1806383
+"I love you." "I know." (Princess Leia and Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26309287843805396
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.00728191                  -
+ JEDI                 0.00737933                 1.34
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0076508    100.0        0.0073793
+"Only at the end do you realize the power of the Dark Side." (Emperor Palpatine)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2715888648632603
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.20320401                  -
+ JEDI                 0.19835086                -2.39
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0396659    100.0        0.1983509
+"Told you I did. Reckless is he. ...Now, matters are worse." (Yoda)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26352748031972584
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.01730406                  -
+ JEDI                 0.01737214                 0.39
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0117389    100.0        0.0173721
+"R2-D2, you know better than to trust a strange computer!" (C-3PO)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2700956228464615
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.16876903                  -
+ JEDI                 0.17255205                 2.24
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0369965    100.0        0.1725521
+"Try not. Do... or do not. There is no try." (Yoda)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.2700531678302218
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.16778999                  -
+ JEDI                 0.17153609                 2.23
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1        0.0368874    100.0        0.1715361
+"Would it help if I got out and pushed?!" "...It might!" (Princess Leia and Han Solo)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.26645061148581184
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.08471307                  -
+ JEDI                 0.08366189                -1.24
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0257611    100.0        0.0836619
+"I felt a great disturbance in the force, as if millions of voices suddenly cried out in terror, and were suddenly silenced" (Obi-Wan Kenobi)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+0.27659991516022764
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     0.31876158                  -
+ JEDI                 0.30878871                -3.13
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                N0 N1       -0.0494916    100.0        0.3087887
+"Try not. Do... or do not. There is no try." (Yoda)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%

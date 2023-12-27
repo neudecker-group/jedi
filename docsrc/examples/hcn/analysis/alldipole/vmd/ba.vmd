@@ -72,7 +72,7 @@ mol modcolor 2 top {colorid 31}
 mol modselect 2 top {name N}
 
 # Adding a pbc box
-pbc set {3.394040 4.726810 8.119020 90.000000 90.000000 90.000000}
+pbc set {3.394040 4.726810 8.219020 90.000000 90.000000 90.000000}
 pbc box -color 32
 
 # Adding a representation with the appropriate colorID for each bond
@@ -88,17 +88,17 @@ mol modselect 4 top {index 1 4}
 
 mol addrep top
 mol modstyle 5 top bonds
-mol modcolor 5 top {colorid 29}
+mol modcolor 5 top {colorid 1}
 mol modselect 5 top {index 1 6}
 
 mol addrep top
 mol modstyle 6 top bonds
-mol modcolor 6 top {colorid 1}
+mol modcolor 6 top {colorid 17}
 mol modselect 6 top {index 2 3}
 
 mol addrep top
 mol modstyle 7 top bonds
-mol modcolor 7 top {colorid 1}
+mol modcolor 7 top {colorid 19}
 mol modselect 7 top {index 2 5}
 
 mol addrep top
@@ -108,12 +108,12 @@ mol modselect 8 top {index 7 10}
 
 mol addrep top
 mol modstyle 9 top bonds
-mol modcolor 9 top {colorid 1}
+mol modcolor 9 top {colorid 11}
 mol modselect 9 top {index 8 9}
 
 mol addrep top
 mol modstyle 10 top bonds
-mol modcolor 10 top {colorid 1}
+mol modcolor 10 top {colorid 12}
 mol modselect 10 top {index 8 11}
 
 mol addrep top
@@ -134,27 +134,22 @@ draw line  $a $b width 3 style dashed
 set x [[atomselect top "index 6 10"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 6
+draw  color 1
 draw line  $a $b width 3 style dashed
 set x [[atomselect top "index 5 9"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 1
-draw line  $a $b width 3 style dashed
-set x [[atomselect top "index 3 11"] get {x y z}]
-set a [lindex $x 0] 
-set b [lindex $x 1] 
-draw  color 1
+draw  color 29
 draw line  $a $b width 3 style dashed
 set x [[atomselect top "index 3 13"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 1
+draw  color 28
 draw line  $a $b width 3 style dashed
 set x [[atomselect top "index 11 15"] get {x y z}]
 set a [lindex $x 0] 
 set b [lindex $x 1] 
-draw  color 1
+draw  color 28
 draw line  $a $b width 3 style dashed
 		display update off
 display resetview
@@ -176,7 +171,7 @@ set center [molinfo $old_top get center]
 set center [regsub -all {[{}]} $center ""]
 set center [split $center]
 set min 0.0
-set max 7.931139368511326e-10
+set max 0.013740268496122927
 set length 30.0
 set width [expr $length / 6]
 

@@ -254,107 +254,6 @@ The following is intended to be an inspiration of what can also be analyzed.
 
 
 
-Benzene
--------
-
-Another way to distort molecules is to shrink boxes in periodic boundary conditions.
-
-.. code-block:: python
-
-    from ase.io import read
-    from ase.build import molecule
-    from ase.calculators.vasp import Vasp
-    from ase.vibratrions.vibrations import VibrationsData
-    from jedi.jedi import Jedi
-    import os
-
-    mol=molecule("C6H6")
-    mol.set_cell=([20,20,20])
-    mol.set_pbc([True,True,True])
-    mol.center()
-    #optimize molecule
-    label='opt'
-    mol.calc=Vasp(label='%s/%s'%(label,label),
-                prec='Accurate',
-                xc='PBE',pp='PBE',
-                nsw=0,ivdw=12,
-                lreal=False,ibrion=2, 
-                isym=0,symprec=1.0e-5,
-                encut=315,ediff=0.00001,isif=2,
-                command= "your command to start vasp jobs")
-    mol.calc.write_input(mol)
-    mol=ase.io.read('opt/vasprun.xml')  
-    mol.get_potential_energy()
-    #frequency analysis
-    label='freq'
-    mol.calc=Vasp(label='%s/%s'%(label,label),
-                prec='Accurate',
-                xc='PBE',pp='PBE', 
-                nsw=0,ivdw=12,
-                lreal=False,ibrion=5, 
-                isym=0,symprec=1.0e-5,
-                encut=315,ediff=0.00001,isif=2,
-                command= "your command to start vasp jobs")
-    mol.get_potential_energy()
-    modes=mol.calc.get_vibrations()
-    #distort molecule
-    mol2=mol.copy()
-    mol2.cell=[8,8,8]
-    label='8_8_8'
-    calc = Vasp(label='%s/%s'%(label,label),
-                prec='Accurate',
-                xc='PBE',pp='PBE', 
-                nsw=0,ivdw=12,
-                lreal=False,ibrion=2, 
-                isym=0,symprec=1.0e-5,
-                encut=315,ediff=0.00001,isif=2,
-                command= "your command to start vasp jobs")
-    mol2.calc=calc
-    mol2.get_potential_energy()
-
-    os.chdir('8_8_8')
-    j=Jedi(mol,mol2,modes)
-    j.run()
-    j.vmd_gen(modus='all', man_strain=0.655)
-
-    os.chdir('../..')
-    mol3=mol2.copy()
-    mol3.cell=[6,6,6]
-    label='6_6_6'
-    calc = Vasp(label='%s/%s'%(label,label),
-                prec='Accurate',
-                xc='PBE',pp='PBE', 
-                nsw=0,ivdw=12,
-                lreal=False,ibrion=2, 
-                isym=0,symprec=1.0e-5,
-                encut=315,ediff=0.00001,isif=2,
-                command= "your command to start vasp jobs")
-    mol3.calc=calc
-    mol3.get_potential_energy()
-    os.chdir('6_6_6')
-    j2=Jedi(mol,mol3,modes)
-    j2.run()
-    j2.vmd_gen(modus='all', man_strain=0.655)
-
-.. image:: benzene/ben666.png
-    :width: 18%
-
-.. image:: benzene/analysis/6_6_6/vmd/allcolorbar.pdf
-    :width: 10%
-
-.. image:: benzene/ben888.png
-    :width: 24%
-
-.. image:: benzene/analysis/8_8_8/vmd/allcolorbar.pdf
-    :width: 10%
-
-
-:download:`8_8_8 analysis <benzene/analysis/8_8_8/jedi.txt>`
-:download:`6_6_6 analysis <benzene/analysis/6_6_6/jedi.txt>`
-:download:`All data <benzene/benzene.zip>`
-
-For a better comparison of two seperate analyzes, one can set a reference strain energy for the coloring by using the man_strain parameter.
-
 
 
 Using EFEI
@@ -538,86 +437,17 @@ In another folder the same for Ladenburg benzene:
 :download:`All data <xhcff/xhcff.zip>`
 
 
-Graphene
---------
 
-Analysing functional materials is of particular interest. Graphene is shown as an example.
-
-.. code-block:: python
-
-    import ase.io
-    from ase.vibrations.data import VibrationsData
-    import ase.units
-    from jedi.jedi import Jedi
-    from ase.calculators.vasp import Vasp
-
-
-    mol=ase.io.read('start.xyz')
-
-    label='graphene'
-  
-    calc = Vasp(label='opt/%s'%(label),
-                    prec='Accurate',
-                    xc='PBE',pp='PBE', 
-                    nsw=600,kpts=[6,6,1],
-                    lreal=False,ibrion=2,ivdw=12,
-                    isym=0,symprec=1.0e-5,
-                    encut=315,ediff=0.00001,isif=2,
-                    command= "your command")
-    mol.calc=calc
-    mol.calc.write_input(mol)
-    mol=ase.io.read('opt/vasprun.xml')
-
-    mol.get_potential_energy()
-    ase.io.write('opt.json', mol)
-
-    mol=ase.io.read('opt.json')
-
-    label='graphene_freq'
-    calc3 = Vasp(label='freq/%s'%(label),
-                    prec='Accurate', ibrion=5,
-                    xc='PBE',pp='PBE', 
-                    ivdw=12,kpts=[6,6,1],
-                    lreal=False,isym=0,symprec=1.0e-5,
-                    encut=315,ediff=0.00001,isif=2,
-                    command= "your command")
-
-    mol.calc=calc3
-    mol.get_potential_energy()
-    modes=mol.calc.get_vibrations()
-    modes.write('modes.json')
-
-
-    mol2=ase.io.read('opt.json')
-    cell=mol.get_cell()
-    cell[0][0]-=0.1
-    mol2.set_cell(cell)
-    mol2.set_pbc([ True ,True,  True])
-    label='graphenex-0_1'
-    calc = Vasp(label='x-0_1/%s'%(label),
-                prec='Accurate', 
-                xc='PBE',pp='PBE',nsw=600,
-                lreal=False,ibrion=2,ivdw=12,
-                isym=0,symprec=1.0e-8,
-                encut=315,ediff=0.00001,isif=2
-                command="your command")
-    mol2.calc=calc
-    mol2.get_potential_energy()
-    ase.io.write('x-0_1.json', mol2, format='json')
-    j=Jedi(mol,mol2,modes)
-    j.run()
-    j.vmd_gen()
-
-:download:`Starting geometry <graphene/start.xyz>`
-:download:`Analysis output <graphene/analysis/jedi.txt>`
-:download:`All data <graphene/graphene.zip>`
 
 HCN
 ---
 
+Periodic boundary conditions can also be used as long as the cell's shape is constant throughout the analysis.
 The HCN crystal is an interesting construct to examine bulk behavior. It consists of small molecules with strong intermolecular interactions. The standard Jedi analysis does not include those interactions.
+Here, the distorted structure is got by moving one molecule by 0.1 Å away from its original lattice position and at the same time pulling the H atom by 0.1 Å along the covalent bond.
 
-
+:download:`Starting geometry <hcn/start.xyz>`
+:download:`Distorted geometry <hcn/analysis/sp.json>`
 
 .. code-block:: python
 
@@ -646,34 +476,29 @@ The HCN crystal is an interesting construct to examine bulk behavior. It consist
     vib.summary()
     modes=vib.get_vibrations()
 
-    vib=Vibrations(mol,indices=[0,4,1,6,10,7])
+    vib=Vibrations(mol,indices=[2,3,5,8,9,11])
     vib.run()
     vib.summary()
     partmodes=vib.get_vibrations()
     
-    mol2=mol.copy()
-    cell=mol2.get_cell()
-    cell[2][2]-=0.1
-    mol2.set_cell(cell)
+    mol2=ase.io.read('sp.json')
 
     mol2.calc=calc
 
-    dis=BFGS(mol2)
-    dis.run(fmax=0.05)
-    mol2.set_constraint()
-    ase.io.write('dis.json',mol2)
+    mol.get_potential_energy()
+
 
     j=Jedi(mol,mol2,modes)
 
     
     j.run()
-    j.vmd_gen()
+    j.vmd_gen(label='all')
 
     jpart=Jedi(mol,mol2,partmodes)
    
 
-    jpart.partial_analysis(indices=[0,4,1,6,10,7])
-    jpart.vmd_gen()
+    jpart.partial_analysis(indices=[2,3,5,8,9,11])
+    jpart.vmd_gen(label='part')
 
 The visualization should look like following picture.
 
@@ -689,7 +514,6 @@ The visualization should look like following picture.
 .. image:: hcn/analysis/part/vmd/allcolorbar.pdf
     :width: 10%
 
-The existence of different values for chemical equivalent RIC is caused by the low accuracy which gives a low quality hessian.
 
 To include the dipole interactions for this example, a modified version of the get_hbonds() function can be modified so that C atoms are seen as possible donors.
 
@@ -703,13 +527,13 @@ To include the dipole interactions for this example, a modified version of the g
     j.add_custom_bonds(get_hbonds(mol))
     
     j.run()
-    j.vmd_gen()
+    j.vmd_gen(label='alldipole')
 
     jpart=Jedi(mol,mol2,partmodes)
     j.add_custom_bonds(get_hbonds(mol))
 
-    jpart.partial_analysis(indices=[0,4,1,6,10,7])
-    jpart.vmd_gen()
+    jpart.partial_analysis(indices=[2,3,5,8,9,11])
+    jpart.vmd_gen(label='partdipole')
 
 With dipole interactions the visualization looks as follows
 
@@ -732,3 +556,92 @@ The outputs can be found here.
 :download:`alldipole <hcn/analysis/alldipole/jedi.txt>`
 :download:`partdipole <hcn/analysis/partdipole/jedi.txt>`
 :download:`All data <hcn/hcn.zip>`
+
+Jedi in Molecular Dynamics
+---------------------------
+
+It might be interesting to see the strain energy in bonds during MD simulations since it can show the energy distribution over time. 
+A N2 molecule is simulated at 400 K in the following.
+
+.. video:: ../_images/output.mp4
+    :width: 100
+    :alt: video of N2 at 400 K
+
+Within ASE using the EMT calculator all necessary data is got by
+
+.. code-block:: python
+
+    from ase import Atoms
+    from ase.calculators.emt import EMT
+    from ase.optimize import BFGS
+    from ase.vibrations import Vibrations
+    n2 = Atoms('N2', [(0, 0, 0), (0, 0, 1.1)],
+                calculator=EMT())
+    BFGS(n2).run(fmax=0.01)
+
+    vib = Vibrations(n2)
+    vib.run()
+    modes = vib.get_vibrations()
+
+
+
+
+    from ase import units
+    from ase.io.trajectory import Trajectory
+
+    from ase.md.langevin import Langevin
+
+
+
+    T = 400  # Kelvin
+
+
+    atoms = n2.copy()
+
+    # Describe the interatomic interactions with the Effective Medium Theory
+    atoms.calc = EMT()
+
+    # We want to run MD with constant energy using the Langevin algorithm
+    # with a time step of 5 fs, the temperature T and the friction
+    # coefficient to 0.02 atomic units.
+    dyn = Langevin(atoms, 5 * units.fs, T * units.kB, 0.002)
+
+
+    def printenergy(a=atoms):  # store a reference to atoms in the definition.
+        """Function to print the potential, kinetic and total energy."""
+        epot = a.get_potential_energy() / len(a)
+        ekin = a.get_kinetic_energy() / len(a)
+        print('Energy per atom: Epot = %.3feV  Ekin = %.3feV (T=%3.0fK)  '
+            'Etot = %.3feV' % (epot, ekin, ekin / (1.5 * units.kB), epot + ekin))
+
+
+    dyn.attach(printenergy, interval=50)
+
+    # We also want to save the positions of all atoms after every 100th time step.
+    traj = Trajectory('moldyn3.traj', 'w', atoms)
+    dyn.attach(traj.write, interval=4)
+
+    # Now run the dynamics
+    dyn.run(200)
+
+The Jedi analysis needs to be done for each time step separately. The following generates a Jedi object for each time step comparing it with the optimized state. The visualization scripts for each time step are stored in a different folder named by the parameter "label".
+To have a consistent color coding the maximum strain in one bond over the whole simulation is set as the maimum for the color scale with the parameter "man_strain".
+
+.. code-block:: python
+
+
+    from jedi.jedi import Jedi
+    for i in range(1,51):
+        j = Jedi(n2, Trajectory('moldyn3.traj')[i], modes)
+        print(Trajectory('moldyn3.traj')[i].calc.get_potential_energy())
+        
+        j.run()
+
+        j.vmd_gen(label=str(i), man_strain=0.3087887,modus='all')
+
+
+Here, three time steps are shown as an example.
+
+.. image:: md/frames.pdf
+
+:download:`All data <md/md.zip>`

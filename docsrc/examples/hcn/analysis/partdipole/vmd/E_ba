@@ -4,13 +4,13 @@
  ************************************************
 
                    Strain Energy (kcal/mol)  Deviation (%)
-      Geometries     1.03887339                  -
- Red. Int. Modes     -0.00000001              -100.00
+      Ab initio     2.86357217                  -
+ JEDI                 0.05439978               -98.10
 
- RIM No.       RIM type                       indices       Percentage    Energy (kcal/mol)
-     1       bond                                H0 C7      4.4       -0.0000000
-     2       bond                                C1 N4     28.6       -0.0000000
-     3       bond                                C1 H6    -12.5        0.0000000
-     4       bond                               C7 N10     22.5       -0.0000000
-     5       custom                              H0 N4     40.0       -0.0000000
-     6       custom                             H6 N10     17.0       -0.0000000
+ RIC No.       RIC type                       indices       Percentage    Energy (kcal/mol)
+     1       bond                                C2 N3     14.7        0.0079907
+     2       bond                                C2 H5     15.8        0.0086117
+     3       bond                                C8 N9      9.4        0.0051285
+     4       bond                               C8 H11     10.1        0.0054689
+     5       custom                              H5 N9     25.3        0.0137403
+     6       custom                             N3 H11     24.7        0.0134596

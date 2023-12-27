@@ -62,11 +62,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#more-examples">More Examples</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#benzene">Benzene</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#using-efei">Using EFEI</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hydrostatic-pressure-using-x-hcff">Hydrostatic Pressure using X-HCFF</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#graphene">Graphene</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#hcn">HCN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#jedi-in-molecular-dynamics">Jedi in Molecular Dynamics</a></li>
 </ul>
 </li>
 </ul>
@@ -316,94 +315,6 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <section id="more-examples">
 <h2>More Examples<a class="headerlink" href="#more-examples" title="Permalink to this headline"></a></h2>
 <p>The following is intended to be an inspiration of what can also be analyzed.</p>
-<section id="benzene">
-<h3>Benzene<a class="headerlink" href="#benzene" title="Permalink to this headline"></a></h3>
-<p>Another way to distort molecules is to shrink boxes in periodic boundary conditions.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.io</span> <span class="kn">import</span> <span class="n">read</span>
-<span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">molecule</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.vasp</span> <span class="kn">import</span> <span class="n">Vasp</span>
-<span class="kn">from</span> <span class="nn">ase.vibratrions.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">import</span> <span class="nn">os</span>
-
-<span class="n">mol</span><span class="o">=</span><span class="n">molecule</span><span class="p">(</span><span class="s2">&quot;C6H6&quot;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">set_cell</span><span class="o">=</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">])</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">set_pbc</span><span class="p">([</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">])</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
-<span class="c1">#optimize molecule</span>
-<span class="n">label</span><span class="o">=</span><span class="s1">&#39;opt&#39;</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">Vasp</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">label</span><span class="p">),</span>
-            <span class="n">prec</span><span class="o">=</span><span class="s1">&#39;Accurate&#39;</span><span class="p">,</span>
-            <span class="n">xc</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span><span class="n">pp</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span>
-            <span class="n">nsw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ivdw</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-            <span class="n">lreal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ibrion</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">isym</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">symprec</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span>
-            <span class="n">encut</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span><span class="n">ediff</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">isif</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">command</span><span class="o">=</span> <span class="s2">&quot;your command to start vasp jobs&quot;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">write_input</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;opt/vasprun.xml&#39;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="c1">#frequency analysis</span>
-<span class="n">label</span><span class="o">=</span><span class="s1">&#39;freq&#39;</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">Vasp</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">label</span><span class="p">),</span>
-            <span class="n">prec</span><span class="o">=</span><span class="s1">&#39;Accurate&#39;</span><span class="p">,</span>
-            <span class="n">xc</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span><span class="n">pp</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span>
-            <span class="n">nsw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ivdw</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-            <span class="n">lreal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ibrion</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-            <span class="n">isym</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">symprec</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span>
-            <span class="n">encut</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span><span class="n">ediff</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">isif</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">command</span><span class="o">=</span> <span class="s2">&quot;your command to start vasp jobs&quot;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="n">modes</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
-<span class="c1">#distort molecule</span>
-<span class="n">mol2</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">cell</span><span class="o">=</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
-<span class="n">label</span><span class="o">=</span><span class="s1">&#39;8_8_8&#39;</span>
-<span class="n">calc</span> <span class="o">=</span> <span class="n">Vasp</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">label</span><span class="p">),</span>
-            <span class="n">prec</span><span class="o">=</span><span class="s1">&#39;Accurate&#39;</span><span class="p">,</span>
-            <span class="n">xc</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span><span class="n">pp</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span>
-            <span class="n">nsw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ivdw</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-            <span class="n">lreal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ibrion</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">isym</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">symprec</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span>
-            <span class="n">encut</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span><span class="n">ediff</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">isif</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">command</span><span class="o">=</span> <span class="s2">&quot;your command to start vasp jobs&quot;</span><span class="p">)</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">calc</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-
-<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;8_8_8&#39;</span><span class="p">)</span>
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
-<span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">modus</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">man_strain</span><span class="o">=</span><span class="mf">0.655</span><span class="p">)</span>
-
-<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;../..&#39;</span><span class="p">)</span>
-<span class="n">mol3</span><span class="o">=</span><span class="n">mol2</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">mol3</span><span class="o">.</span><span class="n">cell</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">]</span>
-<span class="n">label</span><span class="o">=</span><span class="s1">&#39;6_6_6&#39;</span>
-<span class="n">calc</span> <span class="o">=</span> <span class="n">Vasp</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">label</span><span class="p">),</span>
-            <span class="n">prec</span><span class="o">=</span><span class="s1">&#39;Accurate&#39;</span><span class="p">,</span>
-            <span class="n">xc</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span><span class="n">pp</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span>
-            <span class="n">nsw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">ivdw</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-            <span class="n">lreal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ibrion</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">isym</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">symprec</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span>
-            <span class="n">encut</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span><span class="n">ediff</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">isif</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">command</span><span class="o">=</span> <span class="s2">&quot;your command to start vasp jobs&quot;</span><span class="p">)</span>
-<span class="n">mol3</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">calc</span>
-<span class="n">mol3</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;6_6_6&#39;</span><span class="p">)</span>
-<span class="n">j2</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol3</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
-<span class="n">j2</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">j2</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">modus</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">man_strain</span><span class="o">=</span><span class="mf">0.655</span><span class="p">)</span>
-</pre></div>
-</div>
-<a class="reference internal image-reference" href="../_images/ben666.png"><img alt="../_images/ben666.png" src="../_images/ben666.png" style="width: 18%;" /></a>
-<a class="reference internal image-reference" href="../_images/allcolorbar4.pdf"><img alt="../_images/allcolorbar4.pdf" src="../_images/allcolorbar4.pdf" style="width: 10%;" /></a>
-<a class="reference internal image-reference" href="../_images/ben888.png"><img alt="../_images/ben888.png" src="../_images/ben888.png" style="width: 24%;" /></a>
-<a class="reference internal image-reference" href="../_images/allcolorbar5.pdf"><img alt="../_images/allcolorbar5.pdf" src="../_images/allcolorbar5.pdf" style="width: 10%;" /></a>
-<p><a class="reference download internal" download="" href="../_downloads/cffbecd405f89462a2467d3a5501d96f/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">8_8_8</span> <span class="pre">analysis</span></code></a>
-<a class="reference download internal" download="" href="../_downloads/d9eddb70c9893cc06619bda7416bcdb2/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">6_6_6</span> <span class="pre">analysis</span></code></a>
-<a class="reference download internal" download="" href="../_downloads/347adbb10b827cb7c391277b31c26d0d/benzene.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
-<p>For a better comparison of two seperate analyzes, one can set a reference strain energy for the coloring by using the man_strain parameter.</p>
-</section>
 <section id="using-efei">
 <h3>Using EFEI<a class="headerlink" href="#using-efei" title="Permalink to this headline"></a></h3>
 <p>Stretching bonds using a predefined force is possible with the EFEI method. The following example shows an ethane molecule of which the C-C bond is stretched with a force of 4 nN.</p>
@@ -449,7 +360,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 </pre></div>
 </div>
 <a class="reference internal image-reference" href="../_images/ethan.png"><img alt="../_images/ethan.png" src="../_images/ethan.png" style="width: 20%;" /></a>
-<a class="reference internal image-reference" href="../_images/allcolorbar6.pdf"><img alt="../_images/allcolorbar6.pdf" src="../_images/allcolorbar6.pdf" style="width: 10%;" /></a>
+<a class="reference internal image-reference" href="../_images/allcolorbar4.pdf"><img alt="../_images/allcolorbar4.pdf" src="../_images/allcolorbar4.pdf" style="width: 10%;" /></a>
 <p><a class="reference download internal" download="" href="../_downloads/7d133d767bd3cf4912db90a6a292734d/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">Analysis</span> <span class="pre">output</span></code></a>
 <a class="reference download internal" download="" href="../_downloads/e485766bcae1a436ad300fdb19a4ec93/ethane.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
 </section>
@@ -568,80 +479,13 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <a class="reference download internal" download="" href="../_downloads/466cb0321d92434949d97c20e0a421c1/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">Ladenburg</span> <span class="pre">analysis</span></code></a>
 <a class="reference download internal" download="" href="../_downloads/41dc6ec6ab2d409072d60fc052411785/xhcff.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
 </section>
-<section id="graphene">
-<h3>Graphene<a class="headerlink" href="#graphene" title="Permalink to this headline"></a></h3>
-<p>Analysing functional materials is of particular interest. Graphene is shown as an example.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations.data</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">import</span> <span class="nn">ase.units</span>
-<span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.vasp</span> <span class="kn">import</span> <span class="n">Vasp</span>
-
-
-<span class="n">mol</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;start.xyz&#39;</span><span class="p">)</span>
-
-<span class="n">label</span><span class="o">=</span><span class="s1">&#39;graphene&#39;</span>
-
-<span class="n">calc</span> <span class="o">=</span> <span class="n">Vasp</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;opt/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">),</span>
-                <span class="n">prec</span><span class="o">=</span><span class="s1">&#39;Accurate&#39;</span><span class="p">,</span>
-                <span class="n">xc</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span><span class="n">pp</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span>
-                <span class="n">nsw</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span><span class="n">kpts</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
-                <span class="n">lreal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ibrion</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">ivdw</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-                <span class="n">isym</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">symprec</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span>
-                <span class="n">encut</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span><span class="n">ediff</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">isif</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">command</span><span class="o">=</span> <span class="s2">&quot;your command&quot;</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">calc</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">write_input</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-<span class="n">mol</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;opt/vasprun.xml&#39;</span><span class="p">)</span>
-
-<span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;opt.json&#39;</span><span class="p">,</span> <span class="n">mol</span><span class="p">)</span>
-
-<span class="n">mol</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;opt.json&#39;</span><span class="p">)</span>
-
-<span class="n">label</span><span class="o">=</span><span class="s1">&#39;graphene_freq&#39;</span>
-<span class="n">calc3</span> <span class="o">=</span> <span class="n">Vasp</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;freq/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">),</span>
-                <span class="n">prec</span><span class="o">=</span><span class="s1">&#39;Accurate&#39;</span><span class="p">,</span> <span class="n">ibrion</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-                <span class="n">xc</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span><span class="n">pp</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span>
-                <span class="n">ivdw</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span><span class="n">kpts</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span>
-                <span class="n">lreal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">isym</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">symprec</span><span class="o">=</span><span class="mf">1.0e-5</span><span class="p">,</span>
-                <span class="n">encut</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span><span class="n">ediff</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">isif</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                <span class="n">command</span><span class="o">=</span> <span class="s2">&quot;your command&quot;</span><span class="p">)</span>
-
-<span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">calc3</span>
-<span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="n">modes</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
-<span class="n">modes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;modes.json&#39;</span><span class="p">)</span>
-
-
-<span class="n">mol2</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;opt.json&#39;</span><span class="p">)</span>
-<span class="n">cell</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
-<span class="n">cell</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-=</span><span class="mf">0.1</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">set_pbc</span><span class="p">([</span> <span class="kc">True</span> <span class="p">,</span><span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">])</span>
-<span class="n">label</span><span class="o">=</span><span class="s1">&#39;graphenex-0_1&#39;</span>
-<span class="n">calc</span> <span class="o">=</span> <span class="n">Vasp</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;x-0_1/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">),</span>
-            <span class="n">prec</span><span class="o">=</span><span class="s1">&#39;Accurate&#39;</span><span class="p">,</span>
-            <span class="n">xc</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span><span class="n">pp</span><span class="o">=</span><span class="s1">&#39;PBE&#39;</span><span class="p">,</span><span class="n">nsw</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span>
-            <span class="n">lreal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">ibrion</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">ivdw</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
-            <span class="n">isym</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">symprec</span><span class="o">=</span><span class="mf">1.0e-8</span><span class="p">,</span>
-            <span class="n">encut</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span><span class="n">ediff</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">isif</span><span class="o">=</span><span class="mi">2</span>
-            <span class="n">command</span><span class="o">=</span><span class="s2">&quot;your command&quot;</span><span class="p">)</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">calc</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;x-0_1.json&#39;</span><span class="p">,</span> <span class="n">mol2</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
-<span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
-</pre></div>
-</div>
-<p><a class="reference download internal" download="" href="../_downloads/39ce3ffe2b205c3786710d1f25d650b9/start.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Starting</span> <span class="pre">geometry</span></code></a>
-<a class="reference download internal" download="" href="../_downloads/e8ad23a5650e80762851f4777e067fa3/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">Analysis</span> <span class="pre">output</span></code></a>
-<a class="reference download internal" download="" href="../_downloads/404fb6e06f224e29695aecbc159d6d84/graphene.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
-</section>
 <section id="hcn">
 <h3>HCN<a class="headerlink" href="#hcn" title="Permalink to this headline"></a></h3>
-<p>The HCN crystal is an interesting construct to examine bulk behavior. It consists of small molecules with strong intermolecular interactions. The standard Jedi analysis does not include those interactions.</p>
+<p>Periodic boundary conditions can also be used as long as the cell’s shape is constant throughout the analysis.
+The HCN crystal is an interesting construct to examine bulk behavior. It consists of small molecules with strong intermolecular interactions. The standard Jedi analysis does not include those interactions.
+Here, the distorted structure is got by moving one molecule by 0.1 Å away from its original lattice position and at the same time pulling the H atom by 0.1 Å along the covalent bond.</p>
+<p><a class="reference download internal" download="" href="../_downloads/b8c5eea2c93479d84737b5e232f003ab/start.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Starting</span> <span class="pre">geometry</span></code></a>
+<a class="reference download internal" download="" href="../_downloads/6c8c90624b9a928ce38529f224adad85/sp.json"><code class="xref download docutils literal notranslate"><span class="pre">Distorted</span> <span class="pre">geometry</span></code></a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gpaw</span> <span class="kn">import</span> <span class="n">GPAW</span> <span class="p">,</span> <span class="n">PW</span>
 <span class="kn">from</span> <span class="nn">ase.optimize</span> <span class="kn">import</span> <span class="n">BFGS</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">Vibrations</span>
@@ -667,42 +511,36 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="n">vib</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 <span class="n">modes</span><span class="o">=</span><span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
 
-<span class="n">vib</span><span class="o">=</span><span class="n">Vibrations</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
+<span class="n">vib</span><span class="o">=</span><span class="n">Vibrations</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">11</span><span class="p">])</span>
 <span class="n">vib</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">vib</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
 <span class="n">partmodes</span><span class="o">=</span><span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
 
-<span class="n">mol2</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-<span class="n">cell</span><span class="o">=</span><span class="n">mol2</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span>
-<span class="n">cell</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="o">-=</span><span class="mf">0.1</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+<span class="n">mol2</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;sp.json&#39;</span><span class="p">)</span>
 
 <span class="n">mol2</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">calc</span>
 
-<span class="n">dis</span><span class="o">=</span><span class="n">BFGS</span><span class="p">(</span><span class="n">mol2</span><span class="p">)</span>
-<span class="n">dis</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">fmax</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
-<span class="n">mol2</span><span class="o">.</span><span class="n">set_constraint</span><span class="p">()</span>
-<span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;dis.json&#39;</span><span class="p">,</span><span class="n">mol2</span><span class="p">)</span>
+<span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+
 
 <span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
 
 
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
+<span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
 
 <span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">partmodes</span><span class="p">)</span>
 
 
-<span class="n">jpart</span><span class="o">.</span><span class="n">partial_analysis</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
-<span class="n">jpart</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
+<span class="n">jpart</span><span class="o">.</span><span class="n">partial_analysis</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">11</span><span class="p">])</span>
+<span class="n">jpart</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;part&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The visualization should look like following picture.</p>
 <a class="reference internal image-reference" href="../_images/all.pdf"><img alt="../_images/all.pdf" src="../_images/all.pdf" style="width: 30%;" /></a>
-<a class="reference internal image-reference" href="../_images/allcolorbar7.pdf"><img alt="../_images/allcolorbar7.pdf" src="../_images/allcolorbar7.pdf" style="width: 10%;" /></a>
+<a class="reference internal image-reference" href="../_images/allcolorbar5.pdf"><img alt="../_images/allcolorbar5.pdf" src="../_images/allcolorbar5.pdf" style="width: 10%;" /></a>
 <a class="reference internal image-reference" href="../_images/part.pdf"><img alt="../_images/part.pdf" src="../_images/part.pdf" style="width: 30%;" /></a>
-<a class="reference internal image-reference" href="../_images/allcolorbar8.pdf"><img alt="../_images/allcolorbar8.pdf" src="../_images/allcolorbar8.pdf" style="width: 10%;" /></a>
-<p>The existence of different values for chemical equivalent RIC is caused by the low accuracy which gives a low quality hessian.</p>
+<a class="reference internal image-reference" href="../_images/allcolorbar6.pdf"><img alt="../_images/allcolorbar6.pdf" src="../_images/allcolorbar6.pdf" style="width: 10%;" /></a>
 <p>To include the dipole interactions for this example, a modified version of the get_hbonds() function can be modified so that C atoms are seen as possible donors.</p>
 <p><a class="reference download internal" download="" href="../_downloads/331c95e5926ead85b07504973ac5fac2/dipole.py"><code class="xref download docutils literal notranslate"><span class="pre">get_hbonds()</span></code></a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dipole</span> <span class="kn">import</span> <span class="n">get_hbonds</span>
@@ -711,26 +549,101 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">))</span>
 
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
+<span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;alldipole&#39;</span><span class="p">)</span>
 
 <span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">partmodes</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">))</span>
 
-<span class="n">jpart</span><span class="o">.</span><span class="n">partial_analysis</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
-<span class="n">jpart</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
+<span class="n">jpart</span><span class="o">.</span><span class="n">partial_analysis</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">11</span><span class="p">])</span>
+<span class="n">jpart</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;partdipole&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>With dipole interactions the visualization looks as follows</p>
 <a class="reference internal image-reference" href="../_images/alldipole.pdf"><img alt="../_images/alldipole.pdf" src="../_images/alldipole.pdf" style="width: 30%;" /></a>
-<a class="reference internal image-reference" href="../_images/allcolorbar9.pdf"><img alt="../_images/allcolorbar9.pdf" src="../_images/allcolorbar9.pdf" style="width: 10%;" /></a>
+<a class="reference internal image-reference" href="../_images/allcolorbar7.pdf"><img alt="../_images/allcolorbar7.pdf" src="../_images/allcolorbar7.pdf" style="width: 10%;" /></a>
 <a class="reference internal image-reference" href="../_images/partdipole.pdf"><img alt="../_images/partdipole.pdf" src="../_images/partdipole.pdf" style="width: 30%;" /></a>
-<a class="reference internal image-reference" href="../_images/allcolorbar10.pdf"><img alt="../_images/allcolorbar10.pdf" src="../_images/allcolorbar10.pdf" style="width: 10%;" /></a>
+<a class="reference internal image-reference" href="../_images/allcolorbar8.pdf"><img alt="../_images/allcolorbar8.pdf" src="../_images/allcolorbar8.pdf" style="width: 10%;" /></a>
 <p>The outputs can be found here.</p>
 <p><a class="reference download internal" download="" href="../_downloads/27d28aff5588d66741b548371ccb3cd1/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">all</span></code></a>
 <a class="reference download internal" download="" href="../_downloads/39a25034940278073709d6f528b8ea03/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">part</span></code></a>
 <a class="reference download internal" download="" href="../_downloads/68b5cfb1a42deaebfa2986e4b292e49c/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">alldipole</span></code></a>
 <a class="reference download internal" download="" href="../_downloads/e3619bbf8d5eb29256213988daadf866/jedi.txt"><code class="xref download docutils literal notranslate"><span class="pre">partdipole</span></code></a>
 <a class="reference download internal" download="" href="../_downloads/65995733bd301b60437f786bf109db10/hcn.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
+</section>
+<section id="jedi-in-molecular-dynamics">
+<h3>Jedi in Molecular Dynamics<a class="headerlink" href="#jedi-in-molecular-dynamics" title="Permalink to this headline"></a></h3>
+<p>It might be interesting to see the strain energy in bonds during MD simulations since it can show the energy distribution over time.
+A N2 molecule is simulated at 400 K in the following.</p>
+<video controls="True" preload="auto" width="100"><source src="../_images/output.mp4" type="video/mp4">video of N2 at 400 K</video><p>Within ASE using the EMT calculator all necessary data is got by</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.emt</span> <span class="kn">import</span> <span class="n">EMT</span>
+<span class="kn">from</span> <span class="nn">ase.optimize</span> <span class="kn">import</span> <span class="n">BFGS</span>
+<span class="kn">from</span> <span class="nn">ase.vibrations</span> <span class="kn">import</span> <span class="n">Vibrations</span>
+<span class="n">n2</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="s1">&#39;N2&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)],</span>
+            <span class="n">calculator</span><span class="o">=</span><span class="n">EMT</span><span class="p">())</span>
+<span class="n">BFGS</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">fmax</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+<span class="n">vib</span> <span class="o">=</span> <span class="n">Vibrations</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
+<span class="n">vib</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="n">modes</span> <span class="o">=</span> <span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
+
+
+
+
+<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span> <span class="nn">ase.io.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
+
+<span class="kn">from</span> <span class="nn">ase.md.langevin</span> <span class="kn">import</span> <span class="n">Langevin</span>
+
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="mi">400</span>  <span class="c1"># Kelvin</span>
+
+
+<span class="n">atoms</span> <span class="o">=</span> <span class="n">n2</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># Describe the interatomic interactions with the Effective Medium Theory</span>
+<span class="n">atoms</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">EMT</span><span class="p">()</span>
+
+<span class="c1"># We want to run MD with constant energy using the Langevin algorithm</span>
+<span class="c1"># with a time step of 5 fs, the temperature T and the friction</span>
+<span class="c1"># coefficient to 0.02 atomic units.</span>
+<span class="n">dyn</span> <span class="o">=</span> <span class="n">Langevin</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="n">T</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">kB</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">printenergy</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">atoms</span><span class="p">):</span>  <span class="c1"># store a reference to atoms in the definition.</span>
+    <span class="sd">&quot;&quot;&quot;Function to print the potential, kinetic and total energy.&quot;&quot;&quot;</span>
+    <span class="n">epot</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">ekin</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get_kinetic_energy</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Energy per atom: Epot = </span><span class="si">%.3f</span><span class="s1">eV  Ekin = </span><span class="si">%.3f</span><span class="s1">eV (T=</span><span class="si">%3.0f</span><span class="s1">K)  &#39;</span>
+        <span class="s1">&#39;Etot = </span><span class="si">%.3f</span><span class="s1">eV&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">epot</span><span class="p">,</span> <span class="n">ekin</span><span class="p">,</span> <span class="n">ekin</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1.5</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">kB</span><span class="p">),</span> <span class="n">epot</span> <span class="o">+</span> <span class="n">ekin</span><span class="p">))</span>
+
+
+<span class="n">dyn</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">printenergy</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="c1"># We also want to save the positions of all atoms after every 100th time step.</span>
+<span class="n">traj</span> <span class="o">=</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
+<span class="n">dyn</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">traj</span><span class="o">.</span><span class="n">write</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Now run the dynamics</span>
+<span class="n">dyn</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The Jedi analysis needs to be done for each time step separately. The following generates a Jedi object for each time step comparing it with the optimized state. The visualization scripts for each time step are stored in a different folder named by the parameter “label”.
+To have a consistent color coding the maximum strain in one bond over the whole simulation is set as the maimum for the color scale with the parameter “man_strain”.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">51</span><span class="p">):</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">modes</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">())</span>
+
+    <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+    <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">man_strain</span><span class="o">=</span><span class="mf">0.3087887</span><span class="p">,</span><span class="n">modus</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here, three time steps are shown as an example.</p>
+<img alt="../_images/frames.pdf" src="../_images/frames.pdf" />
+<p><a class="reference download internal" download="" href="../_downloads/666608bd73de05642fa7ca4438cca84a/md.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
 </section>
 </section>
 </section>

@@ -1,0 +1,18 @@
+# Load a molecule
+mol new xF.xyz
+
+# Change bond radii and various resolution parameters
+mol representation cpk 0.8 0.0 30 5
+mol representation bonds 0.2 30
+
+# Change the drawing method of the first graphical representation to CPK
+mol modstyle 0 top cpk
+# Color only H atoms white
+mol modselect 0 top {name H}
+# Change the color of the graphical representation 0 to white
+color change rgb 0 1.00 1.00 1.00
+mol modcolor 0 top {colorid 0}
+# The background should be white ("blue" has the colorID 0, which we have changed to white)
+color Display Background blue
+
+# Define the other colorIDs

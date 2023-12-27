@@ -72,58 +72,58 @@ mol modcolor 2 top {colorid 31}
 mol modselect 2 top {name N}
 
 # Adding a pbc box
-pbc set {3.394040 4.726810 8.119020 90.000000 90.000000 90.000000}
+pbc set {3.394040 4.726810 8.219020 90.000000 90.000000 90.000000}
 pbc box -color 32
 
 # Adding a representation with the appropriate colorID for each bond
 mol addrep top
 mol modstyle 3 top bonds
-mol modcolor 3 top {colorid 29}
-mol modselect 3 top {index 0 7}
+mol modcolor 3 top {colorid 1}
+mol modselect 3 top {index 2 3}
 
 mol addrep top
 mol modstyle 4 top bonds
 mol modcolor 4 top {colorid 1}
-mol modselect 4 top {index 1 4}
+mol modselect 4 top {index 2 5}
 
 mol addrep top
 mol modstyle 5 top bonds
 mol modcolor 5 top {colorid 1}
-mol modselect 5 top {index 1 6}
+mol modselect 5 top {index 8 9}
 
 mol addrep top
 mol modstyle 6 top bonds
-mol modcolor 6 top {colorid 29}
-mol modselect 6 top {index 7 10}
+mol modcolor 6 top {colorid 1}
+mol modselect 6 top {index 8 11}
 
 mol addrep top
 mol modstyle 7 top bonds
 mol modcolor 7 top {colorid 32}
-mol modselect 7 top {index 2 3}
+mol modselect 7 top {index 0 7}
 
 mol addrep top
 mol modstyle 8 top bonds
 mol modcolor 8 top {colorid 32}
-mol modselect 8 top {index 2 5}
+mol modselect 8 top {index 1 4}
 
 mol addrep top
 mol modstyle 9 top bonds
 mol modcolor 9 top {colorid 32}
-mol modselect 9 top {index 8 9}
+mol modselect 9 top {index 1 6}
 
 mol addrep top
 mol modstyle 10 top bonds
 mol modcolor 10 top {colorid 32}
-mol modselect 10 top {index 8 11}
+mol modselect 10 top {index 7 10}
 
 mol addrep top
 mol modstyle 11 top bonds
-mol modcolor 11 top {colorid 29}
+mol modcolor 11 top {colorid 32}
 mol modselect 11 top {index 0 12}
 
 mol addrep top
 mol modstyle 12 top bonds
-mol modcolor 12 top {colorid 29}
+mol modcolor 12 top {colorid 32}
 mol modselect 12 top {index 7 13}
 
 		display update off
@@ -146,7 +146,7 @@ set center [molinfo $old_top get center]
 set center [regsub -all {[{}]} $center ""]
 set center [split $center]
 set min 0.0
-set max 2.5051849836284712e-11
+set max 0.0
 set length 30.0
 set width [expr $length / 6]
 
