@@ -99,12 +99,6 @@
              
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
-<section id="git">
-<h2>Git<a class="headerlink" href="#git" title="Permalink to this headline"></a></h2>
-<p><a class="reference external" href="https://git-scm.com/">Git</a> is used as version control system for JEDI.
-Thus it is also used to clone the <a class="reference external" href="https://github.com/neudecker-group/jedi">JEDI source code repository</a>
-from <a class="reference external" href="https://github.com/">Github</a> to a local system where JEDI should be installed.</p>
-</section>
 <section id="python">
 <h2>Python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h2>
 <p>JEDI is a tool using the ASE api. JEDI requires at least Python version 3.7.</p>
@@ -162,6 +156,12 @@ You can use the package installer <code class="docutils literal notranslate"><sp
 </div>
 </section>
 </section>
+<section id="git">
+<h2>Git<a class="headerlink" href="#git" title="Permalink to this headline"></a></h2>
+<p><a class="reference external" href="https://git-scm.com/">Git</a> is used as version control system for JEDI.
+Thus it is also used to clone the <a class="reference external" href="https://github.com/neudecker-group/jedi">JEDI source code repository</a>
+from <a class="reference external" href="https://github.com/">Github</a> to a local system where JEDI should be installed.</p>
+</section>
 <section id="clone-the-jedi-repository">
 <h2>Clone the JEDI repository<a class="headerlink" href="#clone-the-jedi-repository" title="Permalink to this headline"></a></h2>
 <p>Clone the JEDI repository to your local machine with <code class="docutils literal notranslate"><span class="pre">git</span></code> from GitHub:</p>
@@ -169,7 +169,10 @@ You can use the package installer <code class="docutils literal notranslate"><sp
 </pre></div>
 </div>
 <p>This clones the JEDI repository to a local folder <code class="docutils literal notranslate"><span class="pre">jedi</span></code>.</p>
-<p>Add ~/jedi to your $PYTHONPATH environment variable (assuming ~/jedi is where your jedi folder is).</p>
+<p>Add ~/path_to_folder/jedi to your $PYTHONPATH environment variable (assuming ~/path_to_folder/ is where your jedi folder is located).</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">export $PYTHONPATH=~/path_to_folder/jedi:$PYTHONPATH</span>
+</pre></div>
+</div>
 </section>
 </section>
 
