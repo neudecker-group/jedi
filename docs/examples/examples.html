@@ -143,8 +143,8 @@ For better results, a higher accuracy is needed.</p>
                     <span class="n">EmpiricalDispersion</span><span class="o">=</span><span class="s1">&#39;GD3BJ&#39;</span><span class="p">,</span>
                     <span class="n">scf</span><span class="o">=</span><span class="s1">&#39;qc&#39;</span><span class="p">)</span>
 <span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="n">modes</span> <span class="o">=</span> <span class="n">get_vibrations</span><span class="p">(</span><span class="s1">&#39;freq&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
-<span class="n">modes</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;modes.json&#39;</span><span class="p">)</span>
+<span class="n">hessian</span> <span class="o">=</span> <span class="n">get_vibrations</span><span class="p">(</span><span class="s1">&#39;freq&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
+<span class="n">hessian</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;modes.json&#39;</span><span class="p">)</span>
 
 <span class="n">mol2</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 <span class="n">v</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">get_distance</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">27</span><span class="p">)</span><span class="o">+</span><span class="mf">0.1</span>
@@ -168,7 +168,7 @@ For better results, a higher accuracy is needed.</p>
 <span class="n">opt</span><span class="o">=</span><span class="n">GaussianOptimizer</span><span class="p">(</span><span class="n">mol2</span><span class="p">,</span><span class="n">calc</span><span class="p">)</span>
 <span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">fmax</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">opt</span><span class="o">=</span><span class="s1">&#39;ModRedundant&#39;</span><span class="p">)</span>
 
-<span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol2</span><span class="p">))</span>
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
@@ -186,8 +186,8 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 <span class="n">mol</span><span class="o">=</span><span class="n">read_gaussian_out</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 <span class="n">file2</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;output/dist.log&#39;</span><span class="p">)</span>
 <span class="n">mol2</span><span class="o">=</span><span class="n">read_gaussian_out</span><span class="p">(</span><span class="n">file2</span><span class="p">)</span>
-<span class="n">modes</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="s1">&#39;output/freq&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">hessian</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="s1">&#39;output/freq&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol2</span><span class="p">))</span>
 
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -241,7 +241,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
                 <span class="n">encut</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span><span class="n">ediff</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span><span class="n">isif</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
                 <span class="n">command</span><span class="o">=</span> <span class="s2">&quot;your command to start vasp jobs&quot;</span><span class="p">)</span>
 <span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="n">modes</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
+<span class="n">hessian</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
 
 <span class="n">c</span> <span class="o">=</span> <span class="n">FixAtoms</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">17</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">19</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">21</span><span class="p">])</span>
 <span class="n">mol</span><span class="o">.</span><span class="n">set_constraint</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
@@ -253,8 +253,8 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 
 <span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">calc3</span>
 <span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
-<span class="n">partmodes</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
-<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s1">&#39;p-hessian&#39;</span><span class="p">,</span><span class="n">partmodes</span><span class="o">.</span><span class="n">_hessian2d</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%25s</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1">#VibrationsData.write does not allow saving partial hessian</span>
+<span class="n">parthessian</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
+<span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="s1">&#39;p-hessian&#39;</span><span class="p">,</span><span class="n">parthessian</span><span class="o">.</span><span class="n">_hessian2d</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%25s</span><span class="s1">&#39;</span><span class="p">)</span> <span class="c1">#VibrationsData.write does not allow saving partial hessian</span>
 
 <span class="n">mol</span><span class="o">.</span><span class="n">set_constraint</span><span class="p">()</span>
 <span class="c1">#distort molecule</span>
@@ -278,14 +278,14 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 
 <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
 <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 
 <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;../..&#39;</span><span class="p">)</span>
 <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;partial&#39;</span><span class="p">)</span>
 <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;partial&#39;</span><span class="p">)</span>
-<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">partmodes</span><span class="p">)</span>
+<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">parthessian</span><span class="p">)</span>
 <span class="n">jpart</span><span class="o">.</span><span class="n">partial_analysis</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">16</span><span class="p">])</span>
 <span class="n">jpart</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 </pre></div>
@@ -301,7 +301,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;../..&#39;</span><span class="p">)</span>
 <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;special&#39;</span><span class="p">)</span>
 <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;special&#39;</span><span class="p">)</span>
-<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 <span class="n">jpart</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">16</span><span class="p">])</span>
 <span class="n">jpart</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 </pre></div>
@@ -340,7 +340,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
             <span class="n">task</span><span class="o">=</span><span class="s1">&#39;sp&#39;</span><span class="p">)</span>
 <span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
 
-<span class="n">modes</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="s1">&#39;orcafreq&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
+<span class="n">hessian</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="s1">&#39;orcafreq&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
 
 <span class="n">mol2</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 <span class="n">calc</span> <span class="o">=</span> <span class="n">ORCA</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;stretch&#39;</span><span class="p">,</span>
@@ -354,7 +354,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;force.json&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
 
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 </pre></div>
@@ -397,7 +397,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="n">mol</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">calc</span>
 <span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;hessian&#39;</span><span class="p">],</span><span class="n">atoms</span><span class="o">=</span><span class="n">mol</span><span class="p">)</span>
 
-<span class="n">modes</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
+<span class="n">hessian</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
 
 <span class="n">label</span><span class="o">=</span><span class="s1">&#39;force&#39;</span>
 <span class="n">mol2</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.json&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
@@ -414,7 +414,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;xhcff/50GB/</span><span class="si">%s</span><span class="s1">.json&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">),</span><span class="n">mol2</span><span class="p">)</span>
 
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 </pre></div>
@@ -450,7 +450,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="n">mol</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">calc</span>
 <span class="n">mol</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;hessian&#39;</span><span class="p">],</span><span class="n">atoms</span><span class="o">=</span><span class="n">mol</span><span class="p">)</span>
 
-<span class="n">modes</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
+<span class="n">hessian</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
 
 <span class="n">label</span><span class="o">=</span><span class="s1">&#39;force&#39;</span>
 <span class="n">mol2</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.json&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
@@ -467,7 +467,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="n">opt</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;xhcff/50GB/</span><span class="si">%s</span><span class="s1">.json&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">label</span><span class="p">),</span><span class="n">mol2</span><span class="p">)</span>
 
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 </pre></div>
@@ -509,12 +509,12 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
 <span class="n">vib</span><span class="o">=</span><span class="n">Vibrations</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 <span class="n">vib</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">vib</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
-<span class="n">modes</span><span class="o">=</span><span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
+<span class="n">hessian</span><span class="o">=</span><span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
 
 <span class="n">vib</span><span class="o">=</span><span class="n">Vibrations</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">11</span><span class="p">])</span>
 <span class="n">vib</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">vib</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
-<span class="n">partmodes</span><span class="o">=</span><span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
+<span class="n">parthessian</span><span class="o">=</span><span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
 
 <span class="n">mol2</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;sp.json&#39;</span><span class="p">)</span>
 
@@ -523,13 +523,13 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
 <span class="n">mol</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
 
 
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 
 
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
 
-<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">partmodes</span><span class="p">)</span>
+<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">parthessian</span><span class="p">)</span>
 
 
 <span class="n">jpart</span><span class="o">.</span><span class="n">partial_analysis</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">11</span><span class="p">])</span>
@@ -545,13 +545,13 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
 <p><a class="reference download internal" download="" href="../_downloads/331c95e5926ead85b07504973ac5fac2/dipole.py"><code class="xref download docutils literal notranslate"><span class="pre">get_hbonds()</span></code></a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dipole</span> <span class="kn">import</span> <span class="n">get_hbonds</span>
 
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">))</span>
 
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;alldipole&#39;</span><span class="p">)</span>
 
-<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">partmodes</span><span class="p">)</span>
+<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">parthessian</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">))</span>
 
 <span class="n">jpart</span><span class="o">.</span><span class="n">partial_analysis</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">11</span><span class="p">])</span>
@@ -585,7 +585,7 @@ A N2 molecule is simulated at 400 K in the following.</p>
 
 <span class="n">vib</span> <span class="o">=</span> <span class="n">Vibrations</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
 <span class="n">vib</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">modes</span> <span class="o">=</span> <span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
+<span class="n">hessian</span> <span class="o">=</span> <span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
 
 
 
@@ -633,7 +633,7 @@ A N2 molecule is simulated at 400 K in the following.</p>
 To have a consistent color coding the maximum strain in one bond over the whole simulation is set as the maimum for the color scale with the parameter “man_strain”.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">51</span><span class="p">):</span>
-    <span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">modes</span><span class="p">)</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">hessian</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">())</span>
 
     <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
