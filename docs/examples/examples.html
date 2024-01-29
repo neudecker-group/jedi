@@ -424,8 +424,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="kn">from</span> <span class="nn">ase.calculators.qchem</span> <span class="kn">import</span> <span class="n">QChem</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.data</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.qchem</span> <span class="kn">import</span> <span class="n">QChemOptimizer</span>
-<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span>
+<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span>,<span class="n">QChemOptimizer</span>
 <span class="n">mol</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Ladenburg.xyz&#39;</span><span class="p">)</span>
 
 <span class="n">label</span><span class="o">=</span><span class="s1">&#39;opt&#39;</span>
