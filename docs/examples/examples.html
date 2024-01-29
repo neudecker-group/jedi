@@ -491,8 +491,8 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
 <span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">from</span> <span class="nn">ase.calculators.dftd3</span> <span class="kn">import</span> <span class="n">DFTD3</span>
 
-<span class="kn">from</span> <span class="nn">gpaw.analyse.vdwradii</span> <span class="kn">import</span> <span class="n">vdWradii</span>
-<span class="kn">from</span> <span class="nn">ase.constraints</span> <span class="kn">import</span> <span class="n">FixAtoms</span>
+<span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
+
 
 <span class="n">mol</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;start.xyz&#39;</span><span class="p">)</span>
 <span class="n">convergence</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;energy&#39;</span><span class="p">:</span> <span class="mf">0.00001</span><span class="p">}</span>
