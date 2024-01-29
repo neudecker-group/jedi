@@ -210,7 +210,7 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 For the partial analysis, the hessian of only one phenyl ring is calculated yielding near identical values as when calculated for the whole system.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">from</span> <span class="nn">ase.calculators.vasp</span> <span class="kn">import</span> <span class="n">Vasp</span>
-<span class="kn">from</span> <span class="nn">ase.vibratrions.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -320,7 +320,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <h3>Using EFEI<a class="headerlink" href="#using-efei" title="Permalink to this headline"></a></h3>
 <p>Stretching bonds using a predefined force is possible with the EFEI method. The following example shows an ethane molecule of which the C-C bond is stretched with a force of 4 nN.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">molecule</span>
-<span class="kn">from</span> <span class="nn">ase.vibratrions.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
 <span class="kn">from</span> <span class="nn">ase.calculators.orca</span> <span class="kn">import</span> <span class="n">ORCA</span>
 <span class="kn">from</span> <span class="nn">jedi.io.orca</span> <span class="kn">import</span> <span class="n">OrcaOptimizer</span><span class="p">,</span> <span class="n">get_vibrations</span>
