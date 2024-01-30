@@ -12,6 +12,7 @@ _re_atom = re.compile(
     r'^\s*\S+\s+(\S+)\s+(?:\S+\s+)?(\S+)\s+(\S+)\s+(\S+)\s*$'
 )
         
+
 def read_gaussian_out(fd, index=-1):
     '''
     modified for reading gaussian geometry optimizations
