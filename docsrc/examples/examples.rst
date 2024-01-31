@@ -258,49 +258,48 @@ Stretching bonds using a predefined force is possible with the EFEI method. The 
 .. code-block:: python
 
     from ase.build import molecule
-    from ase.vibratrions.vibrations import VibrationsData
+    from ase.vibrations.vibrations import VibrationsData
     from jedi.jedi import Jedi
-    from jedi.io.orca import get_vibrations
-    from jedi.io.orca import OrcaOptimizer, ORCA
+    from jedi.io.orca import OrcaOptimizer,  get_vibrations,  ORCA
     import ase.io
+    
     mol=molecule('C2H6')
-
-
+    
     calc = ORCA(label='opt',
                 orcasimpleinput='pbe cc-pVDZ OPT'
                 ,task='opt')
     opt=OrcaOptimizer(mol,calc)
     opt.run()
-
+    
     ase.io.write('opt.json',mol)
     mol=ase.io.read('opt.json')
     mol.calc=ORCA(label='orcafreq',
                 orcasimpleinput='pbe cc-pVDZ FREQ',
                 task='sp')
     mol.get_potential_energy()
-
-    modes=get_vibrations('orcafreq',mol)
-
+    
+    hessian=get_vibrations('orcafreq',mol)
+    
     mol2=mol.copy()
     calc = ORCA(label='stretch',
                 orcasimpleinput='pbe cc-pVDZ  OPT',
                 orcablocks='''%geom
         POTENTIALS
             { C 0 1 4.0 }
-        end 
+        end
     end ''',task='opt')
     opt=OrcaOptimizer(mol2,calc)
     opt.run()
     ase.io.write('force.json',mol)
-
-    j=Jedi(mol,mol2,modes)
+    
+    j=Jedi(mol,mol2,hessian)
     j.run()
     j.vmd_gen()
 
 .. image:: ethane/ethan.png
     :width: 20%
 
-.. image:: ethane/vmd/allcolorbar.pdf
+.. image:: ethane/vmd/allcolorbar.png
     :width: 10%
 
 :download:`Analysis output <ethane/jedi.txt>`
