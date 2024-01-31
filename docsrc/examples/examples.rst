@@ -309,7 +309,7 @@ Stretching bonds using a predefined force is possible with the EFEI method. The 
 Hydrostatic Pressure using X-HCFF
 ---------------------------------
 
-A lot of models have been developed to simulate pressure. X-HCFF is one of them that simulates Hydrostatic pressure. Here, Dewar and Ladenburg benzene are analyzed under 50GPa of pressure.
+A lot of models have been developed to simulate pressure. X-HCFF is one of them that simulates Hydrostatic pressure. Here, Dewar and Ladenburg benzene are analyzed under 50 GPa of pressure.
 
 .. code-block:: python
 
@@ -317,14 +317,14 @@ A lot of models have been developed to simulate pressure. X-HCFF is one of them 
     from ase.calculators.qchem import QChem
     from ase.vibrations.data import VibrationsData
     from jedi.jedi import Jedi
-    from ase.calculators.qchem import QChemOptimizer
-    from jedi.jedi.io.qchem import get_vibrations
+    from jedi.io.qchem import get_vibrations, QChemOptimizer
+    
     mol = ase.io.read('Dewar.xyz')
-
+    
     label='opt'
     
     calc=QChem(jobtype='sp',
-                label='xhcff/50GB/%s'%(label),          
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',GEOM_OPT_MAX_CYCLES='150',
                 USE_LIBQINTS='1',MAX_SCF_CYCLES='150',
@@ -332,23 +332,23 @@ A lot of models have been developed to simulate pressure. X-HCFF is one of them 
     mol.calc = calc
     opt = QChemOptimizer(mol)
     opt.run()
-
-
+    
+    
     label='freq'
     calc=QChem(jobtype='freq',
-                label='xhcff/50GB/%s'%(label),          
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',vibman_print= '7',
                 command='your command')
     mol.calc = calc
     mol.calc.calculate(properties=['hessian'],atoms=mol)
-
-    modes=get_vibrations(label,mol)
-
+    
+    hessian=get_vibrations(label,mol)
+    
     label='force'
     mol2=ase.io.read('%s.json'%(label))
     calc=QChem(jobtype='sp',
-                label='xhcff/50GB/%s'%(label), 
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',
                 GEOM_OPT_MAX_CYCLES='150',
@@ -359,8 +359,8 @@ A lot of models have been developed to simulate pressure. X-HCFF is one of them 
     opt = QChemOptimizer(mol2)
     opt.run()
     ase.io.write('xhcff/50GB/%s.json'%(label),mol2)
-
-    j=Jedi(mol,mol2,modes)
+    
+    j=Jedi(mol,mol2,hessian)
     j.run()
     j.vmd_gen()
 
@@ -372,14 +372,14 @@ In another folder the same for Ladenburg benzene:
     from ase.calculators.qchem import QChem
     from ase.vibrations.data import VibrationsData
     from jedi.jedi import Jedi
-    from ase.calculators.qchem import QChemOptimizer
-    from jedi.io.qchem import get_vibrations
+    from jedi.io.qchem import get_vibrations, QChemOptimizer
+    
     mol = ase.io.read('Ladenburg.xyz')
-
+    
     label='opt'
     
     calc=QChem(jobtype='sp',
-                label='xhcff/50GB/%s'%(label),          
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',GEOM_OPT_MAX_CYCLES='150',
                 USE_LIBQINTS='1',MAX_SCF_CYCLES='150',
@@ -387,23 +387,23 @@ In another folder the same for Ladenburg benzene:
     mol.calc = calc
     opt = QChemOptimizer(mol)
     opt.run()
-
-
+    
+    
     label='freq'
     calc=QChem(jobtype='freq',
-                label='xhcff/50GB/%s'%(label),          
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',vibman_print= '7',
                 command='your command')
     mol.calc = calc
     mol.calc.calculate(properties=['hessian'],atoms=mol)
-
-    modes=get_vibrations(label,mol)
-
+    
+    hessian=get_vibrations(label,mol)
+    
     label='force'
     mol2=ase.io.read('%s.json'%(label))
     calc=QChem(jobtype='sp',
-                label='xhcff/50GB/%s'%(label), 
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',
                 GEOM_OPT_MAX_CYCLES='150',
@@ -415,11 +415,11 @@ In another folder the same for Ladenburg benzene:
     opt.run()
     ase.io.write('xhcff/50GB/%s.json'%(label),mol2)
     
-    j=Jedi(mol,mol2,modes)
+    j=Jedi(mol,mol2,hessian)
     j.run()
     j.vmd_gen()
 
-.. image:: xhcff/prisxh.pdf
+.. image:: xhcff/prisxh.png
     :width: 20%
 
 :download:`dewar.xyz <xhcff/dewar/dewar.xyz>`
