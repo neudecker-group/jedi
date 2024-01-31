@@ -635,6 +635,6 @@ To have a consistent color coding the maximum strain in one bond over the whole 
 
 Here, three time steps are shown as an example.
 
-.. image:: md/frames.pdf
+.. image:: md/frames.png
 
 :download:`All data <md/md.zip>`
