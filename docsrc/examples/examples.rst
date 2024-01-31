@@ -439,7 +439,7 @@ Periodic boundary conditions can also be used as long as the cell's shape is con
 The HCN crystal is an interesting construct to examine bulk behavior. It consists of small molecules with strong intermolecular interactions. The standard Jedi analysis does not include those interactions.
 Here, the distorted structure is got by moving one molecule by 0.1 Å away from its original lattice position and at the same time pulling the H atom by 0.1 Å along the covalent bond.
 
-:download:`Starting geometry <hcn/start.xyz>`
+:download:`Start geometry <hcn/start.xyz>`
 :download:`Distorted geometry <hcn/analysis/sp.json>`
 
 .. code-block:: python
@@ -449,62 +449,62 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
     from ase.vibrations.vibrations import Vibrations
     import ase.io
     from ase.calculators.dftd3 import DFTD3
-
-    from gpaw.analyse.vdwradii import vdWradii
-    from ase.constraints import FixAtoms
-
+    
+    from jedi.jedi import Jedi
+    
+    
     mol=ase.io.read('start.xyz')
     convergence={'energy': 0.00001}
     calc=DFTD3(dft=GPAW(xc='PBE',mode=PW(700),kpts=[3,2,2],convergence=convergence),damping='bj')
     mol.calc=calc
-
+    
     opt=BFGS(mol)
     opt.run(fmax=0.05)
-
+    
     calc=DFTD3(dft=GPAW(xc='PBE',mode=PW(700),kpts=[3,2,2],convergence=convergence,symmetry='off'),damping='bj')
     mol.calc=calc
-
+    
     vib=Vibrations(mol)
     vib.run()
     vib.summary()
-    modes=vib.get_vibrations()
-
+    hessian=vib.get_vibrations()
+    
     vib=Vibrations(mol,indices=[2,3,5,8,9,11])
     vib.run()
     vib.summary()
-    partmodes=vib.get_vibrations()
+    parthessian=vib.get_vibrations()
     
     mol2=ase.io.read('sp.json')
-
+    
     mol2.calc=calc
-
+    
     mol.get_potential_energy()
-
-
-    j=Jedi(mol,mol2,modes)
-
+    
+    
+    j=Jedi(mol,mol2,hessian)
+    
     
     j.run()
     j.vmd_gen(label='all')
-
-    jpart=Jedi(mol,mol2,partmodes)
-   
-
+    
+    jpart=Jedi(mol,mol2,parthessian)
+    
+    
     jpart.partial_analysis(indices=[2,3,5,8,9,11])
     jpart.vmd_gen(label='part')
 
 The visualization should look like following picture.
 
-.. image:: hcn/all.pdf
+.. image:: hcn/all.png
     :width: 30%
 
-.. image:: hcn/analysis/all/vmd/allcolorbar.pdf
+.. image:: hcn/analysis/all/vmd/allcolorbar.png
     :width: 10%
 
-.. image:: hcn/part.pdf
+.. image:: hcn/part.png
     :width: 30%
 
-.. image:: hcn/analysis/part/vmd/allcolorbar.pdf
+.. image:: hcn/analysis/part/vmd/allcolorbar.png
     :width: 10%
 
 
@@ -530,16 +530,16 @@ To include the dipole interactions for this example, a modified version of the g
 
 With dipole interactions the visualization looks as follows
 
-.. image:: hcn/alldipole.pdf
+.. image:: hcn/alldipole.png
     :width: 30%
 
-.. image:: hcn/analysis/alldipole/vmd/allcolorbar.pdf
+.. image:: hcn/analysis/alldipole/vmd/allcolorbar.png
     :width: 10%
 
-.. image:: hcn/partdipole.pdf
+.. image:: hcn/partdipole.png
     :width: 30%
 
-.. image:: hcn/analysis/partdipole/vmd/allcolorbar.pdf
+.. image:: hcn/analysis/partdipole/vmd/allcolorbar.png
     :width: 10%
 
 The outputs can be found here.
