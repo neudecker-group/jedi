@@ -2,9 +2,7 @@
 Further Analysis
 ================
 
-Due to the larger outputs of the following examples, the outputs are attached as files and only the visualizations are shown. 
-The calculations were performed with low accuracy to keep the computational effort as low as possible so that the first time user can perform them to getting used to Jedi. Nevertheless, the Vasp calculations might still take very long.
-For better results, a higher accuracy is needed.
+Due to the larger outputs of the following examples, the outputs are attached as files and only the visualizations are shown. The calculations were performed with low accuracy to keep the computational effort as low as possible so that the first time user can perform them to getting used to Jedi. Nevertheless, the Vasp calculations might still take very long. For better results, a higher accuracy is needed. **Note that the usage of the gaussian and vasp calculators still needs the respective licences. If you do not have a licence you can use other programs like ORCA or GPAW.**
 
 Custom bonds
 ============
@@ -18,15 +16,13 @@ Here, cytosine and guanine are examined.
 
 .. code-block:: python
 
-    from ase import Atoms
     from ase.calculators.gaussian import Gaussian, GaussianOptimizer
-    from ase.build import molecule
     import ase.io
     from jedi.jedi import Jedi, get_hbonds
     from ase.vibrations.vibrations import VibrationsData
     
     mol = ase.io.read('cg.xyz')
-
+    
     calc = Gaussian(mem='6GB',
                         label='opt',
                         method='blyp',
@@ -36,7 +32,7 @@ Here, cytosine and guanine are examined.
     opt=GaussianOptimizer(mol,calc)
     opt.run(fmax='tight', steps=100)
     ase.io.write('opt.json',mol)
-
+    
     mol=ase.io.read('opt.json')
     mol.calc = Gaussian(mem='6GB',
                         iop='7/33=1',
@@ -49,19 +45,19 @@ Here, cytosine and guanine are examined.
                         EmpiricalDispersion='GD3BJ',
                         scf='qc')
     mol.get_potential_energy()
-    modes = get_vibrations('freq',mol)
-    modes.write('modes.json')
-
+    hessian = get_vibrations('freq',mol)
+    hessian.write('modes.json')
+    
     mol2 = mol.copy()
     v = mol.get_distance(10,27)+0.1
     w = mol.get_distance(13,21)+0.1
     x = mol.get_distance(15,20)+0.1
-
+    
     calc = Gaussian(mem='6GB',
-
+    
                         label='dist',
-                        
-
+    
+    
                         method='blyp',
                         basis='4-21G',
                         EmpiricalDispersion='GD3BJ',
@@ -73,23 +69,22 @@ Here, cytosine and guanine are examined.
     16 21 F'''.format(v,w,x))
     opt=GaussianOptimizer(mol2,calc)
     opt.run(fmax='tight', steps=100,opt='ModRedundant')
-
-    j = Jedi(mol,mol2,modes)
+    
+    j = Jedi(mol,mol2,hessian)
     j.add_custom_bonds(get_hbonds(mol2))
     j.run()
     j.vmd_gen()
 
-:download:`Starting geometry <dna/cg.xyz>`
+:download:`Start geometry <dna/cg.xyz>`
 
 
-The input written by ase for the cogef calculation has a line break too much between the coordinates section and the constraints section. So it has to be corrected manually and the job needs to be sent manually.
+The input written by ASE for the COGEF calculation has a line break too much between the coordinates section and the constraints section. So it has to be corrected manually and the job needs to be sent manually.
 The gaussian outputs can be read by the funtions delivered with the Jedi package.
 
 .. code-block:: python
 
     from ase.vibrations.vibrations import VibrationsData
-    from jedi.jedi import Jedi
-    from jedi.jedi import get_hbonds
+    from jedi.jedi import Jedi, get_hbonds
     from jedi.io.gaussian import get_vibrations,read_gaussian_out
 
     file=open('output/opt.log')
@@ -103,10 +98,10 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
     j.run()
     j.vmd_gen()
 
-.. image:: dna/cg.pdf
+.. image:: dna/cg.png
     :width: 30%
 
-.. image:: dna/vmd/allcolorbar.pdf
+.. image:: dna/vmd/allcolorbar.png
     :width: 10%
 
 
