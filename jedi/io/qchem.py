@@ -106,7 +106,7 @@ def get_vibrations(label, atoms):
     '''Read hessian.
 
     label: str
-        Filename w/o .log.
+        Filename w/o .out.
     atoms: class
         Structure of which the frequency analysis was performed.
     Returns:
