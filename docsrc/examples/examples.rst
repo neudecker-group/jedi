@@ -116,60 +116,59 @@ Analysis of a Substructure
 Biphenyl
 --------
 
-It is possible to analyse substructures. This is desired when local changes of large structures need to be analysed. Here, a Hydrogen atom in a biphenyl molecule is pulled 0.1 Å away from its relaxed position. 
-For the partial analysis, the hessian of only one phenyl ring is calculated yielding near identical values as when calculated for the whole system. 
+It is possible to analyse substructures. This is desired when local changes of large structures need to be analysed. Here, a Hydrogen atom in a biphenyl molecule is pulled 0.1 Å away from its relaxed position. For the partial analysis, the hessian of only one phenyl ring is calculated yielding near identical values as when calculated for the whole system.
 
 .. code-block:: python
 
-    import ase.io 
+    import ase.io
     from ase.calculators.vasp import Vasp
-    from ase.vibratrions.vibrations import VibrationsData
+    from ase.vibrations.vibrations import VibrationsData
     from jedi.jedi import Jedi
     import os
-
+    
     mol=ase.io.read('start.xyz')
-
+    
     #optimize the molecule
     label="opt"
     mol.calc=Vasp(label='%s/%s'%(label,label),
                     prec='Accurate',
-                    xc='PBE',pp='PBE', 
+                    xc='PBE',pp='PBE',
                     nsw=0,ivdw=12,
-                    lreal=False,ibrion=2, 
+                    lreal=False,ibrion=2,
                     isym=0,symprec=1.0e-5,
                     encut=315,ediff=0.00001,isif=2,
                     command= "your command to start vasp jobs")
-
+    
     mol.calc.write_input(mol)
     mol=ase.io.read('opt/vasprun.xml')  #vasp needs a specific ordering of the atoms writing and rereading will adapt this indexing
     mol.get_potential_energy()
-
+    
     #frequency analysis
     label="freq"
     mol.calc=Vasp(label='%s/%s'%(label,label),
                     prec='Accurate',
-                    xc='PBE',pp='PBE', 
+                    xc='PBE',pp='PBE',
                     nsw=0,ivdw=12,
-                    lreal=False,ibrion=5, 
+                    lreal=False,ibrion=5,
                     isym=0,symprec=1.0e-5,
                     encut=315,ediff=0.00001,isif=2,
                     command= "your command to start vasp jobs")
     mol.get_potential_energy()
-    modes=mol.calc.get_vibrations()
-
+    hessian=mol.calc.get_vibrations()
+    
     c = FixAtoms(indices=[6,7,8,9,10,11,17,18,19,20,21])
     mol.set_constraint(c)
-
+    
     label='pfreq'
     calc3 = Vasp(label='pfreq/%s'%(label),prec='Accurate', ibrion=5,ediff=0.00001,
                 xc='PBE',pp='PBE',ivdw=12,symprec=1.0e-5,encut=315,isym=0,
                 lreal=False,command= "sh /home1/wang/vasp/submit-vasp-job.sh -la %s"%(label))
-
+    
     mol.calc=calc3
     mol.get_potential_energy()
-    partmodes=mol.calc.get_vibrations()
-    np.savetxt('p-hessian',partmodes._hessian2d,fmt='%25s') #VibrationsData.write does not allow saving partial hessian
-
+    parthessian=mol.calc.get_vibrations()
+    np.savetxt('p-hessian',parthessian._hessian2d,fmt='%25s') #VibrationsData.write does not allow saving partial hessian
+    
     mol.set_constraint()
     #distort molecule
     mol2=mol.copy()
@@ -181,41 +180,41 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
     mol2.set_positions(positions)
     calc = Vasp(label='%s/%s'%(label,label),
                 prec='Accurate',
-                xc='PBE',pp='PBE', 
+                xc='PBE',pp='PBE',
                 nsw=0,ivdw=12,
-                lreal=False,ibrion=2, 
+                lreal=False,ibrion=2,
                 isym=0,symprec=1.0e-5,
                 encut=315,ediff=0.00001,isif=2,
                 command= "your command to start vasp jobs")
     mol2.calc=calc
     mol2.get_potential_energy()
-
+    
     os.mkdir('all')
     os.chdir('all')
-    j=Jedi(mol,mol2,modes)
+    j=Jedi(mol,mol2,hessian)
     j.run()
     j.vmd_gen()
-
+    
     os.chdir('../..')
     os.mkdir('partial')
     os.chdir('partial')
-    jpart=Jedi(mol,mol2,partmodes)
+    jpart=Jedi(mol,mol2,parthessian)
     jpart.partial_analysis(indices=[0,1,2,3,4,5,12,13,14,15,16])
     jpart.vmd_gen()
 
 
-:download:`Starting geometry <biphenyl/start.xyz>`
+:download:`Start geometry <biphenyl/start.xyz>`
 
 .. image:: biphenyl/biphg.png
     :width: 20%
 
-.. image:: biphenyl/analysis/all/vmd/allcolorbar.pdf
+.. image:: biphenyl/analysis/all/vmd/allcolorbar.png
     :width: 10%
 
 .. image:: biphenyl/biphp.png
     :width: 20%
 
-.. image:: biphenyl/analysis/partial/vmd/allcolorbar.pdf
+.. image:: biphenyl/analysis/partial/vmd/allcolorbar.png
     :width: 10%
 
 :download:`Analysis output <biphenyl/analysis/all/jedi.txt>`
@@ -236,7 +235,7 @@ It is possible to only show specific RIC after calculating the whole analysis by
 .. image:: biphenyl/biphs.png
     :width: 20%
 
-.. image:: biphenyl/analysis/special/vmd/allcolorbar.pdf
+.. image:: biphenyl/analysis/special/vmd/allcolorbar.png
     :width: 10%
 
 :download:`Analysis output <biphenyl/analysis/special/jedi.txt>`
