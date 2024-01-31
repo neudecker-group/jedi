@@ -29,7 +29,7 @@ class ORCA(FileIOCalculator):
     def __init__(self, restart=None,
                  ignore_bad_restart_file=FileIOCalculator._deprecated,
                  label='orca', atoms=None, **kwargs):
-        """ ASE interface to ORCA 4
+        """ Modified ASE interface to ORCA 4 
         by Ragnar Bjornsson, Based on NWchem interface but simplified.
         Only supports energies and gradients (no dipole moments,
         orbital energies etc.) for now.
@@ -152,7 +152,7 @@ class ORCA(FileIOCalculator):
         return self.pcpot
         
 def write_orca(atoms, **params):
-    """Function to write ORCA input file
+    """Modified function to write ORCA input file, making optimizations possible
     """
     charge = params['charge']
     mult = params['mult']
