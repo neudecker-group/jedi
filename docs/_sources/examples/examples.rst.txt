@@ -2,9 +2,7 @@
 Further Analysis
 ================
 
-Due to the larger outputs of the following examples, the outputs are attached as files and only the visualizations are shown. 
-The calculations were performed with low accuracy to keep the computational effort as low as possible so that the first time user can perform them to getting used to Jedi. Nevertheless, the Vasp calculations might still take very long.
-For better results, a higher accuracy is needed.
+Due to the larger outputs of the following examples, the outputs are attached as files and only the visualizations are shown. The calculations were performed with low accuracy to keep the computational effort as low as possible so that the first time user can perform them to getting used to Jedi. Nevertheless, the Vasp calculations might still take very long. For better results, a higher accuracy is needed. **Note that the usage of the gaussian and vasp calculators still needs the respective licences. If you do not have a licence you can use other programs like ORCA or GPAW.**
 
 Custom bonds
 ============
@@ -18,15 +16,13 @@ Here, cytosine and guanine are examined.
 
 .. code-block:: python
 
-    from ase import Atoms
     from ase.calculators.gaussian import Gaussian, GaussianOptimizer
-    from ase.build import molecule
     import ase.io
     from jedi.jedi import Jedi, get_hbonds
     from ase.vibrations.vibrations import VibrationsData
     
     mol = ase.io.read('cg.xyz')
-
+    
     calc = Gaussian(mem='6GB',
                         label='opt',
                         method='blyp',
@@ -36,7 +32,7 @@ Here, cytosine and guanine are examined.
     opt=GaussianOptimizer(mol,calc)
     opt.run(fmax='tight', steps=100)
     ase.io.write('opt.json',mol)
-
+    
     mol=ase.io.read('opt.json')
     mol.calc = Gaussian(mem='6GB',
                         iop='7/33=1',
@@ -49,19 +45,19 @@ Here, cytosine and guanine are examined.
                         EmpiricalDispersion='GD3BJ',
                         scf='qc')
     mol.get_potential_energy()
-    modes = get_vibrations('freq',mol)
-    modes.write('modes.json')
-
+    hessian = get_vibrations('freq',mol)
+    hessian.write('modes.json')
+    
     mol2 = mol.copy()
     v = mol.get_distance(10,27)+0.1
     w = mol.get_distance(13,21)+0.1
     x = mol.get_distance(15,20)+0.1
-
+    
     calc = Gaussian(mem='6GB',
-
+    
                         label='dist',
-                        
-
+    
+    
                         method='blyp',
                         basis='4-21G',
                         EmpiricalDispersion='GD3BJ',
@@ -73,23 +69,22 @@ Here, cytosine and guanine are examined.
     16 21 F'''.format(v,w,x))
     opt=GaussianOptimizer(mol2,calc)
     opt.run(fmax='tight', steps=100,opt='ModRedundant')
-
-    j = Jedi(mol,mol2,modes)
+    
+    j = Jedi(mol,mol2,hessian)
     j.add_custom_bonds(get_hbonds(mol2))
     j.run()
     j.vmd_gen()
 
-:download:`Starting geometry <dna/cg.xyz>`
+:download:`Start geometry <dna/cg.xyz>`
 
 
-The input written by ase for the cogef calculation has a line break too much between the coordinates section and the constraints section. So it has to be corrected manually and the job needs to be sent manually.
+The input written by ASE for the COGEF calculation has a line break too much between the coordinates section and the constraints section. So it has to be corrected manually and the job needs to be sent manually.
 The gaussian outputs can be read by the funtions delivered with the Jedi package.
 
 .. code-block:: python
 
     from ase.vibrations.vibrations import VibrationsData
-    from jedi.jedi import Jedi
-    from jedi.jedi import get_hbonds
+    from jedi.jedi import Jedi, get_hbonds
     from jedi.io.gaussian import get_vibrations,read_gaussian_out
 
     file=open('output/opt.log')
@@ -103,10 +98,10 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
     j.run()
     j.vmd_gen()
 
-.. image:: dna/cg.pdf
+.. image:: dna/cg.png
     :width: 30%
 
-.. image:: dna/vmd/allcolorbar.pdf
+.. image:: dna/vmd/allcolorbar.png
     :width: 10%
 
 
@@ -121,60 +116,59 @@ Analysis of a Substructure
 Biphenyl
 --------
 
-It is possible to analyse substructures. This is desired when local changes of large structures need to be analysed. Here, a Hydrogen atom in a biphenyl molecule is pulled 0.1 Å away from its relaxed position. 
-For the partial analysis, the hessian of only one phenyl ring is calculated yielding near identical values as when calculated for the whole system. 
+It is possible to analyse substructures. This is desired when local changes of large structures need to be analysed. Here, a Hydrogen atom in a biphenyl molecule is pulled 0.1 Å away from its relaxed position. For the partial analysis, the hessian of only one phenyl ring is calculated yielding near identical values as when calculated for the whole system.
 
 .. code-block:: python
 
-    import ase.io 
+    import ase.io
     from ase.calculators.vasp import Vasp
-    from ase.vibratrions.vibrations import VibrationsData
+    from ase.vibrations.vibrations import VibrationsData
     from jedi.jedi import Jedi
     import os
-
+    
     mol=ase.io.read('start.xyz')
-
+    
     #optimize the molecule
     label="opt"
     mol.calc=Vasp(label='%s/%s'%(label,label),
                     prec='Accurate',
-                    xc='PBE',pp='PBE', 
+                    xc='PBE',pp='PBE',
                     nsw=0,ivdw=12,
-                    lreal=False,ibrion=2, 
+                    lreal=False,ibrion=2,
                     isym=0,symprec=1.0e-5,
                     encut=315,ediff=0.00001,isif=2,
                     command= "your command to start vasp jobs")
-
+    
     mol.calc.write_input(mol)
     mol=ase.io.read('opt/vasprun.xml')  #vasp needs a specific ordering of the atoms writing and rereading will adapt this indexing
     mol.get_potential_energy()
-
+    
     #frequency analysis
     label="freq"
     mol.calc=Vasp(label='%s/%s'%(label,label),
                     prec='Accurate',
-                    xc='PBE',pp='PBE', 
+                    xc='PBE',pp='PBE',
                     nsw=0,ivdw=12,
-                    lreal=False,ibrion=5, 
+                    lreal=False,ibrion=5,
                     isym=0,symprec=1.0e-5,
                     encut=315,ediff=0.00001,isif=2,
                     command= "your command to start vasp jobs")
     mol.get_potential_energy()
-    modes=mol.calc.get_vibrations()
-
+    hessian=mol.calc.get_vibrations()
+    
     c = FixAtoms(indices=[6,7,8,9,10,11,17,18,19,20,21])
     mol.set_constraint(c)
-
+    
     label='pfreq'
     calc3 = Vasp(label='pfreq/%s'%(label),prec='Accurate', ibrion=5,ediff=0.00001,
                 xc='PBE',pp='PBE',ivdw=12,symprec=1.0e-5,encut=315,isym=0,
                 lreal=False,command= "sh /home1/wang/vasp/submit-vasp-job.sh -la %s"%(label))
-
+    
     mol.calc=calc3
     mol.get_potential_energy()
-    partmodes=mol.calc.get_vibrations()
-    np.savetxt('p-hessian',partmodes._hessian2d,fmt='%25s') #VibrationsData.write does not allow saving partial hessian
-
+    parthessian=mol.calc.get_vibrations()
+    np.savetxt('p-hessian',parthessian._hessian2d,fmt='%25s') #VibrationsData.write does not allow saving partial hessian
+    
     mol.set_constraint()
     #distort molecule
     mol2=mol.copy()
@@ -186,41 +180,41 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
     mol2.set_positions(positions)
     calc = Vasp(label='%s/%s'%(label,label),
                 prec='Accurate',
-                xc='PBE',pp='PBE', 
+                xc='PBE',pp='PBE',
                 nsw=0,ivdw=12,
-                lreal=False,ibrion=2, 
+                lreal=False,ibrion=2,
                 isym=0,symprec=1.0e-5,
                 encut=315,ediff=0.00001,isif=2,
                 command= "your command to start vasp jobs")
     mol2.calc=calc
     mol2.get_potential_energy()
-
+    
     os.mkdir('all')
     os.chdir('all')
-    j=Jedi(mol,mol2,modes)
+    j=Jedi(mol,mol2,hessian)
     j.run()
     j.vmd_gen()
-
+    
     os.chdir('../..')
     os.mkdir('partial')
     os.chdir('partial')
-    jpart=Jedi(mol,mol2,partmodes)
+    jpart=Jedi(mol,mol2,parthessian)
     jpart.partial_analysis(indices=[0,1,2,3,4,5,12,13,14,15,16])
     jpart.vmd_gen()
 
 
-:download:`Starting geometry <biphenyl/start.xyz>`
+:download:`Start geometry <biphenyl/start.xyz>`
 
 .. image:: biphenyl/biphg.png
     :width: 20%
 
-.. image:: biphenyl/analysis/all/vmd/allcolorbar.pdf
+.. image:: biphenyl/analysis/all/vmd/allcolorbar.png
     :width: 10%
 
 .. image:: biphenyl/biphp.png
     :width: 20%
 
-.. image:: biphenyl/analysis/partial/vmd/allcolorbar.pdf
+.. image:: biphenyl/analysis/partial/vmd/allcolorbar.png
     :width: 10%
 
 :download:`Analysis output <biphenyl/analysis/all/jedi.txt>`
@@ -241,7 +235,7 @@ It is possible to only show specific RIC after calculating the whole analysis by
 .. image:: biphenyl/biphs.png
     :width: 20%
 
-.. image:: biphenyl/analysis/special/vmd/allcolorbar.pdf
+.. image:: biphenyl/analysis/special/vmd/allcolorbar.png
     :width: 10%
 
 :download:`Analysis output <biphenyl/analysis/special/jedi.txt>`
@@ -264,49 +258,48 @@ Stretching bonds using a predefined force is possible with the EFEI method. The 
 .. code-block:: python
 
     from ase.build import molecule
-    from ase.vibratrions.vibrations import VibrationsData
+    from ase.vibrations.vibrations import VibrationsData
     from jedi.jedi import Jedi
-    from jedi.io.orca import get_vibrations
-    from jedi.io.orca import OrcaOptimizer, ORCA
+    from jedi.io.orca import OrcaOptimizer,  get_vibrations,  ORCA
     import ase.io
+    
     mol=molecule('C2H6')
-
-
+    
     calc = ORCA(label='opt',
                 orcasimpleinput='pbe cc-pVDZ OPT'
                 ,task='opt')
     opt=OrcaOptimizer(mol,calc)
     opt.run()
-
+    
     ase.io.write('opt.json',mol)
     mol=ase.io.read('opt.json')
     mol.calc=ORCA(label='orcafreq',
                 orcasimpleinput='pbe cc-pVDZ FREQ',
                 task='sp')
     mol.get_potential_energy()
-
-    modes=get_vibrations('orcafreq',mol)
-
+    
+    hessian=get_vibrations('orcafreq',mol)
+    
     mol2=mol.copy()
     calc = ORCA(label='stretch',
                 orcasimpleinput='pbe cc-pVDZ  OPT',
                 orcablocks='''%geom
         POTENTIALS
             { C 0 1 4.0 }
-        end 
+        end
     end ''',task='opt')
     opt=OrcaOptimizer(mol2,calc)
     opt.run()
     ase.io.write('force.json',mol)
-
-    j=Jedi(mol,mol2,modes)
+    
+    j=Jedi(mol,mol2,hessian)
     j.run()
     j.vmd_gen()
 
 .. image:: ethane/ethan.png
     :width: 20%
 
-.. image:: ethane/vmd/allcolorbar.pdf
+.. image:: ethane/vmd/allcolorbar.png
     :width: 10%
 
 :download:`Analysis output <ethane/jedi.txt>`
@@ -316,7 +309,7 @@ Stretching bonds using a predefined force is possible with the EFEI method. The 
 Hydrostatic Pressure using X-HCFF
 ---------------------------------
 
-A lot of models have been developed to simulate pressure. X-HCFF is one of them that simulates Hydrostatic pressure. Here, Dewar and Ladenburg benzene are analyzed under 50GPa of pressure.
+A lot of models have been developed to simulate pressure. X-HCFF is one of them that simulates Hydrostatic pressure. Here, Dewar and Ladenburg benzene are analyzed under 50 GPa of pressure.
 
 .. code-block:: python
 
@@ -324,14 +317,14 @@ A lot of models have been developed to simulate pressure. X-HCFF is one of them 
     from ase.calculators.qchem import QChem
     from ase.vibrations.data import VibrationsData
     from jedi.jedi import Jedi
-    from ase.calculators.qchem import QChemOptimizer
-    from jedi.jedi.io.qchem import get_vibrations
+    from jedi.io.qchem import get_vibrations, QChemOptimizer
+    
     mol = ase.io.read('Dewar.xyz')
-
+    
     label='opt'
     
     calc=QChem(jobtype='sp',
-                label='xhcff/50GB/%s'%(label),          
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',GEOM_OPT_MAX_CYCLES='150',
                 USE_LIBQINTS='1',MAX_SCF_CYCLES='150',
@@ -339,23 +332,23 @@ A lot of models have been developed to simulate pressure. X-HCFF is one of them 
     mol.calc = calc
     opt = QChemOptimizer(mol)
     opt.run()
-
-
+    
+    
     label='freq'
     calc=QChem(jobtype='freq',
-                label='xhcff/50GB/%s'%(label),          
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',vibman_print= '7',
                 command='your command')
     mol.calc = calc
     mol.calc.calculate(properties=['hessian'],atoms=mol)
-
-    modes=get_vibrations(label,mol)
-
+    
+    hessian=get_vibrations(label,mol)
+    
     label='force'
     mol2=ase.io.read('%s.json'%(label))
     calc=QChem(jobtype='sp',
-                label='xhcff/50GB/%s'%(label), 
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',
                 GEOM_OPT_MAX_CYCLES='150',
@@ -366,8 +359,8 @@ A lot of models have been developed to simulate pressure. X-HCFF is one of them 
     opt = QChemOptimizer(mol2)
     opt.run()
     ase.io.write('xhcff/50GB/%s.json'%(label),mol2)
-
-    j=Jedi(mol,mol2,modes)
+    
+    j=Jedi(mol,mol2,hessian)
     j.run()
     j.vmd_gen()
 
@@ -379,14 +372,14 @@ In another folder the same for Ladenburg benzene:
     from ase.calculators.qchem import QChem
     from ase.vibrations.data import VibrationsData
     from jedi.jedi import Jedi
-    from ase.calculators.qchem import QChemOptimizer
-    from jedi.io.qchem import get_vibrations
+    from jedi.io.qchem import get_vibrations, QChemOptimizer
+    
     mol = ase.io.read('Ladenburg.xyz')
-
+    
     label='opt'
     
     calc=QChem(jobtype='sp',
-                label='xhcff/50GB/%s'%(label),          
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',GEOM_OPT_MAX_CYCLES='150',
                 USE_LIBQINTS='1',MAX_SCF_CYCLES='150',
@@ -394,23 +387,23 @@ In another folder the same for Ladenburg benzene:
     mol.calc = calc
     opt = QChemOptimizer(mol)
     opt.run()
-
-
+    
+    
     label='freq'
     calc=QChem(jobtype='freq',
-                label='xhcff/50GB/%s'%(label),          
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',vibman_print= '7',
                 command='your command')
     mol.calc = calc
     mol.calc.calculate(properties=['hessian'],atoms=mol)
-
-    modes=get_vibrations(label,mol)
-
+    
+    hessian=get_vibrations(label,mol)
+    
     label='force'
     mol2=ase.io.read('%s.json'%(label))
     calc=QChem(jobtype='sp',
-                label='xhcff/50GB/%s'%(label), 
+                label='xhcff/50GB/%s'%(label),
                 method='pbe',dft_d='D3_BJ',
                 basis='cc-pvdz',
                 GEOM_OPT_MAX_CYCLES='150',
@@ -422,11 +415,11 @@ In another folder the same for Ladenburg benzene:
     opt.run()
     ase.io.write('xhcff/50GB/%s.json'%(label),mol2)
     
-    j=Jedi(mol,mol2,modes)
+    j=Jedi(mol,mol2,hessian)
     j.run()
     j.vmd_gen()
 
-.. image:: xhcff/prisxh.pdf
+.. image:: xhcff/prisxh.png
     :width: 20%
 
 :download:`dewar.xyz <xhcff/dewar/dewar.xyz>`
@@ -446,7 +439,7 @@ Periodic boundary conditions can also be used as long as the cell's shape is con
 The HCN crystal is an interesting construct to examine bulk behavior. It consists of small molecules with strong intermolecular interactions. The standard Jedi analysis does not include those interactions.
 Here, the distorted structure is got by moving one molecule by 0.1 Å away from its original lattice position and at the same time pulling the H atom by 0.1 Å along the covalent bond.
 
-:download:`Starting geometry <hcn/start.xyz>`
+:download:`Start geometry <hcn/start.xyz>`
 :download:`Distorted geometry <hcn/analysis/sp.json>`
 
 .. code-block:: python
@@ -456,62 +449,62 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
     from ase.vibrations.vibrations import Vibrations
     import ase.io
     from ase.calculators.dftd3 import DFTD3
-
-    from gpaw.analyse.vdwradii import vdWradii
-    from ase.constraints import FixAtoms
-
+    
+    from jedi.jedi import Jedi
+    
+    
     mol=ase.io.read('start.xyz')
     convergence={'energy': 0.00001}
     calc=DFTD3(dft=GPAW(xc='PBE',mode=PW(700),kpts=[3,2,2],convergence=convergence),damping='bj')
     mol.calc=calc
-
+    
     opt=BFGS(mol)
     opt.run(fmax=0.05)
-
+    
     calc=DFTD3(dft=GPAW(xc='PBE',mode=PW(700),kpts=[3,2,2],convergence=convergence,symmetry='off'),damping='bj')
     mol.calc=calc
-
+    
     vib=Vibrations(mol)
     vib.run()
     vib.summary()
-    modes=vib.get_vibrations()
-
+    hessian=vib.get_vibrations()
+    
     vib=Vibrations(mol,indices=[2,3,5,8,9,11])
     vib.run()
     vib.summary()
-    partmodes=vib.get_vibrations()
+    parthessian=vib.get_vibrations()
     
     mol2=ase.io.read('sp.json')
-
+    
     mol2.calc=calc
-
+    
     mol.get_potential_energy()
-
-
-    j=Jedi(mol,mol2,modes)
-
+    
+    
+    j=Jedi(mol,mol2,hessian)
+    
     
     j.run()
     j.vmd_gen(label='all')
-
-    jpart=Jedi(mol,mol2,partmodes)
-   
-
+    
+    jpart=Jedi(mol,mol2,parthessian)
+    
+    
     jpart.partial_analysis(indices=[2,3,5,8,9,11])
     jpart.vmd_gen(label='part')
 
 The visualization should look like following picture.
 
-.. image:: hcn/all.pdf
+.. image:: hcn/all.png
     :width: 30%
 
-.. image:: hcn/analysis/all/vmd/allcolorbar.pdf
+.. image:: hcn/analysis/all/vmd/allcolorbar.png
     :width: 10%
 
-.. image:: hcn/part.pdf
+.. image:: hcn/part.png
     :width: 30%
 
-.. image:: hcn/analysis/part/vmd/allcolorbar.pdf
+.. image:: hcn/analysis/part/vmd/allcolorbar.png
     :width: 10%
 
 
@@ -537,16 +530,16 @@ To include the dipole interactions for this example, a modified version of the g
 
 With dipole interactions the visualization looks as follows
 
-.. image:: hcn/alldipole.pdf
+.. image:: hcn/alldipole.png
     :width: 30%
 
-.. image:: hcn/analysis/alldipole/vmd/allcolorbar.pdf
+.. image:: hcn/analysis/alldipole/vmd/allcolorbar.png
     :width: 10%
 
-.. image:: hcn/partdipole.pdf
+.. image:: hcn/partdipole.png
     :width: 30%
 
-.. image:: hcn/analysis/partdipole/vmd/allcolorbar.pdf
+.. image:: hcn/analysis/partdipole/vmd/allcolorbar.png
     :width: 10%
 
 The outputs can be found here.
@@ -642,6 +635,6 @@ To have a consistent color coding the maximum strain in one bond over the whole 
 
 Here, three time steps are shown as an example.
 
-.. image:: md/frames.pdf
+.. image:: md/frames.png
 
 :download:`All data <md/md.zip>`

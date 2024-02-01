@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Further Analysis &mdash; test  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -102,20 +105,15 @@
            <div itemprop="articleBody">
              
   <section id="further-analysis">
-<h1>Further Analysis<a class="headerlink" href="#further-analysis" title="Permalink to this headline"></a></h1>
-<p>Due to the larger outputs of the following examples, the outputs are attached as files and only the visualizations are shown.
-The calculations were performed with low accuracy to keep the computational effort as low as possible so that the first time user can perform them to getting used to Jedi. Nevertheless, the Vasp calculations might still take very long.
-For better results, a higher accuracy is needed.
-<b>Note that the usage of the gaussian and vasp calculators still needs the respective licences. If you do not have a licence you can use other programs like ORCA or GPAW.</b></p>
+<h1>Further Analysis<a class="headerlink" href="#further-analysis" title="Permalink to this heading"></a></h1>
+<p>Due to the larger outputs of the following examples, the outputs are attached as files and only the visualizations are shown. The calculations were performed with low accuracy to keep the computational effort as low as possible so that the first time user can perform them to getting used to Jedi. Nevertheless, the Vasp calculations might still take very long. For better results, a higher accuracy is needed. <strong>Note that the usage of the gaussian and vasp calculators still needs the respective licences. If you do not have a licence you can use other programs like ORCA or GPAW.</strong></p>
 <section id="custom-bonds">
-<h2>Custom bonds<a class="headerlink" href="#custom-bonds" title="Permalink to this headline"></a></h2>
+<h2>Custom bonds<a class="headerlink" href="#custom-bonds" title="Permalink to this heading"></a></h2>
 <p>Custom bonds can be analyzed too. The Jedi package has a function to determine hydrogen bonds in a structure. These will be added to the RIC with add_custom_bonds() after generating the Jedi object.</p>
 <section id="stretching-hydrogen-bonds-using-cogef">
-<h3>Stretching Hydrogen Bonds Using COGEF<a class="headerlink" href="#stretching-hydrogen-bonds-using-cogef" title="Permalink to this headline"></a></h3>
+<h3>Stretching Hydrogen Bonds Using COGEF<a class="headerlink" href="#stretching-hydrogen-bonds-using-cogef" title="Permalink to this heading"></a></h3>
 <p>Here, cytosine and guanine are examined.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.gaussian</span> <span class="kn">import</span> <span class="n">Gaussian</span><span class="p">,</span> <span class="n">GaussianOptimizer</span>
-<span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">molecule</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.calculators.gaussian</span> <span class="kn">import</span> <span class="n">Gaussian</span><span class="p">,</span> <span class="n">GaussianOptimizer</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span><span class="p">,</span> <span class="n">get_hbonds</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
@@ -175,20 +173,19 @@ For better results, a higher accuracy is needed.
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 </pre></div>
 </div>
-<p><a class="reference download internal" download="" href="../_downloads/98365d3121138c0dab0b69739155a339/cg.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Starting</span> <span class="pre">geometry</span></code></a></p>
-<p>The input written by ase for the cogef calculation has a line break too much between the coordinates section and the constraints section. So it has to be corrected manually and the job needs to be sent manually.
+<p><a class="reference download internal" download="" href="../_downloads/98365d3121138c0dab0b69739155a339/cg.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Start</span> <span class="pre">geometry</span></code></a></p>
+<p>The input written by ASE for the COGEF calculation has a line break too much between the coordinates section and the constraints section. So it has to be corrected manually and the job needs to be sent manually.
 The gaussian outputs can be read by the funtions delivered with the Jedi package.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">get_hbonds</span>
+<span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span><span class="p">,</span> <span class="n">get_hbonds</span>
 <span class="kn">from</span> <span class="nn">jedi.io.gaussian</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span><span class="n">read_gaussian_out</span>
 
 <span class="n">file</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;output/opt.log&#39;</span><span class="p">)</span>
 <span class="n">mol</span><span class="o">=</span><span class="n">read_gaussian_out</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 <span class="n">file2</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;output/dist.log&#39;</span><span class="p">)</span>
 <span class="n">mol2</span><span class="o">=</span><span class="n">read_gaussian_out</span><span class="p">(</span><span class="n">file2</span><span class="p">)</span>
-<span class="n">hessian</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="s1">&#39;output/freq&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
+<span class="n">modes</span><span class="o">=</span><span class="n">get_vibrations</span><span class="p">(</span><span class="s1">&#39;output/freq&#39;</span><span class="p">,</span><span class="n">mol</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol2</span><span class="p">))</span>
 
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -203,11 +200,10 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 </section>
 </section>
 <section id="analysis-of-a-substructure">
-<h2>Analysis of a Substructure<a class="headerlink" href="#analysis-of-a-substructure" title="Permalink to this headline"></a></h2>
+<h2>Analysis of a Substructure<a class="headerlink" href="#analysis-of-a-substructure" title="Permalink to this heading"></a></h2>
 <section id="biphenyl">
-<h3>Biphenyl<a class="headerlink" href="#biphenyl" title="Permalink to this headline"></a></h3>
-<p>It is possible to analyse substructures. This is desired when local changes of large structures need to be analysed. Here, a Hydrogen atom in a biphenyl molecule is pulled 0.1 Å away from its relaxed position.
-For the partial analysis, the hessian of only one phenyl ring is calculated yielding near identical values as when calculated for the whole system.</p>
+<h3>Biphenyl<a class="headerlink" href="#biphenyl" title="Permalink to this heading"></a></h3>
+<p>It is possible to analyse substructures. This is desired when local changes of large structures need to be analysed. Here, a Hydrogen atom in a biphenyl molecule is pulled 0.1 Å away from its relaxed position. For the partial analysis, the hessian of only one phenyl ring is calculated yielding near identical values as when calculated for the whole system.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">from</span> <span class="nn">ase.calculators.vasp</span> <span class="kn">import</span> <span class="n">Vasp</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
@@ -291,7 +287,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="n">jpart</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 </pre></div>
 </div>
-<p><a class="reference download internal" download="" href="../_downloads/67e6370dd625fc2ec6568b26daa57853/start.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Starting</span> <span class="pre">geometry</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/67e6370dd625fc2ec6568b26daa57853/start.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Start</span> <span class="pre">geometry</span></code></a></p>
 <a class="reference internal image-reference" href="../_images/biphg.png"><img alt="../_images/biphg.png" src="../_images/biphg.png" style="width: 20%;" /></a>
 <a class="reference internal image-reference" href="../_images/allcolorbar1.png"><img alt="../_images/allcolorbar1.png" src="../_images/allcolorbar1.png" style="width: 10%;" /></a>
 <a class="reference internal image-reference" href="../_images/biphp.png"><img alt="../_images/biphp.png" src="../_images/biphp.png" style="width: 20%;" /></a>
@@ -302,7 +298,7 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;../..&#39;</span><span class="p">)</span>
 <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;special&#39;</span><span class="p">)</span>
 <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;special&#39;</span><span class="p">)</span>
-<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
+<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
 <span class="n">jpart</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">16</span><span class="p">])</span>
 <span class="n">jpart</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">()</span>
 </pre></div>
@@ -314,18 +310,18 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 </section>
 </section>
 <section id="more-examples">
-<h2>More Examples<a class="headerlink" href="#more-examples" title="Permalink to this headline"></a></h2>
+<h2>More Examples<a class="headerlink" href="#more-examples" title="Permalink to this heading"></a></h2>
 <p>The following is intended to be an inspiration of what can also be analyzed.</p>
 <section id="using-efei">
-<h3>Using EFEI<a class="headerlink" href="#using-efei" title="Permalink to this headline"></a></h3>
+<h3>Using EFEI<a class="headerlink" href="#using-efei" title="Permalink to this heading"></a></h3>
 <p>Stretching bonds using a predefined force is possible with the EFEI method. The following example shows an ethane molecule of which the C-C bond is stretched with a force of 4 nN.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">molecule</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">jedi.io.orca</span> <span class="kn">import</span> <span class="n">OrcaOptimizer</span><span class="p">, </span> <span class="n">get_vibrations</span><span class="p">, </span> <span class="n">ORCA</span>
+<span class="kn">from</span> <span class="nn">jedi.io.orca</span> <span class="kn">import</span> <span class="n">OrcaOptimizer</span><span class="p">,</span>  <span class="n">get_vibrations</span><span class="p">,</span>  <span class="n">ORCA</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="n">mol</span><span class="o">=</span><span class="n">molecule</span><span class="p">(</span><span class="s1">&#39;C2H6&#39;</span><span class="p">)</span>
 
+<span class="n">mol</span><span class="o">=</span><span class="n">molecule</span><span class="p">(</span><span class="s1">&#39;C2H6&#39;</span><span class="p">)</span>
 
 <span class="n">calc</span> <span class="o">=</span> <span class="n">ORCA</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;opt&#39;</span><span class="p">,</span>
             <span class="n">orcasimpleinput</span><span class="o">=</span><span class="s1">&#39;pbe cc-pVDZ OPT&#39;</span>
@@ -365,13 +361,14 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <a class="reference download internal" download="" href="../_downloads/e485766bcae1a436ad300fdb19a4ec93/ethane.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
 </section>
 <section id="hydrostatic-pressure-using-x-hcff">
-<h3>Hydrostatic Pressure using X-HCFF<a class="headerlink" href="#hydrostatic-pressure-using-x-hcff" title="Permalink to this headline"></a></h3>
-<p>A lot of models have been developed to simulate pressure. X-HCFF is one of them that simulates Hydrostatic pressure. Here, Dewar and Ladenburg benzene are analyzed under 50GPa of pressure.</p>
+<h3>Hydrostatic Pressure using X-HCFF<a class="headerlink" href="#hydrostatic-pressure-using-x-hcff" title="Permalink to this heading"></a></h3>
+<p>A lot of models have been developed to simulate pressure. X-HCFF is one of them that simulates Hydrostatic pressure. Here, Dewar and Ladenburg benzene are analyzed under 50 GPa of pressure.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">from</span> <span class="nn">ase.calculators.qchem</span> <span class="kn">import</span> <span class="n">QChem</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.data</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span>,<span class="n">QChemOptimizer</span>
+<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span>
+
 <span class="n">mol</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Dewar.xyz&#39;</span><span class="p">)</span>
 
 <span class="n">label</span><span class="o">=</span><span class="s1">&#39;opt&#39;</span>
@@ -423,7 +420,8 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <span class="kn">from</span> <span class="nn">ase.calculators.qchem</span> <span class="kn">import</span> <span class="n">QChem</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.data</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span>,<span class="n">QChemOptimizer</span>
+<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span>
+
 <span class="n">mol</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Ladenburg.xyz&#39;</span><span class="p">)</span>
 
 <span class="n">label</span><span class="o">=</span><span class="s1">&#39;opt&#39;</span>
@@ -478,11 +476,11 @@ For the partial analysis, the hessian of only one phenyl ring is calculated yiel
 <a class="reference download internal" download="" href="../_downloads/41dc6ec6ab2d409072d60fc052411785/xhcff.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
 </section>
 <section id="hcn">
-<h3>HCN<a class="headerlink" href="#hcn" title="Permalink to this headline"></a></h3>
+<h3>HCN<a class="headerlink" href="#hcn" title="Permalink to this heading"></a></h3>
 <p>Periodic boundary conditions can also be used as long as the cell’s shape is constant throughout the analysis.
 The HCN crystal is an interesting construct to examine bulk behavior. It consists of small molecules with strong intermolecular interactions. The standard Jedi analysis does not include those interactions.
 Here, the distorted structure is got by moving one molecule by 0.1 Å away from its original lattice position and at the same time pulling the H atom by 0.1 Å along the covalent bond.</p>
-<p><a class="reference download internal" download="" href="../_downloads/b8c5eea2c93479d84737b5e232f003ab/start.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Starting</span> <span class="pre">geometry</span></code></a>
+<p><a class="reference download internal" download="" href="../_downloads/b8c5eea2c93479d84737b5e232f003ab/start.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Start</span> <span class="pre">geometry</span></code></a>
 <a class="reference download internal" download="" href="../_downloads/6c8c90624b9a928ce38529f224adad85/sp.json"><code class="xref download docutils literal notranslate"><span class="pre">Distorted</span> <span class="pre">geometry</span></code></a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gpaw</span> <span class="kn">import</span> <span class="n">GPAW</span> <span class="p">,</span> <span class="n">PW</span>
 <span class="kn">from</span> <span class="nn">ase.optimize</span> <span class="kn">import</span> <span class="n">BFGS</span>
@@ -543,13 +541,13 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
 <p><a class="reference download internal" download="" href="../_downloads/331c95e5926ead85b07504973ac5fac2/dipole.py"><code class="xref download docutils literal notranslate"><span class="pre">get_hbonds()</span></code></a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dipole</span> <span class="kn">import</span> <span class="n">get_hbonds</span>
 
-<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">hessian</span><span class="p">)</span>
+<span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">))</span>
 
 <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">j</span><span class="o">.</span><span class="n">vmd_gen</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;alldipole&#39;</span><span class="p">)</span>
 
-<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">parthessian</span><span class="p">)</span>
+<span class="n">jpart</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">partmodes</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">))</span>
 
 <span class="n">jpart</span><span class="o">.</span><span class="n">partial_analysis</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">11</span><span class="p">])</span>
@@ -569,7 +567,7 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
 <a class="reference download internal" download="" href="../_downloads/65995733bd301b60437f786bf109db10/hcn.zip"><code class="xref download docutils literal notranslate"><span class="pre">All</span> <span class="pre">data</span></code></a></p>
 </section>
 <section id="jedi-in-molecular-dynamics">
-<h3>Jedi in Molecular Dynamics<a class="headerlink" href="#jedi-in-molecular-dynamics" title="Permalink to this headline"></a></h3>
+<h3>Jedi in Molecular Dynamics<a class="headerlink" href="#jedi-in-molecular-dynamics" title="Permalink to this heading"></a></h3>
 <p>It might be interesting to see the strain energy in bonds during MD simulations since it can show the energy distribution over time.
 A N2 molecule is simulated at 400 K in the following.</p>
 <video controls="True" preload="auto" width="100"><source src="../_images/output.mp4" type="video/mp4">video of N2 at 400 K</video><p>Within ASE using the EMT calculator all necessary data is got by</p>
@@ -583,7 +581,7 @@ A N2 molecule is simulated at 400 K in the following.</p>
 
 <span class="n">vib</span> <span class="o">=</span> <span class="n">Vibrations</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span>
 <span class="n">vib</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-<span class="n">hessian</span> <span class="o">=</span> <span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
+<span class="n">modes</span> <span class="o">=</span> <span class="n">vib</span><span class="o">.</span><span class="n">get_vibrations</span><span class="p">()</span>
 
 
 
@@ -610,7 +608,7 @@ A N2 molecule is simulated at 400 K in the following.</p>
 
 
 <span class="k">def</span> <span class="nf">printenergy</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">atoms</span><span class="p">):</span>  <span class="c1"># store a reference to atoms in the definition.</span>
-    <span class="sd">&quot;&quot;&quot;Function to print the potential, kinetic and total energy.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to print the potential, kinetic and total energy.&quot;&quot;&quot;</span>
     <span class="n">epot</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     <span class="n">ekin</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get_kinetic_energy</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Energy per atom: Epot = </span><span class="si">%.3f</span><span class="s1">eV  Ekin = </span><span class="si">%.3f</span><span class="s1">eV (T=</span><span class="si">%3.0f</span><span class="s1">K)  &#39;</span>
@@ -631,7 +629,7 @@ A N2 molecule is simulated at 400 K in the following.</p>
 To have a consistent color coding the maximum strain in one bond over the whole simulation is set as the maimum for the color scale with the parameter “man_strain”.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">51</span><span class="p">):</span>
-    <span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">hessian</span><span class="p">)</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">modes</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">())</span>
 
     <span class="n">j</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>

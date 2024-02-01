@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Installation &mdash; test  documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +17,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -51,9 +54,9 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#building-guide">Building Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#update-package-sources-check-install-git-and-python">Update package sources, Check / install Git and Python:</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id3">Python</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pip-and-libraries">pip and libraries</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id2">Git</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Python</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pip-and-libraries">Pip and Libraries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#git">Git</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#clone-the-jedi-repository">Clone the JEDI repository</a></li>
@@ -97,23 +100,23 @@
            <div itemprop="articleBody">
              
   <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
 <section id="python">
-<h2>Python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h2>
+<h2>Python<a class="headerlink" href="#python" title="Permalink to this heading"></a></h2>
 <p>JEDI is a tool using the ASE api. JEDI requires at least Python version 3.8. In addition, the python packages Numpy and ASE have to be installed.</p>
 </section>
 </section>
 <section id="building-guide">
-<h1>Building Guide<a class="headerlink" href="#building-guide" title="Permalink to this headline"></a></h1>
+<h1>Building Guide<a class="headerlink" href="#building-guide" title="Permalink to this heading"></a></h1>
 <p>JEDI is primarily developed on Linux systems but can also be used on Windows and Mac systems.</p>
 <section id="update-package-sources-check-install-git-and-python">
-<h2>Update package sources, Check / install Git and Python:<a class="headerlink" href="#update-package-sources-check-install-git-and-python" title="Permalink to this headline"></a></h2>
+<h2>Update package sources, Check / install Git and Python:<a class="headerlink" href="#update-package-sources-check-install-git-and-python" title="Permalink to this heading"></a></h2>
 <p>First the package sources should be updated:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">sudo apt update</span>
 </pre></div>
 </div>
-<section id="id3">
-<h3>Python<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<section id="id1">
+<h3>Python<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>JEDI runs with <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.8</span></code>. Check if it is installed with</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python --version</span>
 </pre></div>
@@ -124,7 +127,7 @@
 </div>
 </section>
 <section id="pip-and-libraries">
-<h3>Pip and Libraries<a class="headerlink" href="#pip-and-libraries" title="Permalink to this headline"></a></h3>
+<h3>Pip and Libraries<a class="headerlink" href="#pip-and-libraries" title="Permalink to this heading"></a></h3>
 <p>The JEDI analysis uses the libraries ASE and NumPy. To run JEDI both these libraries need to be installed.
 You can use the package installer <code class="docutils literal notranslate"><span class="pre">pip</span></code> to do that. First, check if pip is available by running:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -m pip --version</span>
@@ -143,29 +146,24 @@ You can use the package installer <code class="docutils literal notranslate"><sp
 </pre></div>
 </div>
 </section>
-</section>
-<section id="id2">
-<h3>Git<a class="headerlink" href="#git" title="Permalink to this headline"></a></h3>
+<section id="git">
+<h3>Git<a class="headerlink" href="#git" title="Permalink to this heading"></a></h3>
 <p><a class="reference external" href="https://git-scm.com/">Git</a> is used as version control system for JEDI.
 Thus it is also used to clone the <a class="reference external" href="https://github.com/neudecker-group/jedi">JEDI source code repository</a>
 from <a class="reference external" href="https://github.com/">Github</a> to a local system where JEDI should be installed.</p>
 </section>
+</section>
 <section id="clone-the-jedi-repository">
-<h2>Clone the JEDI repository<a class="headerlink" href="#clone-the-jedi-repository" title="Permalink to this headline"></a></h2>
+<h2>Clone the JEDI repository<a class="headerlink" href="#clone-the-jedi-repository" title="Permalink to this heading"></a></h2>
 <p>Clone the JEDI repository to your local machine with <code class="docutils literal notranslate"><span class="pre">git</span></code> from GitHub:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone https://github.com/neudecker-group/jedi.git</span>
 </pre></div>
 </div>
 <p>This clones the JEDI repository to a local folder <code class="docutils literal notranslate"><span class="pre">jedi</span></code>.</p>
-<p>Add ~/path_to_folder/jedi to your $PYTHONPATH environment variable (assuming ~/path_to_folder/ is where your jedi folder is located).</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">export $PYTHONPATH=~/path_to_folder/jedi:$PYTHONPATH</span>
-</pre></div>
-</div>
+<p>Add ~/jedi to your $PYTHONPATH environment variable (assuming ~/jedi is where your jedi folder is).</p>
 </section>
 </section>
-<h3>Installation without Git<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
-<p>Alternativley you may directly download the zipped version of the JEDI code from the <a class="reference external" href="https://github.com/neudecker-group/jedi">JEDI source code repository</a>
-from <a class="reference external" href="https://github.com/">Github</a> to a local system where JEDI should be installed. Here you unzip the folder and add ~/path_to_folder/jedi to your $PYTHONPATH environment variable as explained above.</p>
+
 
            </div>
           </div>

@@ -1,7 +1,7 @@
 Tutorial
 ============
 
-A simple two atoms system of N2 is shown as example. With the following code a N2 molecule is first optimised, then a frequency analysis is performed and lastly, the molecule is stretched.
+A simple two atoms system of N:sub:`2` is shown as example. With the following code a N:sub:`2` molecule is first optimized, then a frequency analysis is performed and lastly, the molecule is stretched.
 
 .. code-block:: python
 
@@ -9,23 +9,27 @@ A simple two atoms system of N2 is shown as example. With the following code a N
    from ase.calculators.emt import EMT
    from ase.optimize import BFGS
    from ase.vibrations import Vibrations
-   #create the structure and optimize it
-   n2 = Atoms('N2', [(0, 0, 0), (0, 0, 1.1)],calculator=EMT())
+   #create the structure
+   n2 = Atoms('N2', [(0, 0, 0), (0, 0, 1.1)])
+   #define the code/metod that is responsible for the electronic structure calculation
+   calc = EMT()
+   n2.set_calculator(calc)
+   #do a geometry optimization
    BFGS(n2).run(fmax=0.01)
    #do a frequency analysis
    vib = Vibrations(n2)
    vib.run()
-   modes = vib.get_vibrations()
+   hessian = vib.get_vibrations()
    #distort the structure and get the energy
    n2l = n2.copy()
    n2l.positions[1][2] = n2.positions[1][2]+0.1
    n2l.calc = EMT()
    n2l.get_potential_energy()
-
+   
    from jedi.jedi import Jedi
-
-   j = Jedi(n2, n2l, modes)
-
+   
+   j = Jedi(n2, n2l, hessian)
+   
    j.run()
 
 This will give following output
@@ -63,5 +67,5 @@ generates a vmd folder with files that are VMD scripts 'bl.vmd', 'all.vmd' (, 'b
 .. image:: n2/vmdscene.png
    :width: 20%
 
-.. image:: n2/allcolorbar.pdf
+.. image:: n2/allcolorbar.png
    :width: 10%

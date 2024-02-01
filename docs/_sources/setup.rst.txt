@@ -1,20 +1,9 @@
 Installation
 =============
-
----
-Git
----
-
-`Git <https://git-scm.com/>`_ is used as version control system for JEDI. 
-Thus it is also used to clone the `JEDI source code repository <https://github.com/neudecker-group/jedi>`_ 
-from `Github <https://github.com/>`_ to a local system where JEDI should be installed. 
-
-------
+-------
 Python
-------
-
-JEDI is a tool using the ASE api. JEDI requires at least Python version 3.7.
-
+-------
+JEDI is a tool using the ASE api. JEDI requires at least Python version 3.8. In addition, the python packages Numpy and ASE have to be installed.
 
 Building Guide
 ==============
@@ -31,27 +20,12 @@ First the package sources should be updated:
 
     sudo apt update
 
-Git 
----
-
-Usually ``git`` should be installed already, however check if git is really installed: 
-
-.. code-block:: console
-
-    git --version 
-
-prints the installed ``git`` version. If ``git`` is not installed, install it with 
-
-.. code-block:: console
-
-    sudo apt install git 
-
 
 Python 
 ------
 
 
-JEDI runs with ``Python 3.7``. Check if it is installed with
+JEDI runs with ``Python 3.8``. Check if it is installed with
 
 .. code-block:: console
 
@@ -61,9 +35,9 @@ If ``Python 2.7`` is running on your system or if ``Python`` is not installed, i
 
 .. code-block:: console
 
-    sudo apt install python3.7
+    sudo apt install python3.8
 
-pip and libraries
+Pip and Libraries
 -----------------
 
 The JEDI analysis uses the libraries ASE and NumPy. To run JEDI both these libraries need to be installed. 
@@ -90,6 +64,14 @@ and
 .. code-block:: console
 
     pip install numpy
+
+
+Git
+---
+
+`Git <https://git-scm.com/>`_ is used as version control system for JEDI. 
+Thus it is also used to clone the `JEDI source code repository <https://github.com/neudecker-group/jedi>`_ 
+from `Github <https://github.com/>`_ to a local system where JEDI should be installed. 
 
 
 --------------------------

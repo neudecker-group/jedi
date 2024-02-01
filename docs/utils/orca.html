@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ORCA &mdash; test  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -15,6 +17,7 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -92,7 +95,7 @@
            <div itemprop="articleBody">
              
   <section id="orca">
-<h1>ORCA<a class="headerlink" href="#orca" title="Permalink to this headline"></a></h1>
+<h1>ORCA<a class="headerlink" href="#orca" title="Permalink to this heading"></a></h1>
 <p>Functions to process orca calculations</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="jedi.io.orca.read">
@@ -114,15 +117,139 @@
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>VibrationsData object.</p>
 </dd>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="jedi.io.orca.write_orca">
+<span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">write_orca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#write_orca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.write_orca" title="Permalink to this definition"></a></dt>
+<dd><p>Modified function to write ORCA input file, making optimizations possible</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">ORCA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_bad_restart_file=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label='orca'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA" title="Permalink to this definition"></a></dt>
+<dd><p>Modified ASE interface to ORCA 4
+by Ragnar Bjornsson, Based on NWchem interface but simplified.
+Only supports energies and gradients (no dipole moments,
+orbital energies etc.) for now.</p>
+<p>For more ORCA-keyword flexibility, method/xc/basis etc.
+keywords are not used. Instead, two keywords:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>orcasimpleinput: str</dt><dd><p>What you’d put after the “!” in an orca input file.
+Should in most cases contain “engrad” or method that
+writes the engrad file. If not (single point only),
+set the “task” parameter manually.
+Default is <code class="docutils literal notranslate"><span class="pre">engrad</span> <span class="pre">tightscf</span> <span class="pre">PBE</span> <span class="pre">def2-SVP</span></code>.</p>
+</dd>
+<dt>orcablock: str</dt><dd><p>What you’d put in the “% … end”-blocks.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>are used to define the ORCA simple-inputline and the ORCA-block input.
+This allows for more flexible use of any ORCA method or keyword
+available in ORCA instead of hardcoding stuff.</p>
+<p>Default parameters are:</p>
+<blockquote>
+<div><p>charge: 0</p>
+<p>mult: 1</p>
+<p>task: ‘gradient’</p>
+</div></blockquote>
+<p>Point Charge IO functionality added by A. Dohn.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.command">
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'orca</span> <span class="pre">PREFIX.inp</span> <span class="pre">&gt;</span> <span class="pre">PREFIX.out'</span></em><a class="headerlink" href="#jedi.io.orca.ORCA.command" title="Permalink to this definition"></a></dt>
+<dd><p>Command used to start calculation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.default_parameters">
+<span class="sig-name descname"><span class="pre">default_parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'charge':</span> <span class="pre">0,</span> <span class="pre">'mult':</span> <span class="pre">1,</span> <span class="pre">'orcablocks':</span> <span class="pre">'%scf</span> <span class="pre">maxiter</span> <span class="pre">200</span> <span class="pre">end',</span> <span class="pre">'orcasimpleinput':</span> <span class="pre">'tightscf</span> <span class="pre">PBE</span> <span class="pre">def2-SVP',</span> <span class="pre">'task':</span> <span class="pre">'gradient'}</span></em><a class="headerlink" href="#jedi.io.orca.ORCA.default_parameters" title="Permalink to this definition"></a></dt>
+<dd><p>Default parameters</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.embed">
+<span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmcharges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.embed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.embed" title="Permalink to this definition"></a></dt>
+<dd><p>Embed atoms in point-charges (mmcharges)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.implemented_properties">
+<span class="sig-name descname"><span class="pre">implemented_properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['energy',</span> <span class="pre">'forces']</span></em><a class="headerlink" href="#jedi.io.orca.ORCA.implemented_properties" title="Permalink to this definition"></a></dt>
+<dd><p>Properties calculator can handle (energy, forces, …)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.read" title="Permalink to this definition"></a></dt>
+<dd><p>Read atoms, parameters and calculated properties from output file.</p>
+<p>Read result from self.label file.  Raise ReadError if the file
+is not there.  If the file is corrupted or contains an error
+message from the calculation, a ReadError should also be
+raised.  In case of succes, these attributes must set:</p>
+<dl class="simple">
+<dt>atoms: Atoms object</dt><dd><p>The state of the atoms from last calculation.</p>
+</dd>
+<dt>parameters: Parameters object</dt><dd><p>The parameter dictionary.</p>
+</dd>
+<dt>results: dict</dt><dd><p>Calculated properties like energy and forces.</p>
+</dd>
+</dl>
+<p>The FileIOCalculator.read() method will typically read atoms
+and parameters and get the results dict by calling the
+read_results() method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.read_energy">
+<span class="sig-name descname"><span class="pre">read_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.read_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.read_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Read Energy from ORCA output file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.read_forces">
+<span class="sig-name descname"><span class="pre">read_forces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.read_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.read_forces" title="Permalink to this definition"></a></dt>
+<dd><p>Read Forces from ORCA output file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.read_results">
+<span class="sig-name descname"><span class="pre">read_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.read_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.read_results" title="Permalink to this definition"></a></dt>
+<dd><p>Read energy, forces, … from output file(s).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.set" title="Permalink to this definition"></a></dt>
+<dd><p>Set parameters like set(key1=value1, key2=value2, …).</p>
+<p>A dictionary containing the parameters that have been changed
+is returned.</p>
+<p>Subclasses must implement a set() method that will look at the
+chaneged parameters and decide if a call to reset() is needed.
+If the changed parameters are harmless, like a change in
+verbosity, then there is no need to call reset().</p>
+<p>The special keyword ‘parameters’ can be used to read
+parameters from a file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.io.orca.ORCA.write_input">
+<span class="sig-name descname"><span class="pre">write_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.write_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.write_input" title="Permalink to this definition"></a></dt>
+<dd><p>Write input file(s).</p>
+<p>Call this method first in subclasses so that directories are
+created automatically.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="jedi.io.orca.OrcaOptimizer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">OrcaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#OrcaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.OrcaOptimizer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">OrcaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#OrcaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.OrcaOptimizer" title="Permalink to this definition"></a></dt>
 <dd><p>Allowing ase to use Orca geometry optimizations</p>
 <dl class="simple">
 <dt>atoms: class</dt><dd><p>Structure with orca calculator</p>
