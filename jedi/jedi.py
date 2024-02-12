@@ -919,8 +919,8 @@ class Jedi:
         if  len(self.proc_E_RIMs) == 0:
             self.run()
         proc_E_RIMs = self.proc_E_RIMs
-        pbc_flag =  True
-        if box == True and self.atomsF.get_pbc().any() == True:
+        pbc_flag = False
+        if self.atomsF.get_pbc().any() == True:
             pbc_flag=True
         # Check whether we need to write ba, da and all and read basic stuff
         file_list = []
@@ -1305,7 +1305,7 @@ color Axes Labels 32
                 
     
             f = open(f'{filename}.vmd', 'a')
-            if pbc_flag==True:
+            if pbc_flag & box  :
              
                 f.write("\n\n# Adding a pbc box")
                 f.write('\npbc set {%f %f %f %f %f %f}'%(self.atomsF.cell.cellpar()[0],self.atomsF.cell.cellpar()[1],self.atomsF.cell.cellpar()[2],self.atomsF.cell.cellpar()[3],self.atomsF.cell.cellpar()[4],self.atomsF.cell.cellpar()[5]))
