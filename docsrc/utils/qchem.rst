@@ -8,5 +8,8 @@ Functions to process qchem calculations
 
 .. autofunction:: jedi.io.qchem.get_vibrations
 
+.. autoclass:: jedi.io.qchem.QChem
+    :members:
+
 .. autoclass:: jedi.io.qchem.QChemOptimizer
     :members:
