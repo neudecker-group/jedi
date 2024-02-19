@@ -100,7 +100,8 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="jedi.io.qchem.read">
 <span class="sig-prename descclassname"><span class="pre">jedi.io.qchem.</span></span><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/qchem.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.qchem.read" title="Permalink to this definition"></a></dt>
-<dd><p>Read qchem out file</p>
+<dd><p>Read qchem out file
+filename: str</p>
 </dd></dl>
 
 <dl class="py function">
@@ -118,6 +119,41 @@
 <dd class="field-odd"><p>VibrationsData object.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="jedi.io.qchem.QChem">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jedi.io.qchem.</span></span><span class="sig-name descname"><span class="pre">QChem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_bad_restart_file=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label='qchem'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scratch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">np=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nt=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pbs=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basisfile=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ecpfile=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distort={}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/qchem.html#QChem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.qchem.QChem" title="Permalink to this definition"></a></dt>
+<dd><p>Modified version of the ASE QChem calculator</p>
+<p>The scratch directory, number of processor and threads as well as a few
+other command line options can be set using the arguments explained
+below. The remaining kwargs are copied as options to the input file.
+The calculator will convert these options to upper case
+(Q-Chem standard) when writing the input file.</p>
+<dl class="simple">
+<dt>scratch: str</dt><dd><p>path of the scratch directory</p>
+</dd>
+<dt>np: int</dt><dd><p>number of processors for the -np command line flag</p>
+</dd>
+<dt>nt: int</dt><dd><p>number of threads for the -nt command line flag</p>
+</dd>
+<dt>pbs: boolean</dt><dd><p>command line flag for pbs scheduler (see Q-Chem manual)</p>
+</dd>
+<dt>basisfile: str</dt><dd><p>path to file containing the basis. Use in combination with
+basis=’gen’ keyword argument.</p>
+</dd>
+<dt>ecpfile: str</dt><dd><p>path to file containing the effective core potential. Use in
+combination with ecp=’gen’ keyword argument.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="jedi.io.qchem.QChem.write_input">
+<span class="sig-name descname"><span class="pre">write_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/qchem.html#QChem.write_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.qchem.QChem.write_input" title="Permalink to this definition"></a></dt>
+<dd><p>Write input file(s).</p>
+<p>Call this method first in subclasses so that directories are
+created automatically.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">

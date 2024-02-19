@@ -1,7 +1,7 @@
 Tutorial
 ============
 
-A simple two atoms system of N:sub:`2` is shown as example. With the following code a N:sub:`2` molecule is first optimized, then a frequency analysis is performed and lastly, the molecule is stretched.
+A simple two atoms system of N\ :sub:`2`\  is shown as example. With the following code a N\ :sub:`2`\  molecule is first optimized, then a frequency analysis is performed and lastly, the molecule is stretched.
 
 .. code-block:: python
 

@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>jedi.jedi &mdash; test  documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -14,6 +16,7 @@
         <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -99,7 +102,7 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Hartree</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">mol</span><span class="p">,</span> <span class="n">kcal</span>
 <div class="viewcode-block" id="jedi_analysis"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.jedi_analysis">[docs]</a><span class="k">def</span> <span class="nf">jedi_analysis</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">H_cart</span><span class="p">,</span><span class="n">delta_q</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span><span class="n">printout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Analysis of strain energy stored in redundant internal coordinates.</span>
 
 <span class="sd">    atoms: class </span>
@@ -187,7 +190,7 @@
     <span class="k">return</span> <span class="n">proc_E_RIMs</span><span class="p">,</span><span class="n">E_RIMs</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">,</span><span class="n">delta_q</span></div>
 
 <div class="viewcode-block" id="jedi_printout"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.jedi_printout">[docs]</a><span class="k">def</span> <span class="nf">jedi_printout</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">delta_q</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">,</span><span class="n">proc_E_RIMs</span><span class="p">,</span> <span class="n">E_RIMs</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Printout of analysis of stored strain energy in redundant internal coordinates.</span>
 
 <span class="sd">    atoms: class</span>
@@ -259,7 +262,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">quotes</span><span class="o">.</span><span class="n">quotes</span><span class="p">())</span></div>
 
 <div class="viewcode-block" id="jedi_printout_bonds"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.jedi_printout_bonds">[docs]</a><span class="k">def</span> <span class="nf">jedi_printout_bonds</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">,</span><span class="n">proc_E_RIMs</span><span class="p">,</span> <span class="n">E_RIMs</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">file</span><span class="o">=</span><span class="s1">&#39;total&#39;</span><span class="p">):</span> <span class="c1">#total strain in bonds after adding contributions of stretching angles and dihedral angles</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Printout of analysis of stored strain energy in the bonds.</span>
 
 <span class="sd">    atoms: class</span>
@@ -323,7 +326,7 @@
 
 
 <div class="viewcode-block" id="get_hbonds"><a class="viewcode-back" href="../../utils/hbond.html#jedi.jedi.get_hbonds">[docs]</a><span class="k">def</span> <span class="nf">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">covf</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span><span class="n">vdwf</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Get all hbonds in a structure.</span>
 <span class="sd">    Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90° and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.</span>
 
@@ -368,7 +371,7 @@
 <div class="viewcode-block" id="Jedi"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi">[docs]</a><span class="nd">@jsonable</span><span class="p">(</span><span class="s1">&#39;jedi&#39;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">Jedi</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms0</span><span class="p">,</span> <span class="n">atomsF</span><span class="p">,</span> <span class="n">modes</span><span class="p">):</span> <span class="c1">#indices=None</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 
 <span class="sd">        atoms0: class</span>
 <span class="sd">            Atoms object of relaxed structure with calculated energy.</span>
@@ -398,7 +401,7 @@
             <span class="k">raise</span> <span class="ne">GeneratorExit</span>
         
 <div class="viewcode-block" id="Jedi.todict"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.todict">[docs]</a>    <span class="k">def</span> <span class="nf">todict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-        <span class="sd">&#39;&#39;&#39;make it saveable with .write()</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;make it saveable with .write()</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;atoms0&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span><span class="p">,</span>
@@ -415,7 +418,7 @@
                 <span class="s1">&#39;custom_bonds&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span><span class="p">}</span></div>
 <div class="viewcode-block" id="Jedi.fromdict"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.fromdict">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromdict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;Jedi&#39;</span><span class="p">:</span>
-        <span class="sd">&#39;&#39;&#39;make it readable with .read()</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;make it readable with .read()</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="c1"># mypy is understandably suspicious of data coming from a dict that</span>
@@ -473,7 +476,7 @@
         <span class="k">return</span> <span class="n">cl</span></div>
 
 <div class="viewcode-block" id="Jedi.run"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Runs the analysis. Calls all necessary functions to get the needed values.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the analysis. Calls all necessary functions to get the needed values.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            indices: </span>
@@ -520,7 +523,7 @@
 
 
 <div class="viewcode-block" id="Jedi.get_rims"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_rims">[docs]</a>    <span class="k">def</span> <span class="nf">get_rims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mol</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Gets the redundant internal coordinates</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Gets the redundant internal coordinates</span>
 
 <span class="sd">        &#39;&#39;&#39;</span> 
         <span class="c1">###bondlengths####</span>
@@ -684,7 +687,7 @@
         <span class="k">return</span> <span class="n">rim_list</span></div>
     
 <div class="viewcode-block" id="Jedi.get_common_rims"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_common_rims">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_rims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Get only the RICs in both structures bond breaks cannot be analysed logically</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get only the RICs in both structures bond breaks cannot be analysed logically</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>  
         <span class="n">rim_atoms0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_rims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span><span class="p">)</span>
@@ -706,14 +709,14 @@
         <span class="k">return</span> <span class="n">rim_atoms0</span></div>
     
 <div class="viewcode-block" id="Jedi.get_hessian"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_hessian">[docs]</a>    <span class="k">def</span> <span class="nf">get_hessian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Calls the hessian from the VibrationsData object</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Calls the hessian from the VibrationsData object</span>
 <span class="sd">        &#39;&#39;&#39;</span> 
         <span class="n">hessian</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">_hessian2d</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">hessian</span> <span class="o">/</span><span class="p">(</span><span class="n">Hartree</span><span class="o">/</span><span class="n">Bohr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hessian</span></div>
     
 <div class="viewcode-block" id="Jedi.get_b_matrix"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_b_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_b_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>  
         <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span>
@@ -896,7 +899,7 @@
         <span class="k">return</span> <span class="n">B</span></div>
 
 <div class="viewcode-block" id="Jedi.get_energies"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_energies">[docs]</a>    <span class="k">def</span> <span class="nf">get_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Calls the energies of the Atoms objects.</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Calls the energies of the Atoms objects.</span>
 
 <span class="sd">            Returns: </span>
 <span class="sd">                [energy difference, energy of atoms0, energy of atomsF]</span>
@@ -912,7 +915,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">deltaE</span><span class="p">,</span> <span class="n">eF</span><span class="p">,</span> <span class="n">e0</span><span class="p">]</span></div>
         
 <div class="viewcode-block" id="Jedi.get_delta_q"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.get_delta_q">[docs]</a>    <span class="k">def</span> <span class="nf">get_delta_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;get the strain in RICs substracts the values of the relaxed structure from the strained structure</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;get the strain in RICs substracts the values of the relaxed structure from the strained structure</span>
 <span class="sd">        </span>
 <span class="sd">            Returns: </span>
 <span class="sd">                2D array of the values.</span>
@@ -967,7 +970,7 @@
         <span class="k">return</span> <span class="n">delta_q</span></div>
 
 <div class="viewcode-block" id="Jedi.vmd_gen"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.vmd_gen">[docs]</a>    <span class="k">def</span> <span class="nf">vmd_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">des_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">box</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">man_strain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">modus</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">colorbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;vmd&#39;</span><span class="p">):</span> <span class="c1">#get vmd scripts</span>
-        <span class="sd">&#39;&#39;&#39;Generates vmd scripts and files to save the values for the color coding</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Generates vmd scripts and files to save the values for the color coding</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            des_colors: (dict)</span>
@@ -1003,8 +1006,8 @@
         <span class="k">if</span>  <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc_E_RIMs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
         <span class="n">proc_E_RIMs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_E_RIMs</span>
-        <span class="n">pbc_flag</span> <span class="o">=</span>  <span class="kc">True</span>
-        <span class="k">if</span> <span class="n">box</span> <span class="o">==</span> <span class="kc">True</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">pbc_flag</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">pbc_flag</span><span class="o">=</span><span class="kc">True</span>
         <span class="c1"># Check whether we need to write ba, da and all and read basic stuff</span>
         <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1389,7 +1392,7 @@
                 
     
             <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s1">.vmd&#39;</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">pbc_flag</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pbc_flag</span> <span class="o">&amp;</span> <span class="n">box</span>  <span class="p">:</span>
              
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2"># Adding a pbc box&quot;</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">pbc set {</span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1">}&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">2</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">3</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">4</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">5</span><span class="p">]))</span>
@@ -1480,8 +1483,8 @@
 <span class="s1">set center [molinfo $old_top get center]</span>
 <span class="s1">set center [regsub -all </span><span class="se">{{</span><span class="s1">[</span><span class="se">{{}}</span><span class="s1">]</span><span class="se">}}</span><span class="s1"> $center &quot;&quot;]</span>
 <span class="s1">set center [split $center]</span>
-<span class="s1">set min </span><span class="si">{</span><span class="nb">min</span><span class="si">}</span><span class="s1"></span>
-<span class="s1">set max </span><span class="si">{</span><span class="nb">max</span><span class="si">}</span><span class="s1"></span>
+<span class="s1">set min </span><span class="si">{</span><span class="nb">min</span><span class="si">}</span>
+<span class="s1">set max </span><span class="si">{</span><span class="nb">max</span><span class="si">}</span>
 <span class="s1">set length 30.0</span>
 <span class="s1">set width [expr $length / 6]</span>
 
@@ -1496,11 +1499,11 @@
 
 <span class="s1">set label_num 8</span>
 
-<span class="s1">for </span><span class="se">{{</span><span class="s1">set colorid 1 </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1"> $colorid &lt;= </span><span class="si">{</span><span class="n">N_colors</span><span class="si">}</span><span class="s1"> </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">incr colorid 1 </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1"></span>
+<span class="s1">for </span><span class="se">{{</span><span class="s1">set colorid 1 </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1"> $colorid &lt;= </span><span class="si">{</span><span class="n">N_colors</span><span class="si">}</span><span class="s1"> </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">incr colorid 1 </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
 <span class="s1">    draw color $colorid</span>
 <span class="s1">    set cur_y [ expr $start_y + ($colorid -0.5 ) * $step ]</span>
 <span class="s1">    draw line &quot;$use_x $cur_y $use_z&quot;  &quot;[expr $use_x+$width] $cur_y $use_z&quot; width 10000</span>
-<span class="se">}}</span><span class="s1"></span>
+<span class="se">}}</span>
 
 <span class="s1"># draw the labels</span>
 <span class="s1">set coord_x [expr (1.1*$width)+$use_x];</span>
@@ -1508,13 +1511,13 @@
 <span class="s1">set color_step [expr </span><span class="si">{</span><span class="n">N_colors</span><span class="si">}</span><span class="s1">/$label_num]</span>
 <span class="s1">set value_step [expr ($max - $min ) / double ($label_num)]</span>
 
-<span class="s1">for </span><span class="se">{{</span><span class="s1">set i 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">$i &lt;= $label_num </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1"> incr i 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1"></span>
+<span class="s1">for </span><span class="se">{{</span><span class="s1">set i 0</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1">$i &lt;= $label_num </span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span><span class="s1"> incr i 1</span><span class="se">}}</span><span class="s1"> </span><span class="se">{{</span>
 <span class="s1">    set cur_color_id 32</span>
 <span class="s1">    draw color $cur_color_id</span>
 <span class="s1">    set coord_y [expr $start_y+$i * $step_size ]</span>
 <span class="s1">    set cur_text [expr $min + $i * $value_step ]</span>
 <span class="s1">    draw text  &quot; $coord_x $coord_y $use_z&quot;  [format %6.3f  $cur_text]</span>
-<span class="se">}}</span><span class="s1"></span>
+<span class="se">}}</span>
 <span class="s1">draw text &quot; $coord_x [expr $coord_y + $step_size] $use_z&quot;   &quot;</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s1">&quot;</span>
 <span class="s1"># re-set top</span>
 <span class="s1">mol top $old_top</span>
@@ -1556,7 +1559,7 @@
 
 
 <div class="viewcode-block" id="Jedi.partial_analysis"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.partial_analysis">[docs]</a>    <span class="k">def</span> <span class="nf">partial_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>  
-        <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Analyse a substructure with given indices. </span>
 
 <span class="sd">        Args:</span>
@@ -1618,7 +1621,7 @@
             
       
 <div class="viewcode-block" id="Jedi.post_process"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="p">):</span>             <span class="c1">#a function to get segments of all full analysis for better understanding of local strain</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        get only the values of RICs inside a defined substructure</span>
 
 <span class="sd">        Args:</span>
@@ -1664,7 +1667,7 @@
 
     <span class="k">def</span> <span class="nf">add_custom_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bonds</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span> <span class="o">=</span> <span class="n">bonds</span>   <span class="c1"># additional bonds for analysis of non covalent interactions</span>
-        <span class="sd">&#39;&#39;&#39;Add custom bonds after creating the object.</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Add custom bonds after creating the object.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
 <span class="sd">            bonds: </span>
@@ -1672,7 +1675,7 @@
 <span class="sd">            &#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="Jedi.set_bond_params"><a class="viewcode-back" href="../../jedi.html#jedi.jedi.Jedi.set_bond_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_bond_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">covf</span><span class="p">,</span><span class="n">vdwf</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            covf: </span>
 <span class="sd">                float factor for  covalent radii to determine covalent bonds</span>

@@ -16,7 +16,7 @@ Here, cytosine and guanine are examined.
 
 .. code-block:: python
 
-    from ase.calculators.gaussian import Gaussian, GaussianOptimizer
+    from jedi.io.gaussian import Gaussian, GaussianOptimizer, get_vibrations
     import ase.io
     from jedi.jedi import Jedi, get_hbonds
     from ase.vibrations.vibrations import VibrationsData
@@ -85,7 +85,7 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 
     from ase.vibrations.vibrations import VibrationsData
     from jedi.jedi import Jedi, get_hbonds
-    from jedi.io.gaussian import get_vibrations,read_gaussian_out
+    from jedi.io.gaussian import get_vibrations, read_gaussian_out
 
     file=open('output/opt.log')
     mol=read_gaussian_out(file)
@@ -260,7 +260,7 @@ Stretching bonds using a predefined force is possible with the EFEI method. The 
     from ase.build import molecule
     from ase.vibrations.vibrations import VibrationsData
     from jedi.jedi import Jedi
-    from jedi.io.orca import OrcaOptimizer,  get_vibrations,  ORCA
+    from jedi.io.orca import OrcaOptimizer, get_vibrations, ORCA
     import ase.io
     
     mol=molecule('C2H6')
@@ -314,10 +314,9 @@ A lot of models have been developed to simulate pressure. X-HCFF is one of them 
 .. code-block:: python
 
     import ase.io
-    from ase.calculators.qchem import QChem
     from ase.vibrations.data import VibrationsData
     from jedi.jedi import Jedi
-    from jedi.io.qchem import get_vibrations, QChemOptimizer
+    from jedi.io.qchem import get_vibrations, QChemOptimizer, QChem
     
     mol = ase.io.read('Dewar.xyz')
     
@@ -369,10 +368,9 @@ In another folder the same for Ladenburg benzene:
 .. code-block:: python
 
     import ase.io
-    from ase.calculators.qchem import QChem
     from ase.vibrations.data import VibrationsData
     from jedi.jedi import Jedi
-    from jedi.io.qchem import get_vibrations, QChemOptimizer
+    from jedi.io.qchem import get_vibrations, QChemOptimizer, QChem
     
     mol = ase.io.read('Ladenburg.xyz')
     

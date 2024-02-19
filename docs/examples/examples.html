@@ -113,7 +113,7 @@
 <section id="stretching-hydrogen-bonds-using-cogef">
 <h3>Stretching Hydrogen Bonds Using COGEF<a class="headerlink" href="#stretching-hydrogen-bonds-using-cogef" title="Permalink to this heading"></a></h3>
 <p>Here, cytosine and guanine are examined.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.calculators.gaussian</span> <span class="kn">import</span> <span class="n">Gaussian</span><span class="p">,</span> <span class="n">GaussianOptimizer</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">jedi.io.gaussian</span> <span class="kn">import</span> <span class="n">Gaussian</span><span class="p">,</span> <span class="n">GaussianOptimizer</span><span class="p">,</span> <span class="n">get_vibrations</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span><span class="p">,</span> <span class="n">get_hbonds</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
@@ -178,7 +178,7 @@
 The gaussian outputs can be read by the funtions delivered with the Jedi package.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span><span class="p">,</span> <span class="n">get_hbonds</span>
-<span class="kn">from</span> <span class="nn">jedi.io.gaussian</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span><span class="n">read_gaussian_out</span>
+<span class="kn">from</span> <span class="nn">jedi.io.gaussian</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">read_gaussian_out</span>
 
 <span class="n">file</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;output/opt.log&#39;</span><span class="p">)</span>
 <span class="n">mol</span><span class="o">=</span><span class="n">read_gaussian_out</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
@@ -318,7 +318,7 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">molecule</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">jedi.io.orca</span> <span class="kn">import</span> <span class="n">OrcaOptimizer</span><span class="p">,</span>  <span class="n">get_vibrations</span><span class="p">,</span>  <span class="n">ORCA</span>
+<span class="kn">from</span> <span class="nn">jedi.io.orca</span> <span class="kn">import</span> <span class="n">OrcaOptimizer</span><span class="p">,</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">ORCA</span>
 <span class="kn">import</span> <span class="nn">ase.io</span>
 
 <span class="n">mol</span><span class="o">=</span><span class="n">molecule</span><span class="p">(</span><span class="s1">&#39;C2H6&#39;</span><span class="p">)</span>
@@ -364,10 +364,9 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 <h3>Hydrostatic Pressure using X-HCFF<a class="headerlink" href="#hydrostatic-pressure-using-x-hcff" title="Permalink to this heading"></a></h3>
 <p>A lot of models have been developed to simulate pressure. X-HCFF is one of them that simulates Hydrostatic pressure. Here, Dewar and Ladenburg benzene are analyzed under 50 GPa of pressure.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.qchem</span> <span class="kn">import</span> <span class="n">QChem</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.data</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span>
+<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span><span class="p">,</span> <span class="n">QChem</span>
 
 <span class="n">mol</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Dewar.xyz&#39;</span><span class="p">)</span>
 
@@ -417,10 +416,9 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 </div>
 <p>In another folder the same for Ladenburg benzene:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.qchem</span> <span class="kn">import</span> <span class="n">QChem</span>
 <span class="kn">from</span> <span class="nn">ase.vibrations.data</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
 <span class="kn">from</span> <span class="nn">jedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span>
+<span class="kn">from</span> <span class="nn">jedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span><span class="p">,</span> <span class="n">QChem</span>
 
 <span class="n">mol</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Ladenburg.xyz&#39;</span><span class="p">)</span>
 
