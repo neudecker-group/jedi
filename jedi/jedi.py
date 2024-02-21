@@ -1450,7 +1450,7 @@ display update on ''')
                                             cmap=cmap,
                                             norm=Normalize(min,round(max,3)),
                                             label=unit,
-                                            ticks=np.round_(np.linspace(min, max, 8),decimals=3))
+                                            ticks=np.round(np.linspace(min, max, 8),decimals=3))
                 
                 fig.savefig(f'{filename}colorbar.pdf', bbox_inches='tight')
                 
@@ -1562,8 +1562,10 @@ display update on ''')
             if rim_list[i].shape == (0,):
                 rim_list_c.append([])
             else:
-                rim_list_c.append(np.vstack((rim_list[i],rim_p[i])))
-            
+                if rim_p[i].shape[0]>0:
+                    rim_list_c.append(np.vstack((rim_list[i],rim_p[i])))
+                else:
+                    rim_list_c.append(np.vstack((rim_list[i])))
             x,z=np.unique(rim_list_c[-1],return_counts=True,axis=0)
             
             ind.append(np.where(z>1)[0])                                        #get indices where ric is in both sets
@@ -1611,7 +1613,7 @@ class JediAtoms(Jedi):
             indices: 
                 list of indices of a substructure if desired
             ase_units: boolean
-                flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians 
+                flag to get eV for energies å fo lengths otherwise it is kcal/mol, Bohr  
         Returns:
             Indices, strain, energy in every RIM
         """
@@ -1719,19 +1721,10 @@ class JediAtoms(Jedi):
             unit = "kcal/mol"
         elif self.ase_units == True:
             unit = "eV"
-        rim_list = self.rim_list
         self.atomsF.write('xF.xyz')
         
 
-        pbc_flag = False
-        if self.atomsF.get_pbc().any() == True:
-            pbc_flag=True
 
-
-     
-        # E_RIMs_perc
-
-        E_atoms_perc = np.array(self.E_atoms/np.sum(self.E_atoms))
         E_atoms = self.E_atoms
 
         # Write some basic stuff to the tcl scripts
@@ -1850,7 +1843,7 @@ color Axes Labels 32
             
     
         f = open('atoms.vmd', 'a')
-        if pbc_flag & box  :
+        if box  :
             
             f.write("\n\n# Adding a pbc box")
             f.write('\npbc set {%f %f %f %f %f %f}'%(self.atomsF.cell.cellpar()[0],self.atomsF.cell.cellpar()[1],self.atomsF.cell.cellpar()[2],self.atomsF.cell.cellpar()[3],self.atomsF.cell.cellpar()[4],self.atomsF.cell.cellpar()[5]))
@@ -1893,7 +1886,7 @@ color Axes Labels 32
                                         cmap=cmap,
                                         norm=Normalize(min,round(max,3)),
                                         label=unit,
-                                        ticks=np.round_(np.linspace(min, max, 8),decimals=3))
+                                        ticks=np.round(np.linspace(min, max, 8),decimals=3))
             
             fig.savefig('atomscolorbar.pdf', bbox_inches='tight')
 
