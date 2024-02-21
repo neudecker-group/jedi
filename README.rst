@@ -10,7 +10,7 @@ Requirements
 
 * Python_ 3.8 or later
 * NumPy_ (base N-dimensional array package)
-* ase_ (functions to determine atomic structures' geometries and quantum chemical calculators)
+* ase_ 3.23 (functions to determine atomic structures' geometries and quantum chemical calculators)
 
 
 
