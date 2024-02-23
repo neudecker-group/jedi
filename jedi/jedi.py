@@ -127,50 +127,52 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
     #	    	   Output section	        	#
     #############################################
 
+    output = []
     # Header
-    print("\n \n")
-    print(" ************************************************")
-    print(" *                 JEDI ANALYSIS                *")
-    print(" *       Judgement of Energy DIstribution       *")
-    print(" ************************************************\n")
+    output.append("\n \n")
+    output.append("************************************************")
+    output.append("\n *                 JEDI ANALYSIS                *")
+    output.append("\n *       Judgement of Energy DIstribution       *")
+    output.append("\n ************************************************\n")
     
     # Comparison of total energies
     if ase_units == False:
-        print("                   Strain Energy (kcal/mol)  Deviation (%)")
+        output.append("\n                   Strain Energy (kcal/mol)  Deviation (%)")
     elif ase_units == True:
-        print("                   Strain Energy (eV)        Deviation (%)")
-    print("      Ab initio     " + "%.8f" % E_geometries + "                  -" )
-    print('%5s%16.8f%21.2f' % (" JEDI           ", E_RIMs_total, proc_geom_RIMs))
+        output.append("\n                   Strain Energy (eV)        Deviation (%)")
+    output.append("\n      Ab initio     " + "%.8f" % E_geometries + "                  -" )
+    output.append('\n%5s%16.8f%21.2f' % (" JEDI           ", E_RIMs_total, proc_geom_RIMs))
 
 
     # JEDI analysis
 
     if ase_units == False:
-        print("\n RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)")
+        output.append("\n RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)")
     elif ase_units == True:
-        print("\n RIC No.       RIC type                       indices        delta_q (Å,°) Percentage    Energy (eV)")
+        output.append("\n RIC No.       RIC type                       indices        delta_q (Å,°) Percentage    Energy (eV)")
     i = 0
 
     for k in rim_list[0]:
         rim = "bond" 
         ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
-        print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+        output.append('\n%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
         i += 1
     for k in rim_list[1]:
         rim = "custom" 
         ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
-        print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+        output.append('\n%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
         i += 1
     for k in rim_list[2]:
         rim = "bond angle" 
         ind = "%s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2])
-        print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+        output.append('\n%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
         i += 1
     for k in rim_list[3]:
         rim = "dihedral" 
         ind = "%s%d %s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2], atoms.symbols[k[3]], k[3])
-        print('%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
+        output.append('\n%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
         i += 1
+    print(*output)
     from . import quotes
     print(quotes.quotes())
 
@@ -201,42 +203,46 @@ def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIM
     #############################################
     #	    	   Output section	        	#
     #############################################
-    f = open(file, 'w')
+    
+
+    output = []
     # Header
    
-    print(" ************************************************",file=f)
-    print(" *                 JEDI ANALYSIS                *",file=f)
-    print(" *       Judgement of Energy DIstribution       *",file=f)
-    print(" ************************************************\n",file=f)
+    output.append("\n ************************************************")
+    output.append("\n *                 JEDI ANALYSIS                *")
+    output.append("\n *       Judgement of Energy DIstribution       *")
+    output.append("\n ************************************************\n")
     
     # Comparison of total energies
     if ase_units==False:
-        print("                   Strain Energy (kcal/mol)  Deviation (%)",file=f)
+        output.append("\n                   Strain Energy (kcal/mol)  Deviation (%)")
     elif ase_units==True:
-        print("                   Strain Energy (eV)        Deviation (%)",file=f)
-    print("      Ab initio     " + "%.8f" % E_geometries + "                  -",file=f)
-    print('%5s%16.8f%21.2f' % (" JEDI           ", E_RIMs_total, proc_geom_RIMs),file=f)
+        output.append("\n                   Strain Energy (eV)        Deviation (%)")
+    output.append("\n      Ab initio     " + "%.8f" % E_geometries + "                  -")
+    output.append('\n%5s%16.8f%21.2f' % (" JEDI           ", E_RIMs_total, proc_geom_RIMs))
 
 
     # strain in the bonds
 
     if ase_units == False:
-        print("\n RIC No.       RIC type                       indices       Percentage    Energy (kcal/mol)",file=f)
+        output.append("\n RIC No.       RIC type                       indices       Percentage    Energy (kcal/mol)")
     elif ase_units == True:
-        print("\n RIC No.       RIC type                       indices       Percentage    Energy (eV)",file=f)
+        output.append("\n RIC No.       RIC type                       indices       Percentage    Energy (eV)")
     i = 0
 
     for k in rim_list[0]:
         rim = "bond" 
         ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
-        print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
+        output.append('\n%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]))
         i += 1
     for k in rim_list[1]:
         rim = "custom" 
         ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
-        print('%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]),file=f)
+        output.append('\n%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]))
         i += 1
-
+    f = open(file, 'w')
+    f.writelines(output)
+    f.close()
 
 def get_hbonds(mol,covf=1.3,vdwf=0.9):
     '''
@@ -967,17 +973,18 @@ class Jedi:
         E_RIMs = self.E_RIMs
 
         # Write some basic stuff to the tcl scripts
-        for filename in file_list:
+        output = [[],[],[],[]]
+        for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
-                f = open(f'{filename}.vmd', 'w')
-                f.write('# Load a molecule\nmol new xF.xyz\n\n')
-                f.write('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
-                f.write('# Change the drawing method of the first graphical representation to CPK\nmol modstyle 0 top cpk\n')
-                f.write('# Color only H atoms white\nmol modselect 0 top {name H}\n')
-                f.write('# Change the color of the graphical representation 0 to white\ncolor change rgb 0 1.00 1.00 1.00\nmol modcolor 0 top {colorid 0}\n')
-                f.write('# The background should be white ("blue" has the colorID 0, which we have changed to white)\ncolor Display Background blue\n\n')
-                f.write('# Define the other colorIDs\n')
-                f.close()
+                
+                output[outindex].append('\n# Load a molecule\nmol new xF.xyz\n\n')
+                output[outindex].append('\n# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
+                output[outindex].append('\n# Change the drawing method of the first graphical representation to CPK\nmol modstyle 0 top cpk\n')
+                output[outindex].append('\n# Color only H atoms white\nmol modselect 0 top {name H}\n')
+                output[outindex].append('\n# Change the color of the graphical representation 0 to white\ncolor change rgb 0 1.00 1.00 1.00\nmol modcolor 0 top {colorid 0}\n')
+                output[outindex].append('\n# The background should be white ("blue" has the colorID 0, which we have changed to white)\ncolor Display Background blue\n\n')
+                output[outindex].append('\n# Define the other colorIDs\n')
+               
 
         # Define colorcodes for various atomtypes
 
@@ -994,9 +1001,9 @@ class Jedi:
 
         
         # Generate the color-code and write it to the tcl scripts
-        for filename in file_list:
+        for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
-                f = open(f'{filename}.vmd', 'a')
+                
                 colorbar_colors = []
 
                 #get green to red gradient
@@ -1013,20 +1020,20 @@ class Jedi:
 
                     B_value = 0
 
-                    f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
+                    output[outindex].append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
                     colorbar_colors.append((R_value, G_value, B_value))
 
                 # add color codes of atoms
                 for j in range(N_colors_atoms):
-                    f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", N_colors+j+1, float(colors[symbols[j]][0]), float(colors[symbols[j]][1]), float(colors[symbols[j]][2]), "\n"))
+                    output[outindex].append('\n%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", N_colors+j+1, float(colors[symbols[j]][0]), float(colors[symbols[j]][1]), float(colors[symbols[j]][2]), "\n"))
 
                 #add color code for axes and box
-                f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))#black
-                f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1039, float(1), float(0), float(0), "\n"))#red
-                f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1038, float(0), float(1), float(0), "\n"))#green
-                f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1037, float(0), float(0), float(1), "\n"))#blue
-                f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1036, float(0.25), float(0.75), float(0.75), "\n"))#cyan
-                f.write('''color Axes X 1039
+                output[outindex].append('\n%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))#black
+                output[outindex].append('\n%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1039, float(1), float(0), float(0), "\n"))#red
+                output[outindex].append('\n%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1038, float(0), float(1), float(0), "\n"))#green
+                output[outindex].append('\n%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1037, float(0), float(0), float(1), "\n"))#blue
+                output[outindex].append('\n%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1036, float(0.25), float(0.75), float(0.75), "\n"))#cyan
+                output[outindex].append('''\ncolor Axes X 1039
 color Axes Y 1038
 color Axes Z 1037
 color Axes Origin 1036
@@ -1034,14 +1041,14 @@ color Axes Labels 32
 ''')
                 #define color of atoms with the color code above
                 for j in range(N_colors_atoms):
-                    f.write('\n\nmol representation cpk 0.7 0.0 30 5')
-                    f.write('\nmol addrep top') 	
-                    f.write('\n%s%i%s' % ("mol modstyle ", j+1, " top cpk"))
-                    f.write('\n%s%i%s%i%s' % ("mol modcolor ", j+1, " top {colorid ", N_colors+j+1, "}"))
-                    f.write('\n%s%i%s%s%s' % ("mol modselect ", j+1, " top {name ", symbols[j], "}"))
+                    output[outindex].append('\n\nmol representation cpk 0.7 0.0 30 5')
+                    output[outindex].append('\nmol addrep top') 	
+                    output[outindex].append('\n%s%i%s' % ("mol modstyle ", j+1, " top cpk"))
+                    output[outindex].append('\n%s%i%s%i%s' % ("mol modcolor ", j+1, " top {colorid ", N_colors+j+1, "}"))
+                    output[outindex].append('\n%s%i%s%s%s' % ("mol modselect ", j+1, " top {name ", symbols[j], "}"))
                 
             
-                f.close()
+               
 
 
         #########################
@@ -1121,7 +1128,7 @@ color Axes Labels 32
             self.rim_list=p_rim                 #restore the partial rim list
 
         # Achieve the binning for bl, ba, da an all simultaneously
-        for filename in file_list:
+        for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
 
         # Create an array that stores the bond connectivity as the first two entries. The energy will be added as the third entry.
@@ -1304,13 +1311,13 @@ color Axes Labels 32
                 binning_windows = np.linspace(0, np.nanmax(E_array, axis=0)[2], num=N_colors )
                 
     
-            f = open(f'{filename}.vmd', 'a')
+           
             if pbc_flag & box  :
              
-                f.write("\n\n# Adding a pbc box")
-                f.write('\npbc set {%f %f %f %f %f %f}'%(self.atomsF.cell.cellpar()[0],self.atomsF.cell.cellpar()[1],self.atomsF.cell.cellpar()[2],self.atomsF.cell.cellpar()[3],self.atomsF.cell.cellpar()[4],self.atomsF.cell.cellpar()[5]))
-                f.write("\npbc box -color 32")
-            f.write("\n\n# Adding a representation with the appropriate colorID for each bond")
+                output[outindex].append("\n\n# Adding a pbc box")
+                output[outindex].append('\npbc set {%f %f %f %f %f %f}'%(self.atomsF.cell.cellpar()[0],self.atomsF.cell.cellpar()[1],self.atomsF.cell.cellpar()[2],self.atomsF.cell.cellpar()[3],self.atomsF.cell.cellpar()[4],self.atomsF.cell.cellpar()[5]))
+                output[outindex].append("\npbc box -color 32")
+            output[outindex].append("\n\n# Adding a representation with the appropriate colorID for each bond")
                 # Calculate which binning_windows value is closest to the bond-percentage and do the output
             
         
@@ -1319,23 +1326,23 @@ color Axes Labels 32
                     colorID = 32                       #black
                 else:
                     colorID = np.abs( binning_windows - b[2] ).argmin() + 1
-                f.write('\nmol addrep top')
-                f.write('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top bonds"))
-                f.write('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
-                f.write('\n%s%i%s%i%s%i%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", b[0], " ", b[1], "}\n"))
+                output[outindex].append('\nmol addrep top')
+                output[outindex].append('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top bonds"))
+                output[outindex].append('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
+                output[outindex].append('\n%s%i%s%i%s%i%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", b[0], " ", b[1], "}\n"))
             for i in custom_E_array:
               
                 if np.isnan(i[2]):
                     colorID = 32                       #black
                 else:
                     colorID = np.abs( binning_windows - i[2] ).argmin() + 1
-                f.write('\nset x [[atomselect top "index %d %d"] get {x y z}]'%(i[0],i[1]))
-                f.write('\nset a [lindex $x 0] ')
-                f.write('\nset b [lindex $x 1] ')
-                f.write('\ndraw  color %d'%(colorID))
-                f.write('\ndraw line  $a $b width 3 style dashed' )
+                output[outindex].append('\nset x [[atomselect top "index %d %d"] get {x y z}]'%(i[0],i[1]))
+                output[outindex].append('\nset a [lindex $x 0] ')
+                output[outindex].append('\nset b [lindex $x 1] ')
+                output[outindex].append('\ndraw  color %d'%(colorID))
+                output[outindex].append('\ndraw line  $a $b width 3 style dashed' )
 
-            f.close()
+          
             
         #colorbar
             if colorbar==True:
@@ -1376,8 +1383,8 @@ color Axes Labels 32
                     else:
                         max = np.nanmax(E_array, axis=0)[2] 
                     
-                f = open(f'{filename}.vmd', 'a')
-                f.write(f'''\n		display update off
+              
+                output[outindex].append(f'''\n		display update off
 display resetview
 variable bar_mol
 
@@ -1435,7 +1442,7 @@ draw text " $coord_x [expr $coord_y + $step_size] $use_z"   "{unit}"
 # re-set top
 mol top $old_top
 display update on ''')
-                f.close()
+                
 
             #highresolution colorbar with matplotlib
                 import matplotlib.pyplot as plt
@@ -1466,7 +1473,13 @@ display update on ''')
         if not man_strain:
             print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
             print(f"Maximum energy in bond between atoms {atom_1_max_energy} and {atom_2_max_energy}: {float(max_energy):.3f} {unit}.")
-           
+
+        #write tcl scripts
+        for _,mode in enumerate(output):
+            if len(mode) > 0:
+                f = open(f"{file_list[_]}.vmd",'w')  
+                f.writelines(mode)
+
         if self.custom_bonds is not None:
             print(f"\nTotal energy custom bonds: {custom_E} {unit}")
         os.chdir('..')
@@ -1643,7 +1656,7 @@ class JediAtoms(Jedi):
         if ase_units==True:
   
             self.E_atoms*=Hartree
-            
+            delta_x*=Bohr
         elif ase_units == False:
             self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
@@ -1660,35 +1673,80 @@ class JediAtoms(Jedi):
         #	    	   Output section	        	#
         #############################################
         # Header
-    
-        print(" ************************************************")
-        print(" *                 JEDI ANALYSIS                *")
-        print(" *       Judgement of Energy DIstribution       *")
-        print(" ************************************************\n")
+        output = []
+        output.append("\n ************************************************")
+        output.append("\n *                 JEDI ANALYSIS                *")
+        output.append("\n *       Judgement of Energy DIstribution       *")
+        output.append("\n ************************************************\n")
         
         # Comparison of total energies
         if self.ase_units==False:
-            print("                   Strain Energy (kcal/mol)  Deviation (%)")
+            output.append("\n                   Strain Energy (kcal/mol)  Deviation (%)")
         elif self.ase_units==True:
-            print("                   Strain Energy (eV)        Deviation (%)")
-        E_atoms_total = sum(self.E_atoms)
-        print("      Ab initio     " + "%.8f" % E_geometries + "                  -")
-        print('%5s%16.8f%21.2f' % (" JEDI           ", E_atoms_total, (E_atoms_total / E_geometries-1)*100))
+            output.append("\n                   Strain Energy (eV)        Deviation (%)")
+        E_atoms_total = sum(self.E_atoms[self.indices])
+        output.append("\n      Ab initio     " + "%.8f" % E_geometries + "                  -")
+        output.append('\n%5s%16.8f%21.2f' % (" JEDI           ", E_atoms_total, (E_atoms_total / E_geometries-1)*100))
 
 
         # strain in the bonds
 
         if self.ase_units == False:
-            print("\n Atom No.       Element                              Percentage    Energy (kcal/mol)")
+            output.append("\n Atom No.       Element                              Percentage    Energy (kcal/mol)")
         elif self.ase_units == True:
-            print("\n Atom No.       Element                              Percentage    Energy (eV)")
+            output.append("\n Atom No.       Element                              Percentage    Energy (eV)")
        
         
-        for i, k in enumerate(self.E_atoms):
-            print('%6i%7s%-11s%9.1f%17.7f' % (i+1, " ", self.atoms0.symbols[i], k/E_atoms_total, k))
-           
+        for i, k in enumerate(self.E_atoms[self.indices]):
+            output.append('\n%6i%7s%-11s%9.1f%17.7f' % (self.indices[i], " ", self.atoms0.symbols[self.indices[i]], k/E_atoms_total, k))
+        print(*output)
 
-         
+    def partial_analysis(self, indices, ase_units=False):
+        
+        """Runs the analysis. Calls all necessary functions to get the needed values.
+
+        Args:
+            indices: 
+                list of indices of a substructure 
+            ase_units: boolean
+                flag to get eV for energies å fo lengths otherwise it is kcal/mol, Bohr  
+        Returns:
+            Indices, strain, energy in every RIM
+        """
+        self.ase_units = ase_units
+        # get necessary data
+        self.indices=indices
+    
+            
+        self.get_hessian()
+        H_cart = self.H         #Hessian of optimized (ground state) structure
+        #get strain in coordinates
+        i = np.repeat(np.atleast_2d(indices),3,axis=0)*3
+        i[1]+=1
+        i[2]+=2
+        i = i.ravel('F')
+        delta_x= self.get_delta_x()[i]
+#        print(delta_x)
+     
+        if len(indices) != H_cart.shape[0]/3:
+            raise ValueError('Hessian has not the fitting shape')
+        try:
+            all_E_geometries = self.get_energies()
+        except:
+            all_E_geometries = self.energies
+        E_geometries = all_E_geometries[0]
+        
+
+    # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
+        E_coords = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)         
+        self.E_atoms=np.sum(E_coords.reshape(-1, 3), axis=1)
+        if ase_units==True:
+  
+            self.E_atoms*=Hartree
+            delta_x*=Bohr
+        elif ase_units == False:
+            self.E_atoms *= mol/kcal*Hartree
+        self.printout(E_geometries)
     
     def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True,label='vmd'): #get vmd scripts
         '''Generates vmd scripts and files to save the values for the color coding
@@ -1728,15 +1786,16 @@ class JediAtoms(Jedi):
         E_atoms = self.E_atoms
 
         # Write some basic stuff to the tcl scripts
-        f = open('atoms.vmd', 'w')
-        f.write('# Load a molecule\nmol new xF.xyz\n\n')
-        f.write('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
+    
+        output = []
+        output.append('# Load a molecule\nmol new xF.xyz\n\n')
+        output.append('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
 
         
-        f.write('# Change the color of the graphical representation 0 to white\ncolor change rgb 0 1.00 1.00 1.00\n')
-        f.write('# The background should be white ("blue" has the colorID 0, which we have changed to white)\ncolor Display Background blue\n\n')
-        f.write('# Define the other colorIDs\n')
-        f.close()
+        output.append('# Change the color of the graphical representation 0 to white\ncolor change rgb 0 1.00 1.00 1.00\n')
+        output.append('# The background should be white ("blue" has the colorID 0, which we have changed to white)\ncolor Display Background blue\n\n')
+        output.append('# Define the other colorIDs\n')
+       
 
         # Define colorcodes for various atomtypes
 
@@ -1753,7 +1812,7 @@ class JediAtoms(Jedi):
 
         
         # Generate the color-code and write it to the tcl scripts
-        f = open('atoms.vmd', 'a')
+      
         colorbar_colors = []
 
         #get green to red gradient
@@ -1770,20 +1829,20 @@ class JediAtoms(Jedi):
 
             B_value = 0
 
-            f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
+            output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
             colorbar_colors.append((R_value, G_value, B_value))
 
         # add color codes of atoms
         for j in range(N_colors_atoms):
-            f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", N_colors+j+1, float(colors[symbols[j]][0]), float(colors[symbols[j]][1]), float(colors[symbols[j]][2]), "\n"))
+            output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", N_colors+j+1, float(colors[symbols[j]][0]), float(colors[symbols[j]][1]), float(colors[symbols[j]][2]), "\n"))
 
         #add color code for axes and box
-        f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))#black
-        f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1039, float(1), float(0), float(0), "\n"))#red
-        f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1038, float(0), float(1), float(0), "\n"))#green
-        f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1037, float(0), float(0), float(1), "\n"))#blue
-        f.write('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1036, float(0.25), float(0.75), float(0.75), "\n"))#cyan
-        f.write('''color Axes X 1039
+        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))#black
+        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1039, float(1), float(0), float(0), "\n"))#red
+        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1038, float(0), float(1), float(0), "\n"))#green
+        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1037, float(0), float(0), float(1), "\n"))#blue
+        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1036, float(0.25), float(0.75), float(0.75), "\n"))#cyan
+        output.append('''color Axes X 1039
 color Axes Y 1038
 color Axes Z 1037
 color Axes Origin 1036
@@ -1791,14 +1850,14 @@ color Axes Labels 32
 ''')
         #define color of atoms with the color code above
         for j in range(N_colors_atoms):
-            f.write('\n\nmol representation cpk 0.7 0.0 30 5')
-            f.write('\nmol addrep top') 	
-            f.write('\n%s%i%s' % ("mol modstyle ", j+1, " top cpk"))
-            f.write('\n%s%i%s%i%s' % ("mol modcolor ", j+1, " top {colorid ", N_colors+j+1, "}"))
-            f.write('\n%s%i%s%s%s' % ("mol modselect ", j+1, " top {name ", symbols[j], "}"))
+            output.append('\n\nmol representation cpk 0.7 0.0 30 5')
+            output.append('\nmol addrep top') 	
+            output.append('\n%s%i%s' % ("mol modstyle ", j+1, " top cpk"))
+            output.append('\n%s%i%s%i%s' % ("mol modcolor ", j+1, " top {colorid ", N_colors+j+1, "}"))
+            output.append('\n%s%i%s%s%s' % ("mol modselect ", j+1, " top {name ", symbols[j], "}"))
         
     
-        f.close()
+       
 
 
         #########################
@@ -1822,8 +1881,8 @@ color Axes Labels 32
     
         if E_atoms.max() <= 0.001:
             E_atoms = np.zeros(len(self.indices))
-        E_array[list([*self.indices])]=E_atoms
-        E_array=np.vstack((np.arange(len(self.atoms0)),E_array))
+        E_array[list([*self.indices])]=E_atoms[self.indices] if  len(self.indices) != len(E_atoms) else E_atoms
+        E_array=np.vstack((np.arange(len(self.indices)),E_array[self.indices]))
         print("\nProcessing atoms...")
 
     # Store the maximum energy in a variable for later call
@@ -1842,13 +1901,13 @@ color Axes Labels 32
             
             
     
-        f = open('atoms.vmd', 'a')
+        
         if box  :
             
-            f.write("\n\n# Adding a pbc box")
-            f.write('\npbc set {%f %f %f %f %f %f}'%(self.atomsF.cell.cellpar()[0],self.atomsF.cell.cellpar()[1],self.atomsF.cell.cellpar()[2],self.atomsF.cell.cellpar()[3],self.atomsF.cell.cellpar()[4],self.atomsF.cell.cellpar()[5]))
-            f.write("\npbc box -color 32")
-        f.write("\n\n# Adding a representation with the appropriate colorID for each atom")
+            output.append("\n\n# Adding a pbc box")
+            output.append('\npbc set {%f %f %f %f %f %f}'%(self.atomsF.cell.cellpar()[0],self.atomsF.cell.cellpar()[1],self.atomsF.cell.cellpar()[2],self.atomsF.cell.cellpar()[3],self.atomsF.cell.cellpar()[4],self.atomsF.cell.cellpar()[5]))
+            output.append("\npbc box -color 32")
+        output.append("\n\n# Adding a representation with the appropriate colorID for each atom")
             # Calculate which binning_windows value is closest to the bond-percentage and do the output
         
     
@@ -1858,11 +1917,15 @@ color Axes Labels 32
             else:
                 colorID = np.abs( binning_windows - b ).argmin() + 1
 
-            f.write('\n\nmol representation cpk 0.7 0.0 30 5')
-            f.write('\nmol addrep top') 	
-            f.write('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top cpk"))
-            f.write('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
-            f.write('\n%s%i%s%s%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", int(i), "}\n"))
+            output.append('\n\nmol representation cpk 0.7 0.0 30 5')
+            output.append('\nmol addrep top') 	
+            output.append('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top cpk"))
+            output.append('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
+            output.append('\n%s%i%s%s%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", int(i), "}\n"))
+        f = open('atoms.vmd', 'w')
+        f.writelines(output)
+        f.close()
+
         #colorbar
         if colorbar==True:
             min=0.000
@@ -1890,7 +1953,7 @@ color Axes Labels 32
             
             fig.savefig('atomscolorbar.pdf', bbox_inches='tight')
 
-        if not man_strain:
+        if man_strain==None:
             print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
             print(f"Maximum energy in  atom {int(np.argmax(E_atoms)+1)}: {float(max_energy):.3f} {unit}.")
            
