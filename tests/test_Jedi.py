@@ -25,7 +25,7 @@ class  TestJEDIHCN():
 
     def test_run(cls):
         '''Test if ERIMs are correct'''
-        test=cls.hcn.E_RIMs.to_list()
+        test=cls.hcn.E_RIMs.tolist()
  
         compare=np.loadtxt('./tests/hcn/ERIMs').tolist()
 
