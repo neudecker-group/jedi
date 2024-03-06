@@ -1,9 +1,15 @@
 import pytest
-from jedi.jedi import Jedi
+
 import ase.io as io
 from ase.vibrations.vibrations import VibrationsData
 import numpy as np
+import sys
+# caution: path[0] is reserved for script path (or '' in REPL)
+from pathlib import Path
 
+sys.path.insert(1, Path().resolve().parent)
+
+from jedi.jedi import Jedi
 
 
 class  TestJEDIHCN():
