@@ -25,8 +25,10 @@ class  TestJEDIHCN():
 
     def test_run(cls):
         '''Test if ERIMs are correct'''
-        assert np.array_equal(cls.hcn.E_RIMs,np.loadtxt('./tests/hcn/ERIMs'))
+        bool=np.array_equal(cls.hcn.E_RIMs,np.loadtxt('./tests/hcn/ERIMs'))
+        assert bool
     
     def test_partial(cls):
         '''Test if ERIMs are correct'''
-        assert np.array_equal(cls.phcn.E_RIMs,np.loadtxt('./tests/hcn/pERIMs'))
+        bool =np.array_equal(cls.phcn.E_RIMs,np.loadtxt('./tests/hcn/pERIMs'))
+        assert bool
