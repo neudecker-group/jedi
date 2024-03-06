@@ -26,7 +26,9 @@ class  TestJEDIHCN():
     def test_run(cls):
         '''Test if ERIMs are correct'''
         test=cls.hcn.E_RIMs
+        print(test)
         compare=np.loadtxt('./tests/hcn/ERIMs')
+        print(compare)
         assert np.array_equal(test,compare)
     
     def test_partial(cls):
