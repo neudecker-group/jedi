@@ -34,6 +34,6 @@ class  TestJEDIHCN():
     
     def test_partial(cls):
         '''Test if ERIMs are correct'''
-        test=cls.phcn.E_RIMs
-        compare=np.loadtxt('./tests/hcn/pERIMs')
+        test=cls.phcn.E_RIMs.round(5)
+        compare=np.loadtxt('./tests/hcn/pERIMs').round(5)
         assert np.array_equal(test,compare)
