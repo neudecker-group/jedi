@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QChem &mdash; test  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -17,7 +15,6 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -68,6 +65,11 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Hints</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../extras/vmd.html">Visual Molecular Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extras/problems.html">VASP</a></li>
+</ul>
 
         </div>
       </div>
@@ -95,7 +97,7 @@
            <div itemprop="articleBody">
              
   <section id="qchem">
-<h1>QChem<a class="headerlink" href="#qchem" title="Permalink to this heading"></a></h1>
+<h1>QChem<a class="headerlink" href="#qchem" title="Permalink to this headline"></a></h1>
 <p>Functions to process qchem calculations</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="jedi.io.qchem.read">
@@ -115,7 +117,7 @@ filename: str</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>VibrationsData object.</p>
 </dd>
 </dl>
@@ -123,7 +125,7 @@ filename: str</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="jedi.io.qchem.QChem">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jedi.io.qchem.</span></span><span class="sig-name descname"><span class="pre">QChem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">restart=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_bad_restart_file=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label='qchem'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scratch=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">np=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nt=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pbs=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basisfile=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ecpfile=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distort={}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/qchem.html#QChem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.qchem.QChem" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.io.qchem.</span></span><span class="sig-name descname"><span class="pre">QChem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">restart=None</span></em>, <em class="sig-param"><span class="pre">ignore_bad_restart_file=&lt;object</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">label='qchem'</span></em>, <em class="sig-param"><span class="pre">scratch=None</span></em>, <em class="sig-param"><span class="pre">np=1</span></em>, <em class="sig-param"><span class="pre">nt=1</span></em>, <em class="sig-param"><span class="pre">pbs=False</span></em>, <em class="sig-param"><span class="pre">basisfile=None</span></em>, <em class="sig-param"><span class="pre">ecpfile=None</span></em>, <em class="sig-param"><span class="pre">atoms=None</span></em>, <em class="sig-param"><span class="pre">distort={}</span></em>, <em class="sig-param"><span class="pre">app=None</span></em>, <em class="sig-param"><span class="pre">command=None</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/qchem.html#QChem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.qchem.QChem" title="Permalink to this definition"></a></dt>
 <dd><p>Modified version of the ASE QChem calculator</p>
 <p>The scratch directory, number of processor and threads as well as a few
 other command line options can be set using the arguments explained
@@ -158,7 +160,7 @@ created automatically.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="jedi.io.qchem.QChemOptimizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jedi.io.qchem.</span></span><span class="sig-name descname"><span class="pre">QChemOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/qchem.html#QChemOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.qchem.QChemOptimizer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.io.qchem.</span></span><span class="sig-name descname"><span class="pre">QChemOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/qchem.html#QChemOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.qchem.QChemOptimizer" title="Permalink to this definition"></a></dt>
 <dd><p>allowing ase to use Qchem geometry optimizations</p>
 <dl class="simple">
 <dt>atoms: class</dt><dd><p>Structure with QChem calculator</p>

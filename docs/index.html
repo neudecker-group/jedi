@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to JEDI, the Judgement of Energy Distribution Analysis &mdash; test  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
-      <link rel="stylesheet" type="text/css" href="_static/custom.css" />
-
-  
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -17,7 +15,6 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -61,6 +58,11 @@
 <li class="toctree-l1"><a class="reference internal" href="jedi.html">Jedi</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils/utils.html">Utilities</a></li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Hints</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="extras/vmd.html">Visual Molecular Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extras/problems.html">VASP</a></li>
+</ul>
 
         </div>
       </div>
@@ -87,30 +89,30 @@
            <div itemprop="articleBody">
              
   <section id="welcome-to-jedi-the-judgement-of-energy-distribution-analysis">
-<h1>Welcome to JEDI, the Judgement of Energy Distribution Analysis<a class="headerlink" href="#welcome-to-jedi-the-judgement-of-energy-distribution-analysis" title="Permalink to this heading"></a></h1>
+<h1>Welcome to JEDI, the Judgement of Energy Distribution Analysis<a class="headerlink" href="#welcome-to-jedi-the-judgement-of-energy-distribution-analysis" title="Permalink to this headline"></a></h1>
 <p>The JEDI (Judgement of Energy DIstribution) analysis is a quantum chemical analysis tool for the distribution of strain mechanically deformed systems. JEDI is implemented in Python. Currently, the main contributor to JEDI is the <a class="reference external" href="https://www.uni-bremen.de/en/neudecker-group">AG Neudecker</a> from the University of Bremen.</p>
 <section id="introduction-and-overview">
-<h2>Introduction and Overview<a class="headerlink" href="#introduction-and-overview" title="Permalink to this heading"></a></h2>
+<h2>Introduction and Overview<a class="headerlink" href="#introduction-and-overview" title="Permalink to this headline"></a></h2>
 <p>Based on the harmonic approximation, the JEDI analysis calculates the strain energy for each bond, bending and torsion in a molecule or an extended system, thus allowing the identification of the mechanically most strained regions in the system as well as the rationalization of mechanochemical processes.</p>
 </section>
 <section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading"></a></h2>
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
 <p>JEDI can be used in various application scenarios, some of which are:</p>
 <section id="mechanically-deformed-molecules">
-<h3>Mechanically Deformed Molecules<a class="headerlink" href="#mechanically-deformed-molecules" title="Permalink to this heading"></a></h3>
+<h3>Mechanically Deformed Molecules<a class="headerlink" href="#mechanically-deformed-molecules" title="Permalink to this headline"></a></h3>
 <p>When a molecule or a periodic system is deformed, e.g., due to mechanical stretching or hydrostatic compression, some internal coordinates store more energy than others. This leads to particularly large displacements of certain coordinates such as the stretching of bond lengths, and to the preconditioning of selected bonds for rupture. Using the JEDI analysis the mechanochemical properties of the system can be investigated.</p>
 </section>
 <section id="adsorbed-molecules">
-<h3>Adsorbed molecules<a class="headerlink" href="#adsorbed-molecules" title="Permalink to this heading"></a></h3>
+<h3>Adsorbed molecules<a class="headerlink" href="#adsorbed-molecules" title="Permalink to this headline"></a></h3>
 <p>When a molecule adsorbs onto a surface, the geometry of the adsorbate changes as compared to the relaxed molecule in the gas phase. As JEDI allows strain analysis for only a subset of atoms, it is possible to quantify the strain due to adsorbtion.</p>
 </section>
 <section id="dynamical-strain-analyses">
-<h3>Dynamical Strain Analyses<a class="headerlink" href="#dynamical-strain-analyses" title="Permalink to this heading"></a></h3>
+<h3>Dynamical Strain Analyses<a class="headerlink" href="#dynamical-strain-analyses" title="Permalink to this headline"></a></h3>
 <p>During an Ab Initio Molecular Dynamics (AIMD) simulation, JEDI can quantify the potential energy part of the strain due to, e.g., stretching and compression. In this scenario, each time step is considered as a deformed geometry. Dynamical strain analyses using JEDI enable the creation of color-coded movies showing the propagation of strain in dynamical mechanochemical processes.</p>
 </section>
 </section>
 <section id="how-to-cite-jedi">
-<h2>How to Cite JEDI<a class="headerlink" href="#how-to-cite-jedi" title="Permalink to this heading"></a></h2>
+<h2>How to Cite JEDI<a class="headerlink" href="#how-to-cite-jedi" title="Permalink to this headline"></a></h2>
 <p>When using JEDI, please cite the following papers:</p>
 <ul class="simple">
 <li><ol class="upperalpha simple" start="20">
@@ -131,7 +133,7 @@
 </ul>
 </section>
 <section id="documentation">
-<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading"></a></h2>
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline"></a></h2>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Set Up:</span></p>
 <ul>
@@ -154,9 +156,16 @@
 <li class="toctree-l1"><a class="reference internal" href="utils/utils.html">Utilities</a></li>
 </ul>
 </div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Hints</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="extras/vmd.html">Visual Molecular Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extras/problems.html">VASP</a></li>
+</ul>
+</div>
 </section>
 <section id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h2>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 </ul>

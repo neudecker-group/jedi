@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gaussian &mdash; test  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css" />
-      <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -17,11 +15,11 @@
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Visual Molecular Dynamics" href="../extras/vmd.html" />
     <link rel="prev" title="ORCA" href="orca.html" /> 
 </head>
 
@@ -67,6 +65,11 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">Hints</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../extras/vmd.html">Visual Molecular Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extras/problems.html">VASP</a></li>
+</ul>
 
         </div>
       </div>
@@ -94,7 +97,7 @@
            <div itemprop="articleBody">
              
   <section id="gaussian">
-<h1>Gaussian<a class="headerlink" href="#gaussian" title="Permalink to this heading"></a></h1>
+<h1>Gaussian<a class="headerlink" href="#gaussian" title="Permalink to this headline"></a></h1>
 <p>Functions to process gaussian calculations</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="jedi.io.gaussian.read_gaussian_out">
@@ -119,7 +122,7 @@
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>VibrationsData object.</p>
 </dd>
 </dl>
@@ -127,7 +130,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="jedi.io.gaussian.Gaussian">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jedi.io.gaussian.</span></span><span class="sig-name descname"><span class="pre">Gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Gaussian'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/gaussian.html#Gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.gaussian.Gaussian" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.io.gaussian.</span></span><span class="sig-name descname"><span class="pre">Gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Gaussian'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/gaussian.html#Gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.gaussian.Gaussian" title="Permalink to this definition"></a></dt>
 <dd><p>Modified Gaussian calculator using modified parsers</p>
 <p>File-IO calculator.</p>
 <dl class="simple">
@@ -152,7 +155,7 @@ created automatically.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="jedi.io.gaussian.GaussianOptimizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">jedi.io.gaussian.</span></span><span class="sig-name descname"><span class="pre">GaussianOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/gaussian.html#GaussianOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.gaussian.GaussianOptimizer" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.io.gaussian.</span></span><span class="sig-name descname"><span class="pre">GaussianOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/gaussian.html#GaussianOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.gaussian.GaussianOptimizer" title="Permalink to this definition"></a></dt>
 <dd><p>Allowing ase to use Gaussian geometry optimizations</p>
 </dd></dl>
 
@@ -163,6 +166,7 @@ created automatically.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="orca.html" class="btn btn-neutral float-left" title="ORCA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../extras/vmd.html" class="btn btn-neutral float-right" title="Visual Molecular Dynamics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

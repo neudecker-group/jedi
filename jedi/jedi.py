@@ -316,8 +316,8 @@ class Jedi:
         self.vdwf=0.9
         self.covf=1.3
 
-        if np.any(np.round(atoms0.cell, 4) != np.round(atomsF.cell, 4)): #jedi does not work for pbc systems that change their cell shape
-            raise GeneratorExit
+ #       if np.any(np.round(atoms0.cell, 4) != np.round(atomsF.cell, 4)): #jedi does not work for pbc systems that change their cell shape
+#            raise GeneratorExit
         
     def todict(self) -> Dict[str, Any]:
         '''make it saveable with .write()
@@ -905,6 +905,8 @@ class Jedi:
                 default: 'None' 
             colorbar: boolean
                 draw colorbar or not
+            label: string
+                name of folder for the created files
         '''
         try:
             os.mkdir(label)
@@ -1760,11 +1762,10 @@ class JediAtoms(Jedi):
             man_strain: float
                 reference value for the strain energy used in the color scale
                 default: 'None'
-            modus: str
-                defines where to use the man_strain
-                default: 'None' 
             colorbar: boolean
                 draw colorbar or not
+            label: string
+                name of folder for the created files
         '''
         try:
             os.mkdir(label)

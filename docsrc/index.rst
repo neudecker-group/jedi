@@ -70,6 +70,12 @@ Documentation
    jedi
    utils/utils
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Hints
+
+   extras/vmd
+   extras/problems
 
 
 
