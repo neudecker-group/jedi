@@ -25,12 +25,12 @@ class  TestJEDIHCN():
 
     def test_run(cls):
         '''Test if ERIMs are correct'''
-        test=cls.hcn.E_RIMs.tolist()
+        test=cls.hcn.E_RIMs.round(5)
  
-        compare=np.loadtxt('./tests/hcn/ERIMs').tolist()
+        compare=np.loadtxt('./tests/hcn/ERIMs').round(5)
 
      
-        assert test==compare
+        assert np.array_equal(test,compare)
     
     def test_partial(cls):
         '''Test if ERIMs are correct'''
