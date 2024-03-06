@@ -29,5 +29,11 @@ jobs:
           python -m pip install pytest 
           python -m pip install ase
           python -m pip install numpy
+
+      - name: Install jedi package
+        run: |
+          pip install -e .
+          python -c "import jedi"
+          
       - name: Run tests
         run: pytest
