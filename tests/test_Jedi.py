@@ -4,18 +4,18 @@ import ase.io as io
 from ase.vibrations.vibrations import VibrationsData
 import numpy as np
 import sys
-# caution: path[0] is reserved for script path (or '' in REPL)
-from pathlib import Path
 
-sys.path.insert(1, Path().resolve().parent)
-
-from jedi.jedi import Jedi
 
 
 class  TestJEDIHCN():
   
     @classmethod
     def setup_class(cls):
+        from pathlib import Path
+        print(Path().resolve().parent)
+        sys.path.insert(1, Path().resolve().parent)
+
+        from jedi.jedi import Jedi
         mol=io.read('hcn/opt.json')
         mol2=io.read('hcn/dis.json')
         hessian=VibrationsData.read('hcn/modes.json')
