@@ -29,6 +29,7 @@ class  TestJEDIHCN():
         print(test)
         compare=np.loadtxt('./tests/hcn/ERIMs')
         print(compare)
+        print(np.array_equal(test,compare))
         assert np.array_equal(test,compare)
     
     def test_partial(cls):
