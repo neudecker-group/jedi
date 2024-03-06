@@ -10,7 +10,7 @@ setup(
     package_dir={"": "jedi"},
     install_requires=[
         "pytest>=6.1.0",
-        "ase>=3.22.1"
+        "ase>=3.22.1",
         "numpy"
     ]
 )
