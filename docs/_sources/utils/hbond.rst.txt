@@ -2,4 +2,4 @@
 Custom bonds
 ============
 
-.. autofunction:: jedi.jedi.get_hbonds
+.. autofunction:: strainjedi.jedi.get_hbonds

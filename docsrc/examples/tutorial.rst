@@ -26,7 +26,7 @@ A simple two atoms system of N\ :sub:`2`\  is shown as example. With the followi
    n2l.calc = EMT()
    n2l.get_potential_energy()
    
-   from jedi.jedi import Jedi
+   from strainjedi.jedi import Jedi
    
    j = Jedi(n2, n2l, hessian)
    

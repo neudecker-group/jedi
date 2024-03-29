@@ -4,14 +4,14 @@ ORCA
 
 Functions to process orca calculations
 
-.. autofunction:: jedi.io.orca.read
+.. autofunction:: strainjedi.io.orca.read
 
-.. autofunction:: jedi.io.orca.get_vibrations
+.. autofunction:: strainjedi.io.orca.get_vibrations
 
-.. autofunction:: jedi.io.orca.write_orca
+.. autofunction:: strainjedi.io.orca.write_orca
 
-.. autoclass:: jedi.io.orca.ORCA
+.. autoclass:: strainjedi.io.orca.ORCA
     :members:
 
-.. autoclass:: jedi.io.orca.OrcaOptimizer
+.. autoclass:: strainjedi.io.orca.OrcaOptimizer
     :members:

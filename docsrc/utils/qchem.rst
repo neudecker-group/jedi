@@ -4,12 +4,12 @@ QChem
 
 Functions to process qchem calculations
 
-.. autofunction:: jedi.io.qchem.read
+.. autofunction:: strainjedi.io.qchem.read
 
-.. autofunction:: jedi.io.qchem.get_vibrations
+.. autofunction:: strainjedi.io.qchem.get_vibrations
 
-.. autoclass:: jedi.io.qchem.QChem
+.. autoclass:: strainjedi.io.qchem.QChem
     :members:
 
-.. autoclass:: jedi.io.qchem.QChemOptimizer
+.. autoclass:: strainjedi.io.qchem.QChemOptimizer
     :members:

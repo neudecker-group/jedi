@@ -4,12 +4,12 @@ Gaussian
 
 Functions to process gaussian calculations
 
-.. autofunction:: jedi.io.gaussian.read_gaussian_out
+.. autofunction:: strainjedi.io.gaussian.read_gaussian_out
 
-.. autofunction:: jedi.io.gaussian.get_vibrations
+.. autofunction:: strainjedi.io.gaussian.get_vibrations
 
-.. autoclass:: jedi.io.gaussian.Gaussian
+.. autoclass:: strainjedi.io.gaussian.Gaussian
     :members:
 
-.. autoclass:: jedi.io.gaussian.GaussianOptimizer
+.. autoclass:: strainjedi.io.gaussian.GaussianOptimizer
     :members:

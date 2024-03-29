@@ -16,9 +16,9 @@ Here, cytosine and guanine are examined.
 
 .. code-block:: python
 
-    from jedi.io.gaussian import Gaussian, GaussianOptimizer, get_vibrations
+    from strainjedi.io.gaussian import Gaussian, GaussianOptimizer, get_vibrations
     import ase.io
-    from jedi.jedi import Jedi, get_hbonds
+    from strainjedi.jedi import Jedi, get_hbonds
     from ase.vibrations.vibrations import VibrationsData
     
     mol = ase.io.read('cg.xyz')
@@ -84,8 +84,8 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 .. code-block:: python
 
     from ase.vibrations.vibrations import VibrationsData
-    from jedi.jedi import Jedi, get_hbonds
-    from jedi.io.gaussian import get_vibrations, read_gaussian_out
+    from strainjedi.jedi import Jedi, get_hbonds
+    from strainjedi.io.gaussian import get_vibrations, read_gaussian_out
 
     file=open('output/opt.log')
     mol=read_gaussian_out(file)
@@ -123,7 +123,7 @@ It is possible to analyse substructures. This is desired when local changes of l
     import ase.io
     from ase.calculators.vasp import Vasp
     from ase.vibrations.vibrations import VibrationsData
-    from jedi.jedi import Jedi
+    from strainjedi.jedi import Jedi
     import os
     
     mol=ase.io.read('start.xyz')
@@ -259,8 +259,8 @@ Stretching bonds using a predefined force is possible with the EFEI method. The 
 
     from ase.build import molecule
     from ase.vibrations.vibrations import VibrationsData
-    from jedi.jedi import Jedi
-    from jedi.io.orca import OrcaOptimizer, get_vibrations, ORCA
+    from strainjedi.jedi import Jedi
+    from strainjedi.io.orca import OrcaOptimizer, get_vibrations, ORCA
     import ase.io
     
     mol=molecule('C2H6')
@@ -315,8 +315,8 @@ A lot of models have been developed to simulate pressure. X-HCFF is one of them 
 
     import ase.io
     from ase.vibrations.data import VibrationsData
-    from jedi.jedi import Jedi
-    from jedi.io.qchem import get_vibrations, QChemOptimizer, QChem
+    from strainjedi.jedi import Jedi
+    from strainjedi.io.qchem import get_vibrations, QChemOptimizer, QChem
     
     mol = ase.io.read('Dewar.xyz')
     
@@ -369,8 +369,8 @@ In another folder the same for Ladenburg benzene:
 
     import ase.io
     from ase.vibrations.data import VibrationsData
-    from jedi.jedi import Jedi
-    from jedi.io.qchem import get_vibrations, QChemOptimizer, QChem
+    from strainjedi.jedi import Jedi
+    from strainjedi.io.qchem import get_vibrations, QChemOptimizer, QChem
     
     mol = ase.io.read('Ladenburg.xyz')
     
@@ -448,7 +448,7 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
     import ase.io
     from ase.calculators.dftd3 import DFTD3
     
-    from jedi.jedi import Jedi
+    from strainjedi.jedi import Jedi
     
     
     mol=ase.io.read('start.xyz')
@@ -621,7 +621,7 @@ To have a consistent color coding the maximum strain in one bond over the whole 
 .. code-block:: python
 
 
-    from jedi.jedi import Jedi
+    from strainjedi.jedi import Jedi
     for i in range(1,51):
         j = Jedi(n2, Trajectory('moldyn3.traj')[i], modes)
         print(Trajectory('moldyn3.traj')[i].calc.get_potential_energy())

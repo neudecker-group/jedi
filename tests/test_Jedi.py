@@ -5,7 +5,7 @@ from ase.vibrations.vibrations import VibrationsData
 import numpy as np
 import sys
 sys.path.append('./')
-from jedi.jedi import Jedi
+from strainjedi.jedi import Jedi
 
 
 class  TestJEDIHCN():

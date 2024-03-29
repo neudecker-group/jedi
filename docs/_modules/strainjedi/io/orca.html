@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>strainjedi.io.orca &mdash; test  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0b750a" >
+
+          
+          
+          <a href="../../../index.html">
+            
+              <img src="../../../_static/Logo_JEDI_dark_grey.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Set Up:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../setup.html#building-guide">Building Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../preparation/preparation.html">Input Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/examples.html">Further Analysis</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../jedi.html">Jedi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utils/utils.html">Utilities</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Hints</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../extras/vmd.html">Visual Molecular Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../extras/problems.html">VASP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0b750a" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">test</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">strainjedi.io.orca</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for strainjedi.io.orca</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Bohr</span><span class="p">,</span><span class="n">Hartree</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.orca</span> <span class="kn">import</span> <span class="n">PointChargePotential</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.calculator</span> <span class="kn">import</span> <span class="n">FileIOCalculator</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">ReadError</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">ase.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span> <span class="nn">ase.calculators.singlepoint</span> <span class="kn">import</span> <span class="n">SinglePointCalculator</span>
+
+
+
+<div class="viewcode-block" id="ORCA"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.ORCA">[docs]</a><span class="k">class</span> <span class="nc">ORCA</span><span class="p">(</span><span class="n">FileIOCalculator</span><span class="p">):</span>
+    <span class="n">implemented_properties</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">,</span> <span class="s1">&#39;forces&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="s1">&#39;ORCA_COMMAND&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;ORCA_COMMAND&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; PREFIX.inp &gt; PREFIX.out&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="s1">&#39;orca PREFIX.inp &gt; PREFIX.out&#39;</span>
+
+    <span class="n">default_parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mult</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">task</span><span class="o">=</span><span class="s1">&#39;gradient&#39;</span><span class="p">,</span>
+        <span class="n">orcasimpleinput</span><span class="o">=</span><span class="s1">&#39;tightscf PBE def2-SVP&#39;</span><span class="p">,</span>
+        <span class="n">orcablocks</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">cf maxiter 200 end&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">ignore_bad_restart_file</span><span class="o">=</span><span class="n">FileIOCalculator</span><span class="o">.</span><span class="n">_deprecated</span><span class="p">,</span>
+                 <span class="n">label</span><span class="o">=</span><span class="s1">&#39;orca&#39;</span><span class="p">,</span> <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Modified ASE interface to ORCA 4 </span>
+<span class="sd">        by Ragnar Bjornsson, Based on NWchem interface but simplified.</span>
+<span class="sd">        Only supports energies and gradients (no dipole moments,</span>
+<span class="sd">        orbital energies etc.) for now.</span>
+
+<span class="sd">        For more ORCA-keyword flexibility, method/xc/basis etc.</span>
+<span class="sd">        keywords are not used. Instead, two keywords:</span>
+
+<span class="sd">            orcasimpleinput: str</span>
+<span class="sd">                What you&#39;d put after the &quot;!&quot; in an orca input file.</span>
+<span class="sd">                Should in most cases contain &quot;engrad&quot; or method that</span>
+<span class="sd">                writes the engrad file. If not (single point only),</span>
+<span class="sd">                set the &quot;task&quot; parameter manually.</span>
+<span class="sd">                Default is ``engrad tightscf PBE def2-SVP``.</span>
+
+<span class="sd">            orcablock: str</span>
+<span class="sd">                What you&#39;d put in the &quot;% ... end&quot;-blocks.</span>
+
+
+<span class="sd">        are used to define the ORCA simple-inputline and the ORCA-block input.</span>
+<span class="sd">        This allows for more flexible use of any ORCA method or keyword</span>
+<span class="sd">        available in ORCA instead of hardcoding stuff.</span>
+
+<span class="sd">        Default parameters are:</span>
+
+<span class="sd">            charge: 0</span>
+
+<span class="sd">            mult: 1</span>
+
+<span class="sd">            task: &#39;gradient&#39;</span>
+
+<span class="sd">        Point Charge IO functionality added by A. Dohn.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">FileIOCalculator</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restart</span><span class="p">,</span> <span class="n">ignore_bad_restart_file</span><span class="p">,</span>
+                                  <span class="n">label</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pcpot</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ORCA.set"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.ORCA.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">changed_parameters</span> <span class="o">=</span> <span class="n">FileIOCalculator</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">changed_parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ORCA.write_input"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.ORCA.write_input">[docs]</a>    <span class="k">def</span> <span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system_changes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">FileIOCalculator</span><span class="o">.</span><span class="n">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">system_changes</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.ase&#39;</span><span class="p">)</span>
+        <span class="n">p</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pcpot</span><span class="p">:</span>  <span class="c1"># also write point charge file and add things to input</span>
+            <span class="n">p</span><span class="p">[</span><span class="s1">&#39;pcpot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pcpot</span>
+
+        <span class="n">write_orca</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="n">p</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ORCA.read"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.ORCA.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+        <span class="n">FileIOCalculator</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.out&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ReadError</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.inp&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fd</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;geometry&#39;</span><span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fd</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">):</span>
+                    <span class="k">break</span>
+                <span class="n">words</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                <span class="n">symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">words</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">words</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.ase&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_results</span><span class="p">()</span></div>
+<div class="viewcode-block" id="ORCA.read_results"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.ORCA.read_results">[docs]</a>    <span class="k">def</span> <span class="nf">read_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_energy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;gradient&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_forces</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ORCA.read_energy"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.ORCA.read_energy">[docs]</a>    <span class="k">def</span> <span class="nf">read_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Energy from ORCA output file.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.out&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="c1"># Energy:</span>
+        <span class="n">re_energy</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;FINAL SINGLE POINT ENERGY.*\n&quot;</span><span class="p">)</span>
+        <span class="n">re_not_converged</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;Wavefunction not fully converged&quot;</span><span class="p">)</span>
+        <span class="n">found_line</span> <span class="o">=</span> <span class="n">re_energy</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">found_line</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">re_not_converged</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
+                    <span class="k">match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">Hartree</span></div>
+
+<div class="viewcode-block" id="ORCA.read_forces"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.ORCA.read_forces">[docs]</a>    <span class="k">def</span> <span class="nf">read_forces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Forces from ORCA output file.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.engrad&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ReadError</span><span class="p">(</span><span class="s2">&quot;Engrad file missing.&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="si">}</span><span class="s1">.engrad&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">getgrad</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">gradients</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tempgrad</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;# The current gradient&#39;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">getgrad</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">gradients</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">tempgrad</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">getgrad</span> <span class="ow">and</span> <span class="s2">&quot;#&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">grad</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">tempgrad</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">grad</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tempgrad</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">gradients</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tempgrad</span><span class="p">)</span>
+                    <span class="n">tempgrad</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="s1">&#39;# The at&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">getgrad</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;forces&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gradients</span><span class="p">)</span> <span class="o">*</span> <span class="n">Hartree</span> <span class="o">/</span> <span class="n">Bohr</span></div>
+
+<div class="viewcode-block" id="ORCA.embed"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.ORCA.embed">[docs]</a>    <span class="k">def</span> <span class="nf">embed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mmcharges</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">parameters</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Embed atoms in point-charges (mmcharges)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pcpot</span> <span class="o">=</span> <span class="n">PointChargePotential</span><span class="p">(</span><span class="n">mmcharges</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pcpot</span></div></div>
+        
+<div class="viewcode-block" id="write_orca"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.write_orca">[docs]</a><span class="k">def</span> <span class="nf">write_orca</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Modified function to write ORCA input file, making optimizations possible</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">charge</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;charge&#39;</span><span class="p">]</span>
+    <span class="n">mult</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;mult&#39;</span><span class="p">]</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="s1">&#39;pcpot&#39;</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">pcpot</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;pcpot&#39;</span><span class="p">]</span>
+        <span class="n">pcstring</span> <span class="o">=</span> <span class="s1">&#39;% pointcharges </span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span>\
+                   <span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.pc</span><span class="se">\&quot;\n\n</span><span class="s1">&#39;</span>
+        <span class="n">params</span><span class="p">[</span><span class="s1">&#39;orcablocks&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">pcstring</span>
+        <span class="n">pcpot</span><span class="o">.</span><span class="n">write_mmcharges</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.inp&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+        <span class="n">fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;! </span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;orcasimpleinput&#39;</span><span class="p">])</span>
+        <span class="n">fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;orcablocks&#39;</span><span class="p">])</span>
+
+        <span class="n">fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*xyz&#39;</span><span class="p">)</span>
+        <span class="n">fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">charge</span><span class="p">)</span>
+        <span class="n">fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; </span><span class="si">%d</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">mult</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">atoms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="mi">71</span><span class="p">:</span>  <span class="c1"># 71 is ascii G (Ghost)</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">symbol</span> <span class="o">+</span> <span class="s1">&#39; : &#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">symbol</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">symbol</span> <span class="o">+</span> <span class="s1">&#39;   &#39;</span>
+            <span class="n">fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">symbol</span> <span class="o">+</span>
+                     <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span>
+                     <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span>
+                     <span class="nb">str</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;*</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="read"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Read orca outputs.</span>
+
+<span class="sd">    filename: str&#39;&#39;&#39;</span>
+    <span class="n">energy</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">forces</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">dipole</span><span class="o">=</span><span class="kc">None</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fileobj</span><span class="p">:</span>
+        <span class="n">lineiter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">fileobj</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lineiter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;CARTESIAN COORDINATES (ANGSTROEM)&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                    
+                <span class="n">positions</span><span class="o">=</span><span class="p">[]</span>
+                <span class="n">symbols</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+                <span class="nb">next</span><span class="p">(</span><span class="n">lineiter</span><span class="p">)</span>
+                
+                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                    
+                    <span class="n">line</span><span class="o">=</span><span class="nb">next</span><span class="p">(</span><span class="n">lineiter</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    
+                    <span class="k">if</span> <span class="n">line</span> <span class="o">==</span><span class="p">[]:</span>
+                        
+                        <span class="k">break</span>
+                    <span class="n">symbols</span><span class="o">+=</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]])</span>
+                
+
+
+            <span class="k">elif</span> <span class="s1">&#39;FINAL SINGLE POINT ENERGY&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">convert</span> <span class="o">=</span> <span class="n">Hartree</span>
+                <span class="n">energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">4</span><span class="p">])</span> <span class="o">*</span> <span class="n">convert</span>
+ 
+     
+
+    
+           
+
+
+        <span class="n">atoms</span><span class="o">=</span><span class="n">Atoms</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span><span class="n">positions</span><span class="o">=</span><span class="n">positions</span><span class="p">)</span>    
+        <span class="n">atoms</span><span class="o">.</span><span class="n">set_positions</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span>
+
+        <span class="n">atoms</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">SinglePointCalculator</span><span class="p">(</span>
+        <span class="n">atoms</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="n">energy</span>
+        <span class="p">)</span>
+        
+
+    <span class="k">return</span> <span class="n">atoms</span></div>
+
+<div class="viewcode-block" id="get_vibrations"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.get_vibrations">[docs]</a><span class="k">def</span> <span class="nf">get_vibrations</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Read hessian.</span>
+
+<span class="sd">    label: str</span>
+<span class="sd">        Filename w/o .log.</span>
+<span class="sd">    atoms: class</span>
+<span class="sd">        Structure of which the frequency analysis was performed.</span>
+<span class="sd">    indices: lst</span>
+<span class="sd">        Indices of unconstrained atoms.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        VibrationsData object. </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">indices</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.hess&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ReadError</span><span class="p">(</span><span class="s2">&quot;hess file missing.&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read Forces from ORCA output file.&quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">.hess&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+
+            
+    
+    
+    <span class="n">NCarts</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+    <span class="n">hess</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">NCarts</span><span class="p">,</span><span class="n">NCarts</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">atoms</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">==</span><span class="s1">&#39;FixAtoms&#39;</span><span class="p">:</span>
+                <span class="n">a</span><span class="o">=</span><span class="n">l</span><span class="o">.</span><span class="n">todict</span><span class="p">()</span>
+                <span class="n">clist</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">&#39;kwargs&#39;</span><span class="p">][</span><span class="s1">&#39;indices&#39;</span><span class="p">])</span>
+                <span class="n">alist</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)),</span><span class="n">clist</span><span class="p">)</span>
+                
+                <span class="n">NCarts</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">alist</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;$hessian&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">hess_line</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span>
+    
+    <span class="n">chunks</span><span class="o">=</span><span class="n">NCarts</span><span class="o">//</span><span class="mi">5</span><span class="o">+</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">chunks</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NCarts</span><span class="p">):</span>
+            
+            <span class="n">rows</span><span class="o">=</span><span class="n">lines</span><span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">hess_line</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="p">(</span><span class="n">NCarts</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="n">j</span><span class="p">)]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            
+            <span class="n">rows</span><span class="o">=</span><span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;D&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">]</span>
+        
+            <span class="n">hess</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="p">:</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">::]</span>
+    
+    <span class="n">hess</span><span class="o">*=</span><span class="p">(</span><span class="n">Hartree</span> <span class="o">/</span> <span class="n">Bohr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> 
+    
+
+    <span class="n">indices</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
+    <span class="k">if</span> <span class="s1">&#39;alist&#39;</span> <span class="ow">in</span> <span class="nb">locals</span><span class="p">():</span>
+        <span class="n">indices</span><span class="o">=</span><span class="n">alist</span>
+
+    <span class="k">return</span> <span class="n">VibrationsData</span><span class="o">.</span><span class="n">from_2d</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">hess</span><span class="p">,</span><span class="n">indices</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">OrcaDynamics</span><span class="p">:</span>
+    <span class="n">calctype</span> <span class="o">=</span> <span class="s1">&#39;optimizer&#39;</span>
+    <span class="n">delete</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;force&#39;</span><span class="p">]</span>
+    <span class="n">keyword</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">special_keywords</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">calc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        atoms: class</span>
+<span class="sd">            Structure with orca calculator&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span> <span class="o">=</span> <span class="n">atoms</span>
+        <span class="k">if</span> <span class="n">calc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">calc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> requires a valid ORCA calculator &quot;</span>
+                                 <span class="s2">&quot;object!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span>
+
+    <span class="k">def</span> <span class="nf">todict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calctype</span><span class="p">,</span>
+                <span class="s1">&#39;optimizer&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">delete_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;removes list of keywords (delete) from kwargs&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keyword</span><span class="p">,</span> <span class="p">[])</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">args</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">template</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">special_keywords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+        
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;jobtype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;opt&#39;</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_keywords</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_keywords</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_keywords</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">)</span>
+       
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="n">converged</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">converged</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.out&#39;</span><span class="p">)</span>
+        
+        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span>
+        
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span>
+
+        <span class="k">return</span> <span class="n">converged</span>
+
+
+<div class="viewcode-block" id="OrcaOptimizer"><a class="viewcode-back" href="../../../utils/orca.html#strainjedi.io.orca.OrcaOptimizer">[docs]</a><span class="k">class</span> <span class="nc">OrcaOptimizer</span><span class="p">(</span><span class="n">OrcaDynamics</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Allowing ase to use Orca geometry optimizations</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;task&#39;</span><span class="p">:</span><span class="s1">&#39;opt&#39;</span><span class="p">}</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, ad.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

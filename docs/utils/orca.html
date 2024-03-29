@@ -100,15 +100,15 @@
 <h1>ORCA<a class="headerlink" href="#orca" title="Permalink to this headline"></a></h1>
 <p>Functions to process orca calculations</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="jedi.io.orca.read">
-<span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.read" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.read">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.read" title="Permalink to this definition"></a></dt>
 <dd><p>Read orca outputs.</p>
 <p>filename: str</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="jedi.io.orca.get_vibrations">
-<span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">get_vibrations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#get_vibrations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.get_vibrations" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.get_vibrations">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">get_vibrations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#get_vibrations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.get_vibrations" title="Permalink to this definition"></a></dt>
 <dd><p>Read hessian.</p>
 <dl class="simple">
 <dt>label: str</dt><dd><p>Filename w/o .log.</p>
@@ -126,14 +126,14 @@
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="jedi.io.orca.write_orca">
-<span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">write_orca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#write_orca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.write_orca" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.write_orca">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">write_orca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#write_orca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.write_orca" title="Permalink to this definition"></a></dt>
 <dd><p>Modified function to write ORCA input file, making optimizations possible</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="jedi.io.orca.ORCA">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">ORCA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">restart=None</span></em>, <em class="sig-param"><span class="pre">ignore_bad_restart_file=&lt;object</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">label='orca'</span></em>, <em class="sig-param"><span class="pre">atoms=None</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">ORCA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">restart=None</span></em>, <em class="sig-param"><span class="pre">ignore_bad_restart_file=&lt;object</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">label='orca'</span></em>, <em class="sig-param"><span class="pre">atoms=None</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA" title="Permalink to this definition"></a></dt>
 <dd><p>Modified ASE interface to ORCA 4
 by Ragnar Bjornsson, Based on NWchem interface but simplified.
 Only supports energies and gradients (no dipole moments,
@@ -163,14 +163,14 @@ available in ORCA instead of hardcoding stuff.</p>
 </div></blockquote>
 <p>Point Charge IO functionality added by A. Dohn.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="jedi.io.orca.ORCA.embed">
-<span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmcharges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.embed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.embed" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.embed">
+<span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmcharges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.embed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.embed" title="Permalink to this definition"></a></dt>
 <dd><p>Embed atoms in point-charges (mmcharges)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="jedi.io.orca.ORCA.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.read" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.read" title="Permalink to this definition"></a></dt>
 <dd><p>Read atoms, parameters and calculated properties from output file.</p>
 <p>Read result from self.label file.  Raise ReadError if the file
 is not there.  If the file is corrupted or contains an error
@@ -190,26 +190,26 @@ read_results() method.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="jedi.io.orca.ORCA.read_energy">
-<span class="sig-name descname"><span class="pre">read_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.read_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.read_energy" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.read_energy">
+<span class="sig-name descname"><span class="pre">read_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.read_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.read_energy" title="Permalink to this definition"></a></dt>
 <dd><p>Read Energy from ORCA output file.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="jedi.io.orca.ORCA.read_forces">
-<span class="sig-name descname"><span class="pre">read_forces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.read_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.read_forces" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.read_forces">
+<span class="sig-name descname"><span class="pre">read_forces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.read_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.read_forces" title="Permalink to this definition"></a></dt>
 <dd><p>Read Forces from ORCA output file.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="jedi.io.orca.ORCA.read_results">
-<span class="sig-name descname"><span class="pre">read_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.read_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.read_results" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.read_results">
+<span class="sig-name descname"><span class="pre">read_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.read_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.read_results" title="Permalink to this definition"></a></dt>
 <dd><p>Read energy, forces, … from output file(s).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="jedi.io.orca.ORCA.set">
-<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.set" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.set" title="Permalink to this definition"></a></dt>
 <dd><p>Set parameters like set(key1=value1, key2=value2, …).</p>
 <p>A dictionary containing the parameters that have been changed
 is returned.</p>
@@ -222,8 +222,8 @@ parameters from a file.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="jedi.io.orca.ORCA.write_input">
-<span class="sig-name descname"><span class="pre">write_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#ORCA.write_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.ORCA.write_input" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.write_input">
+<span class="sig-name descname"><span class="pre">write_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.write_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.write_input" title="Permalink to this definition"></a></dt>
 <dd><p>Write input file(s).</p>
 <p>Call this method first in subclasses so that directories are
 created automatically.</p>
@@ -232,8 +232,8 @@ created automatically.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="jedi.io.orca.OrcaOptimizer">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">jedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">OrcaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/jedi/io/orca.html#OrcaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#jedi.io.orca.OrcaOptimizer" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="strainjedi.io.orca.OrcaOptimizer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">OrcaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#OrcaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.OrcaOptimizer" title="Permalink to this definition"></a></dt>
 <dd><p>Allowing ase to use Orca geometry optimizations</p>
 <dl class="simple">
 <dt>atoms: class</dt><dd><p>Structure with orca calculator</p>

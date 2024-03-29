@@ -10,12 +10,12 @@ internal mode using the equation shown below.
 
 
 
-.. autofunction:: jedi.jedi.jedi_analysis
+.. autofunction:: strainjedi.jedi.jedi_analysis
 
-.. autofunction:: jedi.jedi.jedi_printout
+.. autofunction:: strainjedi.jedi.jedi_printout
 
-.. autofunction:: jedi.jedi.jedi_printout_bonds
+.. autofunction:: strainjedi.jedi.jedi_printout_bonds
 
-.. autoclass:: jedi.jedi.Jedi
+.. autoclass:: strainjedi.jedi.Jedi
    :members:   
 
