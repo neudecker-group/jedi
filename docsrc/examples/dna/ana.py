@@ -1,8 +1,8 @@
 import ase.io
 from ase.vibrations.vibrations import VibrationsData
-from jedi.jedi import Jedi
-from jedi.jedi import get_hbonds
-from jedi.io.gaussian import get_vibrations,read_gaussian_out
+from strainjedi.jedi import Jedi
+from strainjedi.jedi import get_hbonds
+from strainjedi.io.gaussian import get_vibrations,read_gaussian_out
 
 file=open('output/opt.log')
 mol=read_gaussian_out(file)

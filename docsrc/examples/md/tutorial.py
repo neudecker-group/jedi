@@ -53,7 +53,7 @@ printenergy()
 dyn.run(200)
 import os
 
-from jedi.jedi import Jedi
+from strainjedi.jedi import Jedi
 for i in range(1,51):
     j = Jedi(n2, Trajectory('moldyn3.traj')[i], modes)
     print(Trajectory('moldyn3.traj')[i].calc.get_potential_energy())

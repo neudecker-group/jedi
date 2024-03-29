@@ -1,9 +1,9 @@
 import ase.io
 from ase.vibrations.vibrations import VibrationsData
 import numpy as np
-from jedi.jedi import Jedi
+from strainjedi.jedi import Jedi
 
-from jedi.io.orca import get_vibrations
+from strainjedi.io.orca import get_vibrations
 
 mol=ase.io.read('opt.json')
 mol2=ase.io.read('force.json')

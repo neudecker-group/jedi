@@ -1,4 +1,4 @@
-from jedi.jedi import Jedi
+from strainjedi.jedi import Jedi
 from ase.vibrations.vibrations import VibrationsData
 import ase.io
 import numpy as np

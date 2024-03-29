@@ -1,6 +1,6 @@
 
 
-from jedi.jedi import Jedi
+from strainjedi.jedi import Jedi
 from dipole import get_hbonds
 import ase.io
 from ase.vibrations.vibrations import VibrationsData
