@@ -1,0 +1,4 @@
+mpi4py>=2.0
+numpy
+ase
+pytest

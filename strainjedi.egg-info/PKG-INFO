@@ -1,0 +1,18 @@
+Metadata-Version: 2.1
+Name: strainjedi
+Version: 1.0.0
+Summary: The python distribution for the JEDI analysis
+Home-page: https://github.com/neudecker-group/jedi
+Author: Tim Neudecker, Sanna Benter, Henry Wang, Wilke Dononelli
+Author-email: neudecker@uni-bremen.de
+License: MIT
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3.8
+License-File: LICENSE
+License-File: LICENSE_old
+Requires-Dist: mpi4py>=2.0
+Requires-Dist: numpy
+Requires-Dist: ase
+Requires-Dist: pytest
