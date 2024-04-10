@@ -46,7 +46,10 @@
               <p class="caption" role="heading"><span class="caption-text">Set Up:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#python">Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python">Python</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pip-install">Pip install</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#building-guide">Building Guide</a><ul>
@@ -106,11 +109,19 @@
 <section id="python">
 <h2>Python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h2>
 <p>JEDI is a tool using the ASE api. JEDI requires at least Python version 3.8. In addition, the python packages Numpy and ASE have to be installed.</p>
+<section id="pip-install">
+<h3>Pip install<a class="headerlink" href="#pip-install" title="Permalink to this headline"></a></h3>
+<p>JEDI is pip installable. You can get the latest stable version through:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install strainjedi</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 <section id="building-guide">
 <h1>Building Guide<a class="headerlink" href="#building-guide" title="Permalink to this headline"></a></h1>
-<p>JEDI is primarily developed on Linux systems but can also be used on Windows and Mac systems.</p>
+<p>If you want the developer’s build with latest features you can get it by following the steps below.
+JEDI is primarily developed on Linux systems but can also be used on Windows and Mac systems.</p>
 <section id="update-package-sources-check-install-git-and-python">
 <h2>Update package sources, Check / install Git and Python:<a class="headerlink" href="#update-package-sources-check-install-git-and-python" title="Permalink to this headline"></a></h2>
 <p>First the package sources should be updated:</p>

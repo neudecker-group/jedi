@@ -5,9 +5,21 @@ Python
 -------
 JEDI is a tool using the ASE api. JEDI requires at least Python version 3.8. In addition, the python packages Numpy and ASE have to be installed.
 
+Pip install
+-----------
+
+JEDI is pip installable. You can get the latest stable version through:
+
+.. code-block:: console
+
+    pip install strainjedi
+
+
+
 Building Guide
 ==============
 
+If you want the developer's build with latest features you can get it by following the steps below.
 JEDI is primarily developed on Linux systems but can also be used on Windows and Mac systems. 
 
 -------------------------------------------------------
