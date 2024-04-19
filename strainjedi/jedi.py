@@ -889,6 +889,7 @@ class Jedi:
         return delta_q
 
     def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True,label='vmd'): #get vmd scripts
+        #TODO change os.chdir to take specific folder name as label
         '''Generates vmd scripts and files to save the values for the color coding
 
         Args:
