@@ -976,10 +976,11 @@ class Jedi:
 
         # Write some basic stuff to the tcl scripts
         output = [[],[],[],[]]
+        file_dir = os.getcwd()+r'\xF.xyz'
         for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
                 
-                output[outindex].append('\n# Load a molecule\nmol new xF.xyz\n\n')
+                output[outindex].append('\n# Load a molecule\nmol new {%s}\n\n'%(file_dir))
                 output[outindex].append('\n# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
                 output[outindex].append('\n# Change the drawing method of the first graphical representation to CPK\nmol modstyle 0 top cpk\n')
                 output[outindex].append('\n# Color only H atoms white\nmol modselect 0 top {name H}\n')
