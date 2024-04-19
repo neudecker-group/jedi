@@ -888,7 +888,7 @@ class Jedi:
         
         return delta_q
 
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True,label='vmd'): #get vmd scripts
+    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True,label='vmd', incl_coloring=False): #get vmd scripts
         '''Generates vmd scripts and files to save the values for the color coding
 
         Args:
@@ -907,6 +907,9 @@ class Jedi:
                 draw colorbar or not
             label: string
                 name of folder for the created files
+            incl_coloring: boolean
+                True: use inclusive color scale from blue to red
+                False: use color scale from green to red
         '''
         try:
             os.mkdir(label)
@@ -1008,23 +1011,41 @@ class Jedi:
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
                 
                 colorbar_colors = []
+                if incl_coloring == False:
+                    #get green to red gradient
+                    for i in range(N_colors):
+                        R_value = float(i)/(N_colors/2)
+                        if R_value > 1:
+                            R_value = 1
+                        if N_colors % 2 == 0:
+                            G_value = 2 - float(i+1)/(N_colors/2)
+                        if N_colors % 2 != 0:
+                            G_value = 2 - float(i)/(N_colors/2)
+                        if G_value > 1:
+                            G_value = 1
 
-                #get green to red gradient
-                for i in range(N_colors):
-                    R_value = float(i)/(N_colors/2)
-                    if R_value > 1:
-                        R_value = 1
-                    if N_colors % 2 == 0:
-                        G_value = 2 - float(i+1)/(N_colors/2)
-                    if N_colors % 2 != 0:
-                        G_value = 2 - float(i)/(N_colors/2)
-                    if G_value > 1:
-                        G_value = 1
+                        B_value = 0
 
-                    B_value = 0
+                        output[outindex].append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
+                        colorbar_colors.append((R_value, G_value, B_value))
+                else:
+                    # get blue to red gradient
+                    for i in range(N_colors):
+                        R_value = float(i) / (N_colors / 2)
+                        if R_value > 1:
+                            R_value = 1
+                        if N_colors % 2 == 0:
+                            B_value = 2 - float(i + 1) / (N_colors / 2)
+                        if N_colors % 2 != 0:
+                            B_value = 2 - float(i) / (N_colors / 2)
+                        if B_value > 1:
+                            B_value = 1
 
-                    output[outindex].append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
-                    colorbar_colors.append((R_value, G_value, B_value))
+                        G_value = 0
+
+                        output[outindex].append('%1s%5i%10.6f%10.6f%10.6f%1s' % (
+                        "color change rgb", i + 1, R_value, G_value, B_value, "\n"))
+                        colorbar_colors.append((R_value, G_value, B_value))
 
                 # add color codes of atoms
                 for j in range(N_colors_atoms):
