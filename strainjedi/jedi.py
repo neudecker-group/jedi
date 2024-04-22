@@ -979,7 +979,7 @@ class Jedi:
 
         # Write some basic stuff to the tcl scripts
         output = [[],[],[],[]]
-        file_dir = os.getcwd()+r'\xF.xyz'
+        file_dir = os.path.join(os.getcwd(), 'xF.xyz')
         for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
                 
