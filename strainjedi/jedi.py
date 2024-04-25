@@ -1772,7 +1772,7 @@ class JediAtoms(Jedi):
             self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
     
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True,label='all', incl_coloring=False): #get all scripts
+    def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True,label='vmd', incl_coloring=False): #get all scripts
         '''Generates all scripts and files to save the values for the color coding
 
         Args:
@@ -1858,21 +1858,39 @@ class JediAtoms(Jedi):
                 output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
                 colorbar_colors.append((R_value, G_value, B_value))
 
+#        else:
+#            # get blue to red gradient
+#            for i in range(N_colors):
+#                R_value = float(i) / (N_colors / 2)
+#                if R_value > 1:
+#                    R_value = 1
+#                if N_colors % 2 == 0:
+#                    B_value = 2 - float(i + 1) / (N_colors / 2)
+#                if N_colors % 2 != 0:
+#                    B_value = 2 - float(i) / (N_colors / 2)
+#                if B_value > 1:
+#                    B_value = 1
+#
+#                G_value = 0
+#
+#                output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_value, G_value, B_value, "\n"))
+#                colorbar_colors.append((R_value, G_value, B_value))
         else:
-            # get blue to red gradient
+            # get magenta to yellow to cyan gradient
             for i in range(N_colors):
                 R_value = float(i) / (N_colors / 2)
                 if R_value > 1:
                     R_value = 1
                 if N_colors % 2 == 0:
-                    B_value = 2 - float(i + 1) / (N_colors / 2)
+                    G_value = 2 - float(i + 1) / (N_colors / 2)
                 if N_colors % 2 != 0:
-                    B_value = 2 - float(i) / (N_colors / 2)
-                if B_value > 1:
-                    B_value = 1
-
-                G_value = 0
-
+                    G_value = 2 - float(i) / (N_colors / 2)
+                if G_value > 1:
+                    G_value = 1
+                if i < (N_colors / 2):
+                    B_value = ((N_colors / 2) - i) / (N_colors / 2)
+                if i > (N_colors / 2):
+                    B_value = (float(i) - (N_colors / 2)) / N_colors
                 output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_value, G_value, B_value, "\n"))
                 colorbar_colors.append((R_value, G_value, B_value))
 
