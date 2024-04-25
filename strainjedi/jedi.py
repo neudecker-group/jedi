@@ -1594,7 +1594,7 @@ display update on ''')
        
         ind=[]
         rim_list_c=[] #preparing for stacking rim_list to be able to use np.unique
-       
+
         for i in range(4):   #rim_list is always of length 4
             if rim_list[i].shape == (0,):
                 rim_list_c.append([])
@@ -1603,7 +1603,7 @@ display update on ''')
                     rim_list_c.append(np.vstack((rim_list[i],rim_p[i])))
                 else:
                     rim_list_c.append(np.vstack((rim_list[i])))
-            x,z=np.unique(rim_list_c[-1],return_counts=True,axis=0)
+                x,z=np.unique(rim_list_c[-1],return_counts=True,axis=0)
             
             ind.append(np.where(z>1)[0])                                        #get indices where ric is in both sets
         for i in range(4):
@@ -1772,8 +1772,8 @@ class JediAtoms(Jedi):
             self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
     
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True,label='vmd'): #get vmd scripts
-        '''Generates vmd scripts and files to save the values for the color coding
+    def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True,label='all', incl_coloring=False): #get all scripts
+        '''Generates all scripts and files to save the values for the color coding
 
         Args:
             des_colors: (dict)
@@ -1788,6 +1788,9 @@ class JediAtoms(Jedi):
                 draw colorbar or not
             label: string
                 name of folder for the created files
+            incl_coloring: boolean
+                True: use inclusive color scale from blue to red
+                False: use color scale from green to red
         '''
         try:
             os.mkdir(label)
@@ -1809,9 +1812,9 @@ class JediAtoms(Jedi):
         E_atoms = self.E_atoms
 
         # Write some basic stuff to the tcl scripts
-    
+        file_dir = os.path.join(os.getcwd(), 'xF.xyz')
         output = []
-        output.append('# Load a molecule\nmol new xF.xyz\n\n')
+        output.append('# Load a molecule\nmol new {%s} type xyz\n\n'%(file_dir))
         output.append('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
 
         
@@ -1837,23 +1840,41 @@ class JediAtoms(Jedi):
         # Generate the color-code and write it to the tcl scripts
       
         colorbar_colors = []
+        # get green to red gradient
+        if incl_coloring == False:
+            for i in range(N_colors):
+                R_value = float(i)/(N_colors/2)
+                if R_value > 1:
+                    R_value = 1
+                if N_colors % 2 == 0:
+                    G_value = 2 - float(i+1)/(N_colors/2)
+                if N_colors % 2 != 0:
+                    G_value = 2 - float(i)/(N_colors/2)
+                if G_value > 1:
+                    G_value = 1
 
-        #get green to red gradient
-        for i in range(N_colors):
-            R_value = float(i)/(N_colors/2)
-            if R_value > 1:
-                R_value = 1
-            if N_colors % 2 == 0:
-                G_value = 2 - float(i+1)/(N_colors/2)
-            if N_colors % 2 != 0:
-                G_value = 2 - float(i)/(N_colors/2)
-            if G_value > 1:
-                G_value = 1
+                B_value = 0
 
-            B_value = 0
+                output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
+                colorbar_colors.append((R_value, G_value, B_value))
 
-            output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
-            colorbar_colors.append((R_value, G_value, B_value))
+        else:
+            # get blue to red gradient
+            for i in range(N_colors):
+                R_value = float(i) / (N_colors / 2)
+                if R_value > 1:
+                    R_value = 1
+                if N_colors % 2 == 0:
+                    B_value = 2 - float(i + 1) / (N_colors / 2)
+                if N_colors % 2 != 0:
+                    B_value = 2 - float(i) / (N_colors / 2)
+                if B_value > 1:
+                    B_value = 1
+
+                G_value = 0
+
+                output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_value, G_value, B_value, "\n"))
+                colorbar_colors.append((R_value, G_value, B_value))
 
         # add color codes of atoms
         for j in range(N_colors_atoms):
