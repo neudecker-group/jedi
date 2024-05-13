@@ -14,6 +14,9 @@ import os
 import ase.io
 import warnings
 from ase.units import Hartree, Bohr, mol, kcal
+import matplotlib.cm as cm
+
+
 def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
     '''
     Analysis of strain energy stored in redundant internal coordinates.
@@ -302,7 +305,7 @@ class Jedi:
         self.atoms0 = atoms0        #ref state
         self.atomsF = atomsF        #strained state
         self.modes = modes          #VibrationsData object
-        self.B = None               #Wilson#s B
+        self.B = None               #Wilson's B
         self.delta_q = None         #strain in internal coordinates
         self.rim_list = None        #list of Redundant internal modes
         self.H = None               #cartesian Hessian of ref state
@@ -888,7 +891,7 @@ class Jedi:
         
         return delta_q
 
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True,label='vmd', incl_coloring=False): #get vmd scripts
+    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True,label='vmd',incl_coloring=None): #get vmd scripts
         '''Generates vmd scripts and files to save the values for the color coding
 
         Args:
@@ -907,9 +910,11 @@ class Jedi:
                 draw colorbar or not
             label: string
                 name of folder for the created files
-            incl_coloring: boolean
-                True: use inclusive color scale from blue to red
-                False: use color scale from green to red
+            incl_coloring: str
+                2 inclusive coloring options, otherwise green to red gradient
+                "cyan": cyan to red gradient
+                "magma": matplotlib magma gradient
+                default: 'None'
         '''
         try:
             os.mkdir(label)
@@ -1011,7 +1016,7 @@ class Jedi:
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
                 
                 colorbar_colors = []
-                if incl_coloring == False:
+                if incl_coloring is None:
                     #get green to red gradient
                     for i in range(N_colors):
                         R_value = float(i)/(N_colors/2)
@@ -1028,24 +1033,38 @@ class Jedi:
 
                         output[outindex].append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
                         colorbar_colors.append((R_value, G_value, B_value))
-                else:
-                    # get blue to red gradient
+
+                elif incl_coloring == "cyan":
+                    # get cyan to red gradient
                     for i in range(N_colors):
                         R_value = float(i) / (N_colors / 2)
                         if R_value > 1:
                             R_value = 1
-                        if N_colors % 2 == 0:
-                            B_value = 2 - float(i + 1) / (N_colors / 2)
-                        if N_colors % 2 != 0:
-                            B_value = 2 - float(i) / (N_colors / 2)
+                        B_value = 2 - float(i + 1) / (N_colors / 2)
                         if B_value > 1:
                             B_value = 1
+                        if i <= (N_colors / 2):
+                            G_value = ((N_colors / 2) - i) / (N_colors / 2)
+                        if i > (N_colors / 2):
+                            G_value = 0
 
-                        G_value = 0
-
-                        output[outindex].append('%1s%5i%10.6f%10.6f%10.6f%1s' % (
-                        "color change rgb", i + 1, R_value, G_value, B_value, "\n"))
+                        output[outindex].append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_value, G_value, B_value, "\n"))
                         colorbar_colors.append((R_value, G_value, B_value))
+
+                elif incl_coloring == "magma":
+                    # get magma gradient from matplotlib
+                    gradient = np.linspace(0, 1, N_colors)
+                    cmap = cm.get_cmap('magma').reversed()
+                    cut_off_blue = 0.175
+                    cut_off_beige = 0.15
+                    adjusted_gradient = gradient * (1 - cut_off_blue - cut_off_beige) + cut_off_beige
+                    colors_rgb = cmap(adjusted_gradient)
+                    R_values = colors_rgb[:, 0]
+                    G_values = colors_rgb[:, 1]
+                    B_values = colors_rgb[:, 2]
+                    for i in range(N_colors):
+                        output[outindex].append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_values[i], G_values[i], B_values[i], "\n"))
+                        colorbar_colors.append((R_values[i], G_values[i], B_values[i]))
 
                 # add color codes of atoms
                 for j in range(N_colors_atoms):
@@ -1603,7 +1622,7 @@ display update on ''')
                     rim_list_c.append(np.vstack((rim_list[i],rim_p[i])))
                 else:
                     rim_list_c.append(np.vstack((rim_list[i])))
-                x,z=np.unique(rim_list_c[-1],return_counts=True,axis=0)
+            x,z=np.unique(rim_list_c[-1],return_counts=True,axis=0)
             
             ind.append(np.where(z>1)[0])                                        #get indices where ric is in both sets
         for i in range(4):
@@ -1772,7 +1791,7 @@ class JediAtoms(Jedi):
             self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
     
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True,label='vmd', incl_coloring=False): #get all scripts
+    def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True,label='vmd',incl_coloring=None): #get all scripts
         '''Generates all scripts and files to save the values for the color coding
 
         Args:
@@ -1788,9 +1807,11 @@ class JediAtoms(Jedi):
                 draw colorbar or not
             label: string
                 name of folder for the created files
-            incl_coloring: boolean
-                True: use inclusive color scale from blue to red
-                False: use color scale from green to red
+            incl_coloring: str
+                2 inclusive coloring options, otherwise green to red gradient
+                "cyan": cyan to red gradient
+                "magma": matplotlib magma gradient
+                default: 'None'
         '''
         try:
             os.mkdir(label)
@@ -1841,7 +1862,7 @@ class JediAtoms(Jedi):
       
         colorbar_colors = []
         # get green to red gradient
-        if incl_coloring == False:
+        if incl_coloring is None:
             for i in range(N_colors):
                 R_value = float(i)/(N_colors/2)
                 if R_value > 1:
@@ -1858,41 +1879,37 @@ class JediAtoms(Jedi):
                 output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
                 colorbar_colors.append((R_value, G_value, B_value))
 
-#        else:
-#            # get blue to red gradient
-#            for i in range(N_colors):
-#                R_value = float(i) / (N_colors / 2)
-#                if R_value > 1:
-#                    R_value = 1
-#                if N_colors % 2 == 0:
-#                    B_value = 2 - float(i + 1) / (N_colors / 2)
-#                if N_colors % 2 != 0:
-#                    B_value = 2 - float(i) / (N_colors / 2)
-#                if B_value > 1:
-#                    B_value = 1
-#
-#                G_value = 0
-#
-#                output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_value, G_value, B_value, "\n"))
-#                colorbar_colors.append((R_value, G_value, B_value))
-        else:
-            # get magenta to yellow to cyan gradient
+        elif incl_coloring == "cyan":
+            # get cyan to red gradient
             for i in range(N_colors):
                 R_value = float(i) / (N_colors / 2)
                 if R_value > 1:
                     R_value = 1
-                if N_colors % 2 == 0:
-                    G_value = 2 - float(i + 1) / (N_colors / 2)
-                if N_colors % 2 != 0:
-                    G_value = 2 - float(i) / (N_colors / 2)
-                if G_value > 1:
-                    G_value = 1
-                if i < (N_colors / 2):
-                    B_value = ((N_colors / 2) - i) / (N_colors / 2)
+                B_value = 2 - float(i + 1) / (N_colors / 2)
+                if B_value > 1:
+                    B_value = 1
+                if i <= (N_colors / 2):
+                    G_value = ((N_colors / 2) - i) / (N_colors / 2)
                 if i > (N_colors / 2):
-                    B_value = (float(i) - (N_colors / 2)) / N_colors
+                    G_value = 0
+
                 output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_value, G_value, B_value, "\n"))
                 colorbar_colors.append((R_value, G_value, B_value))
+
+        elif incl_coloring == "magma":
+            # get magma gradient from matplotlib
+            gradient = np.linspace(0, 1, N_colors)
+            cmap = cm.get_cmap('magma').reversed()
+            cut_off_blue = 0.175
+            cut_off_beige = 0.15
+            adjusted_gradient = gradient * (1 - cut_off_blue - cut_off_beige) + cut_off_beige
+            colors_rgb = cmap(adjusted_gradient)
+            R_values = colors_rgb[:, 0]
+            G_values = colors_rgb[:, 1]
+            B_values = colors_rgb[:, 2]
+            for i in range(N_colors):
+                output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_values[i], G_values[i], B_values[i], "\n"))
+                colorbar_colors.append((R_values[i], G_values[i], B_values[i]))
 
         # add color codes of atoms
         for j in range(N_colors_atoms):
