@@ -398,7 +398,7 @@ class Jedi:
                                                 list))
         return cl
 
-    def run(self,indices=None,ase_units=False):
+    def run(self, indices=None, ase_units=False, printout: bool = True):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
         Args:
@@ -437,8 +437,8 @@ class Jedi:
             self.post_process(indices)
             E_RIMs_total = sum(self.E_RIMs)
             proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
-
-        jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+        if printout:
+            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
         pass
 
 
@@ -457,7 +457,7 @@ class Jedi:
         bl = np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
 
         bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
-        bl, counts = np.unique(bl,return_counts=True,axis=0)
+        bl, counts = np.unique(bl, return_counts=True, axis=0)
         if ~ np.all(counts == 1):
             print('unit cell too small hessian not calculated for self interaction \
                    jedi analysis for a finite system consisting of the cell will be conducted')
