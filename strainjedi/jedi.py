@@ -1784,9 +1784,14 @@ class JediAtoms(Jedi):
             self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
 
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,colorbar=True,label='vmd'): #get vmd scripts
-        # TODO change os.chdir to take specific folder name as label
-        '''Generates vmd scripts and files to save the values for the color coding
+    def vmd_gen(self,
+                des_colors: Optional[Dict] = None,
+                box: bool = False,
+                man_strain: Optional[float] = None,
+                colorbar: bool = True,
+                label: Union[Path, str] = 'vmd'):
+        """
+        Generates vmd scripts and files to save the values for the color coding
 
         Args:
             des_colors: (dict)
@@ -1801,12 +1806,14 @@ class JediAtoms(Jedi):
                 draw colorbar or not
             label: string
                 name of folder for the created files
-        '''
-        try:
-            os.mkdir(label)
-        except:
-            pass
-        os.chdir(label)
+        """
+        if isinstance(label, str):
+            destination_dir = Path(label)
+        elif isinstance(label, Path):
+            destination_dir = label
+        else:
+            raise TypeError("Please specify the directory (label) to write vmd scripts to as Path or string")
+        destination_dir.mkdir(parents=True, exist_ok=True)
         #########################
         #       Basic stuff     #
         #########################
@@ -1815,7 +1822,7 @@ class JediAtoms(Jedi):
             unit = "kcal/mol"
         elif self.ase_units == True:
             unit = "eV"
-        self.atomsF.write('xF.xyz')
+        self.atomsF.write(destination_dir / 'xF.xyz')
 
 
 
@@ -1824,7 +1831,7 @@ class JediAtoms(Jedi):
         # Write some basic stuff to the tcl scripts
 
         output = []
-        output.append('# Load a molecule\nmol new xF.xyz\n\n')
+        output.append(f'\n# Load a molecule\nmol new {destination_dir.resolve() / "xF.xyz"}\n\n')
         output.append('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 '
                       '5\nmol representation bonds 0.2 30\n\n')
 
@@ -1873,7 +1880,12 @@ class JediAtoms(Jedi):
 
         # add color codes of atoms
         for j in range(N_colors_atoms):
-            output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", N_colors+j+1, float(colors[symbols[j]][0]), float(colors[symbols[j]][1]), float(colors[symbols[j]][2]), "\n"))
+            output.append('%1s%5i%10.6f%10.6f%10.6f%1s'
+                          % ("color change rgb",
+                             N_colors+j+1,
+                             float(colors[symbols[j]][0]),
+                             float(colors[symbols[j]][1]),
+                             float(colors[symbols[j]][2]), "\n"))
 
         #add color code for axes and box
         output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))#black
@@ -1944,7 +1956,13 @@ color Axes Labels 32
         if box  :
 
             output.append("\n\n# Adding a pbc box")
-            output.append('\npbc set {%f %f %f %f %f %f}'%(self.atomsF.cell.cellpar()[0],self.atomsF.cell.cellpar()[1],self.atomsF.cell.cellpar()[2],self.atomsF.cell.cellpar()[3],self.atomsF.cell.cellpar()[4],self.atomsF.cell.cellpar()[5]))
+            output.append('\npbc set {%f %f %f %f %f %f}'
+                          %(self.atomsF.cell.cellpar()[0],
+                            self.atomsF.cell.cellpar()[1],
+                            self.atomsF.cell.cellpar()[2],
+                            self.atomsF.cell.cellpar()[3],
+                            self.atomsF.cell.cellpar()[4],
+                            self.atomsF.cell.cellpar()[5]))
             output.append("\npbc box -color 32")
         output.append("\n\n# Adding a representation with the appropriate colorID for each atom")
             # Calculate which binning_windows value is closest to the bond-percentage and do the output
@@ -1961,7 +1979,7 @@ color Axes Labels 32
             output.append('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top cpk"))
             output.append('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
             output.append('\n%s%i%s%s%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", int(i), "}\n"))
-        f = open('atoms.vmd', 'w')
+        f = open(destination_dir / 'atoms.vmd', 'w')
         f.writelines(output)
         f.close()
 
@@ -1990,14 +2008,12 @@ color Axes Labels 32
                                         label=unit,
                                         ticks=np.round(np.linspace(min, max, 8),decimals=3))
 
-            fig.savefig('atomscolorbar.pdf', bbox_inches='tight')
+            fig.savefig(destination_dir / 'atomscolorbar.pdf', bbox_inches='tight')
 
         if man_strain==None:
             print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
             print(f"Maximum energy in  atom {int(np.argmax(E_atoms)+1)}: {float(max_energy):.3f} {unit}.")
 
 
-        os.chdir('..')
-        pass
 
 
