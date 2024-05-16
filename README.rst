@@ -1,5 +1,4 @@
-Judgement of Energy DIstribution
-=============================
+=== Judgement of Energy DIstribution ===
 
 JEDI is a quantum chemical strain analysis tool working with the Atomic Simulation Environment (ASE).
 
@@ -18,7 +17,7 @@ Requirements
 Installation
 ------------
 
-Add ``~/jedi`` to your $PYTHONPATH environment variable 
+Add ``~/jedi`` to your $PYTHONPATH environment variable. Alternatively, JEDi can be installed by running ``pip install strainjedi``.
 
 
 
