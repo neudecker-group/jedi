@@ -5,8 +5,10 @@ on:
     branches:
       - main  # Change this to your main branch name
       - docs-workflow-file
+permissions:
+  contents: write
 jobs:
-  build:
+  docs:
     runs-on: ubuntu-latest
 
     steps:
