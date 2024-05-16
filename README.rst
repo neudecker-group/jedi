@@ -1,4 +1,5 @@
-=== Judgement of Energy DIstribution ===
+Judgement of Energy DIstribution
+--------------------------------
 
 JEDI is a quantum chemical strain analysis tool working with the Atomic Simulation Environment (ASE).
 
