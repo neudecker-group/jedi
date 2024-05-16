@@ -33,7 +33,7 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       with:
-        publish_branch: docs-workflow-file
+        publish_branch: main
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: docs/
         force_orphan: true
