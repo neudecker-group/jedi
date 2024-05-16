@@ -14,6 +14,10 @@ import os
 import ase.io
 import warnings
 from ase.units import Hartree, Bohr, mol, kcal
+
+
+# TEST PUSH
+
 def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
     '''
     Analysis of strain energy stored in redundant internal coordinates.
