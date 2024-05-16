@@ -1,0 +1,34 @@
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Ab initio     2.86357217                  -
+ JEDI                 3.44529323                20.31
+
+ RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                C2 N3        0.0000000      0.0        0.0000000
+     2       bond                                C2 H5        0.1889726    100.0        3.4452932
+     3       bond                                C8 N9        0.0000000      0.0        0.0000000
+     4       bond                               C8 H11        0.0000000      0.0        0.0000000
+     5       bond angle                       N3 C2 H5        0.0000000      0.0        0.0000000
+     6       bond angle                      N9 C8 H11        0.0000000      0.0        0.0000000
+"Beep" (R2D2)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.00%
+Total energy in the bond lengths:     100.00%
+
+Processing bond angles...
+Maximum energy in a bond angle:         0.00%
+Total energy in the bond angles:        0.00%
+
+Adding all energies for the stretch, bending and torsion of the bond with maximum strain...
+Maximum energy in bond between atoms 2 and 5: 3.445 kcal/mol.

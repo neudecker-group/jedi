@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jedi &mdash; test  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Utilities" href="utils/utils.html" />
+    <link rel="prev" title="Further Analysis" href="examples/examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0b750a" >
+
+          
+          
+          <a href="index.html">
+            
+              <img src="_static/Logo_JEDI_dark_grey.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Set Up:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html#building-guide">Building Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="preparation/preparation.html">Input Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples.html">Further Analysis</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Jedi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils/utils.html">Utilities</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Hints</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="extras/vmd.html">Visual Molecular Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extras/problems.html">VASP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0b750a" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">test</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Jedi</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/jedi.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="jedi">
+<h1>Jedi<a class="headerlink" href="#jedi" title="Permalink to this headline"></a></h1>
+<p>Jedi is written as a class which includes the structure’s geometries and its hessian in the relaxed state. The analysis works automatically with its inbuilt funcions. It converts the Hessian in
+redundant internal coordinates and calculates the energy in every
+internal mode using the equation shown below.</p>
+<div class="math notranslate nohighlight">
+\[E_{RIMs} = \frac{1}{2} * {\Delta q}^T * H_q * \Delta q\]</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="strainjedi.jedi.jedi_analysis">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.jedi.</span></span><span class="sig-name descname"><span class="pre">jedi_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rim_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H_cart</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_geometries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">printout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#jedi_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.jedi_analysis" title="Permalink to this definition"></a></dt>
+<dd><p>Analysis of strain energy stored in redundant internal coordinates.</p>
+<dl class="simple">
+<dt>atoms: class</dt><dd><p>An ASE Atoms object to determine the atomic species of the indices.</p>
+</dd>
+<dt>rim_list: list</dt><dd><p>A list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals.</p>
+</dd>
+<dt>B: np array</dt><dd><p>B matrix.</p>
+</dd>
+<dt>H_cart: np array</dt><dd><p>Hessian in cartesian coordinates.</p>
+</dd>
+<dt>delta_q: np array</dt><dd><p>Array of deformations along the RICs.</p>
+</dd>
+<dt>E_geometries: float</dt><dd><p>Energy difference between the geometries.</p>
+</dd>
+<dt>printout: bool</dt><dd><p>Flag to print the output.</p>
+</dd>
+<dt>ase_units: bool</dt><dd><p>Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Analysis of RIMs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="strainjedi.jedi.jedi_printout">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.jedi.</span></span><span class="sig-name descname"><span class="pre">jedi_printout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rim_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_geometries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_RIMs_total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proc_geom_RIMs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proc_E_RIMs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_RIMs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#jedi_printout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.jedi_printout" title="Permalink to this definition"></a></dt>
+<dd><p>Printout of analysis of stored strain energy in redundant internal coordinates.</p>
+<dl class="simple">
+<dt>atoms: class</dt><dd><p>An ASE Atoms object to determine the atomic species of the indices.</p>
+</dd>
+<dt>rim_list: list</dt><dd><p>A list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals.</p>
+</dd>
+<dt>delta_q: np array</dt><dd><p>Array of deformations along the RICs.</p>
+</dd>
+<dt>E_geometries: float</dt><dd><p>Energy difference between the geometries.</p>
+</dd>
+<dt>E_RIMs_total: float</dt><dd><p>Calculated total strain energy by jedi.</p>
+</dd>
+<dt>proc_geom_RIMs: float</dt><dd><p>Percentage deviation between calculated total energies.</p>
+</dd>
+<dt>proc_E_RIMs: array</dt><dd><p>Array of energy stored in each RIC.</p>
+</dd>
+<dt>ase_units: bool</dt><dd><p>Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="strainjedi.jedi.jedi_printout_bonds">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.jedi.</span></span><span class="sig-name descname"><span class="pre">jedi_printout_bonds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rim_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_geometries</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_RIMs_total</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proc_geom_RIMs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proc_E_RIMs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_RIMs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'total'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#jedi_printout_bonds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.jedi_printout_bonds" title="Permalink to this definition"></a></dt>
+<dd><p>Printout of analysis of stored strain energy in the bonds.</p>
+<dl class="simple">
+<dt>atoms: class</dt><dd><p>An ASE Atoms object to determine the atomic species of the indices.</p>
+</dd>
+<dt>rim_list: list</dt><dd><p>A list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals.</p>
+</dd>
+<dt>delta_q: np array</dt><dd><p>Array of deformations along the RICs.</p>
+</dd>
+<dt>E_geometries: float</dt><dd><p>Energy difference between the geometries.</p>
+</dd>
+<dt>E_RIMs_total: float</dt><dd><p>Calculated total strain energy by jedi.</p>
+</dd>
+<dt>proc_geom_RIMs: float</dt><dd><p>Percentage deviation between calculated total energies.</p>
+</dd>
+<dt>proc_E_RIMs: np array</dt><dd><p>Array of energy stored in each RIC.</p>
+</dd>
+<dt>ase_units: bool</dt><dd><p>Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians.</p>
+</dd>
+<dt>file: string</dt><dd><p>File to store the output.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">strainjedi.jedi.</span></span><span class="sig-name descname"><span class="pre">Jedi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomsF</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>atoms0: class</dt><dd><p>Atoms object of relaxed structure with calculated energy.</p>
+</dd>
+<dt>atomsF: class</dt><dd><p>Atoms object of strained structure with calculated energy.</p>
+</dd>
+<dt>modes: class</dt><dd><p>VibrationsData object with hessian of relaxed structure.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.fromdict">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#strainjedi.jedi.Jedi" title="strainjedi.jedi.Jedi"><span class="pre">strainjedi.jedi.Jedi</span></a></span></span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.fromdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.fromdict" title="Permalink to this definition"></a></dt>
+<dd><p>make it readable with .read()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.get_b_matrix">
+<span class="sig-name descname"><span class="pre">get_b_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.get_b_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.get_b_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.get_common_rims">
+<span class="sig-name descname"><span class="pre">get_common_rims</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.get_common_rims"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.get_common_rims" title="Permalink to this definition"></a></dt>
+<dd><p>Get only the RICs in both structures bond breaks cannot be analysed logically</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.get_delta_q">
+<span class="sig-name descname"><span class="pre">get_delta_q</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.get_delta_q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.get_delta_q" title="Permalink to this definition"></a></dt>
+<dd><p>get the strain in RICs substracts the values of the relaxed structure from the strained structure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>2D array of the values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.get_energies">
+<span class="sig-name descname"><span class="pre">get_energies</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.get_energies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.get_energies" title="Permalink to this definition"></a></dt>
+<dd><p>Calls the energies of the Atoms objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>[energy difference, energy of atoms0, energy of atomsF]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.get_hessian">
+<span class="sig-name descname"><span class="pre">get_hessian</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.get_hessian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.get_hessian" title="Permalink to this definition"></a></dt>
+<dd><p>Calls the hessian from the VibrationsData object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.get_rims">
+<span class="sig-name descname"><span class="pre">get_rims</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.get_rims"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.get_rims" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the redundant internal coordinates</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.partial_analysis">
+<span class="sig-name descname"><span class="pre">partial_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.partial_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.partial_analysis" title="Permalink to this definition"></a></dt>
+<dd><p>Analyse a substructure with given indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>indices</strong> – list of indices of atoms in desired substructure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.post_process" title="Permalink to this definition"></a></dt>
+<dd><p>get only the values of RICs inside a defined substructure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>indices</strong> – list of indices of atoms in desired substructure</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Values for analyzed RIMs in the defined substructure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.read">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strainjedi.jedi.Jedi.read" title="Permalink to this definition"></a></dt>
+<dd><p>Read new instance from JSON file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ase_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">printout</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.run" title="Permalink to this definition"></a></dt>
+<dd><p>Runs the analysis. Calls all necessary functions to get the needed values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>indices</strong> – list of indices of a substructure if desired</p></li>
+<li><p><strong>ase_units</strong> – boolean
+flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Indices, strain, energy in every RIM</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.set_bond_params">
+<span class="sig-name descname"><span class="pre">set_bond_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">covf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vdwf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.set_bond_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.set_bond_params" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>covf</strong> – float factor for  covalent radii to determine covalent bonds</p></li>
+<li><p><strong>vdwf</strong> – float factor for vdw radii to get the upper limit of the custom bond lengths</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.todict">
+<span class="sig-name descname"><span class="pre">todict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.todict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.todict" title="Permalink to this definition"></a></dt>
+<dd><p>make it saveable with .write()</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.vmd_gen">
+<span class="sig-name descname"><span class="pre">vmd_gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">des_colors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">box</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">man_strain</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modus</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'vmd'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/strainjedi/jedi.html#Jedi.vmd_gen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.jedi.Jedi.vmd_gen" title="Permalink to this definition"></a></dt>
+<dd><p>Generates vmd scripts and files to save the values for the color coding</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>des_colors</strong> – (dict)
+key: order number, value: [R,G,B]</p></li>
+<li><p><strong>box</strong> – boolean
+True: draw box
+False: ignore box</p></li>
+<li><p><strong>man_strain</strong> – float
+reference value for the strain energy used in the color scale
+default: ‘None’</p></li>
+<li><p><strong>modus</strong> – str
+defines where to use the man_strain
+default: ‘None’</p></li>
+<li><p><strong>colorbar</strong> – boolean
+draw colorbar or not</p></li>
+<li><p><strong>label</strong> – string or pathlib.Path
+name of folder for the created files</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.jedi.Jedi.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#strainjedi.jedi.Jedi.write" title="Permalink to this definition"></a></dt>
+<dd><p>Write to JSON file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples/examples.html" class="btn btn-neutral float-left" title="Further Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils/utils.html" class="btn btn-neutral float-right" title="Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, ad.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

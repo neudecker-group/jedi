@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ORCA &mdash; test  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Gaussian" href="gaussian.html" />
+    <link rel="prev" title="QChem" href="qchem.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0b750a" >
+
+          
+          
+          <a href="../index.html">
+            
+              <img src="../_static/Logo_JEDI_dark_grey.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Set Up:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html#building-guide">Building Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../preparation/preparation.html">Input Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/examples.html">Further Analysis</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../jedi.html">Jedi</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="utils.html">Utilities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="hbond.html">Custom bonds</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qchem.html">QChem</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">ORCA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gaussian.html">Gaussian</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Hints</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../extras/vmd.html">Visual Molecular Dynamics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extras/problems.html">VASP</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0b750a" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">test</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="utils.html">Utilities</a></li>
+      <li class="breadcrumb-item active">ORCA</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/utils/orca.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="orca">
+<h1>ORCA<a class="headerlink" href="#orca" title="Permalink to this headline"></a></h1>
+<p>Functions to process orca calculations</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="strainjedi.io.orca.read">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.read" title="Permalink to this definition"></a></dt>
+<dd><p>Read orca outputs.</p>
+<p>filename: str</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="strainjedi.io.orca.get_vibrations">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">get_vibrations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#get_vibrations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.get_vibrations" title="Permalink to this definition"></a></dt>
+<dd><p>Read hessian.</p>
+<dl class="simple">
+<dt>label: str</dt><dd><p>Filename w/o .log.</p>
+</dd>
+<dt>atoms: class</dt><dd><p>Structure of which the frequency analysis was performed.</p>
+</dd>
+<dt>indices: lst</dt><dd><p>Indices of unconstrained atoms.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>VibrationsData object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="strainjedi.io.orca.write_orca">
+<span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">write_orca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#write_orca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.write_orca" title="Permalink to this definition"></a></dt>
+<dd><p>Modified function to write ORCA input file, making optimizations possible</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">ORCA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">restart=None</span></em>, <em class="sig-param"><span class="pre">ignore_bad_restart_file=&lt;object</span> <span class="pre">object&gt;</span></em>, <em class="sig-param"><span class="pre">label='orca'</span></em>, <em class="sig-param"><span class="pre">atoms=None</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA" title="Permalink to this definition"></a></dt>
+<dd><p>Modified ASE interface to ORCA 4
+by Ragnar Bjornsson, Based on NWchem interface but simplified.
+Only supports energies and gradients (no dipole moments,
+orbital energies etc.) for now.</p>
+<p>For more ORCA-keyword flexibility, method/xc/basis etc.
+keywords are not used. Instead, two keywords:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>orcasimpleinput: str</dt><dd><p>What you’d put after the “!” in an orca input file.
+Should in most cases contain “engrad” or method that
+writes the engrad file. If not (single point only),
+set the “task” parameter manually.
+Default is <code class="docutils literal notranslate"><span class="pre">engrad</span> <span class="pre">tightscf</span> <span class="pre">PBE</span> <span class="pre">def2-SVP</span></code>.</p>
+</dd>
+<dt>orcablock: str</dt><dd><p>What you’d put in the “% … end”-blocks.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>are used to define the ORCA simple-inputline and the ORCA-block input.
+This allows for more flexible use of any ORCA method or keyword
+available in ORCA instead of hardcoding stuff.</p>
+<p>Default parameters are:</p>
+<blockquote>
+<div><p>charge: 0</p>
+<p>mult: 1</p>
+<p>task: ‘gradient’</p>
+</div></blockquote>
+<p>Point Charge IO functionality added by A. Dohn.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.embed">
+<span class="sig-name descname"><span class="pre">embed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mmcharges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.embed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.embed" title="Permalink to this definition"></a></dt>
+<dd><p>Embed atoms in point-charges (mmcharges)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.read" title="Permalink to this definition"></a></dt>
+<dd><p>Read atoms, parameters and calculated properties from output file.</p>
+<p>Read result from self.label file.  Raise ReadError if the file
+is not there.  If the file is corrupted or contains an error
+message from the calculation, a ReadError should also be
+raised.  In case of succes, these attributes must set:</p>
+<dl class="simple">
+<dt>atoms: Atoms object</dt><dd><p>The state of the atoms from last calculation.</p>
+</dd>
+<dt>parameters: Parameters object</dt><dd><p>The parameter dictionary.</p>
+</dd>
+<dt>results: dict</dt><dd><p>Calculated properties like energy and forces.</p>
+</dd>
+</dl>
+<p>The FileIOCalculator.read() method will typically read atoms
+and parameters and get the results dict by calling the
+read_results() method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.read_energy">
+<span class="sig-name descname"><span class="pre">read_energy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.read_energy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.read_energy" title="Permalink to this definition"></a></dt>
+<dd><p>Read Energy from ORCA output file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.read_forces">
+<span class="sig-name descname"><span class="pre">read_forces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.read_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.read_forces" title="Permalink to this definition"></a></dt>
+<dd><p>Read Forces from ORCA output file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.read_results">
+<span class="sig-name descname"><span class="pre">read_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.read_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.read_results" title="Permalink to this definition"></a></dt>
+<dd><p>Read energy, forces, … from output file(s).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.set"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.set" title="Permalink to this definition"></a></dt>
+<dd><p>Set parameters like set(key1=value1, key2=value2, …).</p>
+<p>A dictionary containing the parameters that have been changed
+is returned.</p>
+<p>Subclasses must implement a set() method that will look at the
+chaneged parameters and decide if a call to reset() is needed.
+If the changed parameters are harmless, like a change in
+verbosity, then there is no need to call reset().</p>
+<p>The special keyword ‘parameters’ can be used to read
+parameters from a file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="strainjedi.io.orca.ORCA.write_input">
+<span class="sig-name descname"><span class="pre">write_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#ORCA.write_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.ORCA.write_input" title="Permalink to this definition"></a></dt>
+<dd><p>Write input file(s).</p>
+<p>Call this method first in subclasses so that directories are
+created automatically.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="strainjedi.io.orca.OrcaOptimizer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">strainjedi.io.orca.</span></span><span class="sig-name descname"><span class="pre">OrcaOptimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">atoms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">calc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/strainjedi/io/orca.html#OrcaOptimizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#strainjedi.io.orca.OrcaOptimizer" title="Permalink to this definition"></a></dt>
+<dd><p>Allowing ase to use Orca geometry optimizations</p>
+<dl class="simple">
+<dt>atoms: class</dt><dd><p>Structure with orca calculator</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qchem.html" class="btn btn-neutral float-left" title="QChem" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="gaussian.html" class="btn btn-neutral float-right" title="Gaussian" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, ad.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

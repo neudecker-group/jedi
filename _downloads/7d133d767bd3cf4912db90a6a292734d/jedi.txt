@@ -1,0 +1,60 @@
+
+ 
+
+ ************************************************
+ *                 JEDI ANALYSIS                *
+ *       Judgement of Energy DIstribution       *
+ ************************************************
+
+                   Strain Energy (kcal/mol)  Deviation (%)
+      Geometries     4.54959065                  -
+ Red. Int. Modes      5.78274148                27.10
+
+ RIM No.       RIM type                       indices        delta_q (au) Percentage    Energy (kcal/mol)
+     1       bond                                C0 C1        0.2634921    100.3        5.7981073
+     2       bond                                C0 H2       -0.0049709     -0.0       -0.0003487
+     3       bond                                C0 H3       -0.0049828     -0.0       -0.0003358
+     4       bond                                C0 H4       -0.0049828     -0.0       -0.0003358
+     5       bond                                C1 H5       -0.0049709     -0.0       -0.0003487
+     6       bond                                C1 H6       -0.0049828     -0.0       -0.0003358
+     7       bond                                C1 H7       -0.0049828     -0.0       -0.0003358
+     8       bond angle                       C0 C1 H5       -0.0305957     -0.0       -0.0010554
+     9       bond angle                       C0 C1 H6       -0.0305727     -0.0       -0.0010406
+    10       bond angle                       C0 C1 H7       -0.0305727     -0.0       -0.0010406
+    11       bond angle                       C1 C0 H2       -0.0305957     -0.0       -0.0010554
+    12       bond angle                       C1 C0 H3       -0.0305727     -0.0       -0.0010406
+    13       bond angle                       C1 C0 H4       -0.0305727     -0.0       -0.0010406
+    14       bond angle                       H2 C0 H3        0.0319544     -0.0       -0.0011790
+    15       bond angle                       H2 C0 H4        0.0319544     -0.0       -0.0011790
+    16       bond angle                       H3 C0 H4        0.0319771     -0.0       -0.0011679
+    17       bond angle                       H5 C1 H6        0.0319544     -0.0       -0.0011790
+    18       bond angle                       H5 C1 H7        0.0319544     -0.0       -0.0011790
+    19       bond angle                       H6 C1 H7        0.0319771     -0.0       -0.0011679
+    20       dihedral                      H2 C0 C1 H5        0.0000000      0.0        0.0000000
+    21       dihedral                      H2 C0 C1 H6       -0.0000137      0.0        0.0000000
+    22       dihedral                      H2 C0 C1 H7        0.0000137      0.0        0.0000000
+    23       dihedral                      H3 C0 C1 H5       -0.0000137      0.0        0.0000000
+    24       dihedral                      H3 C0 C1 H6       -0.0000275      0.0        0.0000000
+    25       dihedral                      H3 C0 C1 H7        0.0000000      0.0        0.0000000
+    26       dihedral                      H4 C0 C1 H5        0.0000137      0.0        0.0000000
+    27       dihedral                      H4 C0 C1 H6        0.0000000      0.0        0.0000000
+    28       dihedral                      H4 C0 C1 H7        0.0000275      0.0        0.0000000
+"The circle is now complete." (Darth Vader)
+
+
+Creating tcl scripts for generating color-coded structures in VMD...
+
+Processing bond lengths...
+Maximum energy in a bond length:      100.27%
+Total energy in the bond lengths:     100.23%
+
+Processing bond angles...
+Maximum energy in a bond angle:         0.00%
+Total energy in the bond angles:        0.00%
+
+Processing dihedral angles...
+Maximum energy in a dihedral angle:     0.00%
+Total energy in the dihedral angles:    0.00%
+
+Adding all energies for the stretch, bending and torsion of the bond with maximum strain...
+Maximum energy in bond between atoms 0 and 1: 5.795 kcal/mol.
