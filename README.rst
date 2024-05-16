@@ -34,9 +34,9 @@ Citation
 
 When using JEDI, please cite the following papers:
 
-H. Wang, S. Benter, W. Dononelli, T. Neudecker, JEDI: A versatile code for strain analysis of molecular and periodic systems under deformation, J. Chem. Phys. **2024**, 160, 152501. https://doi.org/10.1063/5.0199247
+Wang, H.; Benter, S.; Dononelli, W.; Neudecker, T.; JEDI: A versatile code for strain analysis of molecular and periodic systems under deformation, J. Chem. Phys. **2024**, 160, 152501. https://doi.org/10.1063/5.0199247
 
-T. Stauch, A. Dreuw, A quantitative quantum-chemical analysis tool for the distribution of mechanical force in molecules, J. Chem. Phys. **2014**, 140, 134107. https://doi.org/10.1063/1.4870334
+Stauch, T.; Dreuw, A.; A quantitative quantum-chemical analysis tool for the distribution of mechanical force in molecules, J. Chem. Phys. **2014**, 140, 134107. https://doi.org/10.1063/1.4870334
 
 Additional information on the theoretical background of the JEDI analysis can be found in the following papers:
 
