@@ -4,7 +4,7 @@ import ase.io as io
 from ase.vibrations.vibrations import VibrationsData
 import numpy as np
 from strainjedi.jedi import Jedi
-from jedi_analysis.tests.resources import path_to_test_resources
+from tests.resources import path_to_test_resources
 
 
 class TestJEDIHCN:
