@@ -618,7 +618,7 @@ class Jedi:
 
         for i in range(len(rim_atoms0)):
             if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
-                break
+                continue
             else:
                 rim_atoms0v = rim_atoms0[i].view([('', rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
                 rim_atomsFv = rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()    #get a viable input for np.intersect1d()
