@@ -845,7 +845,7 @@ class Jedi:
         '''
 
         try:
-            len(self.rim_list)
+            len(self.rim_list)  # TODO what happens here?
         except:
             self.get_common_rims()
 
@@ -888,7 +888,7 @@ class Jedi:
         except:
             pass
 
-        self.delta_q = delta_q
+        self.delta_q = delta_q # TODO make void function setting self.delta_q
 
         return delta_q
 
@@ -954,7 +954,7 @@ class Jedi:
 
         for i in rim_list[0]:
         # Bond lengths (a molecule has at least one bond):
-            numbers = [int(i[0]),int(i[1])]
+            numbers = [int(i[0]), int(i[1])]
             bl.append(numbers)
             if 'bl' not in file_list:
                 file_list.append('bl')
@@ -1094,7 +1094,7 @@ class Jedi:
                 rim[i] = np.hstack((rim[i], nan))              # stack unanalyzed rims for later vmd visualization
             bond_E_array_app = rim
 
-            self.indices = p_indices #TODO ? see line 1068
+            self.indices = p_indices #TODO ? see line 1079
 
         # get bonds that reach out of the unit cell
         if pbc_flag:
@@ -1207,7 +1207,7 @@ class Jedi:
                     for i in range(len(bl)):
                         if len(bl) == 1:
                             E_array[i][2] = E_bl[i]
-                        else:
+                        else:                           #TODO if and else are equal?
                             E_array[i][2] = E_bl[i]
 
             # Bendings
@@ -1294,6 +1294,8 @@ class Jedi:
                         atom_2_max_energy = int(row[1])
 
             # Generate the binning windows by splitting bond_E_array into N_colors equal windows
+            # TODO lots of code duplicates as filename changes E_array and therefore binning window
+            # -> define function with parameters e_array and man strain returning binning window
             if filename == "all":
                 if modus == "all":
                     if man_strain is None:
@@ -1472,6 +1474,7 @@ display update on """)
 
 
             #highresolution colorbar with matplotlib
+                # TODO move import statements to top of file
                 import matplotlib.pyplot as plt
                 from matplotlib.colorbar import ColorbarBase
                 from matplotlib.colors import LinearSegmentedColormap, Normalize
@@ -1486,6 +1489,7 @@ display update on """)
                                   norm=Normalize(min,round(max,3)),
                                   label=unit,
                                   ticks=np.round(np.linspace(min, max, 8), decimals=3))
+                #TODO cb colorbase is never used?
 
                 fig.savefig(f'{destination_dir / filename}colorbar.pdf', bbox_inches='tight')
 
