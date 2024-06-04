@@ -6,7 +6,7 @@ import warnings
 import numpy as np
 from collections import Counter
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, List
 import ase.neighborlist
 import ase.geometry
 from ase.atoms import Atoms
@@ -15,8 +15,10 @@ from ase.atoms import Atom
 from ase.utils import jsonable
 import ase.io
 from ase.units import Hartree, Bohr, mol, kcal
-from .colors import colors
-
+from strainjedi.colors import colors
+from strainjedi.print_config import header, energy_comparison, rims_listing
+from strainjedi.quotes import quotes
+from strainjedi import __version__
 
 def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
     '''
@@ -106,8 +108,17 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
 
     return proc_E_RIMs,E_RIMs, E_RIMs_total, proc_geom_RIMs,delta_q
 
-def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False):
-    '''
+
+def jedi_printout(atoms,
+                  rim_list: List,
+                  delta_q: np.array,
+                  E_geometries: float,
+                  E_RIMs_total: float,
+                  proc_geom_RIMs: float,
+                  proc_E_RIMs: List,
+                  E_RIMs: np.array,
+                  ase_units: bool = False):
+    """
     Printout of analysis of stored strain energy in redundant internal coordinates.
 
     atoms: class
@@ -125,63 +136,83 @@ def jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_R
     proc_E_RIMs: array
         Array of energy stored in each RIC.
     ase_units: bool
-        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians. 
-    '''
-    #############################################
-    #	    	   Output section	        	#
-    #############################################
-
+        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians.
+    """
     output = []
     # Header
     output.append("\n \n")
-    output.append("************************************************")
-    output.append("\n *                 JEDI ANALYSIS                *")
-    output.append("\n *       Judgement of Energy DIstribution       *")
-    output.append("\n ************************************************\n")
+    output.append('{:^{header}}'.format("************************************************", **header))
+    output.append('{:^{header}}'.format("*                 JEDI ANALYSIS                *", **header))
+    output.append('{:^{header}}'.format("*       Judgement of Energy DIstribution       *", **header))
+    output.append('{:^{header}}'.format("************************************************", **header))
+    output.append('{:^{header}}'.format(f"version {__version__}\n", **header))
 
     # Comparison of total energies
-    if ase_units == False:
-        output.append("\n                   Strain Energy (kcal/mol)  Deviation (%)")
-    elif ase_units == True:
-        output.append("\n                   Strain Energy (eV)        Deviation (%)")
-    output.append("\n      Ab initio     " + "%.8f" % E_geometries + "                  -" )
-    output.append('\n%5s%16.8f%21.2f' % (" JEDI           ", E_RIMs_total, proc_geom_RIMs))
+    if not ase_units:
+        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+                      .format(" ", "Strain Energy (kcal/mol)", "Deviation (%)", **energy_comparison))
+    elif ase_units:
+        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+                      .format(" ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison))
 
+    output.append('{0:<{column1}}' '{1:^{column2}.4f}' '{2:^{column3}}'
+                  .format("Ab Initio", E_geometries, "-", **energy_comparison))
+    # TODO save proc_e_rims as std decimal number and have print command use .2%
+    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+                  .format("JEDI", E_RIMs_total, proc_geom_RIMs, **energy_comparison))
 
     # JEDI analysis
+    if not ase_units:
+        output.append(
+            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}''{5:^{column6}}'
+            .format("RIC No.", "RIC type", "indices", "delta_q (a.u.)", "Percentage", "Energy (kcal/mol)", **rims_listing))
+    elif ase_units:
+        output.append(
+            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}''{5:^{column6}}'
+            .format("RIC No.", "RIC type", "indices", "delta_q (Å,°)", "Percentage", "Energy (eV)", **rims_listing))
 
-    if ase_units == False:
-        output.append("\n RIC No.       RIC type                       indices        delta_q (au) Percentage    Energy (kcal/mol)")
-    elif ase_units == True:
-        output.append("\n RIC No.       RIC type                       indices        delta_q (Å,°) Percentage    Energy (eV)")
-    i = 0
+    rics_dict = {0: "bond",
+                 1: "custom",
+                 2: "angle",
+                 3: "dihedral"}
+    ric_counter = 0
+    for ric_type, rim in rics_dict.items():
+        for k in rim_list[ric_type]:
+            if rim == "bond" or "custom":
+                ind = f"{atoms.symbols[k[0]]}{k[0]}  {atoms.symbols[k[1]]}{k[1]}"
+            elif rim == "angle":
+                ind = f"{atoms.symbols[k[0]]}{k[0]} {atoms.symbols[k[1]]}{k[1]} {atoms.symbols[k[2]]}{k[2]}"
+            elif rim == "dihedral":
+                ind = f"{atoms.symbols[k[0]]}{k[0]} " \
+                      f"{atoms.symbols[k[1]]}{k[1]} " \
+                      f"{atoms.symbols[k[2]]}{k[2]} " \
+                      f"{atoms.symbols[k[3]]}{k[3]}"
+            # TODO save proc_e_rims as std decimal number and have print command use .2%
+            output.append(
+                '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}.4f}''{4:^{column5}.2f}''{5:^{column6}.4f}'
+                .format(ric_counter + 1,
+                        rim,
+                        ind,
+                        delta_q[ric_counter],
+                        proc_E_RIMs[ric_counter],
+                        E_RIMs[ric_counter],
+                        **rims_listing))
+            ric_counter += 1
+    print("\n".join(output))
+    print(quotes())
 
-    for k in rim_list[0]:
-        rim = "bond"
-        ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
-        output.append('\n%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        i += 1
-    for k in rim_list[1]:
-        rim = "custom"
-        ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
-        output.append('\n%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        i += 1
-    for k in rim_list[2]:
-        rim = "bond angle"
-        ind = "%s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2])
-        output.append('\n%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        i += 1
-    for k in rim_list[3]:
-        rim = "dihedral"
-        ind = "%s%d %s%d %s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1], atoms.symbols[k[2]], k[2], atoms.symbols[k[3]], k[3])
-        output.append('\n%6i%7s%-11s%30s%17.7f%9.1f%17.7f' % (i+1, " ", rim, ind, delta_q[i], proc_E_RIMs[i], E_RIMs[i]))
-        i += 1
-    print(*output)
-    from . import quotes
-    print(quotes.quotes())
 
-def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=False,file='total'): #total strain in bonds after adding contributions of stretching angles and dihedral angles
-    '''
+def jedi_printout_bonds(atoms,
+                        rim_list: np.array,
+                        E_geometries: float,
+                        E_RIMs_total: float,
+                        proc_geom_RIMs: float,
+                        proc_E_RIMs: np.array,
+                        E_RIMs: np.array,
+                        ase_units: bool = False,
+                        file: str = 'total'):
+    # total strain in bonds after adding contributions of stretching angles and dihedral angles
+    """
     Printout of analysis of stored strain energy in the bonds.
 
     atoms: class
@@ -199,54 +230,62 @@ def jedi_printout_bonds(atoms,rim_list,E_geometries, E_RIMs_total, proc_geom_RIM
     proc_E_RIMs: np array
         Array of energy stored in each RIC.
     ase_units: bool
-        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians. 
+        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians.
     file: string
         File to store the output.
-
-    '''
-    #############################################
-    #	    	   Output section	        	#
-    #############################################
-
-
+    """
     output = []
     # Header
-
-    output.append("\n ************************************************")
-    output.append("\n *                 JEDI ANALYSIS                *")
-    output.append("\n *       Judgement of Energy DIstribution       *")
-    output.append("\n ************************************************\n")
+    output.append("\n \n")
+    output.append('{:^{header}}'.format("************************************************", **header))
+    output.append('{:^{header}}'.format("*                 JEDI ANALYSIS                *", **header))
+    output.append('{:^{header}}'.format("*       Judgement of Energy DIstribution       *", **header))
+    output.append('{:^{header}}'.format("************************************************", **header))
+    output.append('{:^{header}}'.format(f"version {__version__}\n", **header))
 
     # Comparison of total energies
-    if ase_units==False:
-        output.append("\n                   Strain Energy (kcal/mol)  Deviation (%)")
-    elif ase_units==True:
-        output.append("\n                   Strain Energy (eV)        Deviation (%)")
-    output.append("\n      Ab initio     " + "%.8f" % E_geometries + "                  -")
-    output.append('\n%5s%16.8f%21.2f' % (" JEDI           ", E_RIMs_total, proc_geom_RIMs))
+    if not ase_units:
+        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+                      .format(" ", "Strain Energy (kcal/mol)", "Deviation (%)", **energy_comparison))
+    elif ase_units:
+        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+                      .format(" ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison))
 
+    output.append('{0:<{column1}}' '{1:^{column2}.4f}' '{2:^{column3}}'
+                  .format("Ab Initio", E_geometries, "-", **energy_comparison))
+    # TODO save proc_e_rims as std decimal number and have print command use .2%
+    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+                  .format("JEDI", E_RIMs_total, proc_geom_RIMs, **energy_comparison))
 
     # strain in the bonds
+    if not ase_units:
+        output.append(
+            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}''{5:^{column6}}'
+            .format("RIC No.", "RIC type", "indices", "delta_q (a.u.)", "Percentage", "Energy (kcal/mol)", **rims_listing))
+    elif ase_units:
+        output.append(
+            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}''{5:^{column6}}'
+            .format("RIC No.", "RIC type", "indices", "delta_q (Å,°)", "Percentage", "Energy (eV)", **rims_listing))
 
-    if ase_units == False:
-        output.append("\n RIC No.       RIC type                       indices       Percentage    Energy (kcal/mol)")
-    elif ase_units == True:
-        output.append("\n RIC No.       RIC type                       indices       Percentage    Energy (eV)")
-    i = 0
+    rics_dict = {0: "bond",
+                 1: "custom"}
+    ric_counter = 0
+    for ric_type, rim in rics_dict.items():
+        for k in rim_list[ric_type]:
+            ind = f"{atoms.symbols[k[0]]}{k[0]}  {atoms.symbols[k[1]]}{k[1]}"
+            # TODO save proc_e_rims as std decimal number and have print command use .2%
+            output.append(
+                '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}.2f}''{4:^{column5}.4f}'
+                .format(ric_counter + 1,
+                        rim,
+                        ind,
+                        proc_E_RIMs[ric_counter],
+                        E_RIMs[ric_counter],
+                        **rims_listing))
+            ric_counter += 1
+    with open(file, 'w') as f:
+        f.writelines(output)
 
-    for k in rim_list[0]:
-        rim = "bond"
-        ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
-        output.append('\n%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]))
-        i += 1
-    for k in rim_list[1]:
-        rim = "custom"
-        ind = "%s%d %s%d"%(atoms.symbols[k[0]], k[0], atoms.symbols[k[1]], k[1])
-        output.append('\n%6i%7s%-11s%30s%9.1f%17.7f' % (i+1, " ", rim, ind, proc_E_RIMs[i], E_RIMs[i]))
-        i += 1
-    f = open(file, 'w')
-    f.writelines(output)
-    f.close()
 
 def get_hbonds(mol,covf=1.3,vdwf=0.9):
     '''
