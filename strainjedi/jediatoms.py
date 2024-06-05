@@ -1,5 +1,6 @@
 import numpy as np
 from pathlib import Path
+import matplotlib.cm as cm
 from typing import Dict, Optional, Union
 from ase.units import Hartree, Bohr, mol, kcal
 from strainjedi.colors import colors
@@ -144,7 +145,8 @@ class JediAtoms(Jedi):
                 box: bool = False,
                 man_strain: Optional[float] = None,
                 colorbar: bool = True,
-                label: Union[Path, str] = 'vmd'):
+                label: Union[Path, str] = 'vmd',
+                incl_coloring: Optional[str] = None):
         """
         Generates vmd scripts and files to save the values for the color coding
 
@@ -161,6 +163,11 @@ class JediAtoms(Jedi):
                 draw colorbar or not
             label: string
                 name of folder for the created files
+            incl_coloring: str
+                2 inclusive coloring options, otherwise green to red gradient
+                "cyan": cyan to red gradient
+                "magma": matplotlib magma gradient
+                default: 'None'
         """
         if isinstance(label, str):
             destination_dir = Path(label)
@@ -216,31 +223,58 @@ class JediAtoms(Jedi):
 
         colorbar_colors = []
 
-        #get green to red gradient
-        for i in range(N_colors):
-            R_value = float(i)/(N_colors/2)
-            if R_value > 1:
-                R_value = 1
-            if N_colors % 2 == 0:
-                G_value = 2 - float(i+1)/(N_colors/2)
-            if N_colors % 2 != 0:
-                G_value = 2 - float(i)/(N_colors/2)
-            if G_value > 1:
-                G_value = 1
+        # get green to red gradient
+        if incl_coloring is None:
+            for i in range(N_colors):
+                R_value = float(i) / (N_colors / 2)
+                if R_value > 1:
+                    R_value = 1
+                if N_colors % 2 == 0:
+                    G_value = 2 - float(i + 1) / (N_colors / 2)
+                if N_colors % 2 != 0:
+                    G_value = 2 - float(i) / (N_colors / 2)
+                if G_value > 1:
+                    G_value = 1
 
-            B_value = 0
+                B_value = 0
 
-            output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i+1, R_value, G_value, B_value, "\n"))
-            colorbar_colors.append((R_value, G_value, B_value))
+                output.append(
+                    '%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_value, G_value, B_value, "\n"))
+                colorbar_colors.append((R_value, G_value, B_value))
 
-        # add color codes of atoms
-        for j in range(N_colors_atoms):
-            output.append('%1s%5i%10.6f%10.6f%10.6f%1s'
-                          % ("color change rgb",
-                             N_colors+j+1,
-                             float(colors[symbols[j]][0]),
-                             float(colors[symbols[j]][1]),
-                             float(colors[symbols[j]][2]), "\n"))
+        elif incl_coloring == "cyan":
+            # get cyan to red gradient
+            for i in range(N_colors):
+                R_value = float(i) / (N_colors / 2)
+                if R_value > 1:
+                    R_value = 1
+                B_value = 2 - float(i + 1) / (N_colors / 2)
+                if B_value > 1:
+                    B_value = 1
+                if i <= (N_colors / 2):
+                    G_value = ((N_colors / 2) - i) / (N_colors / 2)
+                if i > (N_colors / 2):
+                    G_value = 0
+
+                output.append(
+                    '%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", i + 1, R_value, G_value, B_value, "\n"))
+                colorbar_colors.append((R_value, G_value, B_value))
+
+        elif incl_coloring == "magma":
+            # get magma gradient from matplotlib
+            gradient = np.linspace(0, 1, N_colors)
+            cmap = cm.get_cmap('magma').reversed()
+            cut_off_blue = 0.175
+            cut_off_beige = 0.15
+            adjusted_gradient = gradient * (1 - cut_off_blue - cut_off_beige) + cut_off_beige
+            colors_rgb = cmap(adjusted_gradient)
+            R_values = colors_rgb[:, 0]
+            G_values = colors_rgb[:, 1]
+            B_values = colors_rgb[:, 2]
+            for i in range(N_colors):
+                output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % (
+                    "color change rgb", i + 1, R_values[i], G_values[i], B_values[i], "\n"))
+                colorbar_colors.append((R_values[i], G_values[i], B_values[i]))
 
         #add color code for axes and box
         output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))#black
