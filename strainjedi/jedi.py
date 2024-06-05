@@ -357,7 +357,7 @@ class Jedi:
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
         self.vdwf=0.9
-        self.covf=1.3
+        self.covf=1.3                   ## cutoff for covalent bonds see Bakken et al.
 
  #       if np.any(np.round(atoms0.cell, 4) != np.round(atomsF.cell, 4)): #jedi does not work for pbc systems that change their cell shape
 #            raise GeneratorExit
@@ -492,10 +492,10 @@ class Jedi:
         mol = mol
 
         indices = self.indices
-        cutoff = ase.neighborlist.natural_cutoffs(mol,mult=self.covf)   ## cutoff for covalent bonds see Bakken et al.
-        bl = np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
+        cutoff = ase.neighborlist.natural_cutoffs(mol, mult=self.covf)   ## cutoff for covalent bonds see Bakken et al.
+        bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=mol, cutoff=cutoff)).T   #determine covalent bonds
 
-        bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
+        bl = bl[bl[:,0] < bl[:,1]]      #remove double metioned
         bl, counts = np.unique(bl, return_counts=True, axis=0)
         if ~ np.all(counts == 1):
             print('unit cell too small hessian not calculated for self interaction \
@@ -654,7 +654,9 @@ class Jedi:
         '''
         rim_atoms0 = self.get_rims(self.atoms0)
         rim_atomsF = self.get_rims(self.atomsF)
-
+        if len(rim_atoms0[0]) != len(rim_atomsF[0]):
+            print("Warning: The distorted structure has a different amount of bonds. "
+                  "In this case the Jedi strain analysis can not be applied properly.")
         for i in range(len(rim_atoms0)):
             if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
                 continue
