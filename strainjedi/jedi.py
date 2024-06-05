@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.cm as cm
 from collections import Counter
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, Optional, Union, List
 import ase.neighborlist
 import ase.geometry
 from ase.atoms import Atoms
@@ -932,8 +932,15 @@ class Jedi:
 
         return delta_q
 
-    def vmd_gen(self,des_colors=None,box=False,man_strain=None,modus=None,colorbar=True,label='vmd',incl_coloring=None): #get vmd scripts
-        '''Generates vmd scripts and files to save the values for the color coding
+    def vmd_gen(self,
+                des_colors: Optional[Dict] = None,
+                box: bool = False,
+                man_strain: Optional[float] = None,
+                modus: Optional[str] = None,
+                colorbar: bool = True,
+                label: Union[Path, str] = 'vmd',
+                incl_coloring: Optional[str] = None):
+        """Generates vmd scripts and files to save the values for the color coding
 
         Args:
             des_colors: (dict)
@@ -956,7 +963,7 @@ class Jedi:
                 "cyan": cyan to red gradient
                 "magma": matplotlib magma gradient
                 default: 'None'
-        '''
+        """
         if isinstance(label, str):
             destination_dir = Path(label)
         elif isinstance(label, Path):
