@@ -19,7 +19,7 @@ Mechanically Deformed Molecules
 When a molecule or a periodic system is deformed, e.g., due to mechanical stretching or hydrostatic compression, some internal coordinates store more energy than others. This leads to particularly large displacements of certain coordinates such as the stretching of bond lengths, and to the preconditioning of selected bonds for rupture. Using the JEDI analysis the mechanochemical properties of the system can be investigated.
 
 
-Adsorbed molecules
+Adsorbed Molecules
 ------------------
 When a molecule adsorbs onto a surface, the geometry of the adsorbate changes as compared to the relaxed molecule in the gas phase. As JEDI allows strain analysis for only a subset of atoms, it is possible to quantify the strain due to adsorbtion. 
 
@@ -34,13 +34,17 @@ How to Cite JEDI
 
 When using JEDI, please cite the following papers:
 
-* T. Stauch, A. Dreuw, J. Chem. Phys. 140, 134107 (2014)
+* Wang, H.; Benter, S.; Dononelli, W.; Neudecker, T.; JEDI: A versatile code for strain analysis of molecular and periodic systems under deformation, J. Chem. Phys. **2024**, 160, 152501. https://doi.org/10.1063/5.0199247
 
-* T. Stauch, A. Dreuw, Acc. Chem. Res. 50, 1041-1048 (2017)
+* Stauch, T.; Dreuw, A.; A quantitative quantum-chemical analysis tool for the distribution of mechanical force in molecules, J. Chem. Phys. **2014**, 140, 134107. https://doi.org/10.1063/1.4870334
 
-Details on the theoretical background of JEDI are given in 
+Additional information on the theoretical background of the JEDI analysis can be found in the following papers:
 
-* T. Stauch, A. Dreuw, J. Chem. Phys. 143, 074118 (2015)
+* Stauch, T.; Dreuw, A.; On the use of different coordinate systems in mechanochemical force analyses, J. Chem. Phys. **2015**, 143, 074118. https://doi.org/10.1063/1.4928973
+
+* Stauch, T.; Dreuw, A.; Predicting the Efficiency of Photoswitches Using Force Analysis, J. Phys. Chem. Lett. **2016**, 7, 1298-1302. https://doi.org/10.1021/acs.jpclett.6b00455
+
+* Stauch, T.; Dreuw, A.; Quantum Chemical Strain Analysis For Mechanochemical Processes, Acc. Chem. Res. **2017**, 50, 1041-1048. https://doi.org/10.1021/acs.accounts.7b00038
 
 
 Documentation

@@ -3,12 +3,17 @@ from ase.atoms import Atom
 from ase.units import Hartree, Bohr, mol, kcal
 import ase.neighborlist
 import numpy as np
-import os
+from pathlib import Path
 import matplotlib.cm as cm
+from typing import Dict, Optional, Union
+from ase.units import Hartree, Bohr, mol, kcal
+from strainjedi.colors import colors
+from strainjedi.jedi import Jedi
 
 
 class JediAtoms(Jedi):
-    E_atoms = None
+
+    E_atoms=None
 
     def run(self, ase_units=False, indices=None):
         """Runs the analysis. Calls all necessary functions to get the needed values.
@@ -23,13 +28,14 @@ class JediAtoms(Jedi):
         """
         self.ase_units = ase_units
         # get necessary data
-        self.indices = np.arange(0, len(self.atoms0))
+        self.indices=np.arange(0,len(self.atoms0))
         if indices:
-            self.indices = indices
+            self.indices=indices
+
 
         self.get_hessian()
-        H_cart = self.H  # Hessian of optimized (ground state) structure
-        delta_x = self.get_delta_x()
+        H_cart = self.H         #Hessian of optimized (ground state) structure
+        delta_x= self.get_delta_x()
 
         if len(self.atoms0) != H_cart.shape[0] / 3:
             raise ValueError(
@@ -40,15 +46,16 @@ class JediAtoms(Jedi):
             all_E_geometries = self.energies
         E_geometries = all_E_geometries[0]
 
-        # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
-        E_coords = np.sum(0.5 * (delta_x * H_cart).T * delta_x, axis=1)
-        self.E_atoms = np.sum(E_coords.reshape(-1, 3), axis=1)
-        if ase_units == True:
 
-            self.E_atoms *= Hartree
-            delta_x *= Bohr
+    # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
+        E_coords = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)
+        self.E_atoms=np.sum(E_coords.reshape(-1, 3), axis=1)
+        if ase_units==True:
+
+            self.E_atoms*=Hartree
+            delta_x*=Bohr
         elif ase_units == False:
-            self.E_atoms *= mol / kcal * Hartree
+            self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
         pass
 
@@ -79,9 +86,9 @@ class JediAtoms(Jedi):
         output.append("\n ************************************************\n")
 
         # Comparison of total energies
-        if self.ase_units == False:
+        if self.ase_units==False:
             output.append("\n                   Strain Energy (kcal/mol)  Deviation (%)")
-        elif self.ase_units == True:
+        elif self.ase_units==True:
             output.append("\n                   Strain Energy (eV)        Deviation (%)")
 
         E_atoms_total = sum(self.E_atoms[self.indices])
@@ -131,19 +138,20 @@ class JediAtoms(Jedi):
         """
         self.ase_units = ase_units
         # get necessary data
-        self.indices = indices
+        self.indices=indices
+
 
         self.get_hessian()
-        H_cart = self.H  # Hessian of optimized (ground state) structure
-        # get strain in coordinates
-        i = np.repeat(np.atleast_2d(indices), 3, axis=0) * 3
-        i[1] += 1
-        i[2] += 2
+        H_cart = self.H         #Hessian of optimized (ground state) structure
+        #get strain in coordinates
+        i = np.repeat(np.atleast_2d(indices),3,axis=0)*3
+        i[1]+=1
+        i[2]+=2
         i = i.ravel('F')
-        delta_x = self.get_delta_x()[i]
-        #        print(delta_x)
+        delta_x= self.get_delta_x()[i]
+#        print(delta_x)
 
-        if len(indices) != H_cart.shape[0] / 3:
+        if len(indices) != H_cart.shape[0]/3:
             raise ValueError('Hessian has not the fitting shape')
         try:
             all_E_geometries = self.get_energies()
@@ -151,13 +159,14 @@ class JediAtoms(Jedi):
             all_E_geometries = self.energies
         E_geometries = all_E_geometries[0]
 
-        # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
-        E_coords = np.sum(0.5 * (delta_x * H_cart).T * delta_x, axis=1)
-        self.E_atoms = np.sum(E_coords.reshape(-1, 3), axis=1)
-        if ase_units == True:
 
-            self.E_atoms *= Hartree
-            delta_x *= Bohr
+    # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
+        E_coords = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)
+        self.E_atoms=np.sum(E_coords.reshape(-1, 3), axis=1)
+        if ase_units==True:
+
+            self.E_atoms*=Hartree
+            delta_x*=Bohr
         elif ase_units == False:
             self.E_atoms *= mol / kcal * Hartree
         E_atoms = np.full((len(self.atoms0)), np.nan)
@@ -189,7 +198,7 @@ class JediAtoms(Jedi):
 
     def vmd_gen(self, des_colors=None, box=False, man_strain=None, colorbar=True, label='vmd',
                 incl_coloring=None):  # get all scripts
-        '''Generates all scripts and files to save the values for the color coding
+        """Generates all scripts and files to save the values for the color coding
 
         Args:
             des_colors: (dict)
@@ -209,12 +218,14 @@ class JediAtoms(Jedi):
                 "cyan": cyan to red gradient
                 "magma": matplotlib magma gradient
                 default: 'None'
-        '''
-        try:
-            os.mkdir(label)
-        except:
-            pass
-        os.chdir(label)
+        """
+        if isinstance(label, str):
+            destination_dir = Path(label)
+        elif isinstance(label, Path):
+            destination_dir = label
+        else:
+            raise TypeError("Please specify the directory (label) to write vmd scripts to as Path or string")
+        destination_dir.mkdir(parents=True, exist_ok=True)
         #########################
         #       Basic stuff     #
         #########################
@@ -226,39 +237,43 @@ class JediAtoms(Jedi):
         pbc_flag = False
         if self.atomsF.get_pbc().any() == True:
             pbc_flag = True
-        self.atomsF.write('xF.xyz')
+        self.atomsF.write(destination_dir / 'xF.xyz')
 
         E_atoms = self.E_atoms
 
         # Write some basic stuff to the tcl scripts
-        file_dir = os.path.join(os.getcwd(), 'xF.xyz')
-        output = []
-        output.append('# Load a molecule\nmol new {%s} type xyz\n\n' % (file_dir))
-        output.append(
-            '# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
 
-        output.append(
-            '# Change the color of the graphical representation 0 to white\ncolor change rgb 0 1.00 1.00 1.00\n')
-        output.append(
-            '# The background should be white ("blue" has the colorID 0, which we have changed to white)\ncolor Display Background blue\n\n')
+        output = []
+        output.append(f'\n# Load a molecule\nmol new {destination_dir.resolve() / "xF.xyz"}\n\n')
+        output.append('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 '
+                      '5\nmol representation bonds 0.2 30\n\n')
+
+
+        output.append('# Change the color of the graphical representation 0 to white\ncolor change rgb 0 1.00 1.00 '
+                      '1.00\n')
+        output.append('# The background should be white ("blue" has the colorID 0, which we have changed to '
+                      'white)\ncolor Display Background blue\n\n')
         output.append('# Define the other colorIDs\n')
+
 
         # Define colorcodes for various atomtypes
 
-        from .colors import colors
-        if des_colors != None:
+        #from .colors import colors
+        if des_colors is not None:
             for i in des_colors:
-                colors[i] = des_colors[i]  # desired colors overwrite the standard ones
+                colors[i] = des_colors[i]         #desired colors overwrite the standard ones
 
         symbols = np.unique(self.atomsF.get_chemical_symbols())
-        symbols = symbols[symbols != 'H']  # get all symbols except H, H is white
+        symbols = symbols[symbols != 'H']           #get all symbols except H, H is white
 
         N_colors_atoms = len(symbols)
-        N_colors = 32 - N_colors_atoms - 1  # vmd only supports 32 colors for modcolor
+        N_colors = 32 - N_colors_atoms - 1           #vmd only supports 32 colors for modcolor
+
 
         # Generate the color-code and write it to the tcl scripts
 
         colorbar_colors = []
+
         # get green to red gradient
         if incl_coloring is None:
             for i in range(N_colors):
@@ -309,14 +324,8 @@ class JediAtoms(Jedi):
             B_values = colors_rgb[:, 2]
             for i in range(N_colors):
                 output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % (
-                "color change rgb", i + 1, R_values[i], G_values[i], B_values[i], "\n"))
+                    "color change rgb", i + 1, R_values[i], G_values[i], B_values[i], "\n"))
                 colorbar_colors.append((R_values[i], G_values[i], B_values[i]))
-
-        # add color codes of atoms
-        for j in range(N_colors_atoms):
-            output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % (
-            "color change rgb", N_colors + j + 1, float(colors[symbols[j]][0]), float(colors[symbols[j]][1]),
-            float(colors[symbols[j]][2]), "\n"))
 
         # add color code for axes and box
         output.append(
@@ -335,17 +344,22 @@ color Axes Z 1037
 color Axes Origin 1036
 color Axes Labels 32
 ''')
-        # define color of atoms with the color code above
+        #define color of atoms with the color code above
         for j in range(N_colors_atoms):
             output.append('\n\nmol representation cpk 0.7 0.0 30 5')
             output.append('\nmol addrep top')
-            output.append('\n%s%i%s' % ("mol modstyle ", j + 1, " top cpk"))
-            output.append('\n%s%i%s%i%s' % ("mol modcolor ", j + 1, " top {colorid ", N_colors + j + 1, "}"))
-            output.append('\n%s%i%s%s%s' % ("mol modselect ", j + 1, " top {name ", symbols[j], "}"))
+            output.append('\n%s%i%s' % ("mol modstyle ", j+1, " top cpk"))
+            output.append('\n%s%i%s%i%s' % ("mol modcolor ", j+1, " top {colorid ", N_colors+j+1, "}"))
+            output.append('\n%s%i%s%s%s' % ("mol modselect ", j+1, " top {name ", symbols[j], "}"))
+
+
+
+
 
         #########################
         #	Binning		#
         #########################
+
 
         # Welcome
         print("\n\nCreating tcl scripts for generating color-coded structures in VMD...")
@@ -367,7 +381,7 @@ color Axes Labels 32
         E_array = np.vstack((np.arange(len(self.atoms0)), E_array))
         print("\nProcessing atoms...")
 
-        # get bonds that reach out of the unit cell
+    # get bonds that reach out of the unit cell
         if pbc_flag == True:
             E_array_pbc = np.empty((2, 0))
 
@@ -412,9 +426,9 @@ color Axes Labels 32
 
         if man_strain == None:
 
-            binning_windows = np.linspace(0, np.nanmax(E_array, axis=1)[1], num=N_colors)
+            binning_windows = np.linspace(0, np.nanmax(E_array, axis=1)[1], num=N_colors )
         else:
-            binning_windows = np.linspace(0, float(man_strain), num=N_colors)
+            binning_windows = np.linspace(0, float(man_strain), num=N_colors )
 
         if box:
             output.append("\n\n# Adding a pbc box")
@@ -433,16 +447,16 @@ color Axes Labels 32
 
             output.append('\n\nmol representation cpk 0.7 0.0 30 5')
             output.append('\nmol addrep top')
-            output.append('\n%s%i%s' % ("mol modstyle ", N_colors_atoms + i + 1, " top cpk"))
-            output.append('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms + i + 1, " top {colorid ", colorID, "}"))
-            output.append('\n%s%i%s%s%s' % ("mol modselect ", N_colors_atoms + i + 1, " top {index ", int(i), "}\n"))
-        f = open('atoms.vmd', 'w')
+            output.append('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top cpk"))
+            output.append('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
+            output.append('\n%s%i%s%s%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", int(i), "}\n"))
+        f = open(destination_dir / 'atoms.vmd', 'w')
         f.writelines(output)
         f.close()
 
-        # colorbar
-        if colorbar == True:
-            min = 0.000
+        #colorbar
+        if colorbar==True:
+            min=0.000
 
             if man_strain == None:
                 max = np.nanmax(E_array, axis=1)[1]
@@ -464,7 +478,7 @@ color Axes Labels 32
                               label=unit,
                               ticks=np.round(np.linspace(min, max, 8), decimals=3))
 
-            fig.savefig('atomscolorbar.pdf', bbox_inches='tight')
+            fig.savefig(destination_dir / 'atomscolorbar.pdf', bbox_inches='tight')
 
         if man_strain == None:
             print(f"Maximum energy in  atom {int(np.argmax(E_atoms) + 1)}: {float(max_energy):.3f} {unit}.")
