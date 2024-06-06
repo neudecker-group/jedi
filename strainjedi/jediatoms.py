@@ -1,11 +1,10 @@
-from strainjedi.jedi import Jedi
-from ase.atoms import Atom
-from ase.units import Hartree, Bohr, mol, kcal
-import ase.neighborlist
 import numpy as np
+import os
 from pathlib import Path
 import matplotlib.cm as cm
 from typing import Dict, Optional, Union
+from ase.atoms import Atom
+import ase.neighborlist
 from ase.units import Hartree, Bohr, mol, kcal
 from strainjedi.colors import colors
 from strainjedi.jedi import Jedi
@@ -196,8 +195,13 @@ class JediAtoms(Jedi):
 
         return bl
 
-    def vmd_gen(self, des_colors=None, box=False, man_strain=None, colorbar=True, label='vmd',
-                incl_coloring=None):  # get all scripts
+    def vmd_gen(self,
+                des_colors: Optional[Dict] = None,
+                box: bool = False,
+                man_strain: Optional[float] = None,
+                colorbar: bool = True,
+                label: Union[Path, str] = 'vmd',
+                incl_coloring: Optional[str] = None):
         """Generates all scripts and files to save the values for the color coding
 
         Args:
