@@ -513,7 +513,7 @@ color Axes Labels 32
                         see iopov.py
                 '''
 
-        from strainjedi.jedi_io.iopov import POV
+        from strainjedi.io.iopov import POV
         from matplotlib.colors import LinearSegmentedColormap
         import builtins
 
