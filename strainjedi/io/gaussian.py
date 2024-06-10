@@ -1,3 +1,5 @@
+import sys
+
 from ase.io.gaussian import _compare_merge_configs
 from ase.vibrations.vibrations import VibrationsData
 import re
@@ -142,7 +144,7 @@ def read_gaussian_out(label, index=-1):
         return configs[index]
 
 def get_vibrations(label,atoms,indices=None):
-    '''
+    """
     Read hessian.
 
     label: str
@@ -152,41 +154,44 @@ def get_vibrations(label,atoms,indices=None):
 
     Returns:
         VibrationsData object.
-            '''
-    if indices==None:
+    """
+    if indices is None:
         indices = range(len(atoms))
-    _re_hessblock = re.compile(r'^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$')
+    imaginary_freq_pattern = r'\**\s+(\d+)\s+imaginary frequencies \(negative Signs\)\s*\**'
+    _re_hessblock = re.compile(r'^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$') #TODO not used
     output = label+'.log'
-    with open(output,'r') as fd:
-        lines=fd.readlines()
-    
+    with open(output, 'r') as fd:
+        content = fd.read()
+        match = re.search(imaginary_freq_pattern, content)
+        if match:
+            print(f'Found {match.group(1)} imaginary frequencies in {output}. Jedi Analysis can not be performed.')
+            sys.exit()
+        lines = content.splitlines()
+
     hess_line = 0
     NCarts = 3 * len(atoms)
-    if len(atoms.constraints)>0:
+    if len(atoms.constraints) > 0:
         for l in atoms.constraints:
-            if l.__class__.__name__=='FixAtoms':
-                a=l.todict()
-                clist=np.array(a['kwargs']['indices'])
-                alist=np.delete(np.arange(0,len(atoms)),clist)
-                
+            if l.__class__.__name__ == 'FixAtoms':
+                a = l.todict()
+                clist = np.array(a['kwargs']['indices'])
+                alist = np.delete(np.arange(0, len(atoms)), clist)
                 NCarts = 3 * len(alist)
-    hess=np.zeros((NCarts,NCarts))
+    hess = np.zeros((NCarts, NCarts))
     for num, line in enumerate(lines, 1):
         if 'Force constants in Cartesian coordinates:' in line:
-            hess_line=num+1
+            hess_line = num+1
     
-    chunks=NCarts//5+1
+    chunks = NCarts//5+1
     for i in range(chunks):
         for j in range(NCarts-i*5):
-
-            rows=lines[round(hess_line+i*(NCarts+1)-sum(np.linspace(0,i-1,i)*5)+j)].split()
-    
-            rows=[float(k.replace('D', 'e')) for k in rows]
-      
+            # TODO is there any occasion where it actually needs round()? isn't int() also possible
+            rows = lines[round(hess_line+i*(NCarts+1)-sum(np.linspace(0, i-1, i)*5)+j)].split()
+            rows = [float(k.replace('D', 'e')) for k in rows]
             hess[j+i*5][i*5:i*5+len(rows)-1]=rows[1::]
-    hess=hess+hess.T-np.diag(np.diag(hess))
-    hess*=(Hartree / Bohr**2) 
-    return VibrationsData.from_2d(atoms,hess,indices)
+    hess = hess+hess.T-np.diag(np.diag(hess))
+    hess *= (Hartree / Bohr**2)
+    return VibrationsData.from_2d(atoms, hess, indices)
 
 
 
