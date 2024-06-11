@@ -236,7 +236,7 @@ def jedi_printout_bonds(atoms,
     """
     output = []
     # Header
-    output.append("\n \n")
+    output.append("\n")
     output.append('{:^{header}}'.format("************************************************", **header))
     output.append('{:^{header}}'.format("*                 JEDI ANALYSIS                *", **header))
     output.append('{:^{header}}'.format("*       Judgement of Energy DIstribution       *", **header))
@@ -260,12 +260,12 @@ def jedi_printout_bonds(atoms,
     # strain in the bonds
     if not ase_units:
         output.append(
-            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}''{5:^{column6}}'
-            .format("RIC No.", "RIC type", "indices", "delta_q (a.u.)", "Percentage", "Energy (kcal/mol)", **rims_listing))
+            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}'
+            .format("RIC No.", "RIC type", "indices", "Percentage", "Energy (kcal/mol)", **rims_listing))
     elif ase_units:
         output.append(
-            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}''{5:^{column6}}'
-            .format("RIC No.", "RIC type", "indices", "delta_q (Å,°)", "Percentage", "Energy (eV)", **rims_listing))
+            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}'
+            .format("RIC No.", "RIC type", "indices", "Percentage", "Energy (eV)", **rims_listing))
 
     rics_dict = {0: "bond",
                  1: "custom"}
@@ -284,7 +284,7 @@ def jedi_printout_bonds(atoms,
                         **rims_listing))
             ric_counter += 1
     with open(file, 'w') as f:
-        f.writelines(output)
+        f.writelines("\n".join(output))
 
 
 def get_hbonds(mol,covf=1.3,vdwf=0.9):
