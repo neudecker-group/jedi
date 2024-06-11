@@ -1,6 +1,6 @@
 from ase.vibrations.vibrations import VibrationsData
 import numpy as np
-from ase.units import Bohr,Hartree
+from ase.units import Bohr, Hartree
 from ase.calculators.orca import PointChargePotential
 import re
 import os
@@ -213,12 +213,6 @@ def read(filename):
             elif 'FINAL SINGLE POINT ENERGY' in line:
                 convert = Hartree
                 energy = float(line.split()[4]) * convert
- 
-     
-
-    
-           
-
 
         atoms=Atoms(symbols,positions=positions)    
         atoms.set_positions(positions)

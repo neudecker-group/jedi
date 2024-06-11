@@ -148,7 +148,7 @@ def get_vibrations(label,atoms,indices=None):
     Read hessian.
 
     label: str
-        filename w/o .log.
+        file w/o .log.
     atoms: class
         Structure of which the frequency analysis was performed.
 
@@ -158,16 +158,20 @@ def get_vibrations(label,atoms,indices=None):
     if indices is None:
         indices = range(len(atoms))
     imaginary_freq_pattern = r'\**\s+(\d+)\s+imaginary frequencies \(negative Signs\)\s*\**'
-    _re_hessblock = re.compile(r'^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$') #TODO not used
-    output = label+'.log'
-    with open(output, 'r') as fd:
-        content = fd.read()
+    hessian_pattern = r'^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*'
+    file = label+'.log'
+    with open(file, 'r') as f:
+        content = f.read()
         match = re.search(imaginary_freq_pattern, content)
         if match:
-            print(f'Found {match.group(1)} imaginary frequencies in {output}. Jedi Analysis can not be performed.')
-            sys.exit()
+            print(f'Found {match.group(1)} imaginary frequencies in {file}. Jedi Analysis can not be performed.')
+            sys.exit(1)
+        match = re.search(hessian_pattern, content)
+        if match is None:
+            print(f'Couldn\'t find force constants in Cartesian Coordinates in {file}. '
+                  f'Specify iop=7/33=1 in your input file.')
+            sys.exit(1)
         lines = content.splitlines()
-
     hess_line = 0
     NCarts = 3 * len(atoms)
     if len(atoms.constraints) > 0:

@@ -7,6 +7,8 @@ import ase.io
 from typing import Dict, Optional
 from collections.abc import Iterable
 import copy
+import re
+import sys
 from ase.atoms import Atoms
 from ase.calculators.singlepoint import SinglePointCalculator
 
@@ -104,7 +106,8 @@ def read(filename):
     return atoms
 
 def get_vibrations(label, atoms):
-    '''Read hessian.
+    """
+    Read hessian.
 
     label: str
         Filename w/o .out.
@@ -112,43 +115,52 @@ def get_vibrations(label, atoms):
         Structure of which the frequency analysis was performed.
     Returns:
         VibrationsData object.
-    '''
-    filename = label + '.out'
+    """
+    imaginary_freq_pattern = r'\s*This Molecule has\s+(\d+)\s+Imaginary Frequencies\s'
+    hessian_pattern = r'^\s+Mass-Weighted Hessian Matrix:\s'
+    file = label + '.out'
+    with open(file, 'r') as f:
+        content = f.read()
+        match = re.search(imaginary_freq_pattern, content)
+        if int(match.group(1)) > 0:
+            print(f'Found {match.group(1)} imaginary frequencies in {file}. Jedi Analysis can not be performed.')
+            sys.exit(1)
+        match = re.search(hessian_pattern, content)
+        if match is None:
+            print(f'Couldn\'t find mass-weighted Hessian in {file}. '
+                  f'Specify vibman_print 7 in the $rem section.')
+            sys.exit(1)
+        fileobj = content.splitlines()
+    hess_line = 0
+    for num, line in enumerate(fileobj, 1):
+        if 'Mass-Weighted Hessian Matrix' in line:
+            hess_line = num
+            hess = []
+            NCarts = 3 * len(atoms)
+            if len(atoms.constraints) > 0:
+                for l in atoms.constraints:
+                    if l.__class__.__name__ == 'FixAtoms':
+                        a = l.todict()
+                        clist = np.array(a['kwargs']['indices'])
+                        alist = np.delete(np.arange(0, len(atoms)), clist)
 
-    with open(filename, 'r') as fileobj:
-        
-        fileobj = fileobj.readlines()
-        hess_line = 0
-        for num, line in enumerate(fileobj, 1):
-            if  'Mass-Weighted Hessian Matrix' in line:
-                hess_line = num
-                hess = []
-                NCarts = 3 * len(atoms)
-                if len(atoms.constraints)>0:
-                    for l in atoms.constraints:
-                        if l.__class__.__name__=='FixAtoms':
-                            a=l.todict()
-                            clist=np.array(a['kwargs']['indices'])
-                            alist=np.delete(np.arange(0,len(atoms)),clist)
-                        
-                            NCarts = 3 * len(alist)
-                            
-                i=hess_line+2
-                while  any(l.isalpha() for l in fileobj[i]) == False:
-                    hess.append(fileobj[i])                     #read the lines
-                    i += 1            
-                hess=[l for l in hess if l !='\n']              #get rid of empty separator lines
-        
-                hess = [hess[l:l + NCarts] for l in range(0, len(hess), NCarts)]    #identify the chunks
-                hess = [[k.split() for k in l] for l in hess]                       #
-                
-                hess = [np.array(l, dtype=('float64')) for l in hess]
-                mass_weighted_hessian = hess[0]
-                for l in range(1,len(hess)):
-                    if np.size(hess[l],axis=1)>0:
-                        mass_weighted_hessian = np.hstack((mass_weighted_hessian, hess[l]))
-                #atoms.calc.results['hessian'] = mass_weighted_hessian  
-                break
+                        NCarts = 3 * len(alist)
+
+            i = hess_line + 2
+            while not any(l.isalpha() for l in fileobj[i]):
+                hess.append(fileobj[i])  # read the lines
+                i += 1
+            hess = [l for l in hess if l != '\n']  # get rid of empty separator lines
+
+            hess = [hess[l:l + NCarts] for l in range(0, len(hess), NCarts)]  # identify the chunks
+            hess = [[k.split() for k in l] for l in hess]  #
+            hess = [np.array(l, dtype=('float64')) for l in hess]
+            mass_weighted_hessian = hess[0]
+            for l in range(1, len(hess)):
+                if np.size(hess[l], axis=1) > 0:
+                    mass_weighted_hessian = np.hstack((mass_weighted_hessian, hess[l]))
+            # atoms.calc.results['hessian'] = mass_weighted_hessian
+            break
     mass_weights = np.repeat(atoms.get_masses()**0.5, 3)
     if 'alist' in locals():
         mass_weights=np.repeat(atoms.get_masses()[alist]**0.5, 3)
@@ -157,7 +169,7 @@ def get_vibrations(label, atoms):
     indices= np.arange(0,len(atoms))
     if 'alist' in locals():
         indices=alist
-    return VibrationsData.from_2d(atoms, hessian,indices=indices)
+    return VibrationsData.from_2d(atoms, hessian, indices=indices)
 
 
 class QChemDynamics:
