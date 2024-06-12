@@ -89,10 +89,10 @@
   <h1>Source code for strainjedi.jedi</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A class for Jedi analysis&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
@@ -108,6 +108,7 @@
 <span class="kn">from</span> <span class="nn">strainjedi.print_config</span> <span class="kn">import</span> <span class="n">header</span><span class="p">,</span> <span class="n">energy_comparison</span><span class="p">,</span> <span class="n">rims_listing</span>
 <span class="kn">from</span> <span class="nn">strainjedi.quotes</span> <span class="kn">import</span> <span class="n">quotes</span>
 <span class="kn">from</span> <span class="nn">strainjedi</span> <span class="kn">import</span> <span class="n">__version__</span>
+
 
 <div class="viewcode-block" id="jedi_analysis"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.jedi_analysis">[docs]</a><span class="k">def</span> <span class="nf">jedi_analysis</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">H_cart</span><span class="p">,</span><span class="n">delta_q</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span><span class="n">printout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
@@ -325,7 +326,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># Header</span>
-    <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{:^</span><span class="si">{header}</span><span class="s1">}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;************************************************&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">header</span><span class="p">))</span>
     <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{:^</span><span class="si">{header}</span><span class="s1">}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;*                 JEDI ANALYSIS                *&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">header</span><span class="p">))</span>
     <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{:^</span><span class="si">{header}</span><span class="s1">}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;*       Judgement of Energy DIstribution       *&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">header</span><span class="p">))</span>
@@ -349,12 +350,12 @@
     <span class="c1"># strain in the bonds</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_units</span><span class="p">:</span>
         <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="s1">&#39;{0:^</span><span class="si">{column1}</span><span class="s1">}&#39;&#39;{1:^</span><span class="si">{column2}</span><span class="s1">}&#39;&#39;{2:^</span><span class="si">{column3}</span><span class="s1">}&#39;&#39;{3:^</span><span class="si">{column4}</span><span class="s1">}&#39;&#39;{4:^</span><span class="si">{column5}</span><span class="s1">}&#39;&#39;{5:^</span><span class="si">{column6}</span><span class="s1">}&#39;</span>
-            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;RIC No.&quot;</span><span class="p">,</span> <span class="s2">&quot;RIC type&quot;</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;delta_q (a.u.)&quot;</span><span class="p">,</span> <span class="s2">&quot;Percentage&quot;</span><span class="p">,</span> <span class="s2">&quot;Energy (kcal/mol)&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">rims_listing</span><span class="p">))</span>
+            <span class="s1">&#39;{0:^</span><span class="si">{column1}</span><span class="s1">}&#39;&#39;{1:^</span><span class="si">{column2}</span><span class="s1">}&#39;&#39;{2:^</span><span class="si">{column3}</span><span class="s1">}&#39;&#39;{3:^</span><span class="si">{column4}</span><span class="s1">}&#39;&#39;{4:^</span><span class="si">{column5}</span><span class="s1">}&#39;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;RIC No.&quot;</span><span class="p">,</span> <span class="s2">&quot;RIC type&quot;</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;Percentage&quot;</span><span class="p">,</span> <span class="s2">&quot;Energy (kcal/mol)&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">rims_listing</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">ase_units</span><span class="p">:</span>
         <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="s1">&#39;{0:^</span><span class="si">{column1}</span><span class="s1">}&#39;&#39;{1:^</span><span class="si">{column2}</span><span class="s1">}&#39;&#39;{2:^</span><span class="si">{column3}</span><span class="s1">}&#39;&#39;{3:^</span><span class="si">{column4}</span><span class="s1">}&#39;&#39;{4:^</span><span class="si">{column5}</span><span class="s1">}&#39;&#39;{5:^</span><span class="si">{column6}</span><span class="s1">}&#39;</span>
-            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;RIC No.&quot;</span><span class="p">,</span> <span class="s2">&quot;RIC type&quot;</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;delta_q (Å,°)&quot;</span><span class="p">,</span> <span class="s2">&quot;Percentage&quot;</span><span class="p">,</span> <span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">rims_listing</span><span class="p">))</span>
+            <span class="s1">&#39;{0:^</span><span class="si">{column1}</span><span class="s1">}&#39;&#39;{1:^</span><span class="si">{column2}</span><span class="s1">}&#39;&#39;{2:^</span><span class="si">{column3}</span><span class="s1">}&#39;&#39;{3:^</span><span class="si">{column4}</span><span class="s1">}&#39;&#39;{4:^</span><span class="si">{column5}</span><span class="s1">}&#39;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;RIC No.&quot;</span><span class="p">,</span> <span class="s2">&quot;RIC type&quot;</span><span class="p">,</span> <span class="s2">&quot;indices&quot;</span><span class="p">,</span> <span class="s2">&quot;Percentage&quot;</span><span class="p">,</span> <span class="s2">&quot;Energy (eV)&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">rims_listing</span><span class="p">))</span>
 
     <span class="n">rics_dict</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;bond&quot;</span><span class="p">,</span>
                  <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;custom&quot;</span><span class="p">}</span>
@@ -373,7 +374,7 @@
                         <span class="o">**</span><span class="n">rims_listing</span><span class="p">))</span>
             <span class="n">ric_counter</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">output</span><span class="p">)</span></div>
+        <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="get_hbonds"><a class="viewcode-back" href="../../utils/hbond.html#strainjedi.jedi.get_hbonds">[docs]</a><span class="k">def</span> <span class="nf">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">covf</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span><span class="n">vdwf</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
@@ -434,7 +435,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span> <span class="o">=</span> <span class="n">atoms0</span>        <span class="c1">#ref state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span> <span class="o">=</span> <span class="n">atomsF</span>        <span class="c1">#strained state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modes</span> <span class="o">=</span> <span class="n">modes</span>          <span class="c1">#VibrationsData object</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="kc">None</span>               <span class="c1">#Wilson#s B</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="kc">None</span>               <span class="c1">#Wilson&#39;s B</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delta_q</span> <span class="o">=</span> <span class="kc">None</span>         <span class="c1">#strain in internal coordinates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rim_list</span> <span class="o">=</span> <span class="kc">None</span>        <span class="c1">#list of Redundant internal modes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="kc">None</span>               <span class="c1">#cartesian Hessian of ref state</span>
@@ -1026,9 +1027,9 @@
                 <span class="n">man_strain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">modus</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">colorbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="n">label</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;vmd&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generates vmd scripts and files to save the values for the color coding</span>
+                <span class="n">label</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;vmd&#39;</span><span class="p">,</span>
+                <span class="n">incl_coloring</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generates vmd scripts and files to save the values for the color coding</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            des_colors: (dict)</span>
@@ -1046,6 +1047,11 @@
 <span class="sd">                draw colorbar or not</span>
 <span class="sd">            label: string or pathlib.Path</span>
 <span class="sd">                name of folder for the created files</span>
+<span class="sd">            incl_coloring: str</span>
+<span class="sd">                2 inclusive coloring options, otherwise green to red gradient</span>
+<span class="sd">                &quot;cyan&quot;: cyan to red gradient</span>
+<span class="sd">                &quot;magma&quot;: matplotlib magma gradient</span>
+<span class="sd">                default: &#39;None&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">destination_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
@@ -1147,24 +1153,56 @@
             <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="s2">&quot;bl&quot;</span> <span class="ow">or</span> <span class="n">filename</span> <span class="o">==</span> <span class="s2">&quot;ba&quot;</span> <span class="ow">or</span> <span class="n">filename</span> <span class="o">==</span> <span class="s2">&quot;da&quot;</span> <span class="ow">or</span> <span class="n">filename</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
 
                 <span class="n">colorbar_colors</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">incl_coloring</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># get green to red gradient</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_colors</span><span class="p">):</span>
+                        <span class="n">R_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">R_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">R_value</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">N_colors</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">G_value</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">N_colors</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">G_value</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">G_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">G_value</span> <span class="o">=</span> <span class="mi">1</span>
 
-                <span class="c1"># get green to red gradient</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_colors</span><span class="p">):</span>
-                    <span class="n">R_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">R_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">R_value</span> <span class="o">=</span> <span class="mi">1</span>
-                    <span class="k">if</span> <span class="n">N_colors</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">G_value</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">N_colors</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">G_value</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">G_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">G_value</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="n">B_value</span> <span class="o">=</span> <span class="mi">0</span>
 
-                    <span class="n">B_value</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">output</span><span class="p">[</span><span class="n">outindex</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span>
+                                                <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">R_value</span><span class="p">,</span> <span class="n">G_value</span><span class="p">,</span> <span class="n">B_value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+                        <span class="n">colorbar_colors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">R_value</span><span class="p">,</span> <span class="n">G_value</span><span class="p">,</span> <span class="n">B_value</span><span class="p">))</span>
 
-                    <span class="n">output</span><span class="p">[</span><span class="n">outindex</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span>
-                                            <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">R_value</span><span class="p">,</span> <span class="n">G_value</span><span class="p">,</span> <span class="n">B_value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
-                    <span class="n">colorbar_colors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">R_value</span><span class="p">,</span> <span class="n">G_value</span><span class="p">,</span> <span class="n">B_value</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">incl_coloring</span> <span class="o">==</span> <span class="s2">&quot;cyan&quot;</span><span class="p">:</span>
+                    <span class="c1"># get cyan to red gradient</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_colors</span><span class="p">):</span>
+                        <span class="n">R_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">N_colors</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">R_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">R_value</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="n">B_value</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">N_colors</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">B_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">B_value</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">N_colors</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+                            <span class="n">G_value</span> <span class="o">=</span> <span class="p">((</span><span class="n">N_colors</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">N_colors</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">N_colors</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):</span>
+                            <span class="n">G_value</span> <span class="o">=</span> <span class="mi">0</span>
+
+                        <span class="n">output</span><span class="p">[</span><span class="n">outindex</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">R_value</span><span class="p">,</span> <span class="n">G_value</span><span class="p">,</span> <span class="n">B_value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+                        <span class="n">colorbar_colors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">R_value</span><span class="p">,</span> <span class="n">G_value</span><span class="p">,</span> <span class="n">B_value</span><span class="p">))</span>
+
+                <span class="k">elif</span> <span class="n">incl_coloring</span> <span class="o">==</span> <span class="s2">&quot;magma&quot;</span><span class="p">:</span>
+                    <span class="c1"># get magma gradient from matplotlib</span>
+                    <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N_colors</span><span class="p">)</span>
+                    <span class="n">cmap</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;magma&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reversed</span><span class="p">()</span>
+                    <span class="n">cut_off_blue</span> <span class="o">=</span> <span class="mf">0.175</span>
+                    <span class="n">cut_off_beige</span> <span class="o">=</span> <span class="mf">0.15</span>
+                    <span class="n">adjusted_gradient</span> <span class="o">=</span> <span class="n">gradient</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">cut_off_blue</span> <span class="o">-</span> <span class="n">cut_off_beige</span><span class="p">)</span> <span class="o">+</span> <span class="n">cut_off_beige</span>
+                    <span class="n">colors_rgb</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="n">adjusted_gradient</span><span class="p">)</span>
+                    <span class="n">R_values</span> <span class="o">=</span> <span class="n">colors_rgb</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="n">G_values</span> <span class="o">=</span> <span class="n">colors_rgb</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">B_values</span> <span class="o">=</span> <span class="n">colors_rgb</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_colors</span><span class="p">):</span>
+                        <span class="n">output</span><span class="p">[</span><span class="n">outindex</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">R_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">G_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+                        <span class="n">colorbar_colors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">R_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">G_values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">B_values</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
 
                 <span class="c1"># add color codes of atoms</span>
                 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_colors_atoms</span><span class="p">):</span>
@@ -1760,7 +1798,7 @@
         <span class="k">pass</span></div>
 
     <span class="k">def</span> <span class="nf">add_custom_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bonds</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span> <span class="o">=</span> <span class="n">bonds</span>   <span class="c1"># additional bonds for analysis of non covalent interactions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span> <span class="o">=</span> <span class="n">bonds</span>   <span class="c1"># additional bonds for analysis of non-covalent interactions</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Add custom bonds after creating the object.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -1778,373 +1816,6 @@
 <span class="sd">            &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">covf</span><span class="o">=</span><span class="n">covf</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vdwf</span><span class="o">=</span><span class="n">vdwf</span></div></div>
-
-<span class="k">class</span> <span class="nc">JediAtoms</span><span class="p">(</span><span class="n">Jedi</span><span class="p">):</span>
-
-    <span class="n">E_atoms</span><span class="o">=</span><span class="kc">None</span>
-
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the analysis. Calls all necessary functions to get the needed values.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            indices: </span>
-<span class="sd">                list of indices of a substructure if desired</span>
-<span class="sd">            ase_units: boolean</span>
-<span class="sd">                flag to get eV for energies å fo lengths otherwise it is kcal/mol, Bohr  </span>
-<span class="sd">        Returns:</span>
-<span class="sd">            Indices, strain, energy in every RIM</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">=</span> <span class="n">ase_units</span>
-        <span class="c1"># get necessary data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">indices</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="o">=</span><span class="n">indices</span>
-
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_hessian</span><span class="p">()</span>
-        <span class="n">H_cart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>         <span class="c1">#Hessian of optimized (ground state) structure</span>
-        <span class="n">delta_x</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_delta_x</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">H_cart</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">3</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">all_E_geometries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energies</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">all_E_geometries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energies</span>
-        <span class="n">E_geometries</span> <span class="o">=</span> <span class="n">all_E_geometries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-
-    <span class="c1"># Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)</span>
-        <span class="n">E_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">delta_x</span><span class="o">*</span><span class="n">H_cart</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="n">delta_x</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">E_coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ase_units</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span><span class="o">*=</span><span class="n">Hartree</span>
-            <span class="n">delta_x</span><span class="o">*=</span><span class="n">Bohr</span>
-        <span class="k">elif</span> <span class="n">ase_units</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span> <span class="o">*=</span> <span class="n">mol</span><span class="o">/</span><span class="n">kcal</span><span class="o">*</span><span class="n">Hartree</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">printout</span><span class="p">(</span><span class="n">E_geometries</span><span class="p">)</span>
-        <span class="k">pass</span>
-
-    <span class="k">def</span> <span class="nf">get_delta_x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span><span class="o">/</span><span class="n">Bohr</span>
-
-    <span class="k">def</span> <span class="nf">printout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Printout of analysis of stored strain energy in the bonds.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="c1">#############################################</span>
-        <span class="c1">#	    	   Output section	        	#</span>
-        <span class="c1">#############################################</span>
-        <span class="c1"># Header</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> ************************************************&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> *                 JEDI ANALYSIS                *&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> *       Judgement of Energy DIstribution       *&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> ************************************************</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Comparison of total energies</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">                   Strain Energy (kcal/mol)  Deviation (%)&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">                   Strain Energy (eV)        Deviation (%)&quot;</span><span class="p">)</span>
-        <span class="n">E_atoms_total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">])</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">      Ab initio     &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">%.8f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">E_geometries</span> <span class="o">+</span> <span class="s2">&quot;                  -&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%5s%16.8f%21.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot; JEDI           &quot;</span><span class="p">,</span> <span class="n">E_atoms_total</span><span class="p">,</span> <span class="p">(</span><span class="n">E_atoms_total</span> <span class="o">/</span> <span class="n">E_geometries</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="p">))</span>
-
-
-        <span class="c1"># strain in the bonds</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Atom No.       Element                              Percentage    Energy (kcal/mol)&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> Atom No.       Element                              Percentage    Energy (eV)&quot;</span><span class="p">)</span>
-
-
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">]):</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%6i%7s%-11s%9.1f%17.7f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms0</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="n">k</span><span class="o">/</span><span class="n">E_atoms_total</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">output</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">partial_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the analysis. Calls all necessary functions to get the needed values.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            indices: </span>
-<span class="sd">                list of indices of a substructure </span>
-<span class="sd">            ase_units: boolean</span>
-<span class="sd">                flag to get eV for energies å fo lengths otherwise it is kcal/mol, Bohr  </span>
-<span class="sd">        Returns:</span>
-<span class="sd">            Indices, strain, energy in every RIM</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">=</span> <span class="n">ase_units</span>
-        <span class="c1"># get necessary data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="o">=</span><span class="n">indices</span>
-
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">get_hessian</span><span class="p">()</span>
-        <span class="n">H_cart</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">H</span>         <span class="c1">#Hessian of optimized (ground state) structure</span>
-        <span class="c1">#get strain in coordinates</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">indices</span><span class="p">),</span><span class="mi">3</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">*</span><span class="mi">3</span>
-        <span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
-        <span class="n">i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+=</span><span class="mi">2</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
-        <span class="n">delta_x</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_delta_x</span><span class="p">()[</span><span class="n">i</span><span class="p">]</span>
-<span class="c1">#        print(delta_x)</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">!=</span> <span class="n">H_cart</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="mi">3</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Hessian has not the fitting shape&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">all_E_geometries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_energies</span><span class="p">()</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">all_E_geometries</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energies</span>
-        <span class="n">E_geometries</span> <span class="o">=</span> <span class="n">all_E_geometries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-
-    <span class="c1"># Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)</span>
-        <span class="n">E_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">delta_x</span><span class="o">*</span><span class="n">H_cart</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="o">*</span><span class="n">delta_x</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">E_coords</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ase_units</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span><span class="o">*=</span><span class="n">Hartree</span>
-            <span class="n">delta_x</span><span class="o">*=</span><span class="n">Bohr</span>
-        <span class="k">elif</span> <span class="n">ase_units</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span> <span class="o">*=</span> <span class="n">mol</span><span class="o">/</span><span class="n">kcal</span><span class="o">*</span><span class="n">Hartree</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">printout</span><span class="p">(</span><span class="n">E_geometries</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">vmd_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                <span class="n">des_colors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">box</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="n">man_strain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">colorbar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                <span class="n">label</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;vmd&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Generates vmd scripts and files to save the values for the color coding</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            des_colors: (dict)</span>
-<span class="sd">                key: order number, value: [R,G,B]</span>
-<span class="sd">            box: boolean</span>
-<span class="sd">                True: draw box</span>
-<span class="sd">                False: ignore box</span>
-<span class="sd">            man_strain: float</span>
-<span class="sd">                reference value for the strain energy used in the color scale</span>
-<span class="sd">                default: &#39;None&#39;</span>
-<span class="sd">            colorbar: boolean</span>
-<span class="sd">                draw colorbar or not</span>
-<span class="sd">            label: string</span>
-<span class="sd">                name of folder for the created files</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">destination_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
-            <span class="n">destination_dir</span> <span class="o">=</span> <span class="n">label</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Please specify the directory (label) to write vmd scripts to as Path or string&quot;</span><span class="p">)</span>
-        <span class="n">destination_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="c1">#########################</span>
-        <span class="c1">#       Basic stuff     #</span>
-        <span class="c1">#########################</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;kcal/mol&quot;</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_units</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;eV&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">destination_dir</span> <span class="o">/</span> <span class="s1">&#39;xF.xyz&#39;</span><span class="p">)</span>
-
-
-
-        <span class="n">E_atoms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span>
-
-        <span class="c1"># Write some basic stuff to the tcl scripts</span>
-
-        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># Load a molecule</span><span class="se">\n</span><span class="s1">mol new </span><span class="si">{</span><span class="n">destination_dir</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s2">&quot;xF.xyz&quot;</span><span class="si">}</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# Change bond radii and various resolution parameters</span><span class="se">\n</span><span class="s1">mol representation cpk 0.8 0.0 30 &#39;</span>
-                      <span class="s1">&#39;5</span><span class="se">\n</span><span class="s1">mol representation bonds 0.2 30</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
-
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# Change the color of the graphical representation 0 to white</span><span class="se">\n</span><span class="s1">color change rgb 0 1.00 1.00 &#39;</span>
-                      <span class="s1">&#39;1.00</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# The background should be white (&quot;blue&quot; has the colorID 0, which we have changed to &#39;</span>
-                      <span class="s1">&#39;white)</span><span class="se">\n</span><span class="s1">color Display Background blue</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# Define the other colorIDs</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-
-
-        <span class="c1"># Define colorcodes for various atomtypes</span>
-
-        <span class="c1">#from .colors import colors</span>
-        <span class="k">if</span> <span class="n">des_colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">des_colors</span><span class="p">:</span>
-                <span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">des_colors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>         <span class="c1">#desired colors overwrite the standard ones</span>
-
-        <span class="n">symbols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">get_chemical_symbols</span><span class="p">())</span>
-        <span class="n">symbols</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">[</span><span class="n">symbols</span> <span class="o">!=</span> <span class="s1">&#39;H&#39;</span><span class="p">]</span>           <span class="c1">#get all symbols except H, H is white</span>
-
-        <span class="n">N_colors_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
-        <span class="n">N_colors</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">N_colors_atoms</span> <span class="o">-</span> <span class="mi">1</span>           <span class="c1">#vmd only supports 32 colors for modcolor</span>
-
-
-        <span class="c1"># Generate the color-code and write it to the tcl scripts</span>
-
-        <span class="n">colorbar_colors</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="c1">#get green to red gradient</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_colors</span><span class="p">):</span>
-            <span class="n">R_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">R_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">R_value</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">N_colors</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">G_value</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">N_colors</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">G_value</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">N_colors</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">G_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">G_value</span> <span class="o">=</span> <span class="mi">1</span>
-
-            <span class="n">B_value</span> <span class="o">=</span> <span class="mi">0</span>
-
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">R_value</span><span class="p">,</span> <span class="n">G_value</span><span class="p">,</span> <span class="n">B_value</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
-            <span class="n">colorbar_colors</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">R_value</span><span class="p">,</span> <span class="n">G_value</span><span class="p">,</span> <span class="n">B_value</span><span class="p">))</span>
-
-        <span class="c1"># add color codes of atoms</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_colors_atoms</span><span class="p">):</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span>
-                          <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span>
-                             <span class="n">N_colors</span><span class="o">+</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
-                             <span class="nb">float</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="n">symbols</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="mi">0</span><span class="p">]),</span>
-                             <span class="nb">float</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="n">symbols</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="mi">1</span><span class="p">]),</span>
-                             <span class="nb">float</span><span class="p">(</span><span class="n">colors</span><span class="p">[</span><span class="n">symbols</span><span class="p">[</span><span class="n">j</span><span class="p">]][</span><span class="mi">2</span><span class="p">]),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
-
-        <span class="c1">#add color code for axes and box</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="c1">#black</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="mi">1039</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="c1">#red</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="mi">1038</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="c1">#green</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="mi">1037</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="c1">#blue</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%1s%5i%10.6f%10.6f%10.6f%1s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;color change rgb&quot;</span><span class="p">,</span> <span class="mi">1036</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.25</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.75</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.75</span><span class="p">),</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span><span class="c1">#cyan</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;color Axes X 1039</span>
-<span class="s1">color Axes Y 1038</span>
-<span class="s1">color Axes Z 1037</span>
-<span class="s1">color Axes Origin 1036</span>
-<span class="s1">color Axes Labels 32</span>
-<span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
-        <span class="c1">#define color of atoms with the color code above</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_colors_atoms</span><span class="p">):</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">mol representation cpk 0.7 0.0 30 5&#39;</span><span class="p">)</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">mol addrep top&#39;</span><span class="p">)</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s%i%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;mol modstyle &quot;</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot; top cpk&quot;</span><span class="p">))</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s%i%s%i%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;mol modcolor &quot;</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot; top {colorid &quot;</span><span class="p">,</span> <span class="n">N_colors</span><span class="o">+</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">))</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s%i%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;mol modselect &quot;</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot; top {name &quot;</span><span class="p">,</span> <span class="n">symbols</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="s2">&quot;}&quot;</span><span class="p">))</span>
-
-
-
-
-
-        <span class="c1">#########################</span>
-        <span class="c1">#	Binning		#</span>
-        <span class="c1">#########################</span>
-
-
-        <span class="c1"># Welcome</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Creating tcl scripts for generating color-coded structures in VMD...&quot;</span><span class="p">)</span>
-
-
-        <span class="c1"># Create an array that stores the atom as the first entry The energy will be added as the secondd entry.</span>
-        <span class="n">E_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">E_atoms</span><span class="p">)),</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
-
-
-
-        <span class="c1"># Create an array that stores only the energies in the coordinate of interest and print some information</span>
-        <span class="c1"># Get rid of ridiculously small values and treat diatomic molecules explicitly</span>
-        <span class="c1"># (in order to create a unified picture, we have to create all these arrays in any case)</span>
-
-
-        <span class="k">if</span> <span class="n">E_atoms</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mf">0.001</span><span class="p">:</span>
-            <span class="n">E_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">))</span>
-        <span class="n">E_array</span><span class="p">[</span><span class="nb">list</span><span class="p">([</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">])]</span><span class="o">=</span><span class="n">E_atoms</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">]</span> <span class="k">if</span>  <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">E_atoms</span><span class="p">)</span> <span class="k">else</span> <span class="n">E_atoms</span>
-        <span class="n">E_array</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">)),</span><span class="n">E_array</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">]))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Processing atoms...&quot;</span><span class="p">)</span>
-
-    <span class="c1"># Store the maximum energy in a variable for later call</span>
-
-        <span class="n">max_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">E_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># maximum energy in one bond</span>
-
-    <span class="c1"># Generate the binning windows by splitting bond_E_array into N_colors equal windows</span>
-
-
-        <span class="k">if</span> <span class="n">man_strain</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">binning_windows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">E_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">num</span><span class="o">=</span><span class="n">N_colors</span> <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">binning_windows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">man_strain</span><span class="p">),</span> <span class="n">num</span><span class="o">=</span><span class="n">N_colors</span> <span class="p">)</span>
-
-
-
-
-
-        <span class="k">if</span> <span class="n">box</span>  <span class="p">:</span>
-
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2"># Adding a pbc box&quot;</span><span class="p">)</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">pbc set {</span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1"> </span><span class="si">%f</span><span class="s1">}&#39;</span>
-                          <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">2</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">3</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">4</span><span class="p">],</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">cellpar</span><span class="p">()[</span><span class="mi">5</span><span class="p">]))</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">pbc box -color 32&quot;</span><span class="p">)</span>
-        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2"># Adding a representation with the appropriate colorID for each atom&quot;</span><span class="p">)</span>
-            <span class="c1"># Calculate which binning_windows value is closest to the bond-percentage and do the output</span>
-
-
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">E_array</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">E_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
-                <span class="n">colorID</span> <span class="o">=</span> <span class="mi">32</span>                       <span class="c1">#black</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">colorID</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span> <span class="n">binning_windows</span> <span class="o">-</span> <span class="n">b</span> <span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
-
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">mol representation cpk 0.7 0.0 30 5&#39;</span><span class="p">)</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">mol addrep top&#39;</span><span class="p">)</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s%i%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;mol modstyle &quot;</span><span class="p">,</span> <span class="n">N_colors_atoms</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot; top cpk&quot;</span><span class="p">))</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s%i%s%i%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;mol modcolor &quot;</span><span class="p">,</span> <span class="n">N_colors_atoms</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot; top {colorid &quot;</span><span class="p">,</span> <span class="n">colorID</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">))</span>
-            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s%i%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="s2">&quot;mol modselect &quot;</span><span class="p">,</span> <span class="n">N_colors_atoms</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot; top {index &quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="s2">&quot;}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination_dir</span> <span class="o">/</span> <span class="s1">&#39;atoms.vmd&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-
-        <span class="c1">#colorbar</span>
-        <span class="k">if</span> <span class="n">colorbar</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
-            <span class="nb">min</span><span class="o">=</span><span class="mf">0.000</span>
-
-            <span class="k">if</span> <span class="n">man_strain</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="nb">max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">E_array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">max</span> <span class="o">=</span> <span class="n">man_strain</span>
-
-
-            <span class="c1">#highresolution colorbar with matplotlib</span>
-            <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-            <span class="kn">from</span> <span class="nn">matplotlib.colorbar</span> <span class="kn">import</span> <span class="n">ColorbarBase</span>
-            <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span><span class="p">,</span> <span class="n">Normalize</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
-            <span class="n">cmap_name</span> <span class="o">=</span> <span class="s1">&#39;my_list&#39;</span>
-            <span class="n">cmap</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">cmap_name</span><span class="p">,</span> <span class="n">colorbar_colors</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N_colors</span><span class="p">)</span>
-            <span class="n">cb</span> <span class="o">=</span> <span class="n">ColorbarBase</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span>
-                                        <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
-                                        <span class="n">norm</span><span class="o">=</span><span class="n">Normalize</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span><span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span><span class="mi">3</span><span class="p">)),</span>
-                                        <span class="n">label</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
-                                        <span class="n">ticks</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span><span class="n">decimals</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
-
-            <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">destination_dir</span> <span class="o">/</span> <span class="s1">&#39;atomscolorbar.pdf&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">man_strain</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Adding all energies for the stretch, bending and torsion of the bond with maximum strain...&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maximum energy in  atom </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">E_atoms</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">max_energy</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-
-
-
-
 </pre></div>
 
            </div>
