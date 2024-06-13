@@ -179,7 +179,7 @@ def jedi_printout(atoms,
     ric_counter = 0
     for ric_type, rim in rics_dict.items():
         for k in rim_list[ric_type]:
-            if rim == "bond" or "custom":
+            if rim == "bond" or rim == "custom":
                 ind = f"{atoms.symbols[k[0]]}{k[0]}  {atoms.symbols[k[1]]}{k[1]}"
             elif rim == "angle":
                 ind = f"{atoms.symbols[k[0]]}{k[0]} {atoms.symbols[k[1]]}{k[1]} {atoms.symbols[k[2]]}{k[2]}"
