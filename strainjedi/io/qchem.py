@@ -105,6 +105,7 @@ def read(filename):
 
     return atoms
 
+
 def get_vibrations(label, atoms):
     """
     Read hessian.
@@ -315,52 +316,7 @@ class QChem(qchem.QChem):
         self.app = app
     
     def get_vibrations(self, atoms):
-        filename = self.label + '.out'
-
-        with open(filename, 'r') as fileobj:
-            
-            fileobj = fileobj.readlines()
-            hess_line = 0
-            for num, line in enumerate(fileobj, 1):
-                if  'Mass-Weighted Hessian Matrix' in line:
-                    hess_line = num
-                    hess = []
-                    NCarts = 3 * len(atoms)
-                    if len(atoms.constraints)>0:
-                        for l in atoms.constraints:
-                            if l.__class__.__name__=='FixAtoms':
-                                a=l.todict()
-                                clist=np.array(a['kwargs']['indices'])
-                                alist=np.delete(np.arange(0,len(atoms)),clist)
-                          
-                                NCarts = 3 * len(alist)
-                                
-                    i=hess_line+2
-                    while  any(l.isalpha() for l in fileobj[i]) == False:
-                        hess.append(fileobj[i])                     #read the lines
-                        i += 1            
-                    hess=[l for l in hess if l !='\n']              #get rid of empty separator lines
-            
-                    hess = [hess[l:l + NCarts] for l in range(0, len(hess), NCarts)]    #identify the chunks
-                    hess = [[k.split() for k in l] for l in hess]                       #
-                    
-                    hess = [np.array(l, dtype=('float64')) for l in hess]
-                    mass_weighted_hessian = hess[0]
-                    for l in range(1,len(hess)):
-                        if np.size(hess[l],axis=1)>0:
-                            mass_weighted_hessian = np.hstack((mass_weighted_hessian, hess[l]))
-                    self.results['hessian'] = mass_weighted_hessian  
-                    break
-        mass_weights = np.repeat(atoms.get_masses()**0.5, 3)
-        if 'alist' in locals():
-            mass_weights=np.repeat(atoms.get_masses()[alist]**0.5, 3)
-        mass_weights_matrix = np.outer(mass_weights, mass_weights[:, np.newaxis])
-        np.savetxt('Hessmass',mass_weighted_hessian)
-        hessian = np.multiply(mass_weighted_hessian, mass_weights_matrix)*(ase.units.Hartree / ase.units.Bohr**2) #qchem uses atomic units
-        indices= np.arange(0,len(atoms))
-        if 'alist' in locals():
-            indices=alist
-        return VibrationsData.from_2d(atoms, hessian,indices=indices)
+        return get_vibrations(self.label, atoms)
 
     def write_input(self, atoms, properties=None, system_changes=None):
         FileIOCalculator.write_input(self, atoms, properties, system_changes)
