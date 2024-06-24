@@ -61,7 +61,8 @@ class JediAtoms(Jedi):
     def get_delta_x(self):
         from ase.geometry import find_mic
         from rmsd import kabsch_fit
-        if self.atomsF.get_pbc().any() is False:
+        pbc_flag = self.atomsF.get_pbc().any()
+        if not pbc_flag:
             minimised_atomsF = kabsch_fit(self.atomsF.positions,
                                           self.atoms0.positions)  # to get rid of strain for translation and rotation
             delta_x = minimised_atomsF - self.atoms0.positions
