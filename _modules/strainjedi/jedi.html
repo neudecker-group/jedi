@@ -729,6 +729,7 @@
                                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="n">da_flag</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+                <span class="n">da</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
                 <span class="n">rim_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">da</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">rim_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]))</span>
