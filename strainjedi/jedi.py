@@ -640,6 +640,7 @@ class Jedi:
                                 continue
 
             if da_flag==True:
+                da = np.atleast_2d(da)
                 rim_list.append(da)
             else:
                 rim_list.append(np.array([]))
