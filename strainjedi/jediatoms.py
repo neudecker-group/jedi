@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from pathlib import Path
 import matplotlib.cm as cm
 from typing import Dict, Optional, Union
@@ -29,7 +30,7 @@ class JediAtoms(Jedi):
         if indices:
             self.indices=indices
 
-        delta_q = self.get_delta_M(r_cut)
+        delta_q = self.get_delta_q(r_cut)
         self.get_b_matrix(r_cut)
         B = self.B
         self.get_hessian()
@@ -140,7 +141,7 @@ class JediAtoms(Jedi):
 
         return B
 
-    def printout(self,E_geometries):
+    def printout(self,E_geometries, save=False):
         '''
         Printout of analysis of stored strain energy in the bonds.
         '''
@@ -174,7 +175,13 @@ class JediAtoms(Jedi):
 
         for i, k in enumerate(self.E_atoms[self.indices]):
             output.append('\n%6i%7s%-11s%9.1f%17.7f' % (self.indices[i], " ", self.atoms0.symbols[self.indices[i]], k/E_atoms_total, k))
-        print(*output)
+
+        if save is False:
+            print(*output)
+        else:
+            f = open('E_atoms', 'w')
+            f.writelines(output)
+            f.close()
 
     def partial_analysis(self, indices, ase_units=False):
 
@@ -276,7 +283,7 @@ class JediAtoms(Jedi):
         # Write some basic stuff to the tcl scripts
 
         output = []
-        output.append(f'\n# Load a molecule\nmol new {destination_dir.resolve() / "xF.xyz"}\n\n')
+        output.append(f'\n# Load a molecule\nmol new {{{destination_dir.resolve() / "xF.xyz"}}}\n\n')
         output.append('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 '
                       '5\nmol representation bonds 0.2 30\n\n')
 
