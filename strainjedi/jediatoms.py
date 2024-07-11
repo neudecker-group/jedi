@@ -6,6 +6,9 @@ from typing import Dict, Optional, Union
 from ase import neighborlist
 from ase.units import Hartree, Bohr, mol, kcal
 from strainjedi.colors import colors
+from strainjedi.print_config import header, energy_comparison, atoms_listing
+from strainjedi.quotes import quotes
+from strainjedi import __version__
 from strainjedi.jedi import Jedi
 
 
@@ -13,7 +16,7 @@ class JediAtoms(Jedi):
 
     E_atoms=None
 
-    def run(self, ase_units=False, indices=None, r_cut=None):
+    def run(self, ase_units=False, printout_save=True,indices=None, r_cut=None):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
         Args:
@@ -60,13 +63,20 @@ class JediAtoms(Jedi):
         # Get the energy stored in every coordinate
         E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)
         self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)
+        E_atoms_total = sum(self.E_atoms[self.indices])
 
         if ase_units==True:
             self.E_atoms*=Hartree
+            E_atoms_total*=Hartree
             delta_q*=Bohr
         elif ase_units == False:
             self.E_atoms *= mol/kcal*Hartree
-        self.printout(E_geometries)
+            E_atoms_total *= mol/kcal*Hartree
+        proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
+
+        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units)
+        if printout_save is True:
+            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units,save=True)
         pass
 
     def get_bonds(self, mol):
@@ -141,47 +151,64 @@ class JediAtoms(Jedi):
 
         return B
 
-    def printout(self,E_geometries, save=False):
+    def printout(self,
+                 E_geometries: float,
+                 E_atoms_total: float,
+                 proc_geom_atoms: float,
+                 ase_units: bool = False,
+                 save: bool = False):
         '''
         Printout of analysis of stored strain energy in the bonds.
         '''
-        #############################################
-        #	    	   Output section	        	#
-        #############################################
-        # Header
         output = []
-        output.append("\n ************************************************")
-        output.append("\n *                 JEDI ANALYSIS                *")
-        output.append("\n *       Judgement of Energy DIstribution       *")
-        output.append("\n ************************************************\n")
+        # Header
+        output.append("\n")
+        output.append('{:^{header}}'.format("************************************************", **header))
+        output.append('{:^{header}}'.format("*                 JEDI ANALYSIS                *", **header))
+        output.append('{:^{header}}'.format("*       Judgement of Energy DIstribution       *", **header))
+        output.append('{:^{header}}'.format("************************************************", **header))
+        output.append('{:^{header}}'.format(f"version {__version__}\n", **header))
 
         # Comparison of total energies
-        if self.ase_units==False:
-            output.append("\n                   Strain Energy (kcal/mol)  Deviation (%)")
-        elif self.ase_units==True:
-            output.append("\n                   Strain Energy (eV)        Deviation (%)")
-        E_atoms_total = sum(self.E_atoms[self.indices])
-        output.append("\n      Ab initio     " + "%.8f" % E_geometries + "                  -")
-        output.append('\n%5s%16.8f%21.2f' % (" JEDI           ", E_atoms_total, (E_atoms_total / E_geometries-1)*100))
+        if not ase_units:
+            output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+                          .format(" ", "Strain Energy (kcal/mol)", "Deviation (%)", **energy_comparison))
+        elif ase_units:
+            output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+                          .format(" ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison))
 
+        output.append('{0:<{column1}}' '{1:^{column2}.4f}' '{2:^{column3}}'
+                      .format("Ab Initio", E_geometries, "-", **energy_comparison))
+        # TODO save proc_e_rims as std decimal number and have print command use .2%
+        output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+                      .format("JEDI_ATOMS", E_atoms_total, proc_geom_atoms, **energy_comparison))
 
-        # strain in the bonds
-
-        if self.ase_units == False:
-            output.append("\n Atom No.       Element                              Percentage    Energy (kcal/mol)")
-        elif self.ase_units == True:
-            output.append("\n Atom No.       Element                              Percentage    Energy (eV)")
+        # strain in the atoms
+        if not ase_units:
+            output.append(
+                '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
+                .format("Atom No.", "Element", "Percentage", "Energy (kcal/mol)", **atoms_listing))
+        elif ase_units:
+            output.append(
+                '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
+                .format("Atom No.", "Element", "Percentage", "Energy (eV)", **atoms_listing))
 
 
         for i, k in enumerate(self.E_atoms[self.indices]):
-            output.append('\n%6i%7s%-11s%9.1f%17.7f' % (self.indices[i], " ", self.atoms0.symbols[self.indices[i]], k/E_atoms_total, k))
+            output.append(
+                '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}.2f}'
+                .format(self.indices[i],
+                        self.atoms0.symbols[self.indices[i]],
+                        k/E_atoms_total,
+                        k,
+                        **atoms_listing))
 
         if save is False:
-            print(*output)
+            print("\n".join(output))
+            print("\n"+quotes())
         else:
-            f = open('E_atoms', 'w')
-            f.writelines(output)
-            f.close()
+            with open('E_atoms', 'w') as f:
+                f.writelines("\n".join(output))
 
     def partial_analysis(self, indices, ase_units=False):
 
@@ -228,7 +255,7 @@ class JediAtoms(Jedi):
             delta_M*=Bohr
         elif ase_units == False:
             self.E_atoms *= mol/kcal*Hartree
-        self.printout(E_geometries)
+        self.printout(E_geometries,ase_units=self.ase_units)        # ToDo: E_atoms_total etc hinzufügen
 
     def vmd_gen(self,
                 des_colors: Optional[Dict] = None,
@@ -517,14 +544,6 @@ color Axes Labels 32
         if man_strain == None:
             print(f"Maximum energy in  atom {int(np.argmax(E_atoms) + 1)}: {float(max_energy):.3f} {unit}.")
 
-        # save printout in folder
-        try:
-            all_E_geometries = self.get_energies()
-        except:
-            all_E_geometries = self.energies
-        E_geometries = all_E_geometries[0]
-        self.printout(E_geometries, save=True)
-
         os.chdir('..')
         pass
 
@@ -798,14 +817,6 @@ color Axes Labels 32
 
         if man_strain is None:
             print(f"Maximum energy in  atom {int(np.argmax(E_atoms) + 1)}: {float(max_energy):.3f} {unit}.")
-
-        # save printout in folder
-        try:
-            all_E_geometries = self.get_energies()
-        except:
-            all_E_geometries = self.energies
-        E_geometries = all_E_geometries[0]
-        self.printout(E_geometries, save=True)
 
         os.chdir('..')
         pass

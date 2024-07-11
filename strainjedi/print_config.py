@@ -13,3 +13,9 @@ rims_listing = {'column1': int(total_width / 6),
                 'column4': int(total_width / 6),
                 'column5': int(total_width / 6),
                 'column6': int(total_width / 6)}
+
+atoms_listing = {'column1': int(total_width / 4),
+                'column2': int(total_width / 4),
+                'column3': int(total_width / 4),
+                'column4': int(total_width / 4)}
+
