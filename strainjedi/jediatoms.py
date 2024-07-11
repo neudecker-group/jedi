@@ -18,9 +18,9 @@ class JediAtoms(Jedi):
             indices:
                 list of indices of a substructure if desired
             ase_units: boolean
-                flag to get eV for energies å fo lengths otherwise it is kcal/mol, Bohr
+                flag to get eV for energies Å for lengths otherwise it is kcal/mol, Bohr
         Returns:
-            Indices, strain, energy in every RIM
+            Indices, strain, energy in every atom
         """
         self.ase_units = ase_units
         # get necessary data
@@ -28,10 +28,11 @@ class JediAtoms(Jedi):
         if indices:
             self.indices=indices
 
-
+        self.get_b_matrix()
+        B = self.B
+        delta_M= self.get_delta_M()
         self.get_hessian()
-        H_cart = self.H         #Hessian of optimized (ground state) structure
-        delta_x= self.get_delta_x()
+        H_cart = self.H  # Hessian of optimized (ground state) structure
 
         if len(self.atoms0) != H_cart.shape[0]/3:
             raise ValueError('Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis')
@@ -41,21 +42,76 @@ class JediAtoms(Jedi):
             all_E_geometries = self.energies
         E_geometries = all_E_geometries[0]
 
+        B_transp = np.transpose(B)
 
-    # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
-        E_coords = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)
-        self.E_atoms=np.sum(E_coords.reshape(-1, 3), axis=1)
+        # Calculate the pseudoinverse of the B-Matrix and its transposed
+        B_plus = np.linalg.pinv(B, 0.0001)
+        B_transp_plus = np.linalg.pinv(np.transpose(B), 0.0001)
+
+        H_q = P.dot(B_transp_plus).dot(H_cart).dot(B_plus).dot(P)
+
+        # E_atoms_total = 0.5 * np.transpose(delta_M).dot(H_q).dot(delta_M)
+
+        # Get the energy stored in every coordinate
+        E_M = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)
+        self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)
+
         if ase_units==True:
-
             self.E_atoms*=Hartree
-            delta_x*=Bohr
+            delta_M*=Bohr
         elif ase_units == False:
             self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
         pass
 
-    def get_delta_x(self):
-        return (self.atomsF.positions.flatten()-self.atoms0.positions.flatten())/Bohr
+    def weighting(self,delta_M,r_cut):
+        bonds = get_bonds(mol)                                      # ToDo: get get_bonds method from other branch
+        r_g1 = max(neighbor_list('d', self.atoms0, cutoff=1.3))
+        for row in range(dF.shape[0]):
+            for col in range(dF.shape[1]):
+                r_gi = dF[row][col]
+                r = (r_gi - r_g1) / r_cut
+                if row == col:
+                    pass
+                elif any((bond[0] == row and bond[1] == col) or (bond[0] == col and bond[1] == row) for bond in bonds):
+                    delta_M[row][col] *= 1
+                elif r > 1.0:
+                    delta_M[row][col] *= 0
+                elif r <= 0.5:
+                    delta_M[row][col] *= (1 - 6 * r ** 2 + 6 * r ** 3)
+                elif r >= 0.5:
+                    delta_M[row][col] *= (2 - 6 * r + 6 * r ** 2 - 2 * r ** 3)
+
+        return delta_M
+
+    def get_delta_M(self):
+        d0 = self.atoms0.get_all_distances()
+        dF = self.atomsF.get_all_distances()
+        delta_M = dF - d0
+        delta_M = weighting(dF, delta_M, r_cut=r_cut).flatten() / Bohr
+
+        return delta_M
+
+    def get_B_matrix(self):
+        B_matrix = np.empty((len(self.atoms0)**2, 3 * len(self.atoms0)))
+        pos0 = self.atoms0.positions.copy()
+        for i in range(len(self.atoms0)):
+            for j in range(3):
+                a = self.atoms0.copy()
+                pos = pos0.copy()
+                pos[i][j] -= 0.005
+                a.positions = pos
+                d_minus = a.get_all_distances()
+                pos[i][j] += 2 * 0.005
+                a.positions = pos
+                d_plus = a.get_all_distances()
+                delta_M = d_minus - d_plus
+                delta_M = weighting(delta_M, r_cut=r_cut).flatten()
+                derivatives = delta_M / 0.01
+                derivatives = np.reshape(derivatives, (len(self.atoms0)**2))
+                B_matrix[0:len(self.atoms0)**2, i * 3 + j] = derivatives
+
+        return B_matrix
 
     def printout(self,E_geometries):
         '''
@@ -117,7 +173,7 @@ class JediAtoms(Jedi):
         i[1]+=1
         i[2]+=2
         i = i.ravel('F')
-        delta_x= self.get_delta_x()[i]
+        delta_M= self.get_delta_M()[i]
 #        print(delta_x)
 
         if len(indices) != H_cart.shape[0]/3:
@@ -130,12 +186,12 @@ class JediAtoms(Jedi):
 
 
     # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
-        E_coords = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)
-        self.E_atoms=np.sum(E_coords.reshape(-1, 3), axis=1)
+        E_M = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)
+        self.E_atoms=np.sum(E_M.reshape(-1, 3), axis=1)
         if ase_units==True:
 
             self.E_atoms*=Hartree
-            delta_x*=Bohr
+            delta_M*=Bohr
         elif ase_units == False:
             self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
