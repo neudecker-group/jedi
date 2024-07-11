@@ -2,6 +2,7 @@ import numpy as np
 from pathlib import Path
 import matplotlib.cm as cm
 from typing import Dict, Optional, Union
+from ase import neighborlist
 from ase.units import Hartree, Bohr, mol, kcal
 from strainjedi.colors import colors
 from strainjedi.jedi import Jedi
@@ -11,7 +12,7 @@ class JediAtoms(Jedi):
 
     E_atoms=None
 
-    def run(self, ase_units=False, indices=None):
+    def run(self, ase_units=False, indices=None, r_cut=None):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
         Args:
@@ -28,9 +29,9 @@ class JediAtoms(Jedi):
         if indices:
             self.indices=indices
 
-        self.get_b_matrix()
+        delta_q = self.get_delta_M(r_cut)
+        self.get_b_matrix(r_cut)
         B = self.B
-        delta_M= self.get_delta_M()
         self.get_hessian()
         H_cart = self.H  # Hessian of optimized (ground state) structure
 
@@ -48,17 +49,20 @@ class JediAtoms(Jedi):
         B_plus = np.linalg.pinv(B, 0.0001)
         B_transp_plus = np.linalg.pinv(np.transpose(B), 0.0001)
 
+        # Calculate the P-Matrix (eq. 4 in Helgaker's paper)
+        P = np.dot(B, B_plus)
+
         H_q = P.dot(B_transp_plus).dot(H_cart).dot(B_plus).dot(P)
 
-        # E_atoms_total = 0.5 * np.transpose(delta_M).dot(H_q).dot(delta_M)
+        # E_atoms_total = 0.5 * np.transpose(delta_q).dot(H_q).dot(delta_q)
 
         # Get the energy stored in every coordinate
-        E_M = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)
+        E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)
         self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)
 
         if ase_units==True:
             self.E_atoms*=Hartree
-            delta_M*=Bohr
+            delta_q*=Bohr
         elif ase_units == False:
             self.E_atoms *= mol/kcal*Hartree
         self.printout(E_geometries)
@@ -71,8 +75,8 @@ class JediAtoms(Jedi):
         mol = mol
 
         indices = self.indices
-        cutoff = ase.neighborlist.natural_cutoffs(mol, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
-        bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=mol, cutoff=cutoff)).T  # determine covalent bonds
+        cutoff = neighborlist.natural_cutoffs(mol, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
+        bl = np.vstack(neighborlist.neighbor_list('ij', a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
         bl = bl[bl[:, 0] < bl[:, 1]]  # remove double metioned
         bl, counts = np.unique(bl, return_counts=True, axis=0)
@@ -86,36 +90,36 @@ class JediAtoms(Jedi):
 
         return bl
 
-    def weighting(self,delta_M,r_cut):
-        bonds = get_bonds(self.atoms0)
-        r_g1 = max(neighbor_list('d', self.atoms0, cutoff=1.3))
-        for row in range(dF.shape[0]):
-            for col in range(dF.shape[1]):
-                r_gi = dF[row][col]
+    def weighting(self,delta_q,r_cut):
+        bonds = self.get_bonds(self.atoms0)
+        r_g1 = max(neighborlist.neighbor_list('d', self.atoms0, cutoff=1.3))
+        for row in range(self.dF.shape[0]):
+            for col in range(self.dF.shape[1]):
+                r_gi = self.dF[row][col]
                 r = (r_gi - r_g1) / r_cut
                 if row == col:
                     pass
                 elif any((bond[0] == row and bond[1] == col) or (bond[0] == col and bond[1] == row) for bond in bonds):
-                    delta_M[row][col] *= 1
+                    delta_q[row][col] *= 1
                 elif r > 1.0:
-                    delta_M[row][col] *= 0
+                    delta_q[row][col] *= 0
                 elif r <= 0.5:
-                    delta_M[row][col] *= (1 - 6 * r ** 2 + 6 * r ** 3)
+                    delta_q[row][col] *= (1 - 6 * r ** 2 + 6 * r ** 3)
                 elif r >= 0.5:
-                    delta_M[row][col] *= (2 - 6 * r + 6 * r ** 2 - 2 * r ** 3)
+                    delta_q[row][col] *= (2 - 6 * r + 6 * r ** 2 - 2 * r ** 3)
 
-        return delta_M
+        return delta_q
 
-    def get_delta_M(self):
-        d0 = self.atoms0.get_all_distances()
-        dF = self.atomsF.get_all_distances()
-        delta_M = dF - d0
-        delta_M = weighting(dF, delta_M, r_cut=r_cut).flatten() / Bohr
+    def get_delta_q(self,r_cut):
+        self.d0 = self.atoms0.get_all_distances()
+        self.dF = self.atomsF.get_all_distances()
+        delta_q = self.dF - self.d0
+        delta_q = self.weighting(delta_q,r_cut=r_cut).flatten() / Bohr
 
-        return delta_M
+        return delta_q
 
-    def get_B_matrix(self):
-        B_matrix = np.empty((len(self.atoms0)**2, 3 * len(self.atoms0)))
+    def get_b_matrix(self,r_cut):
+        B = np.empty((len(self.atoms0)**2, 3 * len(self.atoms0)))
         pos0 = self.atoms0.positions.copy()
         for i in range(len(self.atoms0)):
             for j in range(3):
@@ -127,13 +131,14 @@ class JediAtoms(Jedi):
                 pos[i][j] += 2 * 0.005
                 a.positions = pos
                 d_plus = a.get_all_distances()
-                delta_M = d_minus - d_plus
-                delta_M = weighting(delta_M, r_cut=r_cut).flatten()
-                derivatives = delta_M / 0.01
+                delta_q = d_minus - d_plus
+                delta_q = self.weighting(delta_q, r_cut=r_cut).flatten()
+                derivatives = delta_q / 0.01
                 derivatives = np.reshape(derivatives, (len(self.atoms0)**2))
-                B_matrix[0:len(self.atoms0)**2, i * 3 + j] = derivatives
+                B[0:len(self.atoms0)**2, i * 3 + j] = derivatives
+        self.B = B
 
-        return B_matrix
+        return B
 
     def printout(self,E_geometries):
         '''
@@ -195,7 +200,7 @@ class JediAtoms(Jedi):
         i[1]+=1
         i[2]+=2
         i = i.ravel('F')
-        delta_M= self.get_delta_M()[i]
+        delta_q= self.get_delta_q()[i]
 #        print(delta_x)
 
         if len(indices) != H_cart.shape[0]/3:
@@ -208,8 +213,8 @@ class JediAtoms(Jedi):
 
 
     # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
-        E_M = np.sum(0.5*(delta_x*H_cart).T*delta_x,axis=1)
-        self.E_atoms=np.sum(E_M.reshape(-1, 3), axis=1)
+        E_M = np.sum(0.5*(delta_q*H_cart).T*delta_q,axis=1)
+        self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)
         if ase_units==True:
 
             self.E_atoms*=Hartree
