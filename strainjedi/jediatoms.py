@@ -64,8 +64,30 @@ class JediAtoms(Jedi):
         self.printout(E_geometries)
         pass
 
+    def get_bonds(self, mol):
+        '''Gets list of bonds in mol
+
+        '''
+        mol = mol
+
+        indices = self.indices
+        cutoff = ase.neighborlist.natural_cutoffs(mol, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
+        bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=mol, cutoff=cutoff)).T  # determine covalent bonds
+
+        bl = bl[bl[:, 0] < bl[:, 1]]  # remove double metioned
+        bl, counts = np.unique(bl, return_counts=True, axis=0)
+        if ~ np.all(counts == 1):
+            print('unit cell too small hessian not calculated for self interaction \
+                   jedi analysis for a finite system consisting of the cell will be conducted')
+        bl = np.atleast_2d(bl)
+
+        if len(indices) != len(mol):
+            bl = bl[np.all([np.in1d(bl[:, 0], indices), np.in1d(bl[:, 1], indices)], axis=0)]
+
+        return bl
+
     def weighting(self,delta_M,r_cut):
-        bonds = get_bonds(mol)                                      # ToDo: get get_bonds method from other branch
+        bonds = get_bonds(self.atoms0)
         r_g1 = max(neighbor_list('d', self.atoms0, cutoff=1.3))
         for row in range(dF.shape[0]):
             for col in range(dF.shape[1]):
@@ -203,8 +225,7 @@ class JediAtoms(Jedi):
                 colorbar: bool = True,
                 label: Union[Path, str] = 'vmd',
                 incl_coloring: Optional[str] = None):
-        """
-        Generates vmd scripts and files to save the values for the color coding
+        """Generates all scripts and files to save the values for the color coding
 
         Args:
             des_colors: (dict)
@@ -240,9 +261,10 @@ class JediAtoms(Jedi):
             unit = "kcal/mol"
         elif self.ase_units == True:
             unit = "eV"
+        pbc_flag = False
+        if self.atomsF.get_pbc().any() == True:
+            pbc_flag = True
         self.atomsF.write(destination_dir / 'xF.xyz')
-
-
 
         E_atoms = self.E_atoms
 
@@ -253,27 +275,24 @@ class JediAtoms(Jedi):
         output.append('# Change bond radii and various resolution parameters\nmol representation cpk 0.8 0.0 30 '
                       '5\nmol representation bonds 0.2 30\n\n')
 
-
         output.append('# Change the color of the graphical representation 0 to white\ncolor change rgb 0 1.00 1.00 '
                       '1.00\n')
         output.append('# The background should be white ("blue" has the colorID 0, which we have changed to '
                       'white)\ncolor Display Background blue\n\n')
         output.append('# Define the other colorIDs\n')
 
-
         # Define colorcodes for various atomtypes
 
-        #from .colors import colors
+        # from .colors import colors
         if des_colors is not None:
             for i in des_colors:
-                colors[i] = des_colors[i]         #desired colors overwrite the standard ones
+                colors[i] = des_colors[i]  # desired colors overwrite the standard ones
 
         symbols = np.unique(self.atomsF.get_chemical_symbols())
-        symbols = symbols[symbols != 'H']           #get all symbols except H, H is white
+        symbols = symbols[symbols != 'H']  # get all symbols except H, H is white
 
         N_colors_atoms = len(symbols)
-        N_colors = 32 - N_colors_atoms - 1           #vmd only supports 32 colors for modcolor
-
+        N_colors = 32 - N_colors_atoms - 1  # vmd only supports 32 colors for modcolor
 
         # Generate the color-code and write it to the tcl scripts
 
@@ -332,113 +351,141 @@ class JediAtoms(Jedi):
                     "color change rgb", i + 1, R_values[i], G_values[i], B_values[i], "\n"))
                 colorbar_colors.append((R_values[i], G_values[i], B_values[i]))
 
-        #add color code for axes and box
-        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))#black
-        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1039, float(1), float(0), float(0), "\n"))#red
-        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1038, float(0), float(1), float(0), "\n"))#green
-        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1037, float(0), float(0), float(1), "\n"))#blue
-        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1036, float(0.25), float(0.75), float(0.75), "\n"))#cyan
+        # add color code for axes and box
+        output.append(
+            '%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 32, float(0), float(0), float(0), "\n"))  # black
+        output.append(
+            '%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1039, float(1), float(0), float(0), "\n"))  # red
+        output.append(
+            '%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1038, float(0), float(1), float(0), "\n"))  # green
+        output.append(
+            '%1s%5i%10.6f%10.6f%10.6f%1s' % ("color change rgb", 1037, float(0), float(0), float(1), "\n"))  # blue
+        output.append('%1s%5i%10.6f%10.6f%10.6f%1s' % (
+            "color change rgb", 1036, float(0.25), float(0.75), float(0.75), "\n"))  # cyan
         output.append('''color Axes X 1039
 color Axes Y 1038
 color Axes Z 1037
 color Axes Origin 1036
 color Axes Labels 32
 ''')
-        #define color of atoms with the color code above
+        # define color of atoms with the color code above
         for j in range(N_colors_atoms):
             output.append('\n\nmol representation cpk 0.7 0.0 30 5')
             output.append('\nmol addrep top')
-            output.append('\n%s%i%s' % ("mol modstyle ", j+1, " top cpk"))
-            output.append('\n%s%i%s%i%s' % ("mol modcolor ", j+1, " top {colorid ", N_colors+j+1, "}"))
-            output.append('\n%s%i%s%s%s' % ("mol modselect ", j+1, " top {name ", symbols[j], "}"))
-
-
-
-
+            output.append('\n%s%i%s' % ("mol modstyle ", j + 1, " top cpk"))
+            output.append('\n%s%i%s%i%s' % ("mol modcolor ", j + 1, " top {colorid ", N_colors + j + 1, "}"))
+            output.append('\n%s%i%s%s%s' % ("mol modselect ", j + 1, " top {name ", symbols[j], "}"))
 
         #########################
         #	Binning		#
         #########################
 
-
         # Welcome
         print("\n\nCreating tcl scripts for generating color-coded structures in VMD...")
 
-
-        # Create an array that stores the atom as the first entry The energy will be added as the secondd entry.
-        E_array = np.full((len(self.E_atoms)),np.nan)
-
-
+        # Create an array that stores the atom as the first entry The energy will be added as the second entry.
+        E_array = np.full((len(self.E_atoms)), np.nan)
 
         # Create an array that stores only the energies in the coordinate of interest and print some information
         # Get rid of ridiculously small values and treat diatomic molecules explicitly
         # (in order to create a unified picture, we have to create all these arrays in any case)
 
-
         if E_atoms.max() <= 0.001:
             E_atoms = np.zeros(len(self.indices))
-        E_array[list([*self.indices])]=E_atoms[self.indices] if  len(self.indices) != len(E_atoms) else E_atoms
-        E_array=np.vstack((np.arange(len(self.indices)),E_array[self.indices]))
+
+        if len(E_atoms) > len(self.indices):  # for partial_analysis or run with indices
+            E_array[self.indices] = E_atoms[self.indices]
+        else:
+            E_array = E_atoms
+        E_array = np.vstack((np.arange(len(self.atoms0)), E_array))
         print("\nProcessing atoms...")
 
-    # Store the maximum energy in a variable for later call
+        # get bonds that reach out of the unit cell
+        if pbc_flag == True:
+            E_array_pbc = np.empty((2, 0))
 
-        max_energy = float(np.nanmax(E_array, axis=1)[1])  # maximum energy in one bond
+            from ase.data.vdw import vdw_radii  # for long range bonds
+            cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
+            ex_bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
+            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
+            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
+            atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (
+                    ex_bl[:, 4] != 0)]  # determines which nearest neighbors are outside the unit cell
+            mol = self.atomsF.copy()  # a extended cell is needed for vmd since it does not show intercellular bonds
+            mol.wrap()  # wrap molecule important for atoms close to the boundaries
+            bondscheck = self.get_bonds(self.atomsF)
 
-    # Generate the binning windows by splitting bond_E_array into N_colors equal windows
+            for i in range(len(atoms_ex_cell)):
+                pos_ex_atom = mol.get_positions()[int(atoms_ex_cell[i, 0])] + atoms_ex_cell[i,
+                                                                              5:8]  # get positions of cell external atoms by adding the vector
+                # if pos_ex_atom in mol.positions:
+                original_rim = [int(atoms_ex_cell[i, 0]),
+                                int(atoms_ex_cell[
+                                        i, 1])]  # get the indices of the corresponding atoms inside the cell
+                original_rim.sort()  # needs to be sorted because rim list only covers one direction
+                if len(np.where(np.all(mol.positions == pos_ex_atom, axis=1))[0]) > 0:
+                    ex_ind = np.where(np.all(mol.positions == pos_ex_atom, axis=1))[0][0]
+                else:
+                    ex_ind = len(mol)
+                    if len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0:
+                        mol.append(Atom(symbol=mol.symbols[int(atoms_ex_cell[i, 1])],
+                                        position=pos_ex_atom))  # append to the virtual atoms object
 
+                if len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0:
+                    E_array_value = E_array[1][int(atoms_ex_cell[i, 1])]
+                    E_array_pbc = np.append(E_array_pbc, [[ex_ind], [E_array_value]],
+                                            axis=1)  # add to bond list with auxillary index
+
+            mol.write('xF.xyz')  # save the modified structure with auxilliary atoms for vmd
+            E_array = np.hstack((E_array, E_array_pbc))
+
+        # Store the maximum energy in a variable for later call
+        max_energy = float(np.nanmax(E_array, axis=1)[1])  # maximum energy in one atom
+
+        # Generate the binning windows by splitting E_array into N_colors equal windows
 
         if man_strain == None:
 
-            binning_windows = np.linspace(0, np.nanmax(E_array, axis=1)[1], num=N_colors )
+            binning_windows = np.linspace(0, np.nanmax(E_array, axis=1)[1], num=N_colors)
         else:
-            binning_windows = np.linspace(0, float(man_strain), num=N_colors )
+            binning_windows = np.linspace(0, float(man_strain), num=N_colors)
 
-
-
-
-
-        if box  :
-
+        if box:
             output.append("\n\n# Adding a pbc box")
-            output.append('\npbc set {%f %f %f %f %f %f}'
-                          %(self.atomsF.cell.cellpar()[0],
-                            self.atomsF.cell.cellpar()[1],
-                            self.atomsF.cell.cellpar()[2],
-                            self.atomsF.cell.cellpar()[3],
-                            self.atomsF.cell.cellpar()[4],
-                            self.atomsF.cell.cellpar()[5]))
+            output.append('\npbc set {%f %f %f %f %f %f}' % (
+                self.atomsF.cell.cellpar()[0], self.atomsF.cell.cellpar()[1], self.atomsF.cell.cellpar()[2],
+                self.atomsF.cell.cellpar()[3], self.atomsF.cell.cellpar()[4], self.atomsF.cell.cellpar()[5]))
             output.append("\npbc box -color 32")
         output.append("\n\n# Adding a representation with the appropriate colorID for each atom")
-            # Calculate which binning_windows value is closest to the bond-percentage and do the output
+        # Calculate which binning_windows value is closest to the bond-percentage and do the output
 
-
-        for i, b in zip(E_array[0],E_array[1]):
+        for i, b in zip(E_array[0], E_array[1]):
             if np.isnan(b):
-                colorID = 32                       #black
+                colorID = 32  # black
             else:
-                colorID = np.abs( binning_windows - b ).argmin() + 1
+                colorID = np.abs(binning_windows - b).argmin() + 1
 
             output.append('\n\nmol representation cpk 0.7 0.0 30 5')
             output.append('\nmol addrep top')
-            output.append('\n%s%i%s' % ("mol modstyle ", N_colors_atoms+i+1, " top cpk"))
-            output.append('\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms+i+1, " top {colorid ", colorID, "}"))
-            output.append('\n%s%i%s%s%s' % ("mol modselect ", N_colors_atoms+i+1, " top {index ", int(i), "}\n"))
+            output.append('\n%s%i%s' % ("mol modstyle ", N_colors_atoms + i + 1, " top cpk"))
+            output.append(
+                '\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms + i + 1, " top {colorid ", colorID, "}"))
+            output.append(
+                '\n%s%i%s%s%s' % ("mol modselect ", N_colors_atoms + i + 1, " top {index ", int(i), "}\n"))
         f = open(destination_dir / 'atoms.vmd', 'w')
         f.writelines(output)
         f.close()
 
-        #colorbar
-        if colorbar==True:
-            min=0.000
+        # colorbar
+        if colorbar == True:
+            min = 0.000
 
             if man_strain == None:
                 max = np.nanmax(E_array, axis=1)[1]
             else:
                 max = man_strain
 
-
-            #highresolution colorbar with matplotlib
+            # highresolution colorbar with matplotlib
             import matplotlib.pyplot as plt
             from matplotlib.colorbar import ColorbarBase
             from matplotlib.colors import LinearSegmentedColormap, Normalize
@@ -448,13 +495,305 @@ color Axes Labels 32
             cmap_name = 'my_list'
             cmap = LinearSegmentedColormap.from_list(cmap_name, colorbar_colors, N=N_colors)
             cb = ColorbarBase(ax, orientation='vertical',
-                                        cmap=cmap,
-                                        norm=Normalize(min,round(max,3)),
-                                        label=unit,
-                                        ticks=np.round(np.linspace(min, max, 8),decimals=3))
+                              cmap=cmap,
+                              norm=Normalize(min, round(max, 3)),
+                              label=unit,
+                              ticks=np.round(np.linspace(min, max, 8), decimals=3))
 
             fig.savefig(destination_dir / 'atomscolorbar.pdf', bbox_inches='tight')
 
-        if man_strain==None:
-            print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
-            print(f"Maximum energy in  atom {int(np.argmax(E_atoms)+1)}: {float(max_energy):.3f} {unit}.")
+        if man_strain == None:
+            print(f"Maximum energy in  atom {int(np.argmax(E_atoms) + 1)}: {float(max_energy):.3f} {unit}.")
+
+        # save printout in folder
+        try:
+            all_E_geometries = self.get_energies()
+        except:
+            all_E_geometries = self.energies
+        E_geometries = all_E_geometries[0]
+        self.printout(E_geometries, save=True)
+
+        os.chdir('..')
+        pass
+
+    def pov_gen(self, colorbar=True, box=False, man_strain=None, label='pov', incl_coloring=None, view_dir=None,
+                zoom=1., tex='vmd',
+                radii=1., scale_radii=None, bond_colors=None, cameratype='perspective',
+                cameralocation=(0., 0., 20.),
+                look_at=(0., 0., 0.), camera_right_up=[(-8., 0., 0.), (0., 6., 0.)], cameradirection=(0., 0., 10.),
+                light=None,
+                background='White', bondradius=.1, pixelwidth=2000, aspectratio=None):
+        '''Generates POV object for atoms object
+
+                Args:
+                    box: boolean
+                        True: draw box
+                        False: ignore box
+                    man_strain: float
+                        reference value for the strain energy used in the color scale
+                        default: 'None'
+                    colorbar: boolean
+                        draw colorbar or not
+                    label: string
+                        name of folder for the created files
+                    incl_coloring: str
+                        2 inclusive coloring options, otherwise green to red gradient
+                        "cyan": cyan to red gradient
+                        "magma": matplotlib magma gradient
+                        default: 'None'
+                    view_dir: str
+                        camera view
+                        'x': from the x-axis at the y,z-plane
+                        'y': from the y-axiy at the z,x-plane
+                        'z': from the z-axis at the x,y-plane
+                    kwargs:
+                        see iopov.py
+                '''
+
+        from strainjedi.io.iopov import POV
+        from matplotlib.colors import LinearSegmentedColormap
+        import builtins
+
+        try:  # ToDo: pov_gen ohne chdir
+            os.mkdir(label)
+        except:
+            pass
+        os.chdir(label)
+
+        atoms_f = self.atomsF.copy()
+        pbc_flag = False
+        if self.atomsF.get_pbc().any() == True:
+            pbc_flag = True
+
+        # Welcome
+        print("\n\nCreating pov script for generating color-coded structures in POV-Ray...")
+
+        # find bonds in molecule
+        bonds = self.get_bonds(self.atomsF)
+
+        # get color gradients
+        if incl_coloring is None:
+            # get green red gradient
+            grad_colors = [(0, 1, 0), (1, 1, 0), (1, 0, 0)]
+            color_positions = [0, 0.5, 1]
+            cmap = LinearSegmentedColormap.from_list('custom_cmap', list(zip(color_positions, grad_colors)))
+        elif incl_coloring == 'cyan':
+            # get cyan red gradient
+            grad_colors = [(0, 1, 1), (1, 0, 1), (1, 0, 0)]
+            color_positions = [0, 0.5, 1]
+            cmap = LinearSegmentedColormap.from_list('custom_cmap', list(zip(color_positions, grad_colors)))
+        elif incl_coloring == 'magma':
+            # get magma gradient
+            magma = cm.get_cmap('magma')
+            magma_r = magma(np.linspace(1, 0, 256))
+            cut_off_beige = int(256 * 0.15)
+            cut_off_blue = -int(256 * 0.175)
+            magma_r_cut = magma_r[cut_off_beige:cut_off_blue]
+            cmap = LinearSegmentedColormap.from_list('custom_cmap', magma_r_cut)
+
+        E_atoms = self.E_atoms
+        # Get rid of ridiculously small values
+        if E_atoms.max() <= 0.001:
+            E_atoms = np.zeros(len(self.indices))
+
+        # get an E_array with only the information from coordinates of interest
+        E_array = np.full((len(self.atoms0)), np.nan)
+        if len(E_atoms) > len(self.indices):  # for partial_analysis or run with indices
+            E_array[self.indices] = E_atoms[self.indices]
+        else:
+            E_array = E_atoms
+        E_array = np.vstack((np.arange(len(self.atoms0)), E_array))
+
+        # get atoms for bonds that reach out of the unit cell and their energies
+        if pbc_flag == True:
+            E_array_pbc = np.empty((2, 0))
+
+            from ase.data.vdw import vdw_radii  # for long range bonds
+            cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
+            ex_bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
+            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
+            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
+            atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (
+                    ex_bl[:, 4] != 0)]  # determines which nearest neighbors are outside the unit cell
+            atoms_f.wrap()  # wrap molecule important for atoms close to the boundaries
+            bondscheck = self.get_bonds(self.atomsF)
+
+            for i in range(len(atoms_ex_cell)):
+                pos_ex_atom = atoms_f.get_positions()[int(atoms_ex_cell[i, 0])] + atoms_ex_cell[i,
+                                                                                  5:8]  # get positions of cell external atoms by adding the vector
+                # if pos_ex_atom in mol.positions:
+                original_rim = [int(atoms_ex_cell[i, 0]),
+                                int(atoms_ex_cell[
+                                        i, 1])]  # get the indices of the corresponding atoms inside the cell
+                original_rim.sort()  # needs to be sorted because rim list only covers one direction
+                if len(np.where(np.all(atoms_f.positions == pos_ex_atom, axis=1))[0]) > 0:
+                    ex_ind = np.where(np.all(atoms_f.positions == pos_ex_atom, axis=1))[0][0]
+                else:
+                    ex_ind = len(atoms_f)
+                    if len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0:
+                        atoms_f.append(Atom(symbol=atoms_f.symbols[int(atoms_ex_cell[i, 1])],
+                                            position=pos_ex_atom))  # append to the virtual atoms object
+                        bonds = np.delete(bonds, np.where(np.all(original_rim == bonds, axis=1))[0], axis=0)
+                        bonds = np.vstack((bonds, [[int(atoms_ex_cell[i, 0]), ex_ind]]))
+                if len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0:
+                    E_array_value = E_array[1][int(atoms_ex_cell[i, 1])]
+                    E_array_pbc = np.append(E_array_pbc, [[ex_ind], [E_array_value]],
+                                            axis=1)  # add to bond list with auxillary index
+
+            E_array = np.hstack((E_array, E_array_pbc))
+
+        # Store the maximum energy in a variable for later call
+        max_energy = float(np.nanmax(E_array, axis=1)[1])  # maximum energy in one atom
+
+        # get atom color for specific energy value from color gradient
+        atom_colors = np.array([])
+        for i, b in zip(E_array[0], E_array[1]):
+            if np.isnan(b):
+                atom_color = (0.000, 0.000, 0.000)  # black
+            else:
+                if man_strain is None:
+                    normalized_energy = b / max_energy
+                else:
+                    normalized_energy = b / float(man_strain)
+                color = cmap(normalized_energy)
+                atom_color = (color[0], color[1], color[2])
+            atom_colors = np.append(atom_colors, atom_color)
+            atom_colors = atom_colors.reshape(-1, 3)
+
+        # generating pov object with specified view direction, write .pov file and run it
+        positions = atoms_f.get_positions()
+        center = np.mean(positions, axis=0)
+        cell = None
+        if box and pbc_flag is True:
+            cell = atoms_f.cell
+            center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+        if view_dir is False:
+            if light is None:
+                light = cameralocation
+            if look_at == 'center':
+                look_at = center
+                cameralocation += center
+                cameradirection += center
+                light += cameralocation
+            pov = POV(atoms_f,
+                      tex=tex,
+                      radii=radii,
+                      scale_radii=scale_radii,
+                      bond_colors=bond_colors,
+                      atom_colors=atom_colors,
+                      cameratype=cameratype,
+                      cameralocation=cameralocation,
+                      look_at=look_at,
+                      camera_right_up=camera_right_up,
+                      cameradirection=cameradirection,
+                      area_light=[light, 'White', 1.7, 1.7, 3, 3],
+                      background=background,
+                      bondatoms=bonds,
+                      bondradius=bondradius,
+                      pixelwidth=pixelwidth,
+                      aspectratio=aspectratio,
+                      cell=cell
+                      )
+            pov.write(f'{label}.png')
+        else:
+            view_list = ['x', 'y', 'z']
+            for view in view_list:
+                if view_dir == view or view_dir is None:
+                    if view == 'x':
+                        atoms_rotated = atoms_f.copy()
+                        atoms_rotated.rotate(90, '-z', rotate_cell=True)
+                        atoms_rotated.rotate(90, '-x', rotate_cell=True)
+                        positions = atoms_rotated.get_positions()
+                        center = np.mean(positions, axis=0)
+                        if box and pbc_flag is True:
+                            cell = atoms_rotated.cell
+                            center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+                    elif view == 'y':
+                        atoms_rotated = atoms_f.copy()
+                        atoms_rotated.rotate(90, 'z', rotate_cell=True)
+                        atoms_rotated.rotate(90, 'y', rotate_cell=True)
+                        positions = atoms_rotated.get_positions()
+                        center = np.mean(positions, axis=0)
+                        if box and pbc_flag is True:
+                            cell = atoms_rotated.cell
+                            center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+                    elif view == 'z':
+                        atoms_rotated = atoms_f.copy()
+                        positions = atoms_rotated.get_positions()
+                        center = np.mean(positions, axis=0)
+                        if box and pbc_flag is True:
+                            cell = atoms_rotated.cell
+                            center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+                    camwidth = [(-(builtins.max(atoms_rotated.positions[:, 0]) - center[0]) - 1, 0., 0.),
+                                (0., builtins.max(atoms_rotated.positions[:, 1]) - center[1] + 1, 0.)]
+                    if cell is not None:
+                        camwidth = [
+                            (-0.5 * abs(center[0] - builtins.min(atoms_rotated.positions[:, 0]) + 2.0), 0., 0.),
+                            (0., 0.5 * abs(center[1] - builtins.max(atoms_rotated.positions[:, 1])) + 1., 0.)]
+                    location = center.copy()
+                    location[2] += 60. * zoom
+                    direction = center.copy()
+                    direction[2] += 10.
+                    light = center.copy()
+                    light[2] += 20.
+                    pov = POV(atoms_rotated,
+                              tex=tex,
+                              radii=radii,
+                              scale_radii=scale_radii,
+                              bond_colors=bond_colors,
+                              atom_colors=atom_colors,
+                              cameratype=cameratype,
+                              cameralocation=location,
+                              look_at=center,
+                              camera_right_up=camwidth,
+                              cameradirection=direction,
+                              area_light=[light, 'White', 1.7, 1.7, 3, 3],
+                              background=background,
+                              bondatoms=bonds,
+                              bondradius=bondradius,
+                              pixelwidth=pixelwidth,
+                              aspectratio=aspectratio,
+                              cell=cell
+                              )
+                    pov.write(f'{label}_{view}.png')
+
+        if self.ase_units == False:
+            unit = "kcal/mol"
+        elif self.ase_units == True:
+            unit = "eV"
+
+        # colorbar
+        if colorbar is True:
+            min = 0.000
+
+            if man_strain is None:
+                max = np.nanmax(E_array, axis=1)[1]
+            else:
+                max = man_strain
+            # high resolution colorbar with matplotlib
+            import matplotlib.pyplot as plt
+            from matplotlib.colorbar import ColorbarBase
+            from matplotlib.colors import Normalize
+            plt.rc('font', size=20)
+            fig = plt.figure()
+            ax = fig.add_axes([0.05, 0.08, 0.1, 0.9])
+            cb = ColorbarBase(ax, orientation='vertical',
+                              cmap=cmap,
+                              norm=Normalize(min, round(max, 3)),
+                              label=unit,
+                              ticks=np.round(np.linspace(min, max, 8), decimals=3))
+            fig.savefig('atomscolorbar.pdf', bbox_inches='tight')
+
+        if man_strain is None:
+            print(f"Maximum energy in  atom {int(np.argmax(E_atoms) + 1)}: {float(max_energy):.3f} {unit}.")
+
+        # save printout in folder
+        try:
+            all_E_geometries = self.get_energies()
+        except:
+            all_E_geometries = self.energies
+        E_geometries = all_E_geometries[0]
+        self.printout(E_geometries, save=True)
+
+        os.chdir('..')
+        pass
