@@ -16,7 +16,7 @@ class JediAtoms(Jedi):
 
     E_atoms=None
 
-    def run(self, ase_units=False, printout_save=True,indices=None, r_cut=None):
+    def run(self, ase_units=False, printout_save=True,indices=None, weighting=True, r_cut=None):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
         Args:
@@ -32,9 +32,10 @@ class JediAtoms(Jedi):
         self.indices=np.arange(0,len(self.atoms0))
         if indices:
             self.indices=indices
-
-        delta_q = self.get_delta_q(r_cut)
-        self.get_b_matrix(r_cut)
+        if weighting is True and r_cut is None:
+            raise TypeError("Please specify r_cut when weighting is set to True")
+        delta_q = self.get_delta_q(weighting,r_cut)
+        self.get_b_matrix(weighting,r_cut)
         B = self.B
         self.get_hessian()
         H_cart = self.H  # Hessian of optimized (ground state) structure
@@ -121,15 +122,21 @@ class JediAtoms(Jedi):
 
         return delta_q
 
-    def get_delta_q(self,r_cut):
-        self.d0 = self.atoms0.get_all_distances()
-        self.dF = self.atomsF.get_all_distances()
+    def get_delta_q(self,weighting,r_cut):
+        mic = False
+        if self.atomsF.get_pbc().any() == True:
+            mic = True
+        self.d0 = self.atoms0.get_all_distances(mic=mic)
+        self.dF = self.atomsF.get_all_distances(mic=mic)
         delta_q = self.dF - self.d0
-        delta_q = self.weighting(delta_q,r_cut=r_cut).flatten() / Bohr
+        if weighting is True:
+            delta_q = self.weighting(delta_q,r_cut=r_cut).flatten() / Bohr
+        else:
+            delta_q = delta_q.flatten() / Bohr
 
         return delta_q
 
-    def get_b_matrix(self,r_cut):
+    def get_b_matrix(self,weighting,r_cut):
         B = np.empty((len(self.atoms0)**2, 3 * len(self.atoms0)))
         pos0 = self.atoms0.positions.copy()
         for i in range(len(self.atoms0)):
@@ -143,7 +150,10 @@ class JediAtoms(Jedi):
                 a.positions = pos
                 d_plus = a.get_all_distances()
                 delta_q = d_minus - d_plus
-                delta_q = self.weighting(delta_q, r_cut=r_cut).flatten()
+                if weighting is True:
+                    delta_q = self.weighting(delta_q, r_cut=r_cut).flatten()
+                else:
+                    delta_q = delta_q.flatten()
                 derivatives = delta_q / 0.01
                 derivatives = np.reshape(derivatives, (len(self.atoms0)**2))
                 B[0:len(self.atoms0)**2, i * 3 + j] = derivatives
@@ -210,7 +220,7 @@ class JediAtoms(Jedi):
             with open('E_atoms', 'w') as f:
                 f.writelines("\n".join(output))
 
-    def partial_analysis(self, indices, ase_units=False):
+    def partial_analysis(self, indices, ase_units=False, printout_save=True, weighting=True, r_cut=None):
 
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
@@ -218,9 +228,9 @@ class JediAtoms(Jedi):
             indices:
                 list of indices of a substructure
             ase_units: boolean
-                flag to get eV for energies å fo lengths otherwise it is kcal/mol, Bohr
+                flag to get eV for energies Å for lengths otherwise it is kcal/mol, Bohr
         Returns:
-            Indices, strain, energy in every RIM
+            Indices, strain, energy in every atom
         """
         self.ase_units = ase_units
         # get necessary data
@@ -246,8 +256,8 @@ class JediAtoms(Jedi):
         E_geometries = all_E_geometries[0]
 
 
-    # Get the energy stored in every coordinate (take care to get the right multiplication for a diatomic molecule)
-        E_M = np.sum(0.5*(delta_q*H_cart).T*delta_q,axis=1)
+    # Get the energy stored in every coordinate
+        E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)
         self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)
         if ase_units==True:
 
