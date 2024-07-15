@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import matplotlib.cm as cm
 from typing import Dict, Optional, Union
+from ase import Atom
 from ase import neighborlist
 from ase.units import Hartree, Bohr, mol, kcal
 from strainjedi.colors import colors
@@ -16,7 +17,7 @@ class JediAtoms(Jedi):
 
     E_atoms=None
 
-    def run(self, ase_units=False, printout_save=True,indices=None, weighting=True, r_cut=None):
+    def run(self, ase_units=False, printout_save=True, indices=None, weighting=True, r_cut=None):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
         Args:
@@ -52,14 +53,12 @@ class JediAtoms(Jedi):
 
         # Calculate the pseudoinverse of the B-Matrix and its transposed
         B_plus = np.linalg.pinv(B, 0.0001)
-        B_transp_plus = np.linalg.pinv(np.transpose(B), 0.0001)
+        B_transp_plus = np.linalg.pinv(B_transp, 0.0001)
 
         # Calculate the P-Matrix (eq. 4 in Helgaker's paper)
         P = np.dot(B, B_plus)
 
         H_q = P.dot(B_transp_plus).dot(H_cart).dot(B_plus).dot(P)
-
-        # E_atoms_total = 0.5 * np.transpose(delta_q).dot(H_q).dot(delta_q)
 
         # Get the energy stored in every coordinate
         E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)
@@ -73,11 +72,15 @@ class JediAtoms(Jedi):
         elif ase_units == False:
             self.E_atoms *= mol/kcal*Hartree
             E_atoms_total *= mol/kcal*Hartree
+
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
         self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units)
+        filename = 'E_atoms'
+        if indices:
+            filename += '_special'
         if printout_save is True:
-            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units,save=True)
+            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units,save=True,file=filename)
         pass
 
     def get_bonds(self, mol):
@@ -102,16 +105,18 @@ class JediAtoms(Jedi):
 
         return bl
 
-    def weighting(self,delta_q,r_cut):
-        bonds = self.get_bonds(self.atoms0)
-        r_g1 = max(neighborlist.neighbor_list('d', self.atoms0, cutoff=1.3))
+    def weighting(self,delta_q,r_cut,indices=None):
+        if indices is None:
+            indices = np.arange(0,len(self.atomsF))
+        bonds = self.get_bonds(self.atomsF)
+        r_g1 = max(neighborlist.neighbor_list('d', self.atomsF, cutoff=1.3))
         for row in range(self.dF.shape[0]):
             for col in range(self.dF.shape[1]):
                 r_gi = self.dF[row][col]
                 r = (r_gi - r_g1) / r_cut
                 if row == col:
                     pass
-                elif any((bond[0] == row and bond[1] == col) or (bond[0] == col and bond[1] == row) for bond in bonds):
+                elif any((bond[0] == indices[row] and bond[1] == indices[col]) or (bond[0] == indices[col] and bond[1] == indices[row]) for bond in bonds):
                     delta_q[row][col] *= 1
                 elif r > 1.0:
                     delta_q[row][col] *= 0
@@ -122,24 +127,29 @@ class JediAtoms(Jedi):
 
         return delta_q
 
-    def get_delta_q(self,weighting,r_cut):
+    def get_delta_q(self,weighting,r_cut,indices=None):
         mic = False
         if self.atomsF.get_pbc().any() == True:
             mic = True
         self.d0 = self.atoms0.get_all_distances(mic=mic)
         self.dF = self.atomsF.get_all_distances(mic=mic)
+        if indices:
+            self.d0 = self.d0[np.ix_(indices, indices)]
+            self.dF = self.dF[np.ix_(indices, indices)]
         delta_q = self.dF - self.d0
         if weighting is True:
-            delta_q = self.weighting(delta_q,r_cut=r_cut).flatten() / Bohr
+            delta_q = self.weighting(delta_q,r_cut,indices).flatten() / Bohr
         else:
             delta_q = delta_q.flatten() / Bohr
 
         return delta_q
 
-    def get_b_matrix(self,weighting,r_cut):
-        B = np.empty((len(self.atoms0)**2, 3 * len(self.atoms0)))
+    def get_b_matrix(self,weighting,r_cut,indices=None):
+        if indices is None:
+            indices = np.arange(0,len(self.atomsF))
+        B = np.empty((len(indices)**2, 3 * len(indices)))
         pos0 = self.atoms0.positions.copy()
-        for i in range(len(self.atoms0)):
+        for idx, i in enumerate(indices):
             for j in range(3):
                 a = self.atoms0.copy()
                 pos = pos0.copy()
@@ -150,13 +160,15 @@ class JediAtoms(Jedi):
                 a.positions = pos
                 d_plus = a.get_all_distances()
                 delta_q = d_minus - d_plus
+                if len(indices) < len(self.atoms0):
+                    delta_q = delta_q[np.ix_(indices, indices)]
                 if weighting is True:
-                    delta_q = self.weighting(delta_q, r_cut=r_cut).flatten()
+                    delta_q = self.weighting(delta_q, r_cut,indices).flatten()
                 else:
                     delta_q = delta_q.flatten()
                 derivatives = delta_q / 0.01
-                derivatives = np.reshape(derivatives, (len(self.atoms0)**2))
-                B[0:len(self.atoms0)**2, i * 3 + j] = derivatives
+                derivatives = np.reshape(derivatives, (len(indices)**2))
+                B[0:len(indices)**2, idx * 3 + j] = derivatives
         self.B = B
 
         return B
@@ -166,7 +178,8 @@ class JediAtoms(Jedi):
                  E_atoms_total: float,
                  proc_geom_atoms: float,
                  ase_units: bool = False,
-                 save: bool = False):
+                 save: bool = False,
+                 file: str = 'E_atoms'):
         '''
         Printout of analysis of stored strain energy in the bonds.
         '''
@@ -206,7 +219,7 @@ class JediAtoms(Jedi):
 
         for i, k in enumerate(self.E_atoms[self.indices]):
             output.append(
-                '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}.2f}'
+                '{0:^{column1}}''{1:^{column2}}''{2:^{column3}.2f}''{3:^{column4}.2f}'
                 .format(self.indices[i],
                         self.atoms0.symbols[self.indices[i]],
                         k/E_atoms_total,
@@ -217,7 +230,7 @@ class JediAtoms(Jedi):
             print("\n".join(output))
             print("\n"+quotes())
         else:
-            with open('E_atoms', 'w') as f:
+            with open(file, 'w') as f:
                 f.writelines("\n".join(output))
 
     def partial_analysis(self, indices, ase_units=False, printout_save=True, weighting=True, r_cut=None):
@@ -236,36 +249,57 @@ class JediAtoms(Jedi):
         # get necessary data
         self.indices=indices
 
-
+        if weighting is True and r_cut is None:
+            raise TypeError("Please specify r_cut when weighting is set to True")
+        delta_q = self.get_delta_q(weighting, r_cut, indices)
         self.get_hessian()
         H_cart = self.H         #Hessian of optimized (ground state) structure
-        #get strain in coordinates
-        i = np.repeat(np.atleast_2d(indices),3,axis=0)*3
-        i[1]+=1
-        i[2]+=2
-        i = i.ravel('F')
-        delta_q= self.get_delta_q()[i]
-#        print(delta_x)
+        self.get_b_matrix(weighting, r_cut,indices=indices)
+        B = self.B
 
         if len(indices) != H_cart.shape[0]/3:
             raise ValueError('Hessian has not the fitting shape')
+
         try:
             all_E_geometries = self.get_energies()
         except:
             all_E_geometries = self.energies
         E_geometries = all_E_geometries[0]
 
+        B_transp = np.transpose(B)
 
-    # Get the energy stored in every coordinate
-        E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)
-        self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)
+        # Calculate the pseudoinverse of the B-Matrix and its transposed
+        B_plus = np.linalg.pinv(B, 0.0001)
+        B_transp_plus = np.linalg.pinv(B_transp, 0.0001)
+
+        # Calculate the P-Matrix (eq. 4 in Helgaker's paper)
+        P = np.dot(B, B_plus)
+
+        H_q = P.dot(B_transp_plus).dot(H_cart).dot(B_plus).dot(P)
+
+        # Get the energy stored in every coordinate
+        E_M = np.sum(0.5 * (delta_q * H_q).T * delta_q, axis=1)
+        self.E_atoms = np.sum(E_M.reshape(-1, len(indices)), axis=1)
+        E_nan = np.full((len(self.atoms0)), np.nan)
+        E_nan[indices] = self.E_atoms
+        self.E_atoms = E_nan
+        E_atoms_total = np.nansum(self.E_atoms)
+
         if ase_units==True:
-
             self.E_atoms*=Hartree
-            delta_M*=Bohr
+            E_atoms_total*=Hartree
+            delta_q*=Bohr
         elif ase_units == False:
-            self.E_atoms *= mol/kcal*Hartree
-        self.printout(E_geometries,ase_units=self.ase_units)        # ToDo: E_atoms_total etc hinzufügen
+            self.E_atoms*=mol/kcal*Hartree
+            E_atoms_total*=mol/kcal*Hartree
+
+        proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
+
+        self.printout(E_geometries, E_atoms_total, proc_geom_atoms, ase_units=self.ase_units)
+        filename = 'E_atoms_partial'
+        if printout_save is True:
+            self.printout(E_geometries, E_atoms_total, proc_geom_atoms, ase_units=self.ase_units, save=True,
+                          file=filename)
 
     def vmd_gen(self,
                 des_colors: Optional[Dict] = None,
@@ -455,9 +489,9 @@ color Axes Labels 32
 
             from ase.data.vdw import vdw_radii  # for long range bonds
             cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
-            ex_bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
-            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
-            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
+            ex_bl = np.vstack(neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
+            ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
+            ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
             atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (
                     ex_bl[:, 4] != 0)]  # determines which nearest neighbors are outside the unit cell
             mol = self.atomsF.copy()  # a extended cell is needed for vmd since it does not show intercellular bonds
@@ -485,7 +519,7 @@ color Axes Labels 32
                     E_array_pbc = np.append(E_array_pbc, [[ex_ind], [E_array_value]],
                                             axis=1)  # add to bond list with auxillary index
 
-            mol.write('xF.xyz')  # save the modified structure with auxilliary atoms for vmd
+            mol.write(destination_dir / 'xF.xyz')  # save the modified structure with auxilliary atoms for vmd
             E_array = np.hstack((E_array, E_array_pbc))
 
         # Store the maximum energy in a variable for later call
@@ -552,7 +586,7 @@ color Axes Labels 32
             fig.savefig(destination_dir / 'atomscolorbar.pdf', bbox_inches='tight')
 
         if man_strain == None:
-            print(f"Maximum energy in  atom {int(np.argmax(E_atoms) + 1)}: {float(max_energy):.3f} {unit}.")
+            print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
 
         os.chdir('..')
         pass
@@ -651,9 +685,9 @@ color Axes Labels 32
 
             from ase.data.vdw import vdw_radii  # for long range bonds
             cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
-            ex_bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
-            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
-            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
+            ex_bl = np.vstack(neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
+            ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
+            ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
             atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (
                     ex_bl[:, 4] != 0)]  # determines which nearest neighbors are outside the unit cell
             atoms_f.wrap()  # wrap molecule important for atoms close to the boundaries
@@ -826,7 +860,7 @@ color Axes Labels 32
             fig.savefig('atomscolorbar.pdf', bbox_inches='tight')
 
         if man_strain is None:
-            print(f"Maximum energy in  atom {int(np.argmax(E_atoms) + 1)}: {float(max_energy):.3f} {unit}.")
+            print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
 
         os.chdir('..')
         pass
