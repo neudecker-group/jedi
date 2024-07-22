@@ -2,6 +2,7 @@
 """Simplified POV-RAY environment creator."""
 
 import os
+from pathlib import Path
 import numpy as np
 from ase.data.colors import jmol_colors
 from ase.data import covalent_radii
@@ -97,12 +98,20 @@ class POV:
             self._aspectratio = (np.linalg.norm(self._camera_right_up[0]) /
                                  np.linalg.norm(self._camera_right_up[1]))
 
-    def write(self, filename, run_povray=None):
+    def write(self, filename, label, run_povray=None):
         """Writes out the .pov file for ray-tracing and also an associated
         .ini file. If filename ends in ".png" it will run povray to turn it
         into a png file. If the filename ends in ".pov" it will not. This can
         be overridden with the keyword run_povray.
         """
+        if isinstance(label, str):
+            destination_dir = Path(label)
+        elif isinstance(label, Path):
+            destination_dir = label
+        else:
+            raise TypeError("Please specify the directory (label) to write vmd scripts to as Path or string")
+        destination_dir.mkdir(parents=True, exist_ok=True)
+
         if filename.endswith('.png'):
             filename = filename[:-4] + '.pov'
             if run_povray is None:
@@ -115,7 +124,7 @@ class POV:
         self._filename = filename
         filebase = filename[:-4]
         # Write the .pov file.
-        f = open(filebase + '.pov', 'w')
+        f = open(destination_dir / Path(filebase + '.pov'), 'w')
 
         def w(text):
             f.write(text + '\n')
@@ -290,7 +299,7 @@ class POV:
         f.close()
 
         # Write the .ini file.
-        f = open(filebase + '.ini', 'w')
+        f = open(destination_dir / Path(filebase + '.ini'), 'w')
         w('Input_File_Name=%s' % os.path.split(filename)[1])
         w('Output_to_File=True')
         w('Output_File_Type=N')
@@ -308,17 +317,22 @@ class POV:
 
         f.close()
         if run_povray:
-            self.raytrace(filename)
+            self.raytrace(filename, destination_dir=destination_dir)
 
-    def raytrace(self, filename=None):
+    def raytrace(self, filename=None, destination_dir=None):
         """Run povray on the generated file."""
 
         if not filename:
             filename = self._filename
-        filebase = filename[:-4]
-        if os.path.split(filename)[0] != '':
-            pwd = os.getcwd()
-            os.chdir(os.path.split(filename)[0])
-        os.system('povray %s.ini' % os.path.split(filebase)[1])
-        if os.path.split(filename)[0] != '':
+        path = Path(filename)
+        if destination_dir:
+            path = destination_dir / filename
+
+        if path.parent != Path(''):
+            pwd = Path.cwd()
+            os.chdir(path.parent)
+
+        os.system(f'povray {path.stem}.ini')
+
+        if path.parent != Path(''):
             os.chdir(pwd)

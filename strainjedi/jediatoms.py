@@ -16,8 +16,8 @@ from strainjedi.jedi import Jedi
 class JediAtoms(Jedi):
 
     E_atoms=None
-
-    def run(self, ase_units=False, printout_save=True, indices=None, weighting=True, r_cut=None):
+    first_call = True
+    def run(self, ase_units=False, printout_save=True, label=None, indices=None, weighting=True, r_cut=None):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
         Args:
@@ -76,9 +76,12 @@ class JediAtoms(Jedi):
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
         self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units)
-        filename = 'E_atoms'
-        if indices:
-            filename += '_special'
+        if not label:
+            filename = 'E_atoms'
+            if indices:
+                filename += '_special'
+        else:
+            filename = f"E_atoms_{label}"
         if printout_save is True:
             self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units,save=True,file=filename)
         pass
@@ -88,18 +91,17 @@ class JediAtoms(Jedi):
 
         '''
         mol = mol
+        indices = np.arange(0,len(self.atoms0))
 
-        indices = self.indices
         cutoff = neighborlist.natural_cutoffs(mol, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
         bl = np.vstack(neighborlist.neighbor_list('ij', a=mol, cutoff=cutoff)).T  # determine covalent bonds
-
-        bl = bl[bl[:, 0] < bl[:, 1]]  # remove double metioned
+        bl = bl[bl[:, 0] < bl[:, 1]]  # remove double mentioned
         bl, counts = np.unique(bl, return_counts=True, axis=0)
-        if ~ np.all(counts == 1):
-            print('unit cell too small hessian not calculated for self interaction \
-                   jedi analysis for a finite system consisting of the cell will be conducted')
+        if ~ np.all(counts == 1) and JediAtoms.first_call:
+            print('\nunit cell too small hessian not calculated for self interaction\n'
+                  'jedi analysis for a finite system consisting of the cell will be conducted')
+            JediAtoms.first_call = False
         bl = np.atleast_2d(bl)
-
         if len(indices) != len(mol):
             bl = bl[np.all([np.in1d(bl[:, 0], indices), np.in1d(bl[:, 1], indices)], axis=0)]
 
@@ -107,13 +109,16 @@ class JediAtoms(Jedi):
 
     def weighting(self,delta_q,r_cut,indices=None):
         if indices is None:
-            indices = np.arange(0,len(self.atomsF))
-        bonds = self.get_bonds(self.atomsF)
-        r_g1 = max(neighborlist.neighbor_list('d', self.atomsF, cutoff=1.3))
+            indices = np.arange(0,len(self.atoms0))
+        bonds = self.get_bonds(self.atoms0)
+        cutoff = neighborlist.natural_cutoffs(self.atoms0, mult=self.covf)
+        r_g1 = max(neighborlist.neighbor_list('d', self.atomsF, cutoff=cutoff))
+        if r_cut < r_g1:
+            raise TypeError("r_cut needs to be bigger than the biggest distance from an atom to it's neighbor atom")
         for row in range(self.dF.shape[0]):
             for col in range(self.dF.shape[1]):
                 r_gi = self.dF[row][col]
-                r = (r_gi - r_g1) / r_cut
+                r = (r_gi - r_g1) / (r_cut - r_g1)
                 if row == col:
                     pass
                 elif any((bond[0] == indices[row] and bond[1] == indices[col]) or (bond[0] == indices[col] and bond[1] == indices[row]) for bond in bonds):
@@ -222,7 +227,7 @@ class JediAtoms(Jedi):
                 '{0:^{column1}}''{1:^{column2}}''{2:^{column3}.2f}''{3:^{column4}.2f}'
                 .format(self.indices[i],
                         self.atoms0.symbols[self.indices[i]],
-                        k/E_atoms_total,
+                        k/E_atoms_total*100,
                         k,
                         **atoms_listing))
 
@@ -233,7 +238,7 @@ class JediAtoms(Jedi):
             with open(file, 'w') as f:
                 f.writelines("\n".join(output))
 
-    def partial_analysis(self, indices, ase_units=False, printout_save=True, weighting=True, r_cut=None):
+    def partial_analysis(self, indices, ase_units=False, printout_save=True, label=None, weighting=True, r_cut=None):
 
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
@@ -254,7 +259,7 @@ class JediAtoms(Jedi):
         delta_q = self.get_delta_q(weighting, r_cut, indices)
         self.get_hessian()
         H_cart = self.H         #Hessian of optimized (ground state) structure
-        self.get_b_matrix(weighting, r_cut,indices=indices)
+        self.get_b_matrix(weighting, r_cut, indices=indices)
         B = self.B
 
         if len(indices) != H_cart.shape[0]/3:
@@ -296,7 +301,10 @@ class JediAtoms(Jedi):
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
         self.printout(E_geometries, E_atoms_total, proc_geom_atoms, ase_units=self.ase_units)
-        filename = 'E_atoms_partial'
+        if not label:
+            filename = 'E_atoms_partial'
+        else:
+            filename = f"E_atoms_{label}"
         if printout_save is True:
             self.printout(E_geometries, E_atoms_total, proc_geom_atoms, ase_units=self.ase_units, save=True,
                           file=filename)
@@ -304,6 +312,7 @@ class JediAtoms(Jedi):
     def vmd_gen(self,
                 des_colors: Optional[Dict] = None,
                 box: bool = False,
+                bonds_out_of_box: bool = False,
                 man_strain: Optional[float] = None,
                 colorbar: bool = True,
                 label: Union[Path, str] = 'vmd',
@@ -484,7 +493,7 @@ color Axes Labels 32
         print("\nProcessing atoms...")
 
         # get bonds that reach out of the unit cell
-        if pbc_flag == True:
+        if pbc_flag == True and bonds_out_of_box == True:
             E_array_pbc = np.empty((2, 0))
 
             from ase.data.vdw import vdw_radii  # for long range bonds
@@ -588,10 +597,7 @@ color Axes Labels 32
         if man_strain == None:
             print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
 
-        os.chdir('..')
-        pass
-
-    def pov_gen(self, colorbar=True, box=False, man_strain=None, label='pov', incl_coloring=None, view_dir=None,
+    def pov_gen(self, colorbar=True, box=False, bonds_out_of_box=False, man_strain=None, label='pov', incl_coloring=None, view_dir=None,
                 zoom=1., tex='vmd',
                 radii=1., scale_radii=None, bond_colors=None, cameratype='perspective',
                 cameralocation=(0., 0., 20.),
@@ -604,6 +610,9 @@ color Axes Labels 32
                     box: boolean
                         True: draw box
                         False: ignore box
+                    bonds_out_of_box: boolean
+                        True: shows atoms for bonds that reach out of the box
+                        default: 'False'
                     man_strain: float
                         reference value for the strain energy used in the color scale
                         default: 'None'
@@ -619,7 +628,7 @@ color Axes Labels 32
                     view_dir: str
                         camera view
                         'x': from the x-axis at the y,z-plane
-                        'y': from the y-axiy at the z,x-plane
+                        'y': from the y-axis at the z,x-plane
                         'z': from the z-axis at the x,y-plane
                     kwargs:
                         see iopov.py
@@ -629,11 +638,13 @@ color Axes Labels 32
         from matplotlib.colors import LinearSegmentedColormap
         import builtins
 
-        try:  # ToDo: pov_gen ohne chdir
-            os.mkdir(label)
-        except:
-            pass
-        os.chdir(label)
+        if isinstance(label, str):
+            destination_dir = Path(label)
+        elif isinstance(label, Path):
+            destination_dir = label
+        else:
+            raise TypeError("Please specify the directory (label) to write vmd scripts to as Path or string")
+        destination_dir.mkdir(parents=True, exist_ok=True)
 
         atoms_f = self.atomsF.copy()
         pbc_flag = False
@@ -680,7 +691,7 @@ color Axes Labels 32
         E_array = np.vstack((np.arange(len(self.atoms0)), E_array))
 
         # get atoms for bonds that reach out of the unit cell and their energies
-        if pbc_flag == True:
+        if pbc_flag == True and bonds_out_of_box == True:
             E_array_pbc = np.empty((2, 0))
 
             from ase.data.vdw import vdw_radii  # for long range bonds
@@ -769,7 +780,7 @@ color Axes Labels 32
                       aspectratio=aspectratio,
                       cell=cell
                       )
-            pov.write(f'{label}.png')
+            pov.write(f'{label}.png', label)
         else:
             view_list = ['x', 'y', 'z']
             for view in view_list:
@@ -830,7 +841,7 @@ color Axes Labels 32
                               aspectratio=aspectratio,
                               cell=cell
                               )
-                    pov.write(f'{label}_{view}.png')
+                    pov.write(f'{label}_{view}.png', label)
 
         if self.ase_units == False:
             unit = "kcal/mol"
@@ -857,10 +868,8 @@ color Axes Labels 32
                               norm=Normalize(min, round(max, 3)),
                               label=unit,
                               ticks=np.round(np.linspace(min, max, 8), decimals=3))
-            fig.savefig('atomscolorbar.pdf', bbox_inches='tight')
+            fig.savefig(destination_dir / 'atomscolorbar.pdf', bbox_inches='tight')
 
         if man_strain is None:
             print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
 
-        os.chdir('..')
-        pass
