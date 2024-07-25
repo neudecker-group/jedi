@@ -152,6 +152,9 @@ class JediAtoms(Jedi):
     def get_b_matrix(self,weighting,r_cut,indices=None):
         if indices is None:
             indices = np.arange(0,len(self.atomsF))
+        mic = False
+        if self.atomsF.get_pbc().any() == True:
+            mic = True
         B = np.empty((len(indices)**2, 3 * len(indices)))
         pos0 = self.atoms0.positions.copy()
         for idx, i in enumerate(indices):
@@ -160,10 +163,10 @@ class JediAtoms(Jedi):
                 pos = pos0.copy()
                 pos[i][j] -= 0.005
                 a.positions = pos
-                d_minus = a.get_all_distances()
+                d_minus = a.get_all_distances(mic=mic)
                 pos[i][j] += 2 * 0.005
                 a.positions = pos
-                d_plus = a.get_all_distances()
+                d_plus = a.get_all_distances(mic=mic)
                 delta_q = d_minus - d_plus
                 if len(indices) < len(self.atoms0):
                     delta_q = delta_q[np.ix_(indices, indices)]
@@ -689,6 +692,18 @@ color Axes Labels 32
         else:
             E_array = E_atoms
         E_array = np.vstack((np.arange(len(self.atoms0)), E_array))
+
+        # delete bonds that reach out of the unit cell for bonds_out_of_box==False
+        if pbc_flag == True and bonds_out_of_box == False:
+            bonds_out_of_box_check = []
+            dF = self.atomsF.get_all_distances()
+            dF_mic = self.atomsF.get_all_distances(mic=True)
+            for i in bonds:
+                if round(dF[i[0]][i[1]],5) != round(dF_mic[i[0]][i[1]],5):
+                    bonds_out_of_box_check.append(False)
+                else:
+                    bonds_out_of_box_check.append(True)
+            bonds = np.delete(bonds,np.where(~np.array(bonds_out_of_box_check))[0],axis=0)
 
         # get atoms for bonds that reach out of the unit cell and their energies
         if pbc_flag == True and bonds_out_of_box == True:
