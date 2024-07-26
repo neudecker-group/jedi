@@ -69,6 +69,7 @@ class POV:
         'area_light': [(20., 3., 40.), 'White', .7, .7, 3, 3],
         'background': 'White',
         'bondatoms': None,
+        'pbc_bondatoms': None,
         'bondradius': .1,
         'aspectratio': None,
         'pixelwidth': 320,
@@ -86,12 +87,14 @@ class POV:
         self._numbers = atoms.get_atomic_numbers()
         if self._atom_colors is None:
             self._atom_colors = jmol_colors[self._numbers]
-        if self._bond_colors is None:
-            self._bond_colors = np.array([(1.000, 1.000, 1.000)]*len(self._bondatoms))
-        if (type(self._radii) is float) or (type(self._radii) is int):
-            self._radii = covalent_radii[self._numbers] * self._radii
         if self._bondatoms is None:
             self._bondatoms = []
+        if self._pbc_bondatoms is None:
+            self._pbc_bondatoms = []
+        if self._bond_colors is None:
+            self._bond_colors = np.array([(1.000, 1.000, 1.000)]*(len(self._bondatoms)+len(self._pbc_bondatoms)))
+        if (type(self._radii) is float) or (type(self._radii) is int):
+            self._radii = covalent_radii[self._numbers] * self._radii
         if self._scale_radii is None:
            self._scale_radii=[0.5]*len(self._atoms)
         if self._aspectratio is None:
@@ -198,6 +201,32 @@ class POV:
                pos1[0], pos1[1], pos1[2],
                color[0], color[1], color[2], self._tex[bond[0]],
                bond[0], bond[1]))
+
+        for i, pbc_bond in enumerate(self._pbc_bondatoms):
+            pos0 = self._atoms[pbc_bond[0]].position.copy()
+            pos1 = self._atoms[pbc_bond[1]].position.copy()
+            vec0 = pos1 - pos0
+            vec1 = pos0 - pos1
+            scaled_vec0 = -0.75 * vec0 / np.linalg.norm(vec0)
+            scaled_vec1 = -0.75 * vec1 / np.linalg.norm(vec1)
+            pbc_pos0 = pos1 + scaled_vec1
+            pbc_pos1 = pos0 + scaled_vec0
+            color = self._bond_colors[i]
+            w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
+              'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
+              ' // # %i to %i' %
+              (pos0[0], pos0[1], pos0[2],
+               pbc_pos1[0], pbc_pos1[1], pbc_pos1[2],
+               color[0], color[1], color[2], self._tex[bond[0]],
+               bond[0], bond[1]))
+            w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
+              'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
+              ' // # %i to %i' %
+              (pbc_pos0[0], pbc_pos0[1], pbc_pos0[2],
+               pos1[0], pos1[1], pos1[2],
+               color[0], color[1], color[2], self._tex[bond[0]],
+               bond[0], bond[1]))
+
         if self._cell is not None:
             a=np.array(self._cell[0])
             b=np.array(self._cell[1])

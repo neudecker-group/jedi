@@ -695,15 +695,16 @@ color Axes Labels 32
 
         # delete bonds that reach out of the unit cell for bonds_out_of_box==False
         if pbc_flag == True and bonds_out_of_box == False:
-            bonds_out_of_box_check = []
+            pbc_bonds_mask = []
             dF = self.atomsF.get_all_distances()
             dF_mic = self.atomsF.get_all_distances(mic=True)
             for i in bonds:
                 if round(dF[i[0]][i[1]],5) != round(dF_mic[i[0]][i[1]],5):
-                    bonds_out_of_box_check.append(False)
+                    pbc_bonds_mask.append(False)
                 else:
-                    bonds_out_of_box_check.append(True)
-            bonds = np.delete(bonds,np.where(~np.array(bonds_out_of_box_check))[0],axis=0)
+                    pbc_bonds_mask.append(True)
+            pbc_bonds = bonds[~np.array(pbc_bonds_mask)]
+            bonds = np.delete(bonds,np.where(~np.array(pbc_bonds_mask))[0],axis=0)
 
         # get atoms for bonds that reach out of the unit cell and their energies
         if pbc_flag == True and bonds_out_of_box == True:
@@ -790,6 +791,7 @@ color Axes Labels 32
                       area_light=[light, 'White', 1.7, 1.7, 3, 3],
                       background=background,
                       bondatoms=bonds,
+                      pbc_bondatoms=pbc_bonds,
                       bondradius=bondradius,
                       pixelwidth=pixelwidth,
                       aspectratio=aspectratio,
@@ -851,6 +853,7 @@ color Axes Labels 32
                               area_light=[light, 'White', 1.7, 1.7, 3, 3],
                               background=background,
                               bondatoms=bonds,
+                              pbc_bondatoms=pbc_bonds,
                               bondradius=bondradius,
                               pixelwidth=pixelwidth,
                               aspectratio=aspectratio,
