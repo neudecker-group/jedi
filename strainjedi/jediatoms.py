@@ -601,7 +601,7 @@ color Axes Labels 32
             print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
 
     def pov_gen(self, colorbar=True, box=False, bonds_out_of_box=False, man_strain=None, label='pov', incl_coloring=None, view_dir=None,
-                zoom=1., tex='vmd',
+                zoom=1., metal=None, tex='vmd',
                 radii=1., scale_radii=None, bond_colors=None, cameratype='perspective',
                 cameralocation=(0., 0., 20.),
                 look_at=(0., 0., 0.), camera_right_up=[(-8., 0., 0.), (0., 6., 0.)], cameradirection=(0., 0., 10.),
@@ -694,7 +694,7 @@ color Axes Labels 32
         E_array = np.vstack((np.arange(len(self.atoms0)), E_array))
 
         # delete bonds that reach out of the unit cell for bonds_out_of_box==False
-        if pbc_flag == True and bonds_out_of_box == False:
+        if pbc_flag == True:
             pbc_bonds_mask = []
             dF = self.atomsF.get_all_distances()
             dF_mic = self.atomsF.get_all_distances(mic=True)
@@ -708,11 +708,13 @@ color Axes Labels 32
 
         # get atoms for bonds that reach out of the unit cell and their energies
         if pbc_flag == True and bonds_out_of_box == True:
+            pbc_bonds = None
             E_array_pbc = np.empty((2, 0))
 
             from ase.data.vdw import vdw_radii  # for long range bonds
             cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
             ex_bl = np.vstack(neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
+            ex_bl = np.vstack(neighborlist.neighbor_list('ji', a=self.atomsF, cutoff=cutoff)).T
             ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
             ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
             atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (
@@ -720,10 +722,21 @@ color Axes Labels 32
             atoms_f.wrap()  # wrap molecule important for atoms close to the boundaries
             bondscheck = self.get_bonds(self.atomsF)
 
+            within_cell_mask = []
             for i in range(len(atoms_ex_cell)):
                 pos_ex_atom = atoms_f.get_positions()[int(atoms_ex_cell[i, 0])] + atoms_ex_cell[i,
                                                                                   5:8]  # get positions of cell external atoms by adding the vector
-                # if pos_ex_atom in mol.positions:
+                pos_ex_atom = np.round(pos_ex_atom, decimals=5)
+                cell = self.atomsF.get_cell()
+                # mod_pos = pos_ex_atom % cell
+                # mod_pos = np.round(mod_pos,decimals=5)
+                cell = np.round(np.diagonal(cell),decimals=5)
+                within_bounds = np.logical_and(pos_ex_atom >= 0, pos_ex_atom <= cell)
+                within_cell = np.all(within_bounds)
+                within_cell_mask.append(within_cell)
+            atoms_ex_cell = np.delete(atoms_ex_cell,~np.array(within_cell_mask), axis=0)
+
+            for i in range(len(atoms_ex_cell)):
                 original_rim = [int(atoms_ex_cell[i, 0]),
                                 int(atoms_ex_cell[
                                         i, 1])]  # get the indices of the corresponding atoms inside the cell
@@ -763,6 +776,27 @@ color Axes Labels 32
             atom_colors = atom_colors.reshape(-1, 3)
 
         # generating pov object with specified view direction, write .pov file and run it
+        if metal:
+            tex = [tex] * len(atoms_f)
+            scales = np.array([0.5] * len(atoms_f))
+            for idx in metal:
+                tex[idx] = 'chrome'
+                scales[idx] = 1.0
+            bond_metal_mask = []
+            pbc_bond_metal_mask = []
+            for bond in bonds:
+                if any((bond[0] == i) or (bond[0] == i) for i in metal):
+                    bond_metal_mask.append(False)
+                else:
+                    bond_metal_mask.append(True)
+            for pbc_bond in pbc_bonds:
+                if any((pbc_bond[0] == i) or (pbc_bond[0] == i) for i in metal):
+                    pbc_bond_metal_mask.append(False)
+                else:
+                    pbc_bond_metal_mask.append(True)
+            bonds = np.delete(bonds,~np.array(bond_metal_mask),axis=0)
+            pbc_bonds = np.delete(bonds,~np.array(pbc_bond_metal_mask),axis=0)
+
         positions = atoms_f.get_positions()
         center = np.mean(positions, axis=0)
         cell = None

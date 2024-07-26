@@ -182,7 +182,7 @@ class POV:
         w('')
 
         if (type(self._tex)!=list) and (type(self._tex)!=np.ndarray) :
-           self._tex=[self._tex] * len(self._atoms)
+            self._tex=[self._tex] * len(self._atoms)
         for atom in self._atoms:
             w('atom(<%.2f,%.2f,%.2f>, %.2f, rgb <%.2f,%.2f,%.2f>, %s) // #%i'
               % (atom.x, atom.y, atom.z,
