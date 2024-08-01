@@ -1,8 +1,10 @@
+import ase
 import numpy as np
 import os
 from pathlib import Path
 import matplotlib.cm as cm
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Literal, Sequence
+from ase import Atoms
 from ase import Atom
 from ase import neighborlist
 from ase.units import Hartree, Bohr, mol, kcal
@@ -600,19 +602,32 @@ color Axes Labels 32
         if man_strain == None:
             print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
 
-    def pov_gen(self, colorbar=True, box=False, bonds_out_of_box=False, man_strain=None, label='pov', incl_coloring=None, view_dir=None,
-                zoom=1., tex='vmd',
-                radii=1., scale_radii=None, bond_colors=None, cameratype='perspective',
-                cameralocation=(0., 0., 20.),
-                look_at=(0., 0., 0.), camera_right_up=[(-8., 0., 0.), (0., 6., 0.)], cameradirection=(0., 0., 10.),
-                light=None,
-                background='White', bondradius=.1, pixelwidth=2000, aspectratio=None):
-        '''Generates POV object for atoms object
+    def pov_gen(self, colorbar: bool = True,
+                box: bool = False,
+                bonds_out_of_box: bool = False,
+                man_strain: Optional[float] = None,
+                label: Union[Path, str] = 'vmd',
+                incl_coloring: Optional[Literal['cyan', 'magma']] = None,
+                view_dir: Optional[Union[Literal['x', 'y', 'z'], Atoms]] = None,
+                zoom: float = 1.,
+                metal: Optional[list] = None,
+                tex: Union[str, list, np.ndarray] = 'vmd',
+                radii: float = 1.,
+                scale_radii: Optional[float] = None,
+                bond_color: Optional[tuple] = None,
+                light: Optional[Union[Sequence[float], np.ndarray]] = None,
+                background: str = 'White',
+                bondradius: float = .1,
+                pixelwidth: int = 2000,
+                aspectratio: Optional[float] = None,
+                run_pov: bool = True):
+        """Generates POV object for atoms object
 
                 Args:
                     box: boolean
                         True: draw box
                         False: ignore box
+                        default: False
                     bonds_out_of_box: boolean
                         True: shows atoms for bonds that reach out of the box
                         default: 'False'
@@ -620,22 +635,69 @@ color Axes Labels 32
                         reference value for the strain energy used in the color scale
                         default: 'None'
                     colorbar: boolean
-                        draw colorbar or not
-                    label: string
+                        True: save colorbar
+                        default: False
+                    label: string or Path
                         name of folder for the created files
+                        default: 'pov'
                     incl_coloring: str
                         2 inclusive coloring options, otherwise green to red gradient
-                        "cyan": cyan to red gradient
-                        "magma": matplotlib magma gradient
+                        'cyan': cyan to red gradient
+                        'magma': costumed matplotlib magma gradient
                         default: 'None'
                     view_dir: str
                         camera view
                         'x': from the x-axis at the y,z-plane
                         'y': from the y-axis at the z,x-plane
                         'z': from the z-axis at the x,y-plane
-                    kwargs:
-                        see iopov.py
-                '''
+                        None: for all three view directions
+                        Atoms: rotated Atoms object for customed view direction
+                        default: None
+                    zoom: float
+                        change the zoom
+                        default: 1.0
+                    metal: list
+                        a list of atom indices that should be treated as metals without bonds, a metal texture and a
+                        bigger scaled radius
+                        default: None
+                    tex: str or list
+                        a texture to use for the atoms, either a single value or a list
+                        of len(atoms),
+                        default = 'vmd'
+                    radii: float or list
+                        atomic radii. if a single value is given, it is interpreted as a multiplier for the covalent radii
+                        in ase.data. if a list of len(atoms) is given, it is interpreted as individual atomic radii
+                        default: 1.0
+                    scale_radii: float
+                        float or list with floats that scale the atomic radii
+                        default: 0.5
+                    bond_color: tuple
+                        color for the bonds as a (r,g,b) tuple
+                        None: white is used
+                        default: None
+                    light: tuple
+                        position of the light source as a (x,y,z) tuple
+                        None: light source has the same direction as the camera
+                        default: None
+                    background: str
+                        background color
+                        default: 'White'
+                    bondradius: float
+                        radii to use in drawing bonds
+                        default: 0.1
+                    pixelwidth: int
+                        width in pixels of the final image. Note that the height is set by the aspect ratio
+                        (controlled by carmera_right_up).
+                        default: 2000
+                    aspectratio: float
+                        controls the aspect ratio
+                        None: aspect ratio is calculated by carmera_right_up
+                        default: None
+                    run_pov: boolean
+                        True: png is created directly
+                        False: pov is saved and needs to be rendered by povray
+                        default: True
+                """
 
         from strainjedi.io.iopov import POV
         from matplotlib.colors import LinearSegmentedColormap
@@ -649,7 +711,10 @@ color Axes Labels 32
             raise TypeError("Please specify the directory (label) to write vmd scripts to as Path or string")
         destination_dir.mkdir(parents=True, exist_ok=True)
 
-        atoms_f = self.atomsF.copy()
+        if type(view_dir) is ase.Atoms:
+            atoms_f = view_dir
+        else:
+            atoms_f = self.atomsF.copy()
         pbc_flag = False
         if self.atomsF.get_pbc().any() == True:
             pbc_flag = True
@@ -694,7 +759,7 @@ color Axes Labels 32
         E_array = np.vstack((np.arange(len(self.atoms0)), E_array))
 
         # delete bonds that reach out of the unit cell for bonds_out_of_box==False
-        if pbc_flag == True and bonds_out_of_box == False:
+        if pbc_flag == True:
             pbc_bonds_mask = []
             dF = self.atomsF.get_all_distances()
             dF_mic = self.atomsF.get_all_distances(mic=True)
@@ -708,11 +773,13 @@ color Axes Labels 32
 
         # get atoms for bonds that reach out of the unit cell and their energies
         if pbc_flag == True and bonds_out_of_box == True:
+            pbc_bonds = None
             E_array_pbc = np.empty((2, 0))
 
             from ase.data.vdw import vdw_radii  # for long range bonds
             cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
             ex_bl = np.vstack(neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
+            ex_bl = np.vstack(neighborlist.neighbor_list('ji', a=self.atomsF, cutoff=cutoff)).T
             ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
             ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
             atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (
@@ -720,10 +787,21 @@ color Axes Labels 32
             atoms_f.wrap()  # wrap molecule important for atoms close to the boundaries
             bondscheck = self.get_bonds(self.atomsF)
 
+            within_cell_mask = []
             for i in range(len(atoms_ex_cell)):
                 pos_ex_atom = atoms_f.get_positions()[int(atoms_ex_cell[i, 0])] + atoms_ex_cell[i,
                                                                                   5:8]  # get positions of cell external atoms by adding the vector
-                # if pos_ex_atom in mol.positions:
+                pos_ex_atom = np.round(pos_ex_atom, decimals=5)
+                cell = atoms_f.get_cell()
+                # mod_pos = pos_ex_atom % cell
+                # mod_pos = np.round(mod_pos,decimals=5)
+                cell = np.round(np.diagonal(cell), decimals=5)
+                within_bounds = np.logical_and(pos_ex_atom >= 0, pos_ex_atom <= cell)
+                within_cell = np.all(within_bounds)
+                within_cell_mask.append(within_cell)
+            atoms_ex_cell = np.delete(atoms_ex_cell, ~np.array(within_cell_mask), axis=0)
+
+            for i in range(len(atoms_ex_cell)):
                 original_rim = [int(atoms_ex_cell[i, 0]),
                                 int(atoms_ex_cell[
                                         i, 1])]  # get the indices of the corresponding atoms inside the cell
@@ -763,31 +841,63 @@ color Axes Labels 32
             atom_colors = atom_colors.reshape(-1, 3)
 
         # generating pov object with specified view direction, write .pov file and run it
-        positions = atoms_f.get_positions()
-        center = np.mean(positions, axis=0)
+        if metal:
+            tex = [tex] * len(atoms_f)
+            scales = np.array([0.5] * len(atoms_f))
+            for idx in metal:
+                tex[idx] = 'chrome'
+                scales[idx] = 1.0
+            bond_metal_mask = []
+            pbc_bond_metal_mask = []
+            for bond in bonds:
+                if any((bond[0] == i) or (bond[1] == i) for i in metal):
+                    bond_metal_mask.append(True)
+                else:
+                    bond_metal_mask.append(False)
+            bonds = np.delete(bonds, np.where(np.array(bond_metal_mask))[0], axis=0)
+            for pbc_bond in pbc_bonds:
+                if any((pbc_bond[0] == i) or (pbc_bond[1] == i) for i in metal):
+                    pbc_bond_metal_mask.append(True)
+                else:
+                    pbc_bond_metal_mask.append(False)
+            pbc_bonds = np.delete(pbc_bonds, np.where(np.array(pbc_bond_metal_mask))[0], axis=0)
+
+        # positions = atoms_f.get_positions()
+        # center = np.mean(positions, axis=0)
         cell = None
-        if box and pbc_flag is True:
-            cell = atoms_f.cell
-            center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
-        if view_dir is False:
+        # if box and pbc_flag is True:
+        #     cell = atoms_f.cell
+            # center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+        if type(view_dir) is ase.Atoms:
+            atoms_rotated = view_dir
+            positions = atoms_rotated.get_positions()
+            center = np.mean(positions, axis=0)
+            if box and pbc_flag is True:
+                cell = atoms_rotated.cell
+                center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+            camwidth = [(-(builtins.max(atoms_rotated.positions[:, 0]) - center[0]) - 1, 0., 0.),
+                        (0., builtins.max(atoms_rotated.positions[:, 1]) - center[1] + 1, 0.)]
+            if cell is not None:
+                camwidth = [
+                    (-0.5 * abs(center[0] - builtins.min(atoms_rotated.positions[:, 0]) + 1.0), 0., 0.),
+                    (0., 0.5 * abs(center[1] - builtins.max(atoms_rotated.positions[:, 1])) + 1.0, 0.)]
+            location = center.copy()
+            location[2] += 60. * zoom
+            direction = center.copy()
+            direction[2] += 10.
             if light is None:
-                light = cameralocation
-            if look_at == 'center':
-                look_at = center
-                cameralocation += center
-                cameradirection += center
-                light += cameralocation
-            pov = POV(atoms_f,
+                light = center.copy()
+                light[2] += 70.
+            pov = POV(atoms_rotated,
                       tex=tex,
                       radii=radii,
                       scale_radii=scale_radii,
-                      bond_colors=bond_colors,
+                      bond_color=bond_color,
                       atom_colors=atom_colors,
-                      cameratype=cameratype,
-                      cameralocation=cameralocation,
-                      look_at=look_at,
-                      camera_right_up=camera_right_up,
-                      cameradirection=cameradirection,
+                      cameralocation=location,
+                      look_at=center,
+                      camera_right_up=camwidth,
+                      cameradirection=direction,
                       area_light=[light, 'White', 1.7, 1.7, 3, 3],
                       background=background,
                       bondatoms=bonds,
@@ -797,7 +907,10 @@ color Axes Labels 32
                       aspectratio=aspectratio,
                       cell=cell
                       )
-            pov.write(f'{label}.png', label)
+            if run_pov is True:
+                pov.write(f'{label}.png', label)
+            else:
+                pov.write(f'{label}.pov', label)
         else:
             view_list = ['x', 'y', 'z']
             for view in view_list:
@@ -831,21 +944,21 @@ color Axes Labels 32
                                 (0., builtins.max(atoms_rotated.positions[:, 1]) - center[1] + 1, 0.)]
                     if cell is not None:
                         camwidth = [
-                            (-0.5 * abs(center[0] - builtins.min(atoms_rotated.positions[:, 0]) + 2.0), 0., 0.),
-                            (0., 0.5 * abs(center[1] - builtins.max(atoms_rotated.positions[:, 1])) + 1., 0.)]
+                            (-0.5 * abs(center[0] - builtins.min(atoms_rotated.positions[:, 0]) + 1.0), 0., 0.),
+                            (0., 0.5 * abs(center[1] - builtins.max(atoms_rotated.positions[:, 1])) + 1.0, 0.)]
                     location = center.copy()
-                    location[2] += 60. * zoom
+                    location[2] += 60.
                     direction = center.copy()
-                    direction[2] += 10.
-                    light = center.copy()
-                    light[2] += 20.
+                    direction[2] += 10. * zoom
+                    if light is None:
+                        light = center.copy()
+                        light[2] += 70.
                     pov = POV(atoms_rotated,
                               tex=tex,
                               radii=radii,
                               scale_radii=scale_radii,
-                              bond_colors=bond_colors,
+                              bond_color=bond_color,
                               atom_colors=atom_colors,
-                              cameratype=cameratype,
                               cameralocation=location,
                               look_at=center,
                               camera_right_up=camwidth,
@@ -859,7 +972,10 @@ color Axes Labels 32
                               aspectratio=aspectratio,
                               cell=cell
                               )
-                    pov.write(f'{label}_{view}.png', label)
+                    if run_pov is True:
+                        pov.write(f'{label}.png', label)
+                    else:
+                        pov.write(f'{label}.pov', label)
 
         if self.ase_units == False:
             unit = "kcal/mol"
