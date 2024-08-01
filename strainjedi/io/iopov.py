@@ -59,7 +59,7 @@ class POV:
         'radii': 1.,
         'scale_radii': None,
         'atom_colors': None,
-        'bond_colors': None,
+        'bond_color': None,
         'alpha': True,
         'cameratype': 'perspective',
         'cameralocation': (0., 0., 20.),
@@ -91,8 +91,9 @@ class POV:
             self._bondatoms = []
         if self._pbc_bondatoms is None:
             self._pbc_bondatoms = []
-        if self._bond_colors is None:
-            self._bond_colors = np.array([(1.000, 1.000, 1.000)]*(len(self._bondatoms)+len(self._pbc_bondatoms)))
+        if self._bond_color is None:
+            self._bond_color = (1.000, 1.000, 1.000)
+        self._bond_color = np.array([self._bond_color]*(len(self._bondatoms)+len(self._pbc_bondatoms)))
         if (type(self._radii) is float) or (type(self._radii) is int):
             self._radii = covalent_radii[self._numbers] * self._radii
         if self._scale_radii is None:
@@ -193,7 +194,7 @@ class POV:
         for i, bond in enumerate(self._bondatoms):
             pos0 = self._atoms[bond[0]].position.copy()
             pos1 = self._atoms[bond[1]].position.copy()
-            color = self._bond_colors[i]
+            color = self._bond_color[i]
             w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
               'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
               ' // # %i to %i' %
@@ -211,7 +212,7 @@ class POV:
             scaled_vec1 = -0.75 * vec1 / np.linalg.norm(vec1)
             pbc_pos0 = pos1 + scaled_vec1
             pbc_pos1 = pos0 + scaled_vec0
-            color = self._bond_colors[i]
+            color = self._bond_color[i]
             w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
               'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
               ' // # %i to %i' %
