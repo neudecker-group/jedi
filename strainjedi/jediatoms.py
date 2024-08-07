@@ -3,7 +3,7 @@ import numpy as np
 import os
 from pathlib import Path
 import matplotlib.cm as cm
-from typing import Dict, Optional, Union, Literal, Sequence
+from typing import Dict, Optional, Union, Literal, Sequence, List
 from ase import Atoms
 from ase import Atom
 from ase import neighborlist
@@ -17,19 +17,44 @@ from strainjedi.jedi import Jedi
 
 class JediAtoms(Jedi):
 
-    E_atoms=None
+    E_atoms = None
     first_call = True
-    def run(self, ase_units=False, printout_save=True, label=None, indices=None, weighting=True, r_cut=None):
+    def run(self, ase_units: bool = False,
+            printout_save: bool = True,
+            label: Union[str] = None,
+            indices: Union[List[int]] = None,
+            weighting: bool = True,
+            r_cut: Union[float] = None):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
         Args:
-            indices:
-                list of indices of a substructure if desired
             ase_units: boolean
-                flag to get eV for energies Å for lengths otherwise it is kcal/mol, Bohr
+                True: eV for energies, Å for lengths
+                False: kcal/mol for energies, Bohr for lengths
+                Default: False
+            printout_save: boolean
+                True: saves printout as file
+                False: doesn't save printout
+                Default: True
+            label: str
+                label for saved printout file, E_atoms_{label}
+                None: saves file as E_atoms or E_atoms_part for partial analysis
+                Default: None
+            indices: list
+                list of indices of a substructure if desired
+                Default: None
+            weighting: boolean
+                True: weighting function is used
+                False: no weighting function
+                Default: False
+            r_cut: float
+                used r_cut value for weighting function
+                Default: None
+
         Returns:
             Indices, strain, energy in every atom
         """
+
         self.ase_units = ase_units
         # get necessary data
         self.indices=np.arange(0,len(self.atoms0))
