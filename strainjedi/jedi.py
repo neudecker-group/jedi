@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.cm as cm
 from collections import Counter
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, Optional, Union, List, Sequence, Literal
 import ase.neighborlist
 import ase.geometry
 from ase.atoms import Atoms
@@ -15,6 +15,7 @@ from ase.atoms import Atom
 from ase.utils import jsonable
 import ase.io
 from ase.units import Hartree, Bohr, mol, kcal
+from ase.data.colors import jmol_colors
 from strainjedi.colors import colors
 from strainjedi.print_config import header, energy_comparison, rims_listing
 from strainjedi.quotes import quotes
@@ -944,7 +945,7 @@ class Jedi:
 
         Args:
             des_colors: (dict)
-                key: order number, value: [R,G,B]
+                key: atom index, value: [R,G,B]
             box: boolean
                 True: draw box
                 False: ignore box
@@ -1226,7 +1227,7 @@ class Jedi:
         if len(self.indices) < len(self.atomsF):
             self.rim_list = p_rim                 # restore the partial rim list # TODO class attribute is changed?
 
-        # Achieve the binning for bl, ba, da an all simultaneously
+        # Achieve the binning for bl, ba, da and all simultaneously
         for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
 
@@ -1598,6 +1599,559 @@ display update on """)
         if self.custom_bonds is not None:
             print(f"\nTotal energy custom bonds: {custom_E} {unit}")
 
+    def pov_gen(self, colorbar: bool = True,
+                des_colors: Optional[Dict] = None,
+                box: bool = False,
+                bonds_out_of_box: bool = False,
+                man_strain: Optional[float] = None,
+                label: Union[Path, str] = 'pov',
+                incl_coloring: Optional[Literal['cyan', 'magma']] = None,
+                view_dir: Optional[Union[Literal['x', 'y', 'z'], Atoms]] = None,
+                zoom: float = 1.,
+                tex: Union[str, list, np.ndarray] = 'vmd',
+                radii: float = 1.,
+                scale_radii: Optional[float] = None,
+                light: Optional[Union[Sequence[float], np.ndarray]] = None,
+                background: str = 'White',
+                bondradius: float = .1,
+                pixelwidth: int = 2000,
+                aspectratio: Optional[float] = None,
+                run_pov: bool = True):
+        """Generates POV object for atoms object
+
+                Args:
+                    des_colors: (dict)
+                        key: atom index, value: [R,G,B]
+                    box: boolean
+                        True: draw box
+                        False: ignore box
+                        default: False
+                    bonds_out_of_box: boolean
+                        True: shows atoms for bonds that reach out of the box
+                        False: indicates bonds that reach out the unit cell
+                        default: 'False'
+                    man_strain: float
+                        reference value for the strain energy used in the color scale
+                        default: 'None'
+                    colorbar: boolean
+                        True: save colorbar
+                        default: False
+                    label: string or Path
+                        name of folder for the created files
+                        default: 'pov'
+                    incl_coloring: str
+                        2 inclusive coloring options, otherwise green to red gradient
+                        'cyan': cyan to red gradient
+                        'magma': costumed matplotlib magma gradient
+                        default: 'None'
+                    view_dir: str
+                        camera view
+                        'x': from the x-axis at the y,z-plane
+                        'y': from the y-axis at the z,x-plane
+                        'z': from the z-axis at the x,y-plane
+                        None: for all three view directions
+                        Atoms: rotated Atoms object for customed view direction
+                        default: None
+                    zoom: float
+                        change the zoom
+                        default: 1.0
+                    tex: str or list
+                        a texture to use for the atoms, either a single value or a list
+                        of len(atoms),
+                        default = 'vmd'
+                    radii: float or list
+                        atomic radii. if a single value is given, it is interpreted as a multiplier for the covalent radii
+                        in ase.data. if a list of len(atoms) is given, it is interpreted as individual atomic radii
+                        default: 1.0
+                    scale_radii: float
+                        float or list with floats that scale the atomic radii
+                        default: 0.5
+                    light: tuple
+                        position of the light source as a (x,y,z) tuple
+                        None: light source has the same direction as the camera
+                        default: None
+                    background: str
+                        background color
+                        default: 'White'
+                    bondradius: float
+                        radii to use in drawing bonds
+                        default: 0.1
+                    pixelwidth: int
+                        width in pixels of the final image. Note that the height is set by the aspect ratio
+                        (controlled by carmera_right_up).
+                        default: 2000
+                    aspectratio: float
+                        controls the aspect ratio
+                        None: aspect ratio is calculated by carmera_right_up
+                        default: None
+                    run_pov: boolean
+                        True: png is created directly
+                        False: pov is saved and needs to be rendered by povray
+                        default: True
+                """
+
+        from strainjedi.io.iopov import POV
+        from matplotlib.colors import LinearSegmentedColormap
+        import builtins
+
+        if isinstance(label, str):
+            destination_dir = Path(label)
+        elif isinstance(label, Path):
+            destination_dir = label
+        else:
+            raise TypeError("Please specify the directory (label) to write vmd scripts to as Path or string")
+        destination_dir.mkdir(parents=True, exist_ok=True)
+
+        if type(view_dir) is ase.Atoms:
+            atoms_f = view_dir
+        else:
+            atoms_f = self.atomsF.copy()
+        pbc_flag = False
+        if self.atomsF.get_pbc().any() == True:
+            pbc_flag = True
+
+        # Welcome
+        print("\n\nCreating pov script for generating color-coded structures in POV-Ray...")
+
+        rim_list = self.rim_list
+        if len(self.proc_E_RIMs) == 0:
+            self.run()
+        proc_E_RIMs = self.proc_E_RIMs
+
+        bl = []
+        ba = []
+        da = []
+
+        # Bond lengths (a molecule has at least one bond):
+        for i in rim_list[0]:
+            numbers = [int(i[0]), int(i[1])]
+            bl.append(numbers)
+
+        # custom bonds
+        for i in rim_list[1]:
+            numbers = [int(i[0]), int(i[1])]
+            bl.append(numbers)
+
+        # Bond angles:
+        for i in rim_list[2]:
+            numbers = [int(i[0]), int(i[1]), int(i[2])]
+            ba.append(numbers)
+
+        # Dihedral angles:
+        for i in rim_list[3]:
+            numbers = [int(n) for n in i]
+            da.append(numbers)
+
+        # percental energy of RIMs
+        E_RIMs_perc = np.array(proc_E_RIMs)
+        E_RIMs = self.E_RIMs
+
+        # get color gradients
+        if incl_coloring is None:
+            # get green red gradient
+            grad_colors = [(0, 1, 0), (1, 1, 0), (1, 0, 0)]
+            color_positions = [0, 0.5, 1]
+            cmap = LinearSegmentedColormap.from_list('custom_cmap', list(zip(color_positions, grad_colors)))
+        elif incl_coloring == 'cyan':
+            # get cyan red gradient
+            grad_colors = [(0, 1, 1), (1, 0, 1), (1, 0, 0)]
+            color_positions = [0, 0.5, 1]
+            cmap = LinearSegmentedColormap.from_list('custom_cmap', list(zip(color_positions, grad_colors)))
+        elif incl_coloring == 'magma':
+            # get magma gradient
+            magma = cm.get_cmap('magma')
+            magma_r = magma(np.linspace(1, 0, 256))
+            cut_off_beige = int(256 * 0.15)
+            cut_off_blue = -int(256 * 0.175)
+            magma_r_cut = magma_r[cut_off_beige:cut_off_blue]
+            cmap = LinearSegmentedColormap.from_list('custom_cmap', magma_r_cut)
+
+        # for substructure analysis
+        if len(self.indices) < len(self.atomsF):  # if there are only values for a substructure
+            p_rim = self.rim_list.copy()          # store rims that were analyzed
+            p_indices = self.indices
+            self.indices = range(len(self.atomsF))
+
+            rim = self.get_common_rims().copy()   # get rims of whole structure to show the whole structure
+
+            for i in range(2):
+                if rim[i].shape[0] == 0:
+                    break
+
+                rim[i] = np.ascontiguousarray(rim[i])
+                a = np.array(rim_list[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
+                b = np.array(rim[i]).view([('', np.array(rim_list[i]).dtype)] * np.array(rim_list[i]).shape[1]).ravel()
+                rim[i] = np.setxor1d(a, b)
+                rim[i] = rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)  # get unconsidered rims
+                nan = np.full((len(rim[i]), 1), np.nan)         # nan for special color (black)
+                rim[i] = np.hstack((rim[i], nan))              # stack unanalyzed rims for later vmd visualization
+            bond_E_array_app = rim
+
+            self.indices = p_indices
+
+        # get bonds that reach out of the unit cell
+        if pbc_flag == True and bonds_out_of_box == True:
+            bond_E_array_pbc = [np.empty((0, 2)), np.empty((0, 2))]
+            bond_E_array_pbc_trans = [np.empty((0, 2)), np.empty((0, 2))]  # initialize list
+
+            from ase.data.vdw import vdw_radii  # for long range bonds
+            cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
+            ex_bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
+            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
+            ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
+            atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (ex_bl[:, 4] != 0)]  # determines which
+            # nearest neighbors are outside the unit cell
+            atoms_f.wrap()  # wrap molecule important for atoms close to the boundaries
+
+            # check if bond or custom bond
+            bondscheck = self.rim_list[0][:, (0, 1)]
+            if self.rim_list[1].shape[0] != 0:
+                customcheck = self.rim_list[1][:, (0, 1)]
+
+            for i in range(len(atoms_ex_cell)):
+                # get positions of cell external atoms by adding the vector
+                pos_ex_atom = atoms_f.get_positions()[int(atoms_ex_cell[i, 0])] + atoms_ex_cell[i, 5:8]
+                # get the indices of the corresponding atoms inside the cell
+                original_rim = [int(atoms_ex_cell[i, 0]), int(atoms_ex_cell[i, 1])]
+                original_rim.sort()  # needs to be sorted because rim list only covers one direction
+                if len(np.where(np.all(atoms_f.positions == pos_ex_atom, axis=1))[0]) > 0:
+                    ex_ind = np.where(np.all(atoms_f.positions == pos_ex_atom, axis=1))[0][0]
+                else:
+                    ex_ind = len(atoms_f)
+                    # TODO how often is len(np.where(np.all())) check exec
+                    if len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0 \
+                            or (self.rim_list[1].shape[0] != 0
+                                and len(np.where(np.all(original_rim == customcheck, axis=1))[0]) > 0):
+                        # append to the virtual atoms object
+                        atoms_f.append(Atom(symbol=atoms_f.symbols[int(atoms_ex_cell[i, 1])], position=pos_ex_atom))
+
+                if len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0:
+                    # add to bond list with auxiliary index
+                    bond_E_array_pbc[0] = np.append(bond_E_array_pbc[0], [[atoms_ex_cell[i, 0], ex_ind]], axis=0)
+                    bond_E_array_pbc_trans[0] = np.append(bond_E_array_pbc_trans[0], [original_rim], axis=0)
+
+                elif self.rim_list[1].shape[0] != 0 and len(
+                        np.where(np.all(original_rim == customcheck, axis=1))[0]) > 0:
+                    # add to bond list with auxiliary index
+                    bond_E_array_pbc[1] = np.append(bond_E_array_pbc[1], [[atoms_ex_cell[i, 0], ex_ind]], axis=0)
+                    bond_E_array_pbc_trans[1] = np.append(bond_E_array_pbc_trans[1], [original_rim], axis=0)
+
+        # Create an array that stores the bond connectivity as the first two entries.
+        # The energy will be added as the third entry.
+        E_array = np.full((len(bl), 3), np.nan)
+        for i in range(len(bl)):
+            E_array[i][0] = bl[i][0]
+            E_array[i][1] = bl[i][1]
+
+        # Bonds
+        if len(bl) == 1:
+            E_bl = E_RIMs
+        else:
+            E_bl = E_RIMs[0:len(bl)]
+
+        # Bendings
+        E_ba = E_RIMs[len(bl):len(bl) + len(ba)]
+
+        # Torsions (handle stdout separately)
+        E_da = E_RIMs[len(bl) + len(ba):len(bl) + len(ba) + len(da)]
+
+        # Map onto the bonds (create "all" on the fly and treat diatomic molecules explicitly)
+        # Bonds (trivial)
+        for i in range(len(bl)):
+            if len(bl) == 1:
+                E_array[i][2] = E_bl[i]
+            else:  # TODO if and else are equal?
+                E_array[i][2] = E_bl[i]
+
+        # Bendings
+        for i in range(len(ba)):
+            for j in range(len(bl)):
+                # look for the right connectivity
+                if ((ba[i][0] == bl[j][0] and ba[i][1] == bl[j][1])
+                        or (ba[i][0] == bl[j][1] and ba[i][1] == bl[j][0])
+                        or (ba[i][1] == bl[j][0] and ba[i][2] == bl[j][1])
+                        or (ba[i][1] == bl[j][1] and ba[i][2] == bl[j][0])):
+                    E_array[j][2] += 0.5 * E_ba[i]
+                    if np.isnan(E_array[j][2]):
+                        E_array[j][2] = 0.5 * E_ba[i]
+
+        # Torsions
+        for i in range(len(da)):
+            for j in range(len(bl)):
+                if ((da[i][0] == bl[j][0] and da[i][1] == bl[j][1])
+                        or (da[i][0] == bl[j][1] and da[i][1] == bl[j][0])
+                        or (da[i][1] == bl[j][0] and da[i][2] == bl[j][1])
+                        or (da[i][1] == bl[j][1] and da[i][2] == bl[j][0])
+                        or (da[i][2] == bl[j][0] and da[i][3] == bl[j][1])
+                        or (da[i][2] == bl[j][1] and da[i][3] == bl[j][0])):
+                    E_array[j][2] += (float(1) / 3) * E_da[i]
+                    if np.isnan(E_array[j][2]):
+                        E_array[j][2] = (float(1) / 3) * E_da[i]
+
+        if rim_list[1].shape[0] != 0:
+            custom_E = sum(E_array[:, 2][len(bl) - len(self.custom_bonds):len(bl)])
+        elif rim_list[1].shape[0] == 0:
+            custom_E = np.nan
+
+        custom_E_array = E_array[len(rim_list[0]):len(bl)]
+        bond_E_array = E_array[0:len(rim_list[0])]
+
+        if len(self.indices) < len(self.atomsF):
+            # stack bonds that were neglected before to show the whole structure
+            bond_E_array = np.vstack((bond_E_array, bond_E_array_app[0]))
+            try:
+                custom_E_array = np.vstack((custom_E_array, bond_E_array_app[1]))
+            except:
+                pass
+
+        # get energies for bonds that reach out of the unit cell
+        if pbc_flag == True and bonds_out_of_box == True:
+            translate = {}  # the new bonds need to get the same values as the original ones inside the cell
+            for i in range(len(bond_E_array)):
+                translate[(np.min([bond_E_array[i, 0], bond_E_array[i, 1]]),
+                           np.max([bond_E_array[i, 0], bond_E_array[i, 1]]))] = bond_E_array[i, 2]
+            ctranslate = {}
+            for i in range(len(custom_E_array)):
+                ctranslate[(np.min([custom_E_array[i, 0], custom_E_array[i, 1]]),
+                            np.max([custom_E_array[i, 0], custom_E_array[i, 1]]))] = custom_E_array[i, 2]
+
+            for i in range(len(bond_E_array_pbc[0])):
+                # get the indices of the corresponding atoms inside the cell
+                original_rim = bond_E_array_pbc_trans[0][i]
+                # add to bond list with auxillary index
+                bond_E_array = np.vstack((bond_E_array,
+                                          [int(bond_E_array_pbc[0][i][0]),
+                                           int(bond_E_array_pbc[0][i][1]),
+                                           translate[tuple(original_rim)]]))
+            for i in range(len(bond_E_array_pbc[1])):
+                # get the indices of the corresponding atoms inside the cell
+                original_rim = [int(bond_E_array_pbc_trans[1][i][0]), int(bond_E_array_pbc_trans[1][i][1])]
+                custom_E_array = np.delete(custom_E_array,
+                                           np.where((custom_E_array[:, 0] == original_rim[0]) &
+                                                    (custom_E_array[:, 1] == original_rim[1]))[0], axis=0)
+                original_rim.sort()  # needs to be sorted because rim list only covers one direction
+                custom_E_array = np.vstack((custom_E_array,
+                                            [int(bond_E_array_pbc[1][i][0]),
+                                             int(bond_E_array_pbc[1][i][1]),
+                                             ctranslate[tuple(original_rim)]]))
+
+        bonds = bond_E_array[:, 0:2].astype(int)
+        custom_bonds = custom_E_array[:, 0:2].astype(int)
+        pbc_bonds = None
+        # delete bonds that reach out of the unit cell for bonds_out_of_box==False
+        if pbc_flag == True:
+            pbc_bonds_mask = []
+            dF = atoms_f.get_all_distances()
+            dF_mic = atoms_f.get_all_distances(mic=True)
+            for i in bonds:
+                if round(dF[i[0]][i[1]], 5) != round(dF_mic[i[0]][i[1]], 5):
+                    pbc_bonds_mask.append(False)
+                else:
+                    pbc_bonds_mask.append(True)
+            bonds = np.delete(bonds, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
+            bond_E_array = np.delete(bond_E_array, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
+            if bonds_out_of_box == False:
+                pbc_bonds = bonds[~np.array(pbc_bonds_mask)]
+                pbc_bond_E_array = np.delete(bond_E_array, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
+
+        # Store the maximum energy in a variable for later call
+        max_energy = float(np.nanmax(E_array, axis=0)[2])  # maximum energy in one bond
+        for row in E_array:
+            if max_energy in row:
+                atom_1_max_energy = int(row[0])
+                atom_2_max_energy = int(row[1])
+
+        # get atom color for specific energy value from color gradient
+        bond_colors = np.array([])
+        for i, b in enumerate(bond_E_array):
+            if np.isnan(b[2]):
+                bond_color = (0.000, 0.000, 0.000)  # black
+            else:
+                if man_strain is None:
+                    normalized_energy = b[2] / max_energy
+                else:
+                    normalized_energy = b[2] / float(man_strain)
+                color = cmap(normalized_energy)
+                bond_color = (color[0], color[1], color[2])
+            bond_colors = np.append(bond_colors, bond_color)
+            bond_colors = bond_colors.reshape(-1, 3)
+
+        if pbc_flag == True and bonds_out_of_box == False:
+            for i, b in enumerate(pbc_bond_E_array):
+                if np.isnan(b[2]):
+                    bond_color = (0.000, 0.000, 0.000)  # black
+                else:
+                    if man_strain is None:
+                        normalized_energy = b[2] / max_energy
+                    else:
+                        normalized_energy = b[2] / float(man_strain)
+                    color = cmap(normalized_energy)
+                    bond_color = (color[0], color[1], color[2])
+                bond_colors = np.append(bond_colors, bond_color)
+                bond_colors = bond_colors.reshape(-1, 3)
+
+        for i in custom_E_array:
+            if np.isnan(i[2]):
+                bond_color = (0.000, 0.000, 0.000)  # black
+            else:
+                if man_strain is None:
+                    normalized_energy = i[2] / max_energy
+                else:
+                    normalized_energy = i[2] / float(man_strain)
+                color = cmap(normalized_energy)
+                bond_color = (color[0], color[1], color[2])
+            bond_colors = np.append(bond_colors, bond_color)
+            bond_colors = bond_colors.reshape(-1, 3)
+
+        atomic_nr = atoms_f.get_atomic_numbers()
+        atom_colors = jmol_colors[atomic_nr]
+        if des_colors is not None:
+            for i in des_colors:
+                atom_colors[i] = des_colors[i]  # desired colors overwrite the standard ones
+
+        # generating pov object with specified view direction, write .pov file and run it
+        cell = None
+        if type(view_dir) is ase.Atoms:
+            atoms_rotated = view_dir
+            positions = atoms_rotated.get_positions()
+            center = np.mean(positions, axis=0)
+            if box and pbc_flag is True:
+                cell = atoms_rotated.cell
+                center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+            camwidth = [(-(builtins.max(atoms_rotated.positions[:, 0]) - center[0]) - 1, 0., 0.),
+                        (0., builtins.max(atoms_rotated.positions[:, 1]) - center[1] + 1, 0.)]
+            if cell is not None:
+                camwidth = [
+                    (-0.5 * abs(center[0] - builtins.min(atoms_rotated.positions[:, 0]) + 1.0), 0., 0.),
+                    (0., 0.5 * abs(center[1] - builtins.max(atoms_rotated.positions[:, 1])) + 1.0, 0.)]
+            location = center.copy()
+            location[2] += 60. * zoom
+            direction = center.copy()
+            direction[2] += 10.
+            if light is None:
+                light = center.copy()
+                light[2] += 70.
+            pov = POV(atoms_rotated,
+                      tex=tex,
+                      radii=radii,
+                      scale_radii=scale_radii,
+                      atom_colors=atom_colors,
+                      bond_colors=bond_colors,
+                      cameralocation=location,
+                      look_at=center,
+                      camera_right_up=camwidth,
+                      cameradirection=direction,
+                      area_light=[light, 'White', 1.7, 1.7, 3, 3],
+                      background=background,
+                      bondatoms=bonds,
+                      pbc_bondatoms=pbc_bonds,
+                      custom_bondatoms=custom_bonds,
+                      bondradius=bondradius,
+                      pixelwidth=pixelwidth,
+                      aspectratio=aspectratio,
+                      cell=cell
+                      )
+            if run_pov is True:
+                pov.write(f'{label}.png', label)
+            else:
+                pov.write(f'{label}.pov', label)
+        else:
+            view_list = ['x', 'y', 'z']
+            for view in view_list:
+                if view_dir == view or view_dir is None:
+                    if view == 'x':
+                        atoms_rotated = atoms_f.copy()
+                        atoms_rotated.rotate(90, '-z', rotate_cell=True)
+                        atoms_rotated.rotate(90, '-x', rotate_cell=True)
+                        positions = atoms_rotated.get_positions()
+                        center = np.mean(positions, axis=0)
+                        if box and pbc_flag is True:
+                            cell = atoms_rotated.cell
+                            center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+                    elif view == 'y':
+                        atoms_rotated = atoms_f.copy()
+                        atoms_rotated.rotate(90, 'z', rotate_cell=True)
+                        atoms_rotated.rotate(90, 'y', rotate_cell=True)
+                        positions = atoms_rotated.get_positions()
+                        center = np.mean(positions, axis=0)
+                        if box and pbc_flag is True:
+                            cell = atoms_rotated.cell
+                            center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+                    elif view == 'z':
+                        atoms_rotated = atoms_f.copy()
+                        positions = atoms_rotated.get_positions()
+                        center = np.mean(positions, axis=0)
+                        if box and pbc_flag is True:
+                            cell = atoms_rotated.cell
+                            center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+                    camwidth = [(-(builtins.max(atoms_rotated.positions[:, 0]) - center[0]) - 1, 0., 0.),
+                                (0., builtins.max(atoms_rotated.positions[:, 1]) - center[1] + 1, 0.)]
+                    if cell is not None:
+                        camwidth = [
+                            (-0.5 * abs(center[0] - builtins.min(atoms_rotated.positions[:, 0]) + 1.0), 0., 0.),
+                            (0., 0.5 * abs(center[1] - builtins.max(atoms_rotated.positions[:, 1])) + 1.0, 0.)]
+                    location = center.copy()
+                    location[2] += 60.
+                    direction = center.copy()
+                    direction[2] += 10. * zoom
+                    if light is None:
+                        light = center.copy()
+                        light[2] += 70.
+                    pov = POV(atoms_rotated,
+                              tex=tex,
+                              radii=radii,
+                              scale_radii=scale_radii,
+                              atom_colors=atom_colors,
+                              bond_colors=bond_colors,
+                              cameralocation=location,
+                              look_at=center,
+                              camera_right_up=camwidth,
+                              cameradirection=direction,
+                              area_light=[light, 'White', 1.7, 1.7, 3, 3],
+                              background=background,
+                              bondatoms=bonds,
+                              pbc_bondatoms=pbc_bonds,
+                              custom_bondatoms=custom_bonds,
+                              bondradius=bondradius,
+                              pixelwidth=pixelwidth,
+                              aspectratio=aspectratio,
+                              cell=cell
+                              )
+                    if run_pov is True:
+                        pov.write(f'{label}.png', label)
+                    else:
+                        pov.write(f'{label}.pov', label)
+
+        if self.ase_units == False:
+            unit = "kcal/mol"
+        elif self.ase_units == True:
+            unit = "eV"
+
+        # colorbar
+        if colorbar is True:
+            min = 0.000
+
+            if man_strain is None:
+                max = np.nanmax(E_array, axis=1)[1]
+            else:
+                max = man_strain
+            # high resolution colorbar with matplotlib
+            import matplotlib.pyplot as plt
+            from matplotlib.colorbar import ColorbarBase
+            from matplotlib.colors import Normalize
+            plt.rc('font', size=20)
+            fig = plt.figure()
+            ax = fig.add_axes([0.05, 0.08, 0.1, 0.9])
+            cb = ColorbarBase(ax, orientation='vertical',
+                              cmap=cmap,
+                              norm=Normalize(min, round(max, 3)),
+                              label=unit,
+                              ticks=np.round(np.linspace(min, max, 8), decimals=3))
+            fig.savefig(destination_dir / 'atomscolorbar.pdf', bbox_inches='tight')
+
+        print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
+        print(f"Maximum energy in bond between atoms "
+              f"{atom_1_max_energy} and {atom_2_max_energy}: {float(max_energy):.3f} {unit}.")
 
     def partial_analysis(self,indices,ase_units=False):
         '''

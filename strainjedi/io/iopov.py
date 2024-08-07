@@ -59,7 +59,7 @@ class POV:
         'radii': 1.,
         'scale_radii': None,
         'atom_colors': None,
-        'bond_color': None,
+        'bond_colors': None,
         'alpha': True,
         'cameratype': 'perspective',
         'cameralocation': (0., 0., 20.),
@@ -70,6 +70,7 @@ class POV:
         'background': 'White',
         'bondatoms': None,
         'pbc_bondatoms': None,
+        'custom_bondatoms': None,
         'bondradius': .1,
         'aspectratio': None,
         'pixelwidth': 320,
@@ -91,9 +92,12 @@ class POV:
             self._bondatoms = []
         if self._pbc_bondatoms is None:
             self._pbc_bondatoms = []
-        if self._bond_color is None:
-            self._bond_color = (1.000, 1.000, 1.000)
-        self._bond_color = np.array([self._bond_color]*(len(self._bondatoms)+len(self._pbc_bondatoms)))
+        if self._custom_bondatoms is None:
+            self._custom_bondatoms = []
+        if self._bond_colors is None:
+            self._bond_colors = (1.000, 1.000, 1.000)
+        if type(self._bond_colors) != list and type(self._bond_colors) != np.ndarray:
+            self._bond_colors = np.array([self._bond_colors]*(len(self._bondatoms)+len(self._pbc_bondatoms)))
         if (type(self._radii) is float) or (type(self._radii) is int):
             self._radii = covalent_radii[self._numbers] * self._radii
         if self._scale_radii is None:
@@ -166,6 +170,7 @@ class POV:
         w('#declare ase4 = finish {ambient 0.05 brilliance 3 diffuse 0.6 specular 0.70 roughness 0.04 reflection 0.005}')
         w('#declare glas = finish {ambient .05 diffuse .3 specular 1. roughness .001}')
         w('#declare Rbond = %.3f;' % self._bondradius)
+        w('#declare Rcustombond = %.3f;' % 0.03)
         w('#declare Rcell = %.3f;' % 0.015)
         w('')
         if self._clipplane is None:
@@ -194,7 +199,7 @@ class POV:
         for i, bond in enumerate(self._bondatoms):
             pos0 = self._atoms[bond[0]].position.copy()
             pos1 = self._atoms[bond[1]].position.copy()
-            color = self._bond_color[i]
+            color = self._bond_colors[i]
             w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
               'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
               ' // # %i to %i' %
@@ -212,7 +217,7 @@ class POV:
             scaled_vec1 = -0.75 * vec1 / np.linalg.norm(vec1)
             pbc_pos0 = pos1 + scaled_vec1
             pbc_pos1 = pos0 + scaled_vec0
-            color = self._bond_color[i]
+            color = self._bond_colors[len(self._bondatoms)+i]
             w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
               'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
               ' // # %i to %i' %
@@ -227,6 +232,25 @@ class POV:
                pos1[0], pos1[1], pos1[2],
                color[0], color[1], color[2], self._tex[bond[0]],
                bond[0], bond[1]))
+
+        for i, custom_bond in enumerate(self._custom_bondatoms):
+            pos0 = self._atoms[custom_bond[0]].position.copy()
+            pos1 = self._atoms[custom_bond[1]].position.copy()
+            color = self._bond_colors[len(self._bondatoms)+len(self._pbc_bondatoms)+i]
+            color2 = [1., 1., 1.]
+            w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rcustombond '
+              'texture{pigment {checker '
+              'color rgb <%.2f,%.2f,%.2f> '
+              'color rgbt <%.2f,%.2f,%.2f,0> '
+              'scale 0.05 } '
+              'finish { %s}}} '
+              ' // # %i to %i' %
+              (pos0[0], pos0[1], pos0[2],
+               pos1[0], pos1[1], pos1[2],
+               color[0], color[1], color[2],
+               color2[0], color2[1], color2[2],
+               self._tex[custom_bond[0]],
+               custom_bond[0], custom_bond[1]))
 
         if self._cell is not None:
             a=np.array(self._cell[0])

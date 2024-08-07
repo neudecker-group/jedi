@@ -606,7 +606,7 @@ color Axes Labels 32
                 box: bool = False,
                 bonds_out_of_box: bool = False,
                 man_strain: Optional[float] = None,
-                label: Union[Path, str] = 'vmd',
+                label: Union[Path, str] = 'pov',
                 incl_coloring: Optional[Literal['cyan', 'magma']] = None,
                 view_dir: Optional[Union[Literal['x', 'y', 'z'], Atoms]] = None,
                 zoom: float = 1.,
@@ -708,7 +708,7 @@ color Axes Labels 32
         elif isinstance(label, Path):
             destination_dir = label
         else:
-            raise TypeError("Please specify the directory (label) to write vmd scripts to as Path or string")
+            raise TypeError("Please specify the directory (label) to write pov scripts to as Path or string")
         destination_dir.mkdir(parents=True, exist_ok=True)
 
         if type(view_dir) is ase.Atoms:
@@ -862,12 +862,7 @@ color Axes Labels 32
                     pbc_bond_metal_mask.append(False)
             pbc_bonds = np.delete(pbc_bonds, np.where(np.array(pbc_bond_metal_mask))[0], axis=0)
 
-        # positions = atoms_f.get_positions()
-        # center = np.mean(positions, axis=0)
         cell = None
-        # if box and pbc_flag is True:
-        #     cell = atoms_f.cell
-            # center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
         if type(view_dir) is ase.Atoms:
             atoms_rotated = view_dir
             positions = atoms_rotated.get_positions()
@@ -892,7 +887,7 @@ color Axes Labels 32
                       tex=tex,
                       radii=radii,
                       scale_radii=scale_radii,
-                      bond_color=bond_color,
+                      bond_colors=bond_color,
                       atom_colors=atom_colors,
                       cameralocation=location,
                       look_at=center,
@@ -957,7 +952,7 @@ color Axes Labels 32
                               tex=tex,
                               radii=radii,
                               scale_radii=scale_radii,
-                              bond_color=bond_color,
+                              bond_colors=bond_color,
                               atom_colors=atom_colors,
                               cameralocation=location,
                               look_at=center,
