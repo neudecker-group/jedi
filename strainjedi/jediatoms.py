@@ -804,7 +804,6 @@ color Axes Labels 32
             from ase.data.vdw import vdw_radii  # for long range bonds
             cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
             ex_bl = np.vstack(neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
-            ex_bl = np.vstack(neighborlist.neighbor_list('ji', a=self.atomsF, cutoff=cutoff)).T
             ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
             ex_bl = np.hstack((ex_bl, neighborlist.neighbor_list('D', a=self.atomsF, cutoff=cutoff)))
             atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (
@@ -812,21 +811,9 @@ color Axes Labels 32
             atoms_f.wrap()  # wrap molecule important for atoms close to the boundaries
             bondscheck = self.get_bonds(self.atomsF)
 
-            within_cell_mask = []
             for i in range(len(atoms_ex_cell)):
                 pos_ex_atom = atoms_f.get_positions()[int(atoms_ex_cell[i, 0])] + atoms_ex_cell[i,
                                                                                   5:8]  # get positions of cell external atoms by adding the vector
-                pos_ex_atom = np.round(pos_ex_atom, decimals=5)
-                cell = atoms_f.get_cell()
-                # mod_pos = pos_ex_atom % cell
-                # mod_pos = np.round(mod_pos,decimals=5)
-                cell = np.round(np.diagonal(cell), decimals=5)
-                within_bounds = np.logical_and(pos_ex_atom >= 0, pos_ex_atom <= cell)
-                within_cell = np.all(within_bounds)
-                within_cell_mask.append(within_cell)
-            atoms_ex_cell = np.delete(atoms_ex_cell, ~np.array(within_cell_mask), axis=0)
-
-            for i in range(len(atoms_ex_cell)):
                 original_rim = [int(atoms_ex_cell[i, 0]),
                                 int(atoms_ex_cell[
                                         i, 1])]  # get the indices of the corresponding atoms inside the cell
@@ -872,20 +859,6 @@ color Axes Labels 32
             for idx in metal:
                 tex[idx] = 'chrome'
                 scales[idx] = 1.0
-            bond_metal_mask = []
-            pbc_bond_metal_mask = []
-            for bond in bonds:
-                if any((bond[0] == i) or (bond[1] == i) for i in metal):
-                    bond_metal_mask.append(True)
-                else:
-                    bond_metal_mask.append(False)
-            bonds = np.delete(bonds, np.where(np.array(bond_metal_mask))[0], axis=0)
-            for pbc_bond in pbc_bonds:
-                if any((pbc_bond[0] == i) or (pbc_bond[1] == i) for i in metal):
-                    pbc_bond_metal_mask.append(True)
-                else:
-                    pbc_bond_metal_mask.append(False)
-            pbc_bonds = np.delete(pbc_bonds, np.where(np.array(pbc_bond_metal_mask))[0], axis=0)
 
         cell = None
         if type(view_dir) is ase.Atoms:
@@ -922,6 +895,7 @@ color Axes Labels 32
                       background=background,
                       bondatoms=bonds,
                       pbc_bondatoms=pbc_bonds,
+                      metal=metal,
                       bondradius=bondradius,
                       pixelwidth=pixelwidth,
                       aspectratio=aspectratio,
@@ -987,6 +961,7 @@ color Axes Labels 32
                               background=background,
                               bondatoms=bonds,
                               pbc_bondatoms=pbc_bonds,
+                              metal=metal,
                               bondradius=bondradius,
                               pixelwidth=pixelwidth,
                               aspectratio=aspectratio,

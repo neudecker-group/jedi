@@ -23,8 +23,10 @@ class POV:
         a multiplier for the covalent radii in ase.data. if a list of
         len(atoms) is given, it is interpreted as individual atomic radii.
         default = 1.0
-    colors : a list of len(atoms) of the colors, as (r,g,b). default is
+    atom_colors : a list of len(atoms) of the colors, as (r,g,b). default is
         None which will use ASE standard colors
+    bond_colors : a list of len(bonds) of the colors, as (r,g,b). default is
+        None which will use (1.,1.,1.)
     cameratype : type of povray camera, default='perspective'
     cameralocation : location of camera as an (x,y,z) tuple,
         default = (0., 0., 20)
@@ -44,6 +46,13 @@ class POV:
     background : background color, default = 'White'
     bondatoms : list of atoms to be bound together, as in
         [(index1, index2), ...], default = None
+    pbc_bondatoms : list of atoms to be bound together that reach out of the unit cell,
+        as in
+        [(index1, index2), ...], default = None
+    custom_bondatoms : list of atoms to be bound together with a custom bond, as in
+        [(index1, index2), ...], default = None
+    custom_pbc_bondatoms : list of atoms to be bound together with a custom bond that reaches
+        out of the unit cell, as in [(index1, index2), ...], default = None
     bondradii : radii to use in drawing bonds, default = 0.1
     pixelwidth : width in pixels of the final image. Note that the height
         is set by the aspect ratio (controlled by carmera_right_up).
@@ -71,6 +80,8 @@ class POV:
         'bondatoms': None,
         'pbc_bondatoms': None,
         'custom_bondatoms': None,
+        'custom_pbc_bondatoms': None,
+        'metal': None,
         'bondradius': .1,
         'aspectratio': None,
         'pixelwidth': 320,
@@ -94,6 +105,10 @@ class POV:
             self._pbc_bondatoms = []
         if self._custom_bondatoms is None:
             self._custom_bondatoms = []
+        if self._custom_pbc_bondatoms is None:
+            self._custom_pbc_bondatoms = []
+        if self._metal is None:
+            self._metal = []
         if self._bond_colors is None:
             self._bond_colors = (1.000, 1.000, 1.000)
         if type(self._bond_colors) != list and type(self._bond_colors) != np.ndarray:
@@ -197,41 +212,47 @@ class POV:
                  self._tex[atom.index], atom.index))
 
         for i, bond in enumerate(self._bondatoms):
-            pos0 = self._atoms[bond[0]].position.copy()
-            pos1 = self._atoms[bond[1]].position.copy()
-            color = self._bond_colors[i]
-            w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
-              'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
-              ' // # %i to %i' %
-              (pos0[0], pos0[1], pos0[2],
-               pos1[0], pos1[1], pos1[2],
-               color[0], color[1], color[2], self._tex[bond[0]],
-               bond[0], bond[1]))
+            if any((bond[0] == i) or (bond[1] == i) for i in self._metal):
+                pass
+            else:
+                pos0 = self._atoms[bond[0]].position.copy()
+                pos1 = self._atoms[bond[1]].position.copy()
+                color = self._bond_colors[i]
+                w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
+                  'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
+                  ' // # %i to %i' %
+                  (pos0[0], pos0[1], pos0[2],
+                   pos1[0], pos1[1], pos1[2],
+                   color[0], color[1], color[2], self._tex[bond[0]],
+                   bond[0], bond[1]))
 
         for i, pbc_bond in enumerate(self._pbc_bondatoms):
-            pos0 = self._atoms[pbc_bond[0]].position.copy()
-            pos1 = self._atoms[pbc_bond[1]].position.copy()
-            vec0 = pos1 - pos0
-            vec1 = pos0 - pos1
-            scaled_vec0 = -0.75 * vec0 / np.linalg.norm(vec0)
-            scaled_vec1 = -0.75 * vec1 / np.linalg.norm(vec1)
-            pbc_pos0 = pos1 + scaled_vec1
-            pbc_pos1 = pos0 + scaled_vec0
-            color = self._bond_colors[len(self._bondatoms)+i]
-            w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
-              'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
-              ' // # %i to %i' %
-              (pos0[0], pos0[1], pos0[2],
-               pbc_pos1[0], pbc_pos1[1], pbc_pos1[2],
-               color[0], color[1], color[2], self._tex[bond[0]],
-               bond[0], bond[1]))
-            w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
-              'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
-              ' // # %i to %i' %
-              (pbc_pos0[0], pbc_pos0[1], pbc_pos0[2],
-               pos1[0], pos1[1], pos1[2],
-               color[0], color[1], color[2], self._tex[bond[0]],
-               bond[0], bond[1]))
+            if any((pbc_bond[0] == i) or (pbc_bond[1] == i) for i in self._metal):
+                pass
+            else:
+                pos0 = self._atoms[pbc_bond[0]].position.copy()
+                pos1 = self._atoms[pbc_bond[1]].position.copy()
+                vec0 = pos1 - pos0
+                vec1 = pos0 - pos1
+                scaled_vec0 = -0.75 * vec0 / np.linalg.norm(vec0)
+                scaled_vec1 = -0.75 * vec1 / np.linalg.norm(vec1)
+                pbc_pos0 = pos1 + scaled_vec1
+                pbc_pos1 = pos0 + scaled_vec0
+                color = self._bond_colors[len(self._bondatoms)+i]
+                w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
+                  'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
+                  ' // # %i to %i' %
+                  (pos0[0], pos0[1], pos0[2],
+                   pbc_pos1[0], pbc_pos1[1], pbc_pos1[2],
+                   color[0], color[1], color[2], self._tex[bond[0]],
+                   bond[0], bond[1]))
+                w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rbond '
+                  'texture{pigment {rgb <%.2f,%.2f,%.2f>} finish{%s}}} '
+                  ' // # %i to %i' %
+                  (pbc_pos0[0], pbc_pos0[1], pbc_pos0[2],
+                   pos1[0], pos1[1], pos1[2],
+                   color[0], color[1], color[2], self._tex[bond[0]],
+                   bond[0], bond[1]))
 
         for i, custom_bond in enumerate(self._custom_bondatoms):
             pos0 = self._atoms[custom_bond[0]].position.copy()
@@ -251,6 +272,42 @@ class POV:
                color2[0], color2[1], color2[2],
                self._tex[custom_bond[0]],
                custom_bond[0], custom_bond[1]))
+
+        for i, custom_pbc_bond in enumerate(self._custom_pbc_bondatoms):
+            pos0 = self._atoms[custom_pbc_bond[0]].position.copy()
+            pos1 = self._atoms[custom_pbc_bond[1]].position.copy()
+            vec0 = pos1 - pos0
+            vec1 = pos0 - pos1
+            scaled_vec0 = -0.75 * vec0 / np.linalg.norm(vec0)
+            scaled_vec1 = -0.75 * vec1 / np.linalg.norm(vec1)
+            pbc_pos0 = pos1 + scaled_vec1
+            pbc_pos1 = pos0 + scaled_vec0
+            color = self._bond_colors[len(self._bondatoms)+len(self._pbc_bondatoms)+len(self._custom_pbc_bondatoms)+i]
+            color2 = [1., 1., 1.]
+            w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rcustombond '
+              'texture{pigment {checker '
+              'color rgb <%.2f,%.2f,%.2f> '
+              'color rgbt <%.2f,%.2f,%.2f,0> '
+              'scale 0.05 } '
+              'finish { %s}}} '
+              ' // # %i to %i' %
+              (pos0[0], pos0[1], pos0[2],
+               pbc_pos1[0], pbc_pos1[1], pbc_pos1[2],
+               color[0], color[1], color[2],
+               color2[0], color2[1], color2[2], self._tex[bond[0]],
+               custom_pbc_bond[0], custom_pbc_bond[1]))
+            w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rcustombond '
+              'texture{pigment {checker '
+              'color rgb <%.2f,%.2f,%.2f> '
+              'color rgbt <%.2f,%.2f,%.2f,0> '
+              'scale 0.05 } '
+              'finish { %s}}} '
+              ' // # %i to %i' %
+              (pbc_pos0[0], pbc_pos0[1], pbc_pos0[2],
+               pos1[0], pos1[1], pos1[2],
+               color[0], color[1], color[2],
+               color2[0], color2[1], color2[2], self._tex[bond[0]],
+               custom_pbc_bond[0], custom_pbc_bond[1]))
 
         if self._cell is not None:
             a=np.array(self._cell[0])

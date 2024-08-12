@@ -1938,9 +1938,11 @@ display update on """)
         bonds = bond_E_array[:, 0:2].astype(int)
         custom_bonds = custom_E_array[:, 0:2].astype(int)
         pbc_bonds = None
+        custom_pbc_bonds = None
         # delete bonds that reach out of the unit cell for bonds_out_of_box==False
         if pbc_flag == True:
             pbc_bonds_mask = []
+            custom_pbc_bonds_mask = []
             dF = atoms_f.get_all_distances()
             dF_mic = atoms_f.get_all_distances(mic=True)
             for i in bonds:
@@ -1948,11 +1950,20 @@ display update on """)
                     pbc_bonds_mask.append(False)
                 else:
                     pbc_bonds_mask.append(True)
-            bonds = np.delete(bonds, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
-            bond_E_array = np.delete(bond_E_array, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
+            for i in custom_bonds:
+                if round(dF[i[0]][i[1]], 5) != round(dF_mic[i[0]][i[1]], 5):
+                    custom_pbc_bonds_mask.append(False)
+                else:
+                    custom_pbc_bonds_mask.append(True)
             if bonds_out_of_box == False:
                 pbc_bonds = bonds[~np.array(pbc_bonds_mask)]
-                pbc_bond_E_array = np.delete(bond_E_array, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
+                pbc_bond_E_array = np.delete(bond_E_array, np.where(np.array(pbc_bonds_mask))[0], axis=0)
+                custom_pbc_bonds = custom_bonds[~np.array(custom_pbc_bonds_mask)]
+                custom_pbc_bond_E_array = np.delete(custom_E_array, np.where(np.array(custom_pbc_bonds_mask))[0], axis=0)
+            bonds = np.delete(bonds, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
+            bond_E_array = np.delete(bond_E_array, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
+            custom_bonds = np.delete(custom_bonds, np.where(~np.array(custom_pbc_bonds_mask))[0], axis=0)
+            custom_E_array = np.delete(custom_E_array, np.where(~np.array(custom_pbc_bonds_mask))[0], axis=0)
 
         # Store the maximum energy in a variable for later call
         max_energy = float(np.nanmax(E_array, axis=0)[2])  # maximum energy in one bond
@@ -2003,6 +2014,20 @@ display update on """)
             bond_colors = np.append(bond_colors, bond_color)
             bond_colors = bond_colors.reshape(-1, 3)
 
+        if pbc_flag == True and bonds_out_of_box == False:
+            for i, b in enumerate(custom_pbc_bond_E_array):
+                if np.isnan(b[2]):
+                    bond_color = (0.000, 0.000, 0.000)  # black
+                else:
+                    if man_strain is None:
+                        normalized_energy = b[2] / max_energy
+                    else:
+                        normalized_energy = b[2] / float(man_strain)
+                    color = cmap(normalized_energy)
+                    bond_color = (color[0], color[1], color[2])
+                bond_colors = np.append(bond_colors, bond_color)
+                bond_colors = bond_colors.reshape(-1, 3)
+
         atomic_nr = atoms_f.get_atomic_numbers()
         atom_colors = jmol_colors[atomic_nr]
         if des_colors is not None:
@@ -2046,6 +2071,7 @@ display update on """)
                       bondatoms=bonds,
                       pbc_bondatoms=pbc_bonds,
                       custom_bondatoms=custom_bonds,
+                      custom_pbc_bondatoms=custom_pbc_bonds,
                       bondradius=bondradius,
                       pixelwidth=pixelwidth,
                       aspectratio=aspectratio,
@@ -2112,6 +2138,7 @@ display update on """)
                               bondatoms=bonds,
                               pbc_bondatoms=pbc_bonds,
                               custom_bondatoms=custom_bonds,
+                              custom_pbc_bondatoms=custom_pbc_bonds,
                               bondradius=bondradius,
                               pixelwidth=pixelwidth,
                               aspectratio=aspectratio,
@@ -2147,7 +2174,7 @@ display update on """)
                               norm=Normalize(min, round(max, 3)),
                               label=unit,
                               ticks=np.round(np.linspace(min, max, 8), decimals=3))
-            fig.savefig(destination_dir / 'atomscolorbar.pdf', bbox_inches='tight')
+            fig.savefig(destination_dir / 'colorbar.pdf', bbox_inches='tight')
 
         print("\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain...")
         print(f"Maximum energy in bond between atoms "
