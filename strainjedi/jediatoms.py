@@ -3,11 +3,15 @@ import numpy as np
 import os
 from pathlib import Path
 import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+from matplotlib.colorbar import ColorbarBase
+from matplotlib.colors import Normalize
 from typing import Dict, Optional, Union, Literal, Sequence, List
 from ase import Atoms
 from ase import Atom
 from ase import neighborlist
 from ase.units import Hartree, Bohr, mol, kcal
+from ase.data import covalent_radii, chemical_symbols
 from strainjedi.colors import colors
 from strainjedi.print_config import header, energy_comparison, atoms_listing
 from strainjedi.quotes import quotes
@@ -852,6 +856,35 @@ color Axes Labels 32
             atom_colors = np.append(atom_colors, atom_color)
             atom_colors = atom_colors.reshape(-1, 3)
 
+        # radii to distinguish different elements
+        atomic_numbers = atoms_f.get_atomic_numbers()
+        z = np.array(list(set(atomic_numbers)))
+        if len(z) > 1:
+            atom_radii = {i: covalent_radii[i] for i in z}
+            atom_radii = dict(sorted(atom_radii.items(), key=lambda item: item[1]))
+            radii_values = np.linspace(0.3, 0.8, len(z))
+            atom_radii = {k: v for k, v in zip(atom_radii.keys(), radii_values)}
+            radii = np.array([atom_radii[num] for num in atomic_numbers])
+
+            # legend for depiction of atom sorts
+            labels = [f"{chemical_symbols[num]}" for num in list(set(z))]
+            fig, ax = plt.subplots(figsize=(8, 6))
+            max_radius = builtins.max(atom_radii.values())
+            distance_between_circles = max_radius + 0.2
+            for i, (radius, label) in enumerate(zip(list(atom_radii.values()), labels)):
+                y_position = i * distance_between_circles  # Abstand auf der Y-Achse
+                circle = plt.Circle((0.5, y_position), radius, color='blue', alpha=0.5, label=label)
+                ax.add_patch(circle)
+            for i, label in enumerate(labels):
+                y_position = i * distance_between_circles  # Abstand auf der Y-Achse
+                ax.text(0.5, y_position, label, ha='center', va='center', color='black')
+            ax.set_xlim(0, 1.5)  # X-Achse von 0 bis 1.5
+            ax.set_ylim(0, (len(labels) * distance_between_circles) + distance_between_circles)  # Y-Achse anpassen
+            ax.set_aspect('equal')
+            ax.set_xticks([])
+            ax.set_yticks([])
+            plt.savefig('atom_radii.pdf', format='pdf')
+
         # generating pov object with specified view direction, write .pov file and run it
         if metal:
             tex = [tex] * len(atoms_f)
@@ -986,9 +1019,6 @@ color Axes Labels 32
             else:
                 max = man_strain
             # high resolution colorbar with matplotlib
-            import matplotlib.pyplot as plt
-            from matplotlib.colorbar import ColorbarBase
-            from matplotlib.colors import Normalize
             plt.rc('font', size=20)
             fig = plt.figure()
             ax = fig.add_axes([0.05, 0.08, 0.1, 0.9])
