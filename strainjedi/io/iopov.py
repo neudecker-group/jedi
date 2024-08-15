@@ -5,9 +5,8 @@ import os
 from pathlib import Path
 import numpy as np
 from ase.data.colors import jmol_colors
-from ase.data import covalent_radii
-from ase.data.vdw import vdw_radii
-
+from ase.data import covalent_radii, chemical_symbols
+import strainjedi
 
 class POV:
     """Class to create .pov files to be executed with the pov-ray raytracer.
@@ -87,6 +86,8 @@ class POV:
         'pixelwidth': 320,
         'clipplane': None,
         'cell': None,
+        'legend': True,
+        'legend_atoms': None
     }
 
     def __init__(self, atoms, **kwargs):
@@ -202,7 +203,8 @@ class POV:
             w('#end')
         w('')
 
-        if (type(self._tex)!=list) and (type(self._tex)!=np.ndarray) :
+        if (type(self._tex)!=list) and (type(self._tex)!=np.ndarray):
+            legend_tex = self._tex
             self._tex=[self._tex] * len(self._atoms)
         for atom in self._atoms:
             w('atom(<%.2f,%.2f,%.2f>, %.2f, rgb <%.2f,%.2f,%.2f>, %s) // #%i'
@@ -427,8 +429,68 @@ class POV:
         w('Verbose=False')
 
         f.close()
-        if run_povray:
-            self.raytrace(filename, destination_dir=destination_dir)
+
+        if self._legend is True:
+            y_middle = (len(self._legend_atoms) - 1)/ 2
+            up_z = len(self._legend_atoms) / 2 - 0.8
+            f = open(destination_dir / Path('legend.pov'), 'w')
+            w('#include "colors.inc"')
+            w('#include "finish.inc"')
+            w('')
+            w('global_settings {assumed_gamma 1 max_trace_level 6}')
+            w('background {color %s}' % self._background)
+            w('camera {%s' % 'perspective')
+            w(f'  location <0.50,{y_middle:.2f},60.00>')
+            w(f'  right <0.6,0.00,0.00> up <0.00,0.00,{up_z:.2f}>')
+            w(f'  direction <0.50,{y_middle:.2f},10>')
+            w(f'  look_at <0.50,{y_middle:.2f},0.00>}}')
+            w(f'light_source {{<0.50,{y_middle:.2f},70.00> color White')
+            w('  area_light <0.70,0,0>, <0,0.70,0>, 3, 3')
+            w('  adaptive 1 jitter}')
+            w('')
+            w('#declare vmd = finish {ambient .0 diffuse .65 phong 0.1 phong_size 40. specular 0.500 }')
+            w('#declare chrome = finish {ambient 0.3 diffuse 0.7 reflection 0.15 brilliance 8 specular 0.8 roughness 0.1 }')
+            w('#declare rubber = finish { ambient 0.2 diffuse 1 brilliance 1 phong 0.2 phong_size 20 specular 0 roughness 0.05 metallic 0 reflection { 0 0 fresnel on metallic 0 } conserve_energy }')
+            w('#macro atom(LOC, R, COL, FIN)')
+            w('  sphere{LOC, R texture{pigment{COL} finish{FIN}}}')
+            w('#end')
+            w('')
+
+            if self._legend_atoms:
+                y = 0.00
+                strainjedi_path = Path(strainjedi.__file__).resolve().parent
+                for k, v in self._legend_atoms.items():
+                    color = self._bond_colors[0]
+                    w(f'atom(<0.00,{y:.2f},0.00>, {v*0.5}, rgb <{color[0]},{color[1]},{color[2]}>, {legend_tex}) // #{k}')
+                    w(f'text {{ttf "{strainjedi_path / "Calibri.ttf"}", "{chemical_symbols[k]}", 0.1, 0 '
+                       'pigment { color rgb <0, 0, 0> } '
+                       'scale 0.4 '
+                      f'translate <1.00, {(y-0.13):.2f}, 0.00> '
+                       '}')
+                    y += 1.00
+
+            f.close()
+
+            # Write the .ini file.
+            legend_ratio = np.linalg.norm((0.6,0.00,0.00)) / np.linalg.norm((0.00,0.00,up_z))
+            f = open(destination_dir / 'legend.ini', 'w')
+            w('Input_File_Name=legend.pov')
+            w('Output_to_File=True')
+            w('Output_File_Type=N')
+            if self._alpha == True:
+                w('Output_Alpha=On')
+            else:
+                w('Output_Alpha=False')
+            w('Width=%d' % self._pixelwidth)
+            w('Height=%.0f' % (self._pixelwidth / legend_ratio))
+            w('Antialias=True')
+            w('Antialias_Threshold=0.1')
+            w('Display=False')
+            w('Pause_When_Done=True')
+            w('Verbose=False')
+
+            if run_povray:
+                self.raytrace(filename, destination_dir=destination_dir)
 
     def raytrace(self, filename=None, destination_dir=None):
         """Run povray on the generated file."""
@@ -444,6 +506,8 @@ class POV:
             os.chdir(path.parent)
 
         os.system(f'povray {path.stem}.ini')
+        if self._legend is True:
+            os.system(f'povray legend.ini')
 
         if path.parent != Path(''):
             os.chdir(pwd)

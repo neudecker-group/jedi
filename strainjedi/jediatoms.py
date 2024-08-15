@@ -632,6 +632,7 @@ color Axes Labels 32
             print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
 
     def pov_gen(self, colorbar: bool = True,
+                legend:bool = True,
                 box: bool = False,
                 bonds_out_of_box: bool = False,
                 man_strain: Optional[float] = None,
@@ -640,7 +641,7 @@ color Axes Labels 32
                 view_dir: Optional[Union[Literal['x', 'y', 'z'], Atoms]] = None,
                 zoom: float = 1.,
                 metal: Optional[list] = None,
-                tex: Union[str, list, np.ndarray] = 'vmd',
+                tex: str = 'vmd',
                 radii: float = 1.,
                 scale_radii: Optional[float] = None,
                 bond_color: Optional[tuple] = None,
@@ -653,6 +654,9 @@ color Axes Labels 32
         """Generates POV object for atoms object
 
                 Args:
+                    colorbar: boolean
+                        True: save colorbar
+                        default: False
                     box: boolean
                         True: draw box
                         False: ignore box
@@ -663,9 +667,6 @@ color Axes Labels 32
                     man_strain: float
                         reference value for the strain energy used in the color scale
                         default: 'None'
-                    colorbar: boolean
-                        True: save colorbar
-                        default: False
                     label: string or Path
                         name of folder for the created files
                         default: 'pov'
@@ -689,9 +690,8 @@ color Axes Labels 32
                         a list of atom indices that should be treated as metals without bonds, a metal texture and a
                         bigger scaled radius
                         default: None
-                    tex: str or list
-                        a texture to use for the atoms, either a single value or a list
-                        of len(atoms),
+                    tex: str
+                        a texture to use for the atoms
                         default = 'vmd'
                     radii: float or list
                         atomic radii. if a single value is given, it is interpreted as a multiplier for the covalent radii
@@ -866,25 +866,6 @@ color Axes Labels 32
             atom_radii = {k: v for k, v in zip(atom_radii.keys(), radii_values)}
             radii = np.array([atom_radii[num] for num in atomic_numbers])
 
-            # legend for depiction of atom sorts
-            labels = [f"{chemical_symbols[num]}" for num in list(set(z))]
-            fig, ax = plt.subplots(figsize=(8, 6))
-            max_radius = builtins.max(atom_radii.values())
-            distance_between_circles = max_radius + 0.2
-            for i, (radius, label) in enumerate(zip(list(atom_radii.values()), labels)):
-                y_position = i * distance_between_circles  # Abstand auf der Y-Achse
-                circle = plt.Circle((0.5, y_position), radius, color='blue', alpha=0.5, label=label)
-                ax.add_patch(circle)
-            for i, label in enumerate(labels):
-                y_position = i * distance_between_circles  # Abstand auf der Y-Achse
-                ax.text(0.5, y_position, label, ha='center', va='center', color='black')
-            ax.set_xlim(0, 1.5)  # X-Achse von 0 bis 1.5
-            ax.set_ylim(0, (len(labels) * distance_between_circles) + distance_between_circles)  # Y-Achse anpassen
-            ax.set_aspect('equal')
-            ax.set_xticks([])
-            ax.set_yticks([])
-            plt.savefig('atom_radii.pdf', format='pdf')
-
         # generating pov object with specified view direction, write .pov file and run it
         if metal:
             tex = [tex] * len(atoms_f)
@@ -932,7 +913,9 @@ color Axes Labels 32
                       bondradius=bondradius,
                       pixelwidth=pixelwidth,
                       aspectratio=aspectratio,
-                      cell=cell
+                      cell=cell,
+                      legend=legend,
+                      legend_atoms=atom_radii
                       )
             if run_pov is True:
                 pov.write(f'{label}.png', label)
@@ -998,7 +981,9 @@ color Axes Labels 32
                               bondradius=bondradius,
                               pixelwidth=pixelwidth,
                               aspectratio=aspectratio,
-                              cell=cell
+                              cell=cell,
+                              legend=legend,
+                              legend_atoms=atom_radii
                               )
                     if run_pov is True:
                         pov.write(f'{label}.png', label)
@@ -1031,4 +1016,3 @@ color Axes Labels 32
 
         if man_strain is None:
             print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
-
