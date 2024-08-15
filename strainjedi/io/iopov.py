@@ -25,7 +25,7 @@ class POV:
     atom_colors : a list of len(atoms) of the colors, as (r,g,b). default is
         None which will use ASE standard colors
     bond_colors : a list of len(bonds) of the colors, as (r,g,b). default is
-        None which will use (1.,1.,1.)
+        None which will use (0.75,0.75,0.75)
     cameratype : type of povray camera, default='perspective'
     cameralocation : location of camera as an (x,y,z) tuple,
         default = (0., 0., 20)
@@ -87,7 +87,8 @@ class POV:
         'clipplane': None,
         'cell': None,
         'legend': True,
-        'legend_atoms': None
+        'legend_atoms': None,
+        'legend_color': None
     }
 
     def __init__(self, atoms, **kwargs):
@@ -111,7 +112,7 @@ class POV:
         if self._metal is None:
             self._metal = []
         if self._bond_colors is None:
-            self._bond_colors = (1.000, 1.000, 1.000)
+            self._bond_colors = (0.750, 0.750, 0.750)
         if type(self._bond_colors) != list and type(self._bond_colors) != np.ndarray:
             self._bond_colors = np.array([self._bond_colors]*(len(self._bondatoms)+len(self._pbc_bondatoms)))
         if (type(self._radii) is float) or (type(self._radii) is int):
@@ -432,7 +433,7 @@ class POV:
 
         if self._legend is True:
             y_middle = (len(self._legend_atoms) - 1)/ 2
-            up_z = len(self._legend_atoms) / 2 - 0.8
+            up_y = (len(self._legend_atoms) - 1) / 2 * 1.05
             f = open(destination_dir / Path('legend.pov'), 'w')
             w('#include "colors.inc"')
             w('#include "finish.inc"')
@@ -441,16 +442,25 @@ class POV:
             w('background {color %s}' % self._background)
             w('camera {%s' % 'perspective')
             w(f'  location <0.50,{y_middle:.2f},60.00>')
-            w(f'  right <0.6,0.00,0.00> up <0.00,0.00,{up_z:.2f}>')
+            w(f'  right <-0.6,0.00,0.00> up <0.00,{up_y:.2f},0.00>')
             w(f'  direction <0.50,{y_middle:.2f},10>')
             w(f'  look_at <0.50,{y_middle:.2f},0.00>}}')
             w(f'light_source {{<0.50,{y_middle:.2f},70.00> color White')
             w('  area_light <0.70,0,0>, <0,0.70,0>, 3, 3')
             w('  adaptive 1 jitter}')
             w('')
+            w('#declare simple = finish {phong 0.7}')
+            w('#declare pale = finish {ambient .5 diffuse .85 roughness .001 specular 0.200 }')
+            w('#declare intermediate = finish {ambient 0.3 diffuse 0.6 specular 0.60 roughness 0.04 }')
             w('#declare vmd = finish {ambient .0 diffuse .65 phong 0.1 phong_size 40. specular 0.500 }')
+            w('#declare metal = finish {ambient 0.05 brilliance 2 diffuse 0.6 metallic specular 0.80 roughness 1/120 reflection 0.3 }')
             w('#declare chrome = finish {ambient 0.3 diffuse 0.7 reflection 0.15 brilliance 8 specular 0.8 roughness 0.1 }')
             w('#declare rubber = finish { ambient 0.2 diffuse 1 brilliance 1 phong 0.2 phong_size 20 specular 0 roughness 0.05 metallic 0 reflection { 0 0 fresnel on metallic 0 } conserve_energy }')
+            w('#declare jmol = finish {ambient .2 diffuse .6 specular 1 roughness .001 metallic}')
+            w('#declare ase2 = finish {ambient 0.05 brilliance 3 diffuse 0.6 metallic specular 0.70 roughness 0.04 reflection 0.15}')
+            w('#declare ase3 = finish {ambient .15 brilliance 2 diffuse .6 metallic specular 1. roughness .001 reflection .0}')
+            w('#declare ase4 = finish {ambient 0.05 brilliance 3 diffuse 0.6 specular 0.70 roughness 0.04 reflection 0.005}')
+            w('#declare glas = finish {ambient .05 diffuse .3 specular 1. roughness .001}')
             w('#macro atom(LOC, R, COL, FIN)')
             w('  sphere{LOC, R texture{pigment{COL} finish{FIN}}}')
             w('#end')
@@ -460,7 +470,7 @@ class POV:
                 y = 0.00
                 strainjedi_path = Path(strainjedi.__file__).resolve().parent
                 for k, v in self._legend_atoms.items():
-                    color = self._bond_colors[0]
+                    color = self._legend_color
                     w(f'atom(<0.00,{y:.2f},0.00>, {v*0.5}, rgb <{color[0]},{color[1]},{color[2]}>, {legend_tex}) // #{k}')
                     w(f'text {{ttf "{strainjedi_path / "Calibri.ttf"}", "{chemical_symbols[k]}", 0.1, 0 '
                        'pigment { color rgb <0, 0, 0> } '
@@ -472,7 +482,7 @@ class POV:
             f.close()
 
             # Write the .ini file.
-            legend_ratio = np.linalg.norm((0.6,0.00,0.00)) / np.linalg.norm((0.00,0.00,up_z))
+            legend_ratio = np.linalg.norm((0.6,0.00,0.00)) / np.linalg.norm((0.00,up_y,0.00))
             f = open(destination_dir / 'legend.ini', 'w')
             w('Input_File_Name=legend.pov')
             w('Output_to_File=True')
@@ -489,8 +499,10 @@ class POV:
             w('Pause_When_Done=True')
             w('Verbose=False')
 
-            if run_povray:
-                self.raytrace(filename, destination_dir=destination_dir)
+            f.close()
+
+        if run_povray:
+            self.raytrace(filename, destination_dir=destination_dir)
 
     def raytrace(self, filename=None, destination_dir=None):
         """Run povray on the generated file."""
@@ -506,6 +518,7 @@ class POV:
             os.chdir(path.parent)
 
         os.system(f'povray {path.stem}.ini')
+        # os.system(f'wait')
         if self._legend is True:
             os.system(f'povray legend.ini')
 

@@ -632,7 +632,6 @@ color Axes Labels 32
             print(f"Maximum energy in  atom {int(np.nanargmax(E_atoms))}: {float(max_energy):.3f} {unit}.")
 
     def pov_gen(self, colorbar: bool = True,
-                legend:bool = True,
                 box: bool = False,
                 bonds_out_of_box: bool = False,
                 man_strain: Optional[float] = None,
@@ -702,7 +701,7 @@ color Axes Labels 32
                         default: 0.5
                     bond_color: tuple
                         color for the bonds as a (r,g,b) tuple
-                        None: white is used
+                        None: (0.75,0.75,0.75) is used
                         default: None
                     light: tuple
                         position of the light source as a (x,y,z) tuple
@@ -787,6 +786,7 @@ color Axes Labels 32
             E_array = E_atoms
         E_array = np.vstack((np.arange(len(self.atoms0)), E_array))
 
+        pbc_bonds = []
         # delete bonds that reach out of the unit cell for bonds_out_of_box==False
         if pbc_flag == True:
             pbc_bonds_mask = []
@@ -802,9 +802,7 @@ color Axes Labels 32
 
         # get atoms for bonds that reach out of the unit cell and their energies
         if pbc_flag == True and bonds_out_of_box == True:
-            pbc_bonds = None
             E_array_pbc = np.empty((2, 0))
-
             from ase.data.vdw import vdw_radii  # for long range bonds
             cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
             ex_bl = np.vstack(neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
@@ -859,7 +857,10 @@ color Axes Labels 32
         # radii to distinguish different elements
         atomic_numbers = atoms_f.get_atomic_numbers()
         z = np.array(list(set(atomic_numbers)))
+        atom_radii = None
+        legend = False
         if len(z) > 1:
+            legend = True
             atom_radii = {i: covalent_radii[i] for i in z}
             atom_radii = dict(sorted(atom_radii.items(), key=lambda item: item[1]))
             radii_values = np.linspace(0.3, 0.8, len(z))
@@ -915,7 +916,8 @@ color Axes Labels 32
                       aspectratio=aspectratio,
                       cell=cell,
                       legend=legend,
-                      legend_atoms=atom_radii
+                      legend_atoms=atom_radii,
+                      legend_color=bond_color
                       )
             if run_pov is True:
                 pov.write(f'{label}.png', label)
@@ -983,7 +985,8 @@ color Axes Labels 32
                               aspectratio=aspectratio,
                               cell=cell,
                               legend=legend,
-                              legend_atoms=atom_radii
+                              legend_atoms=atom_radii,
+                              legend_color=bond_color
                               )
                     if run_pov is True:
                         pov.write(f'{label}.png', label)

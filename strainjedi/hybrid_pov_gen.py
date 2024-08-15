@@ -9,13 +9,13 @@ from matplotlib.colors import LinearSegmentedColormap
 import builtins
 from ase.atoms import Atoms
 import ase.io
+from ase.data import covalent_radii
 from ase.data.colors import jmol_colors
 
 
 def hybrid_pov_gen(jedi: Jedi = None,
                    jediatoms: JediAtoms = None,
-                   des_atom_colors: Optional[Dict] = None,
-                   jediatoms_bond_color: Optional[tuple] = (1.,1.,1.),
+                   color_unanalysed: tuple = (0.75,0.75,0.75),
                    colorbar: bool = True,
                    box: bool = False,
                    man_strain: Optional[float] = None,
@@ -39,11 +39,9 @@ def hybrid_pov_gen(jedi: Jedi = None,
                         partial jedi analysis of the Atoms object
                     jediatoms: JediAtoms object
                         partial jediatoms analysis of the Atoms object
-                    des_atom_colors: (dict)
-                        key: atom index, value: [R,G,B]
-                    jediatoms_bond_color: tuple
-                        bond color for the partial jediatoms analysis as (r,g,b) tuple
-                        Default: (1.,1.,1.)
+                    color_unanalysed: tuple
+                        color for jediatoms bonds and jedi atoms as a (r,g,b) tuple
+                        Default: (0.8,0.8,0.8)
                     box: boolean
                         True: draw box
                         False: ignore box
@@ -341,7 +339,7 @@ def hybrid_pov_gen(jedi: Jedi = None,
             bond_color = (0.000, 0.000, 0.000)  # black
             for idx in jediatoms.indices:
                 if b[0] == idx or b[1] == idx:
-                    bond_color = jediatoms_bond_color
+                    bond_color = color_unanalysed
         else:
             if man_strain is None:
                 normalized_energy = b[2] / max_energy
@@ -358,7 +356,7 @@ def hybrid_pov_gen(jedi: Jedi = None,
                 bond_color = (0.000, 0.000, 0.000)  # black
                 for idx in jediatoms.indices:
                     if b[0] == idx or b[1] == idx:
-                        bond_color = jediatoms_bond_color
+                        bond_color = color_unanalysed
             else:
                 if man_strain is None:
                     normalized_energy = b[2] / max_energy
@@ -388,7 +386,7 @@ def hybrid_pov_gen(jedi: Jedi = None,
                 bond_color = (0.000, 0.000, 0.000)  # black
                 for idx in jediatoms.indices:
                     if b[0] == idx or b[1] == idx:
-                        bond_color = jediatoms_bond_color
+                        bond_color = color_unanalysed
             else:
                 if man_strain is None:
                     normalized_energy = b[2] / max_energy
@@ -415,15 +413,21 @@ def hybrid_pov_gen(jedi: Jedi = None,
         atom_colors = np.append(atom_colors, atom_color)
         atom_colors = atom_colors.reshape(-1, 3)
 
-    atomic_nr = atoms_f.get_atomic_numbers()
-    atom_colors_jedi = jmol_colors[atomic_nr]
-
     for i in jedi.indices:
-        atom_colors[i] = atom_colors_jedi[i]
+        atom_colors[i] = color_unanalysed
 
-    if des_atom_colors is not None:
-        for i in des_atom_colors:
-            atom_colors[i] = des_atom_colors[i]  # desired colors overwrite the standard ones
+    # radii to distinguish different elements
+    atomic_nrs = atoms_f.get_atomic_numbers()
+    z = np.array(list(set(atomic_nrs)))
+    atom_radii = None
+    legend = False
+    if len(z) > 1:
+        legend = True
+        atom_radii = {i: covalent_radii[i] for i in z}
+        atom_radii = dict(sorted(atom_radii.items(), key=lambda item: item[1]))
+        radii_values = np.linspace(0.3, 0.8, len(z))
+        atom_radii = {k: v for k, v in zip(atom_radii.keys(), radii_values)}
+        radii = np.array([atom_radii[num] for num in atomic_nrs])
 
     # generating pov object with specified view direction, write .pov file and run it
     if metal:
@@ -474,7 +478,10 @@ def hybrid_pov_gen(jedi: Jedi = None,
                   bondradius=bondradius,
                   pixelwidth=pixelwidth,
                   aspectratio=aspectratio,
-                  cell=cell
+                  cell=cell,
+                  legend=legend,
+                  legend_atoms=atom_radii,
+                  legend_color=color_unanalysed
                   )
         if run_pov is True:
             pov.write(f'{label}.png', label)
@@ -542,7 +549,10 @@ def hybrid_pov_gen(jedi: Jedi = None,
                           bondradius=bondradius,
                           pixelwidth=pixelwidth,
                           aspectratio=aspectratio,
-                          cell=cell
+                          cell=cell,
+                          legend=legend,
+                          legend_atoms=atom_radii,
+                          legend_color=color_unanalysed
                           )
                 if run_pov is True:
                     pov.write(f'{label}.png', label)
