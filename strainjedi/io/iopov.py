@@ -518,7 +518,6 @@ class POV:
             os.chdir(path.parent)
 
         os.system(f'povray {path.stem}.ini')
-        # os.system(f'wait')
         if self._legend is True:
             os.system(f'povray legend.ini')
 

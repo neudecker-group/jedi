@@ -106,7 +106,7 @@ class JediAtoms(Jedi):
 
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
-        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units)
+        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,r_cut,ase_units=self.ase_units)
         if not label:
             filename = 'E_atoms'
             if indices:
@@ -114,7 +114,7 @@ class JediAtoms(Jedi):
         else:
             filename = f"E_atoms_{label}"
         if printout_save is True:
-            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,ase_units=self.ase_units,save=True,file=filename)
+            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,r_cut,ase_units=self.ase_units,save=True,file=filename)
         pass
 
     def get_bonds(self, mol):
@@ -216,6 +216,7 @@ class JediAtoms(Jedi):
                  E_geometries: float,
                  E_atoms_total: float,
                  proc_geom_atoms: float,
+                 r_cut: float,
                  ase_units: bool = False,
                  save: bool = False,
                  file: str = 'E_atoms'):
@@ -244,6 +245,8 @@ class JediAtoms(Jedi):
         # TODO save proc_e_rims as std decimal number and have print command use .2%
         output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
                       .format("JEDI_ATOMS", E_atoms_total, proc_geom_atoms, **energy_comparison))
+        output.append('{0:<{column1}}' '{1:^{column2}}' '{2:^{column3}}'
+                      .format(f"(r_cut = {r_cut})","","", **energy_comparison))
 
         # strain in the atoms
         if not ase_units:
@@ -272,7 +275,12 @@ class JediAtoms(Jedi):
             with open(file, 'w') as f:
                 f.writelines("\n".join(output))
 
-    def partial_analysis(self, indices, ase_units=False, printout_save=True, label=None, weighting=True, r_cut=None):
+    def partial_analysis(self, indices: Union[List[int]] = None,
+                         ase_units: bool = False,
+                         printout_save: bool = True,
+                         label: Union[str] = None,
+                         weighting: bool = True,
+                         r_cut: Union[float] = None):
 
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
@@ -280,7 +288,27 @@ class JediAtoms(Jedi):
             indices:
                 list of indices of a substructure
             ase_units: boolean
-                flag to get eV for energies Å for lengths otherwise it is kcal/mol, Bohr
+                True: eV for energies, Å for lengths
+                False: kcal/mol for energies, Bohr for lengths
+                Default: False
+            printout_save: boolean
+                True: saves printout as file
+                False: doesn't save printout
+                Default: True
+            label: str
+                label for saved printout file, E_atoms_{label}
+                None: saves file as E_atoms or E_atoms_part for partial analysis
+                Default: None
+            indices: list
+                list of indices of a substructure if desired
+                Default: None
+            weighting: boolean
+                True: weighting function is used
+                False: no weighting function
+                Default: False
+            r_cut: float
+                used r_cut value for weighting function
+                Default: None
         Returns:
             Indices, strain, energy in every atom
         """
@@ -334,13 +362,13 @@ class JediAtoms(Jedi):
 
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
-        self.printout(E_geometries, E_atoms_total, proc_geom_atoms, ase_units=self.ase_units)
+        self.printout(E_geometries, E_atoms_total, proc_geom_atoms, r_cut, ase_units=self.ase_units)
         if not label:
             filename = 'E_atoms_partial'
         else:
             filename = f"E_atoms_{label}"
         if printout_save is True:
-            self.printout(E_geometries, E_atoms_total, proc_geom_atoms, ase_units=self.ase_units, save=True,
+            self.printout(E_geometries, E_atoms_total, proc_geom_atoms, r_cut, ase_units=self.ase_units, save=True,
                           file=filename)
 
     def vmd_gen(self,
