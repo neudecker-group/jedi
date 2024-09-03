@@ -285,7 +285,7 @@ class POV:
             scaled_vec1 = -0.75 * vec1 / np.linalg.norm(vec1)
             pbc_pos0 = pos1 + scaled_vec1
             pbc_pos1 = pos0 + scaled_vec0
-            color = self._bond_colors[len(self._bondatoms)+len(self._pbc_bondatoms)+len(self._custom_pbc_bondatoms)+i]
+            color = self._bond_colors[len(self._bondatoms)+len(self._pbc_bondatoms)+len(self._custom_bondatoms)+i]
             color2 = [1., 1., 1.]
             w('cylinder {<%.2f,%.2f,%.2f>, <%.2f,%.2f,%.2f>, Rcustombond '
               'texture{pigment {checker '
