@@ -27,7 +27,7 @@ class JediAtoms(Jedi):
             printout_save: bool = True,
             label: Union[str] = None,
             indices: Union[List[int]] = None,
-            weighting: bool = True,
+            weighting: Optional[Literal['ric','poly']] = None,
             r_cut: Union[float] = None):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
@@ -64,8 +64,8 @@ class JediAtoms(Jedi):
         self.indices=np.arange(0,len(self.atoms0))
         if indices:
             self.indices=indices
-        if weighting is True and r_cut is None:
-            raise TypeError("Please specify r_cut when weighting is set to True")
+        if weighting == 'poly' and r_cut is None:
+            raise TypeError("Please specify r_cut when weighting is set to 'poly'")
         delta_q = self.get_delta_q(weighting,r_cut)
         self.get_b_matrix(weighting,r_cut)
         B = self.B
@@ -138,7 +138,7 @@ class JediAtoms(Jedi):
 
         return bl
 
-    def weighting(self,delta_q,r_cut,indices=None):
+    def poly_weighting(self,delta_q,r_cut,indices=None):
         if indices is None:
             indices = np.arange(0,len(self.atoms0))
         bonds = self.get_bonds(self.atoms0)
@@ -163,6 +163,35 @@ class JediAtoms(Jedi):
 
         return delta_q
 
+    def ric_weighting(self,delta_q,indices=None):
+        if indices is None:
+            indices = np.arange(0,len(self.atoms0))
+        rim_list = Jedi.get_rims(self,self.atomsF)
+        j = Jedi(self.atoms0,self.atomsF,self.H)
+        j.indices = indices
+        delta_rics = j.get_delta_q()
+        for row in range(self.dF.shape[0]):
+            for col in range(self.dF.shape[1]):
+                if row == col:
+                    pass
+                elif any((bl[0] == indices[row] and bl[1] == indices[col]) or (bl[0] == indices[col] and bl[1] == indices[row]) for bl in rim_list[0]):
+                    delta_q[row][col] *= 1
+                elif any((ba[0] == indices[row] and ba[2] == indices[col]) or (ba[0] == indices[col] and ba[2] == indices[row]) for idx, ba in enumerate(rim_list[2])):
+                    idx =+ 1
+                    if delta_rics[len(rim_list[0])+idx] <= 0.1 and delta_rics[len(rim_list[0])+idx] >= -0.1:
+                        delta_q[row][col] *= 0
+                    else:
+                        delta_q[row][col] *= 0.5
+                elif any((da[0] == indices[row] and da[3] == indices[col]) or (da[0] == indices[col] and da[3] == indices[row]) for idx, da in enumerate(rim_list[3])):
+                    if delta_rics[len(rim_list[0])+len(rim_list[2])+idx] <= 0.1 and delta_rics[len(rim_list[0])+len(rim_list[2])+idx] >= -0.1:
+                        delta_q[row][col] *= 0
+                    else:
+                        delta_q[row][col] *= 0.5
+                else:
+                    delta_q[row][col] *= 0
+
+        return delta_q
+
     def get_delta_q(self,weighting,r_cut,indices=None):
         mic = False
         if self.atomsF.get_pbc().any() == True:
@@ -173,8 +202,10 @@ class JediAtoms(Jedi):
             self.d0 = self.d0[np.ix_(indices, indices)]
             self.dF = self.dF[np.ix_(indices, indices)]
         delta_q = self.dF - self.d0
-        if weighting is True:
-            delta_q = self.weighting(delta_q,r_cut,indices).flatten() / Bohr
+        if weighting == 'poly':
+            delta_q = self.poly_weighting(delta_q,r_cut,indices).flatten() / Bohr
+        elif weighting == 'ric':
+            delta_q = self.ric_weighting(delta_q,indices).flatten() / Bohr
         else:
             delta_q = delta_q.flatten() / Bohr
 
@@ -201,8 +232,10 @@ class JediAtoms(Jedi):
                 delta_q = d_minus - d_plus
                 if len(indices) < len(self.atoms0):
                     delta_q = delta_q[np.ix_(indices, indices)]
-                if weighting is True:
-                    delta_q = self.weighting(delta_q, r_cut,indices).flatten()
+                if weighting == 'poly':
+                    delta_q = self.poly_weighting(delta_q, r_cut,indices).flatten()
+                elif weighting == 'ric':
+                    delta_q = self.ric_weighting(delta_q, indices).flatten()
                 else:
                     delta_q = delta_q.flatten()
                 derivatives = delta_q / 0.01
@@ -216,7 +249,8 @@ class JediAtoms(Jedi):
                  E_geometries: float,
                  E_atoms_total: float,
                  proc_geom_atoms: float,
-                 r_cut: float,
+                 weighting: Optional[Literal['ric','poly']] = None,
+                 r_cut: float = None,
                  ase_units: bool = False,
                  save: bool = False,
                  file: str = 'E_atoms'):
@@ -245,8 +279,9 @@ class JediAtoms(Jedi):
         # TODO save proc_e_rims as std decimal number and have print command use .2%
         output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
                       .format("JEDI_ATOMS", E_atoms_total, proc_geom_atoms, **energy_comparison))
-        output.append('{0:<{column1}}' '{1:^{column2}}' '{2:^{column3}}'
-                      .format(f"(r_cut = {r_cut})","","", **energy_comparison))
+        if weighting == 'poly':
+            output.append('{0:<{column1}}' '{1:^{column2}}' '{2:^{column3}}'
+                          .format(f"(r_cut = {r_cut})","","", **energy_comparison))
 
         # strain in the atoms
         if not ase_units:
@@ -671,7 +706,7 @@ color Axes Labels 32
                 tex: str = 'vmd',
                 radii: float = 1.,
                 scale_radii: Optional[float] = None,
-                bond_color: Optional[tuple] = None,
+                bond_color: tuple = (0.75,0.75,0.75),
                 light: Optional[Union[Sequence[float], np.ndarray]] = None,
                 background: str = 'White',
                 bondradius: float = .1,

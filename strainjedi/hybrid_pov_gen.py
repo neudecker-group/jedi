@@ -591,3 +591,90 @@ def hybrid_pov_gen(jedi: Jedi = None,
         print(f"Maximum energy in bond between atoms "
               f"{atom_1_max_energy} and {atom_2_max_energy}: {float(max_energy_j):.3f} {unit}.")
         print(f"Maximum energy in  atom {int(np.nanargmax(E_jediatoms[0],axis=0))}: {float(max_energy_ja):.3f} {unit}.")
+
+    printout(jedi.E_geometries,jedi.E_RIMs_total,jediatoms.E_atoms_total,jedi.proc_geom_RIMs,jediatoms.proc_geom_atoms)
+             # jedi.rim_list,jedi.atomsF,jedi.proc_E_RIMs,jedi.E_RIMs,)
+
+def printout(E_geometries: float,
+             E_RIMs_total: float,
+             E_atoms_total: float,
+             proc_geom_RIMs: float,
+             proc_geom_atoms: float,
+             ase_units: bool = False,
+             file: str = 'E_hybrid'):
+    '''
+    Printout of analysis of stored strain energy in the bonds and atoms.
+    '''
+    output = []
+    # Header
+    output.append("\n")
+    output.append('{:^{header}}'.format("************************************************", **header))
+    output.append('{:^{header}}'.format("*                 JEDI ANALYSIS                *", **header))
+    output.append('{:^{header}}'.format("*       Judgement of Energy DIstribution       *", **header))
+    output.append('{:^{header}}'.format("************************************************", **header))
+    output.append('{:^{header}}'.format(f"version {__version__}\n", **header))
+
+    # Comparison of total energies
+    if not ase_units:
+        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+                      .format(" ", "Strain Energy (kcal/mol)", "Deviation (%)", **energy_comparison))
+    elif ase_units:
+        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+                      .format(" ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison))
+
+    output.append('{0:<{column1}}' '{1:^{column2}.4f}' '{2:^{column3}}'
+                  .format("Ab Initio", E_geometries, "-", **energy_comparison))
+    # TODO save proc_e_rims as std decimal number and have print command use .2%
+    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+                  .format("JEDI", E_RIMs_total, proc_geom_RIMs, **energy_comparison))
+    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+                  .format(f"JEDI_ATOMS", E_atoms_total, proc_geom_atoms, **energy_comparison))
+    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+                  .format("Hybrid", E_RIMs_total+E_atoms_total, proc_geom_RIMs+proc_geom_atoms, **energy_comparison))
+
+    # # strain in the bonds
+    # if not ase_units:
+    #     output.append(
+    #         '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}'
+    #         .format("RIC No.", "RIC type", "indices", "Percentage", "Energy (kcal/mol)", **rims_listing))
+    # elif ase_units:
+    #     output.append(
+    #         '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}''{4:^{column5}}'
+    #         .format("RIC No.", "RIC type", "indices", "Percentage", "Energy (eV)", **rims_listing))
+    # rics_dict = {0: "bond",
+    #              1: "custom"}
+    # ric_counter = 0
+    # for ric_type, rim in rics_dict.items():
+    #     for k in rim_list[ric_type]:
+    #         ind = f"{atoms.symbols[k[0]]}{k[0]}  {atoms.symbols[k[1]]}{k[1]}"
+    #         # TODO save proc_e_rims as std decimal number and have print command use .2%
+    #         output.append(
+    #             '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}.2f}''{4:^{column5}.4f}'
+    #             .format(ric_counter + 1,
+    #                     rim,
+    #                     ind,
+    #                     proc_E_RIMs[ric_counter],
+    #                     E_RIMs[ric_counter],
+    #                     **rims_listing))
+    #         ric_counter += 1
+    #
+    # # strain in the atoms
+    # if not ase_units:
+    #     output.append(
+    #         '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
+    #         .format("Atom No.", "Element", "Percentage", "Energy (kcal/mol)", **atoms_listing))
+    # elif ase_units:
+    #     output.append(
+    #         '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
+    #         .format("Atom No.", "Element", "Percentage", "Energy (eV)", **atoms_listing))
+    # for i, k in enumerate(E_atoms[indices]):
+    #     output.append(
+    #         '{0:^{column1}}''{1:^{column2}}''{2:^{column3}.2f}''{3:^{column4}.2f}'
+    #         .format(self.indices[i],
+    #                 self.atoms0.symbols[self.indices[i]],
+    #                 k/E_atoms_total*100,
+    #                 k,
+    #                 **atoms_listing))
+
+    with open(file, 'w') as f:
+        f.writelines("\n".join(output))
