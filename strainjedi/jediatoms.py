@@ -557,13 +557,6 @@ color Axes Z 1037
 color Axes Origin 1036
 color Axes Labels 32
 ''')
-        # define color of atoms with the color code above
-        for j in range(N_colors_atoms):
-            output.append('\n\nmol representation cpk 0.7 0.0 30 5')
-            output.append('\nmol addrep top')
-            output.append('\n%s%i%s' % ("mol modstyle ", j + 1, " top cpk"))
-            output.append('\n%s%i%s%i%s' % ("mol modcolor ", j + 1, " top {colorid ", N_colors + j + 1, "}"))
-            output.append('\n%s%i%s%s%s' % ("mol modselect ", j + 1, " top {name ", symbols[j], "}"))
 
         #########################
         #	Binning		#
@@ -656,11 +649,11 @@ color Axes Labels 32
 
             output.append('\n\nmol representation cpk 0.7 0.0 30 5')
             output.append('\nmol addrep top')
-            output.append('\n%s%i%s' % ("mol modstyle ", N_colors_atoms + i + 1, " top cpk"))
+            output.append('\n%s%i%s' % ("mol modstyle ", i + 1, " top cpk"))
             output.append(
-                '\n%s%i%s%i%s' % ("mol modcolor ", N_colors_atoms + i + 1, " top {colorid ", colorID, "}"))
+                '\n%s%i%s%i%s' % ("mol modcolor ", i + 1, " top {colorid ", colorID, "}"))
             output.append(
-                '\n%s%i%s%s%s' % ("mol modselect ", N_colors_atoms + i + 1, " top {index ", int(i), "}\n"))
+                '\n%s%i%s%s%s' % ("mol modselect ", i + 1, " top {index ", int(i), "}\n"))
         f = open(destination_dir / 'atoms.vmd', 'w')
         f.writelines(output)
         f.close()
