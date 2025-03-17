@@ -37,7 +37,7 @@ class TestJEDIHCN:
         assert np.array_equal(test, compare)
 
 
-#Diethyldisulfide with B3LYP/6-31G* in QChem optimized. Distortion with CoGEF on atom
+#Diethyldisulfide: Relaxed and distorted with B3LYP/6-31G* in QChem optimized. Distorted with CoGEF on atom 4 and 6 (terminal carbon atoms) with set atom-distance of 7.35 Ångström (Stretching of 0.79 Å).
 class TestJEDIdiethyldisulfid:
 
     @classmethod
