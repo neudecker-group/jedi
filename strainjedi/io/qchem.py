@@ -259,7 +259,7 @@ class QChem(qchem.QChem):
     def __init__(self, restart=None,
                  ignore_bad_restart_file=FileIOCalculator._deprecated,
                  label='qchem', scratch=None, np=1, nt=1, pbs=False,
-                 basisfile=None, ecpfile=None, atoms=None, distort={},app=None,command=None, **kwargs):
+                 basisfile=None, ecpfile=None, atoms=None, distort={}, opt={}, app=None,command=None, **kwargs):
         """
         The scratch directory, number of processor and threads as well as a few
         other command line options can be set using the arguments explained
@@ -303,6 +303,7 @@ class QChem(qchem.QChem):
         self.basisfile = basisfile
         self.ecpfile = ecpfile
         self.distort = distort
+        self.opt = opt
         self.app = app
     
     def get_vibrations(self, atoms):
@@ -425,7 +426,14 @@ class QChem(qchem.QChem):
                     fileobj.write('   %-25s   %s\n' % (
                         key, prm))
                 fileobj.write('$end\n\n')
-            
+
+            if len(self.opt) > 0:
+                fileobj.write('$opt\n')
+                for key, prm in self.opt.items():
+                    fileobj.write('   %-25s   %s\n' % (
+                        key, prm))
+                fileobj.write('$end\n\n')
+
             if 'alist' in locals():
                 fileobj.write('$alist\n')
                 for a in alist:
