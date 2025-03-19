@@ -43,6 +43,9 @@ def read(filename):
             elif ' Total energy in the final basis set =' in line:
                 convert = ase.units.Hartree
                 energy = float(line.split()[8]) * convert
+            elif ' Final energy is ' in line:
+                convert = ase.units.Hartree
+                energy = float(line.split()[3]) * convert
             elif ' Gradient of SCF Energy' in line:
                 # Read gradient as 3 by N array and transpose at the end
                 gradient = [[] for _ in range(3)]
