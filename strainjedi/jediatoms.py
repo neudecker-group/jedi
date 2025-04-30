@@ -106,7 +106,7 @@ class JediAtoms(Jedi):
 
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
-        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,r_cut,ase_units=self.ase_units)
+        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units)
         if not label:
             filename = 'E_atoms'
             if indices:
@@ -114,7 +114,7 @@ class JediAtoms(Jedi):
         else:
             filename = f"E_atoms_{label}"
         if printout_save is True:
-            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,r_cut,ase_units=self.ase_units,save=True,file=filename)
+            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units,save=True,file=filename)
         pass
 
     def get_bonds(self, mol):
@@ -216,7 +216,7 @@ class JediAtoms(Jedi):
                  E_geometries: float,
                  E_atoms_total: float,
                  proc_geom_atoms: float,
-                 weighting: Optional[Literal['ric','poly']] = None,
+                 weighting: bool = True,
                  r_cut: float = None,
                  ase_units: bool = False,
                  save: bool = False,
@@ -246,7 +246,7 @@ class JediAtoms(Jedi):
         # TODO save proc_e_rims as std decimal number and have print command use .2%
         output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
                       .format("JEDI_ATOMS", E_atoms_total, proc_geom_atoms, **energy_comparison))
-        if weighting == 'poly':
+        if weighting == True:
             output.append('{0:<{column1}}' '{1:^{column2}}' '{2:^{column3}}'
                           .format(f"(r_cut = {r_cut})","","", **energy_comparison))
 
