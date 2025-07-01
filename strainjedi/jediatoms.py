@@ -189,7 +189,7 @@ class JediAtoms(Jedi):
         else:
             B = np.zeros((len(self.indices) ** 2, 3 * len(self.indices)))
         pos0 = self.atoms0.positions.copy()
-        for idx, i in enumerate(indices):
+        for idx, i in enumerate(self.indices):
             for j in range(3):
                 a = self.atoms0.copy()
                 pos = pos0.copy()
@@ -546,8 +546,8 @@ color Axes Labels 32
         # Welcome
         print("\n\nCreating tcl scripts for generating color-coded structures in VMD...")
 
-        # Create an array that stores the atom as the first entry The energy will be added as the second entry.
-        E_array = np.full((len(self.E_atoms)), np.nan)
+        # Create an array that stores the atom as the first entry. The energy will be added as the second entry.
+        E_array = np.full((len(self.indices)), np.nan)
 
         # Create an array that stores only the energies in the coordinate of interest and print some information
         # Get rid of ridiculously small values and treat diatomic molecules explicitly
