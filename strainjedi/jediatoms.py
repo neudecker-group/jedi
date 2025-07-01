@@ -62,12 +62,11 @@ class JediAtoms(Jedi):
         self.ase_units = ase_units
         # get necessary data
         self.indices=np.arange(0,len(self.atoms0))
-        if indices:
-            self.indices=indices
+        self.partial = False
         if weighting is True and r_cut is None:
             raise TypeError("Please specify r_cut when weighting is set to True")
-        delta_q = self.get_delta_q(weighting,r_cut)
-        self.get_b_matrix(weighting,r_cut)
+        delta_q = self.get_delta_q(weighting,r_cut,indices)
+        self.get_b_matrix(weighting,r_cut,indices)
         B = self.B
         self.get_hessian()
         H_cart = self.H  # Hessian of optimized (ground state) structure
@@ -106,7 +105,7 @@ class JediAtoms(Jedi):
 
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
-        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units)
+        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,indices,ase_units=self.ase_units)
         if not label:
             filename = 'E_atoms'
             if indices:
@@ -114,7 +113,7 @@ class JediAtoms(Jedi):
         else:
             filename = f"E_atoms_{label}"
         if printout_save is True:
-            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units,save=True,file=filename)
+            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,indices,ase_units=self.ase_units,save=True,file=filename)
         pass
 
     def get_bonds(self, mol):
@@ -138,9 +137,7 @@ class JediAtoms(Jedi):
 
         return bl
 
-    def weighting(self,delta_q,r_cut,indices=None):
-        if indices is None:
-            indices = np.arange(0,len(self.atoms0))
+    def weighting(self,delta_q,r_cut):
         bonds = self.get_bonds(self.atoms0)
         cutoff = neighborlist.natural_cutoffs(self.atoms0, mult=self.covf)
         r_g1 = max(neighborlist.neighbor_list('d', self.atomsF, cutoff=cutoff))
@@ -152,7 +149,7 @@ class JediAtoms(Jedi):
                 r = (r_gi - r_g1) / (r_cut - r_g1)
                 if row == col:
                     pass
-                elif any((bond[0] == indices[row] and bond[1] == indices[col]) or (bond[0] == indices[col] and bond[1] == indices[row]) for bond in bonds):
+                elif any((bond[0] == self.indices[row] and bond[1] == self.indices[col]) or (bond[0] == self.indices[col] and bond[1] == self.indices[row]) for bond in bonds):
                     delta_q[row][col] *= 1
                 elif r > 1.0:
                     delta_q[row][col] *= 0
@@ -169,24 +166,28 @@ class JediAtoms(Jedi):
             mic = True
         self.d0 = self.atoms0.get_all_distances(mic=mic)
         self.dF = self.atomsF.get_all_distances(mic=mic)
-        if indices:
-            self.d0 = self.d0[np.ix_(indices, indices)]
-            self.dF = self.dF[np.ix_(indices, indices)]
         delta_q = self.dF - self.d0
         if weighting is True:
-            delta_q = self.weighting(delta_q,r_cut,indices).flatten() / Bohr
-        else:
-            delta_q = delta_q.flatten() / Bohr
+            delta_q = self.weighting(delta_q,r_cut)
+        if self.partial is True:
+            delta_q = delta_q[np.ix_(indices, indices)]
+        if self.partial is False and indices != None:
+            run_indices_mask = np.zeros_like(delta_q, dtype=bool)
+            for i in indices:
+                for j in indices:
+                    run_indices_mask[i,j] = True
+            delta_q[~run_indices_mask] = 0
 
-        return delta_q
+        return delta_q.flatten() / Bohr
 
     def get_b_matrix(self,weighting,r_cut,indices=None):
-        if indices is None:
-            indices = np.arange(0,len(self.atomsF))
         mic = False
         if self.atomsF.get_pbc().any() == True:
             mic = True
-        B = np.empty((len(indices)**2, 3 * len(indices)))
+        if self.partial is True:
+            B = np.zeros((len(indices) ** 2, 3 * len(indices)))
+        else:
+            B = np.zeros((len(self.indices) ** 2, 3 * len(self.indices)))
         pos0 = self.atoms0.positions.copy()
         for idx, i in enumerate(indices):
             for j in range(3):
@@ -199,15 +200,24 @@ class JediAtoms(Jedi):
                 a.positions = pos
                 d_plus = a.get_all_distances(mic=mic)
                 delta_q = d_minus - d_plus
-                if len(indices) < len(self.atoms0):
-                    delta_q = delta_q[np.ix_(indices, indices)]
                 if weighting is True:
-                    delta_q = self.weighting(delta_q, r_cut,indices).flatten()
+                    delta_q = self.weighting(delta_q, r_cut)
+                if self.partial is True:
+                    delta_q = delta_q[np.ix_(indices, indices)]
+                if self.partial is False and indices != None:
+                    run_indices_mask = np.zeros_like(delta_q, dtype=bool)
+                    for x in indices:
+                        for y in indices:
+                            run_indices_mask[x, y] = True
+                    delta_q[~run_indices_mask] = 0
+                derivatives = delta_q.flatten() / 0.01
+                if self.partial is True:
+                    derivatives = np.reshape(derivatives, (len(indices) ** 2))
+                    B[0:len(indices) ** 2, idx * 3 + j] = derivatives
                 else:
-                    delta_q = delta_q.flatten()
-                derivatives = delta_q / 0.01
-                derivatives = np.reshape(derivatives, (len(indices)**2))
-                B[0:len(indices)**2, idx * 3 + j] = derivatives
+                    derivatives = np.reshape(derivatives, (len(self.indices)**2))
+                    B[0:len(self.indices)**2, i * 3 + j] = derivatives
+
         self.B = B
 
         return B
@@ -218,12 +228,15 @@ class JediAtoms(Jedi):
                  proc_geom_atoms: float,
                  weighting: bool = True,
                  r_cut: float = None,
+                 indices: Union[List[int]] = None,
                  ase_units: bool = False,
                  save: bool = False,
                  file: str = 'E_atoms'):
         '''
-        Printout of analysis of stored strain energy in the bonds.
+        Printout of analysis of stored strain energy in the atoms.
         '''
+        if indices == None:
+            indices = self.indices
         output = []
         # Header
         output.append("\n")
@@ -261,11 +274,11 @@ class JediAtoms(Jedi):
                 .format("Atom No.", "Element", "Percentage", "Energy (eV)", **atoms_listing))
 
 
-        for i, k in enumerate(self.E_atoms[self.indices]):
+        for i, k in enumerate(self.E_atoms[indices]):
             output.append(
                 '{0:^{column1}}''{1:^{column2}}''{2:^{column3}.2f}''{3:^{column4}.2f}'
-                .format(self.indices[i],
-                        self.atoms0.symbols[self.indices[i]],
+                .format(indices[i],
+                        self.atoms0.symbols[indices[i]],
                         k/E_atoms_total*100,
                         k,
                         **atoms_listing))
@@ -316,14 +329,15 @@ class JediAtoms(Jedi):
         """
         self.ase_units = ase_units
         # get necessary data
-        self.indices=indices
+        self.indices = np.arange(0,len(self.atoms0))
+        self.partial = True
 
         if weighting is True and r_cut is None:
             raise TypeError("Please specify r_cut when weighting is set to True")
         delta_q = self.get_delta_q(weighting, r_cut, indices)
         self.get_hessian()
         H_cart = self.H         #Hessian of optimized (ground state) structure
-        self.get_b_matrix(weighting, r_cut, indices=indices)
+        self.get_b_matrix(weighting, r_cut, indices)
         B = self.B
 
         if len(indices) != H_cart.shape[0]/3:
@@ -364,13 +378,13 @@ class JediAtoms(Jedi):
 
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
-        self.printout(E_geometries, E_atoms_total, proc_geom_atoms, r_cut, ase_units=self.ase_units)
+        self.printout(E_geometries, E_atoms_total, proc_geom_atoms, weighting, r_cut, indices, ase_units=self.ase_units)
         if not label:
             filename = 'E_atoms_partial'
         else:
             filename = f"E_atoms_{label}"
         if printout_save is True:
-            self.printout(E_geometries, E_atoms_total, proc_geom_atoms, r_cut, ase_units=self.ase_units, save=True,
+            self.printout(E_geometries, E_atoms_total, proc_geom_atoms, weighting, r_cut, indices, ase_units=self.ase_units, save=True,
                           file=filename)
 
     def vmd_gen(self,
