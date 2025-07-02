@@ -61,12 +61,16 @@ class JediAtoms(Jedi):
 
         self.ase_units = ase_units
         # get necessary data
-        self.indices=np.arange(0,len(self.atoms0))
+        self.full_indices = np.arange(0,len(self.atoms0))
+        if indices == None:
+            self.indices = np.arange(0,len(self.atoms0))
+        else:
+            self.indices = indices
         self.partial = False
         if weighting is True and r_cut is None:
             raise TypeError("Please specify r_cut when weighting is set to True")
-        delta_q = self.get_delta_q(weighting,r_cut,indices)
-        self.get_b_matrix(weighting,r_cut,indices)
+        delta_q = self.get_delta_q(weighting,r_cut)
+        self.get_b_matrix(weighting,r_cut)
         B = self.B
         self.get_hessian()
         H_cart = self.H  # Hessian of optimized (ground state) structure
@@ -90,10 +94,10 @@ class JediAtoms(Jedi):
 
         H_q = P.dot(B_transp_plus).dot(H_cart).dot(B_plus).dot(P)
 
-        # Get the energy stored in every coordinate
-        E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)
-        self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)
-        E_atoms_total = sum(self.E_atoms[self.indices])
+        # Get the energy stored in every coordinate and total energy
+        E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)        # energy matrix but organised as a list
+        self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)      # summed up the energies corresponding to specific atoms
+        E_atoms_total = sum(self.E_atoms[self.indices])      # only the selected atoms for run with indices
 
         if ase_units==True:
             self.E_atoms*=Hartree
@@ -103,9 +107,10 @@ class JediAtoms(Jedi):
             self.E_atoms *= mol/kcal*Hartree
             E_atoms_total *= mol/kcal*Hartree
 
+        # deviation from ab initio energy
         proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
 
-        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,indices,ase_units=self.ase_units)
+        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units)
         if not label:
             filename = 'E_atoms'
             if indices:
@@ -113,7 +118,7 @@ class JediAtoms(Jedi):
         else:
             filename = f"E_atoms_{label}"
         if printout_save is True:
-            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,indices,ase_units=self.ase_units,save=True,file=filename)
+            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units,save=True,file=filename)
         pass
 
     def get_bonds(self, mol):
@@ -121,8 +126,7 @@ class JediAtoms(Jedi):
 
         '''
         mol = mol
-        indices = np.arange(0,len(self.atoms0))
-
+        indices = self.full_indices
         cutoff = neighborlist.natural_cutoffs(mol, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
         bl = np.vstack(neighborlist.neighbor_list('ij', a=mol, cutoff=cutoff)).T  # determine covalent bonds
         bl = bl[bl[:, 0] < bl[:, 1]]  # remove double mentioned
@@ -149,7 +153,7 @@ class JediAtoms(Jedi):
                 r = (r_gi - r_g1) / (r_cut - r_g1)
                 if row == col:
                     pass
-                elif any((bond[0] == self.indices[row] and bond[1] == self.indices[col]) or (bond[0] == self.indices[col] and bond[1] == self.indices[row]) for bond in bonds):
+                elif any((bond[0] == self.full_indices[row] and bond[1] == self.full_indices[col]) or (bond[0] == self.full_indices[col] and bond[1] == self.full_indices[row]) for bond in bonds):
                     delta_q[row][col] *= 1
                 elif r > 1.0:
                     delta_q[row][col] *= 0
@@ -160,7 +164,7 @@ class JediAtoms(Jedi):
 
         return delta_q
 
-    def get_delta_q(self,weighting,r_cut,indices=None):
+    def get_delta_q(self,weighting,r_cut):
         mic = False
         if self.atomsF.get_pbc().any() == True:
             mic = True
@@ -170,25 +174,22 @@ class JediAtoms(Jedi):
         if weighting is True:
             delta_q = self.weighting(delta_q,r_cut)
         if self.partial is True:
-            delta_q = delta_q[np.ix_(indices, indices)]
-        if self.partial is False and indices != None:
-            run_indices_mask = np.zeros_like(delta_q, dtype=bool)
-            for i in indices:
-                for j in indices:
-                    run_indices_mask[i,j] = True
-            delta_q[~run_indices_mask] = 0
+            delta_q = delta_q[np.ix_(self.indices, self.indices)]
 
         return delta_q.flatten() / Bohr
 
-    def get_b_matrix(self,weighting,r_cut,indices=None):
+    def get_b_matrix(self,weighting,r_cut):
         mic = False
         if self.atomsF.get_pbc().any() == True:
             mic = True
+        indices = self.indices
         if self.partial is True:
-            B = np.zeros((len(indices) ** 2, 3 * len(indices)))
-        else:
             B = np.zeros((len(self.indices) ** 2, 3 * len(self.indices)))
+        else:
+            B = np.zeros((len(self.full_indices) ** 2, 3 * len(self.full_indices)))
         pos0 = self.atoms0.positions.copy()
+        if self.partial is False and len(self.indices) < len(self.full_indices):
+            self.indices = self.full_indices
         for idx, i in enumerate(self.indices):
             for j in range(3):
                 a = self.atoms0.copy()
@@ -203,21 +204,16 @@ class JediAtoms(Jedi):
                 if weighting is True:
                     delta_q = self.weighting(delta_q, r_cut)
                 if self.partial is True:
-                    delta_q = delta_q[np.ix_(indices, indices)]
-                if self.partial is False and indices != None:
-                    run_indices_mask = np.zeros_like(delta_q, dtype=bool)
-                    for x in indices:
-                        for y in indices:
-                            run_indices_mask[x, y] = True
-                    delta_q[~run_indices_mask] = 0
+                    delta_q = delta_q[np.ix_(self.indices, self.indices)]
                 derivatives = delta_q.flatten() / 0.01
                 if self.partial is True:
-                    derivatives = np.reshape(derivatives, (len(indices) ** 2))
-                    B[0:len(indices) ** 2, idx * 3 + j] = derivatives
+                    derivatives = np.reshape(derivatives, (len(self.indices) ** 2))
+                    B[0:len(self.indices) ** 2, idx * 3 + j] = derivatives
                 else:
-                    derivatives = np.reshape(derivatives, (len(self.indices)**2))
-                    B[0:len(self.indices)**2, i * 3 + j] = derivatives
+                    derivatives = np.reshape(derivatives, (len(self.full_indices)**2))
+                    B[0:len(self.full_indices)**2, i * 3 + j] = derivatives
 
+        self.indices = indices
         self.B = B
 
         return B
@@ -274,11 +270,11 @@ class JediAtoms(Jedi):
                 .format("Atom No.", "Element", "Percentage", "Energy (eV)", **atoms_listing))
 
 
-        for i, k in enumerate(self.E_atoms[indices]):
+        for i, k in enumerate(self.E_atoms[self.indices]):
             output.append(
                 '{0:^{column1}}''{1:^{column2}}''{2:^{column3}.2f}''{3:^{column4}.2f}'
-                .format(indices[i],
-                        self.atoms0.symbols[indices[i]],
+                .format(self.indices[i],
+                        self.atoms0.symbols[self.indices[i]],
                         k/E_atoms_total*100,
                         k,
                         **atoms_listing))
@@ -329,15 +325,16 @@ class JediAtoms(Jedi):
         """
         self.ase_units = ase_units
         # get necessary data
-        self.indices = np.arange(0,len(self.atoms0))
+        self.full_indices = np.arange(0,len(self.atoms0))
+        self.indices = indices
         self.partial = True
 
         if weighting is True and r_cut is None:
             raise TypeError("Please specify r_cut when weighting is set to True")
-        delta_q = self.get_delta_q(weighting, r_cut, indices)
+        delta_q = self.get_delta_q(weighting, r_cut)
         self.get_hessian()
         H_cart = self.H         #Hessian of optimized (ground state) structure
-        self.get_b_matrix(weighting, r_cut, indices)
+        self.get_b_matrix(weighting, r_cut)
         B = self.B
 
         if len(indices) != H_cart.shape[0]/3:
@@ -362,9 +359,10 @@ class JediAtoms(Jedi):
 
         # Get the energy stored in every coordinate
         E_M = np.sum(0.5 * (delta_q * H_q).T * delta_q, axis=1)
-        self.E_atoms = np.sum(E_M.reshape(-1, len(indices)), axis=1)
-        E_nan = np.full((len(self.atoms0)), np.nan)
-        E_nan[indices] = self.E_atoms
+        self.E_atoms = np.sum(E_M.reshape(-1, len(self.indices)), axis=1)
+        # NaN values for unused indices
+        E_nan = np.full((len(self.full_indices)), np.nan)
+        E_nan[self.indices] = self.E_atoms
         self.E_atoms = E_nan
         E_atoms_total = np.nansum(self.E_atoms)
 
@@ -547,7 +545,7 @@ color Axes Labels 32
         print("\n\nCreating tcl scripts for generating color-coded structures in VMD...")
 
         # Create an array that stores the atom as the first entry. The energy will be added as the second entry.
-        E_array = np.full((len(self.indices)), np.nan)
+        E_array = np.full((len(self.full_indices)), np.nan)
 
         # Create an array that stores only the energies in the coordinate of interest and print some information
         # Get rid of ridiculously small values and treat diatomic molecules explicitly
@@ -556,7 +554,7 @@ color Axes Labels 32
         if E_atoms.max() <= 0.001:
             E_atoms = np.zeros(len(self.indices))
 
-        if len(E_atoms) > len(self.indices):  # for partial_analysis or run with indices
+        if len(E_atoms) > len(self.indices):  # for run with indices
             E_array[self.indices] = E_atoms[self.indices]
         else:
             E_array = E_atoms
@@ -817,7 +815,7 @@ color Axes Labels 32
 
         # get an E_array with only the information from coordinates of interest
         E_array = np.full((len(self.atoms0)), np.nan)
-        if len(E_atoms) > len(self.indices):  # for partial_analysis or run with indices
+        if len(E_atoms) > len(self.indices):  # for run with indices
             E_array[self.indices] = E_atoms[self.indices]
         else:
             E_array = E_atoms
