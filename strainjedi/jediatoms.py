@@ -179,41 +179,32 @@ class JediAtoms(Jedi):
         return delta_q.flatten() / Bohr
 
     def get_b_matrix(self,weighting,r_cut):
-        mic = False
-        if self.atomsF.get_pbc().any() == True:
-            mic = True
-        indices = self.indices
-        if self.partial is True:
-            B = np.zeros((len(self.indices) ** 2, 3 * len(self.indices)))
-        else:
-            B = np.zeros((len(self.full_indices) ** 2, 3 * len(self.full_indices)))
-        pos0 = self.atoms0.positions.copy()
-        if self.partial is False and len(self.indices) < len(self.full_indices):
-            self.indices = self.full_indices
-        for idx, i in enumerate(self.indices):
-            for j in range(3):
-                a = self.atoms0.copy()
-                pos = pos0.copy()
-                pos[i][j] -= 0.005
-                a.positions = pos
-                d_minus = a.get_all_distances(mic=mic)
-                pos[i][j] += 2 * 0.005
-                a.positions = pos
-                d_plus = a.get_all_distances(mic=mic)
-                delta_q = d_minus - d_plus
-                if weighting is True:
-                    delta_q = self.weighting(delta_q, r_cut)
-                if self.partial is True:
-                    delta_q = delta_q[np.ix_(self.indices, self.indices)]
-                derivatives = delta_q.flatten() / 0.01
-                if self.partial is True:
-                    derivatives = np.reshape(derivatives, (len(self.indices) ** 2))
-                    B[0:len(self.indices) ** 2, idx * 3 + j] = derivatives
-                else:
-                    derivatives = np.reshape(derivatives, (len(self.full_indices)**2))
-                    B[0:len(self.full_indices)**2, i * 3 + j] = derivatives
+        eps = 1e-12
+        pos = self.atoms0.get_positions()
+        N = len(pos)
+        frac = self.atoms0.get_scaled_positions()
+        cell = np.asarray(self.atoms0.get_cell())
+        B = np.zeros((N * N, 3 * N), dtype=float)
 
-        self.indices = indices
+        for i in range(N):
+            for j in range(N):
+                row = i * N + j  # Zeilenindex wie Flattened Distance-Matrix
+                if i == j:
+                    continue  # d_ii = 0, Gradient = 0
+                # Referenz-Delta im Fractional-System
+                diff_frac = frac[j] - frac[i]
+                s = np.round(diff_frac).astype(int)  # Bildwahl aus Referenz
+                diff_frac_min = diff_frac - s
+                delta = diff_frac_min @ cell  # kartesische Differenz
+                d = np.linalg.norm(delta)
+                if d < eps:
+                    continue
+                g = delta / d
+                # Eintragen in die B-Matrix
+                B[row, 3 * i:3 * i + 3] = -g
+                B[row, 3 * j:3 * j + 3] = +g
+                # alle anderen Spalten bleiben 0
+
         self.B = B
 
         return B
