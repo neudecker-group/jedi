@@ -201,8 +201,8 @@ class JediAtoms(Jedi):
                     continue
                 g = delta / d
                 # Eintragen in die B-Matrix
-                B[row, 3 * i:3 * i + 3] = -g
-                B[row, 3 * j:3 * j + 3] = +g
+                B[row, 3 * i:3 * i + 3] = +g
+                B[row, 3 * j:3 * j + 3] = -g
                 # alle anderen Spalten bleiben 0
 
         self.B = B
