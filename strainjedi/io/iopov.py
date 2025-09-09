@@ -119,6 +119,8 @@ class POV:
             self._radii = covalent_radii[self._numbers] * self._radii
         if self._scale_radii is None:
            self._scale_radii=[0.5]*len(self._atoms)
+        else:
+            self._scale_radii = [self._scale_radii] * len(self._atoms)
         if self._aspectratio is None:
             self._aspectratio = (np.linalg.norm(self._camera_right_up[0]) /
                                  np.linalg.norm(self._camera_right_up[1]))
@@ -207,6 +209,8 @@ class POV:
         if (type(self._tex)!=list) and (type(self._tex)!=np.ndarray):
             legend_tex = self._tex
             self._tex=[self._tex] * len(self._atoms)
+        else:
+            legend_tex = 'rubber'
         for atom in self._atoms:
             w('atom(<%.2f,%.2f,%.2f>, %.2f, rgb <%.2f,%.2f,%.2f>, %s) // #%i'
               % (atom.x, atom.y, atom.z,

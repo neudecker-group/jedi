@@ -95,7 +95,7 @@ class JediAtoms(Jedi):
         H_q = P.dot(B_transp_plus).dot(H_cart).dot(B_plus).dot(P)
 
         # Get the energy stored in every coordinate and total energy
-        E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)        # energy matrix but organised as a list
+        E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)        # energy of each distance matrix element but organised as a list
         self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)      # summed up the energies corresponding to specific atoms
         E_atoms_total = sum(self.E_atoms[self.indices])      # only the selected atoms for run with indices
 
@@ -337,7 +337,7 @@ class JediAtoms(Jedi):
         self.get_b_matrix(weighting, r_cut)
         B = self.B
 
-        if len(indices) != H_cart.shape[0]/3:
+        if len(self.indices) != H_cart.shape[0]/3:
             raise ValueError('Hessian has not the fitting shape')
 
         try:
@@ -907,7 +907,7 @@ color Axes Labels 32
             tex = [tex] * len(atoms_f)
             scales = np.array([0.5] * len(atoms_f))
             for idx in metal:
-                tex[idx] = 'chrome'
+                tex[idx] = 'vmd'
                 scales[idx] = 1.0
 
         cell = None
@@ -917,13 +917,13 @@ color Axes Labels 32
             center = np.mean(positions, axis=0)
             if box and pbc_flag is True:
                 cell = atoms_rotated.cell
-                center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
+                # center = 0.5 * cell[0] + 0.5 * cell[1] + 0.5 * cell[2]
             camwidth = [(-(builtins.max(atoms_rotated.positions[:, 0]) - center[0]) - 1, 0., 0.),
                         (0., builtins.max(atoms_rotated.positions[:, 1]) - center[1] + 1, 0.)]
-            if cell is not None:
-                camwidth = [
-                    (-0.5 * abs(center[0] - builtins.min(atoms_rotated.positions[:, 0]) + 1.0), 0., 0.),
-                    (0., 0.5 * abs(center[1] - builtins.max(atoms_rotated.positions[:, 1])) + 1.0, 0.)]
+            # if cell is not None:
+            #     camwidth = [
+            #         (-0.5 * abs(center[0] - builtins.min(atoms_rotated.positions[:, 0]) + 1.0), 0., 0.),
+            #         (0., 0.5 * abs(center[1] - builtins.max(atoms_rotated.positions[:, 1])) + 1.0, 0.)]
             location = center.copy()
             location[2] += 60. * zoom
             direction = center.copy()

@@ -304,10 +304,10 @@ def hybrid_pov_gen(jedi: Jedi = None,
         pbc_bond_E_array = np.delete(bond_E_array, np.where(np.array(pbc_bonds_mask))[0], axis=0)
         bonds = np.delete(bonds, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
         bond_E_array = np.delete(bond_E_array, np.where(~np.array(pbc_bonds_mask))[0], axis=0)
-        custom_pbc_bonds = custom_bonds[~np.array(custom_pbc_bonds_mask)]
-        custom_pbc_bond_E_array = np.delete(custom_E_array, np.where(np.array(custom_pbc_bonds_mask))[0], axis=0)
-        custom_bonds = np.delete(custom_bonds, np.where(~np.array(custom_pbc_bonds_mask))[0], axis=0)
-        custom_E_array = np.delete(custom_E_array, np.where(~np.array(custom_pbc_bonds_mask))[0], axis=0)
+        # custom_pbc_bonds = custom_bonds[~np.array(custom_pbc_bonds_mask)]
+        # custom_pbc_bond_E_array = np.delete(custom_E_array, np.where(np.array(custom_pbc_bonds_mask))[0], axis=0)
+        # custom_bonds = np.delete(custom_bonds, np.where(~np.array(custom_pbc_bonds_mask))[0], axis=0)
+        # custom_E_array = np.delete(custom_E_array, np.where(~np.array(custom_pbc_bonds_mask))[0], axis=0)
 
     ## jediatoms ##
     E_atoms = jediatoms.E_atoms
@@ -380,22 +380,22 @@ def hybrid_pov_gen(jedi: Jedi = None,
         bond_colors = np.append(bond_colors, bond_color)
         bond_colors = bond_colors.reshape(-1, 3)
 
-    if pbc_flag == True:
-        for i, b in enumerate(custom_pbc_bond_E_array):
-            if np.isnan(b[2]):
-                bond_color = (0.000, 0.000, 0.000)  # black
-                for idx in jediatoms.indices:
-                    if b[0] == idx or b[1] == idx:
-                        bond_color = color_unanalysed
-            else:
-                if man_strain is None:
-                    normalized_energy = b[2] / max_energy
-                else:
-                    normalized_energy = b[2] / float(man_strain)
-                color = cmap(normalized_energy)
-                bond_color = (color[0], color[1], color[2])
-            bond_colors = np.append(bond_colors, bond_color)
-            bond_colors = bond_colors.reshape(-1, 3)
+    # if pbc_flag == True:
+    #     for i, b in enumerate(custom_pbc_bond_E_array):
+    #         if np.isnan(b[2]):
+    #             bond_color = (0.000, 0.000, 0.000)  # black
+    #             for idx in jediatoms.indices:
+    #                 if b[0] == idx or b[1] == idx:
+    #                     bond_color = color_unanalysed
+    #         else:
+    #             if man_strain is None:
+    #                 normalized_energy = b[2] / max_energy
+    #             else:
+    #                 normalized_energy = b[2] / float(man_strain)
+    #             color = cmap(normalized_energy)
+    #             bond_color = (color[0], color[1], color[2])
+    #         bond_colors = np.append(bond_colors, bond_color)
+    #         bond_colors = bond_colors.reshape(-1, 3)
 
     ## atom colors ##
     # get atom color for specific energy value from color gradient
@@ -592,45 +592,45 @@ def hybrid_pov_gen(jedi: Jedi = None,
               f"{atom_1_max_energy} and {atom_2_max_energy}: {float(max_energy_j):.3f} {unit}.")
         print(f"Maximum energy in  atom {int(np.nanargmax(E_jediatoms[0],axis=0))}: {float(max_energy_ja):.3f} {unit}.")
 
-    printout(jedi.E_geometries,jedi.E_RIMs_total,jediatoms.E_atoms_total,jedi.proc_geom_RIMs,jediatoms.proc_geom_atoms)
+    # printout(jedi.E_geometries,jedi.E_RIMs_total,jediatoms.E_atoms_total,jedi.proc_geom_RIMs,jediatoms.proc_geom_atoms)
              # jedi.rim_list,jedi.atomsF,jedi.proc_E_RIMs,jedi.E_RIMs,)
 
-def printout(E_geometries: float,
-             E_RIMs_total: float,
-             E_atoms_total: float,
-             proc_geom_RIMs: float,
-             proc_geom_atoms: float,
-             ase_units: bool = False,
-             file: str = 'E_hybrid'):
-    '''
-    Printout of analysis of stored strain energy in the bonds and atoms.
-    '''
-    output = []
-    # Header
-    output.append("\n")
-    output.append('{:^{header}}'.format("************************************************", **header))
-    output.append('{:^{header}}'.format("*                 JEDI ANALYSIS                *", **header))
-    output.append('{:^{header}}'.format("*       Judgement of Energy DIstribution       *", **header))
-    output.append('{:^{header}}'.format("************************************************", **header))
-    output.append('{:^{header}}'.format(f"version {__version__}\n", **header))
-
-    # Comparison of total energies
-    if not ase_units:
-        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
-                      .format(" ", "Strain Energy (kcal/mol)", "Deviation (%)", **energy_comparison))
-    elif ase_units:
-        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
-                      .format(" ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison))
-
-    output.append('{0:<{column1}}' '{1:^{column2}.4f}' '{2:^{column3}}'
-                  .format("Ab Initio", E_geometries, "-", **energy_comparison))
-    # TODO save proc_e_rims as std decimal number and have print command use .2%
-    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
-                  .format("JEDI", E_RIMs_total, proc_geom_RIMs, **energy_comparison))
-    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
-                  .format(f"JEDI_ATOMS", E_atoms_total, proc_geom_atoms, **energy_comparison))
-    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
-                  .format("Hybrid", E_RIMs_total+E_atoms_total, proc_geom_RIMs+proc_geom_atoms, **energy_comparison))
+# def printout(E_geometries: float,
+#              E_RIMs_total: float,
+#              E_atoms_total: float,
+#              proc_geom_RIMs: float,
+#              proc_geom_atoms: float,
+#              ase_units: bool = False,
+#              file: str = 'E_hybrid'):
+#     '''
+#     Printout of analysis of stored strain energy in the bonds and atoms.
+#     '''
+#     output = []
+#     # Header
+#     output.append("\n")
+#     output.append('{:^{header}}'.format("************************************************", **header))
+#     output.append('{:^{header}}'.format("*                 JEDI ANALYSIS                *", **header))
+#     output.append('{:^{header}}'.format("*       Judgement of Energy DIstribution       *", **header))
+#     output.append('{:^{header}}'.format("************************************************", **header))
+#     output.append('{:^{header}}'.format(f"version {__version__}\n", **header))
+#
+#     # Comparison of total energies
+#     if not ase_units:
+#         output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+#                       .format(" ", "Strain Energy (kcal/mol)", "Deviation (%)", **energy_comparison))
+#     elif ase_units:
+#         output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+#                       .format(" ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison))
+#
+#     output.append('{0:<{column1}}' '{1:^{column2}.4f}' '{2:^{column3}}'
+#                   .format("Ab Initio", E_geometries, "-", **energy_comparison))
+#     # TODO save proc_e_rims as std decimal number and have print command use .2%
+#     output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+#                   .format("JEDI", E_RIMs_total, proc_geom_RIMs, **energy_comparison))
+#     output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+#                   .format(f"JEDI_ATOMS", E_atoms_total, proc_geom_atoms, **energy_comparison))
+#     output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
+#                   .format("Hybrid", E_RIMs_total+E_atoms_total, proc_geom_RIMs+proc_geom_atoms, **energy_comparison))
 
     # # strain in the bonds
     # if not ase_units:
@@ -676,5 +676,5 @@ def printout(E_geometries: float,
     #                 k,
     #                 **atoms_listing))
 
-    with open(file, 'w') as f:
-        f.writelines("\n".join(output))
+    # with open(file, 'w') as f:
+    #     f.writelines("\n".join(output))
