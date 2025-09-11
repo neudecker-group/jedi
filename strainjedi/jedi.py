@@ -767,7 +767,7 @@ class Jedi:
             def get_B_matrix_angles_derivatives(u,v):
                 angle = ase.geometry.get_angles(u,v) # angle between v and u
                 tolerance = 5e-6
-                if np.abs(angle - np.pi) < tolerance or np.abs(angle) < tolerance:   #an auxilliary vector is used if linear angles are existing
+                if np.abs(np.radians(angle) - np.pi) < tolerance or np.abs(np.radians(angle)) < tolerance:   #an auxilliary vector is used if linear angles are existing
                     (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v],cell=None,pbc=None)
                     nu = u / lu
                     nv = v / lv
