@@ -359,6 +359,8 @@ class Jedi:
         self.ase_units = False
         self.vdwf=0.9
         self.covf=1.3
+        self.qF = None  # bond lengths and angles in Bohr and degree in distorted molecule
+        self.q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
 
  #       if np.any(np.round(atoms0.cell, 4) != np.round(atomsF.cell, 4)): #jedi does not work for pbc systems that change their cell shape
 #            raise GeneratorExit
@@ -930,6 +932,9 @@ class Jedi:
             pass
 
         self.delta_q = delta_q # TODO make void function setting self.delta_q
+
+        self.qF = qF
+        self.q0 = q0
 
         return delta_q
 
