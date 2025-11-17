@@ -89,28 +89,28 @@
   <h1>Source code for strainjedi.jedi</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;A class for Jedi analysis&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="k">as</span> <span class="nn">cm</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
-<span class="kn">import</span> <span class="nn">ase.neighborlist</span>
-<span class="kn">import</span> <span class="nn">ase.geometry</span>
-<span class="kn">from</span> <span class="nn">ase.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">from</span> <span class="nn">ase.atoms</span> <span class="kn">import</span> <span class="n">Atom</span>
-<span class="kn">from</span> <span class="nn">ase.utils</span> <span class="kn">import</span> <span class="n">jsonable</span>
-<span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Hartree</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">mol</span><span class="p">,</span> <span class="n">kcal</span>
-<span class="kn">from</span> <span class="nn">strainjedi.colors</span> <span class="kn">import</span> <span class="n">colors</span>
-<span class="kn">from</span> <span class="nn">strainjedi.print_config</span> <span class="kn">import</span> <span class="n">header</span><span class="p">,</span> <span class="n">energy_comparison</span><span class="p">,</span> <span class="n">rims_listing</span>
-<span class="kn">from</span> <span class="nn">strainjedi.quotes</span> <span class="kn">import</span> <span class="n">quotes</span>
-<span class="kn">from</span> <span class="nn">strainjedi</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.cm</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.neighborlist</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.geometry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.atoms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.atoms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atom</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">jsonable</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hartree</span><span class="p">,</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">mol</span><span class="p">,</span> <span class="n">kcal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">colors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.print_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">header</span><span class="p">,</span> <span class="n">energy_comparison</span><span class="p">,</span> <span class="n">rims_listing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.quotes</span><span class="w"> </span><span class="kn">import</span> <span class="n">quotes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 
 
-<div class="viewcode-block" id="jedi_analysis"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.jedi_analysis">[docs]</a><span class="k">def</span> <span class="nf">jedi_analysis</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">H_cart</span><span class="p">,</span><span class="n">delta_q</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span><span class="n">printout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="jedi_analysis"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.jedi_analysis">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">jedi_analysis</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span><span class="n">rim_list</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">H_cart</span><span class="p">,</span><span class="n">delta_q</span><span class="p">,</span><span class="n">E_geometries</span><span class="p">,</span><span class="n">printout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Analysis of strain energy stored in redundant internal coordinates.</span>
 
@@ -199,7 +199,7 @@
     <span class="k">return</span> <span class="n">proc_E_RIMs</span><span class="p">,</span><span class="n">E_RIMs</span><span class="p">,</span> <span class="n">E_RIMs_total</span><span class="p">,</span> <span class="n">proc_geom_RIMs</span><span class="p">,</span><span class="n">delta_q</span></div>
 
 
-<div class="viewcode-block" id="jedi_printout"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.jedi_printout">[docs]</a><span class="k">def</span> <span class="nf">jedi_printout</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
+<div class="viewcode-block" id="jedi_printout"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.jedi_printout">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">jedi_printout</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
                   <span class="n">rim_list</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
                   <span class="n">delta_q</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                   <span class="n">E_geometries</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -292,7 +292,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">quotes</span><span class="p">())</span></div>
 
 
-<div class="viewcode-block" id="jedi_printout_bonds"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.jedi_printout_bonds">[docs]</a><span class="k">def</span> <span class="nf">jedi_printout_bonds</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
+<div class="viewcode-block" id="jedi_printout_bonds"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.jedi_printout_bonds">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">jedi_printout_bonds</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span>
                         <span class="n">rim_list</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
                         <span class="n">E_geometries</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                         <span class="n">E_RIMs_total</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -377,7 +377,7 @@
         <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="get_hbonds"><a class="viewcode-back" href="../../utils/hbond.html#strainjedi.jedi.get_hbonds">[docs]</a><span class="k">def</span> <span class="nf">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">covf</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span><span class="n">vdwf</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+<div class="viewcode-block" id="get_hbonds"><a class="viewcode-back" href="../../utils/hbond.html#strainjedi.jedi.get_hbonds">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">covf</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span><span class="n">vdwf</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Get all hbonds in a structure.</span>
 <span class="sd">    Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90° and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.</span>
@@ -392,7 +392,7 @@
 
     <span class="n">bl</span><span class="o">=</span><span class="n">bl</span><span class="p">[</span><span class="n">bl</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;</span><span class="n">bl</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]]</span>      <span class="c1">#remove double mentioned</span>
     <span class="n">bl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">bl</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="kn">from</span> <span class="nn">ase.data.vdw</span> <span class="kn">import</span> <span class="n">vdw_radii</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">ase.data.vdw</span><span class="w"> </span><span class="kn">import</span> <span class="n">vdw_radii</span>
     <span class="n">hpartner</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">,</span><span class="s1">&#39;O&#39;</span><span class="p">,</span><span class="s1">&#39;F&#39;</span><span class="p">]</span>
     <span class="n">hpartner_ls</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">hcutoff</span> <span class="o">=</span> <span class="p">{(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span><span class="s1">&#39;N&#39;</span><span class="p">):</span><span class="n">vdwf</span><span class="o">*</span><span class="p">(</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">vdw_radii</span><span class="p">[</span><span class="mi">7</span><span class="p">]),</span>
@@ -421,8 +421,8 @@
     <span class="k">return</span> <span class="n">hbond_ls</span></div>
 
 <div class="viewcode-block" id="Jedi"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi">[docs]</a><span class="nd">@jsonable</span><span class="p">(</span><span class="s1">&#39;jedi&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Jedi</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms0</span><span class="p">,</span> <span class="n">atomsF</span><span class="p">,</span> <span class="n">modes</span><span class="p">):</span> <span class="c1">#indices=None</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Jedi</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms0</span><span class="p">,</span> <span class="n">atomsF</span><span class="p">,</span> <span class="n">modes</span><span class="p">):</span> <span class="c1">#indices=None</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 
 <span class="sd">        atoms0: class</span>
@@ -452,7 +452,7 @@
  <span class="c1">#       if np.any(np.round(atoms0.cell, 4) != np.round(atomsF.cell, 4)): #jedi does not work for pbc systems that change their cell shape</span>
 <span class="c1">#            raise GeneratorExit</span>
 
-<div class="viewcode-block" id="Jedi.todict"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.todict">[docs]</a>    <span class="k">def</span> <span class="nf">todict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<div class="viewcode-block" id="Jedi.todict"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.todict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">todict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;make it saveable with .write()</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -469,7 +469,7 @@
                 <span class="s1">&#39;proc_E_RIMS&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc_E_RIMs</span><span class="p">,</span>
                 <span class="s1">&#39;custom_bonds&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span><span class="p">}</span></div>
 <div class="viewcode-block" id="Jedi.fromdict"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.fromdict">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">fromdict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;Jedi&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fromdict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;Jedi&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;make it readable with .read()</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -527,7 +527,7 @@
                                                 <span class="nb">list</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">cl</span></div>
 
-<div class="viewcode-block" id="Jedi.run"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">printout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.run"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.run">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">printout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the analysis. Calls all necessary functions to get the needed values.</span>
 
 <span class="sd">        Args:</span>
@@ -574,7 +574,7 @@
 
 
 
-<div class="viewcode-block" id="Jedi.get_rims"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_rims">[docs]</a>    <span class="k">def</span> <span class="nf">get_rims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mol</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.get_rims"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_rims">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_rims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mol</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Gets the redundant internal coordinates</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -739,7 +739,7 @@
 
         <span class="k">return</span> <span class="n">rim_list</span></div>
 
-<div class="viewcode-block" id="Jedi.get_common_rims"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_common_rims">[docs]</a>    <span class="k">def</span> <span class="nf">get_common_rims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.get_common_rims"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_common_rims">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_common_rims</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Get only the RICs in both structures bond breaks cannot be analysed logically</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -761,14 +761,14 @@
 
         <span class="k">return</span> <span class="n">rim_atoms0</span></div>
 
-<div class="viewcode-block" id="Jedi.get_hessian"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_hessian">[docs]</a>    <span class="k">def</span> <span class="nf">get_hessian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.get_hessian"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_hessian">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_hessian</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Calls the hessian from the VibrationsData object</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">hessian</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modes</span><span class="o">.</span><span class="n">_hessian2d</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">H</span> <span class="o">=</span> <span class="n">hessian</span> <span class="o">/</span><span class="p">(</span><span class="n">Hartree</span><span class="o">/</span><span class="n">Bohr</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hessian</span></div>
 
-<div class="viewcode-block" id="Jedi.get_b_matrix"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_b_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">get_b_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.get_b_matrix"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_b_matrix">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_b_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -853,7 +853,7 @@
 
 
 
-            <span class="k">def</span> <span class="nf">get_B_matrix_angles_derivatives</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">get_B_matrix_angles_derivatives</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">):</span>
                 <span class="n">angle</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_angles</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="c1"># angle between v and u</span>
 
                 <span class="k">if</span> <span class="n">angle</span> <span class="o">==</span> <span class="mi">180</span> <span class="ow">or</span> <span class="n">angle</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>   <span class="c1">#an auxilliary vector is used if linear angles are existing</span>
@@ -951,7 +951,7 @@
 
         <span class="k">return</span> <span class="n">B</span></div>
 
-<div class="viewcode-block" id="Jedi.get_energies"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_energies">[docs]</a>    <span class="k">def</span> <span class="nf">get_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.get_energies"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_energies">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Calls the energies of the Atoms objects.</span>
 
 <span class="sd">            Returns: </span>
@@ -967,7 +967,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">energies</span><span class="o">=</span><span class="p">[</span><span class="n">deltaE</span><span class="p">,</span> <span class="n">eF</span><span class="p">,</span> <span class="n">e0</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">deltaE</span><span class="p">,</span> <span class="n">eF</span><span class="p">,</span> <span class="n">e0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Jedi.get_delta_q"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_delta_q">[docs]</a>    <span class="k">def</span> <span class="nf">get_delta_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.get_delta_q"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.get_delta_q">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_delta_q</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;get the strain in RICs substracts the values of the relaxed structure from the strained structure</span>
 <span class="sd">        </span>
 <span class="sd">            Returns: </span>
@@ -1022,7 +1022,7 @@
 
         <span class="k">return</span> <span class="n">delta_q</span></div>
 
-<div class="viewcode-block" id="Jedi.vmd_gen"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.vmd_gen">[docs]</a>    <span class="k">def</span> <span class="nf">vmd_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="Jedi.vmd_gen"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.vmd_gen">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">vmd_gen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                 <span class="n">des_colors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="n">box</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                 <span class="n">man_strain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1268,7 +1268,7 @@
             <span class="n">bond_E_array_pbc</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))]</span>
             <span class="n">bond_E_array_pbc_trans</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))]</span> <span class="c1"># initialize list</span>
 
-            <span class="kn">from</span> <span class="nn">ase.data.vdw</span> <span class="kn">import</span> <span class="n">vdw_radii</span> <span class="c1"># for long range bonds</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">ase.data.vdw</span><span class="w"> </span><span class="kn">import</span> <span class="n">vdw_radii</span> <span class="c1"># for long range bonds</span>
             <span class="n">cutoff</span> <span class="o">=</span> <span class="p">[</span><span class="n">vdw_radii</span><span class="p">[</span><span class="n">atom</span><span class="o">.</span><span class="n">number</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vdwf</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="p">]</span>
             <span class="n">ex_bl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">neighbor_list</span><span class="p">(</span><span class="s1">&#39;ij&#39;</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">cutoff</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
             <span class="n">ex_bl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">ex_bl</span><span class="p">,</span> <span class="n">ase</span><span class="o">.</span><span class="n">neighborlist</span><span class="o">.</span><span class="n">neighbor_list</span><span class="p">(</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">atomsF</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">cutoff</span><span class="p">)))</span>
@@ -1642,9 +1642,9 @@
 
             <span class="c1">#highresolution colorbar with matplotlib</span>
                 <span class="c1"># TODO move import statements to top of file</span>
-                <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-                <span class="kn">from</span> <span class="nn">matplotlib.colorbar</span> <span class="kn">import</span> <span class="n">ColorbarBase</span>
-                <span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">LinearSegmentedColormap</span><span class="p">,</span> <span class="n">Normalize</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colorbar</span><span class="w"> </span><span class="kn">import</span> <span class="n">ColorbarBase</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearSegmentedColormap</span><span class="p">,</span> <span class="n">Normalize</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">rc</span><span class="p">(</span><span class="s1">&#39;font&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
                 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
                 <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
@@ -1689,7 +1689,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Total energy custom bonds: </span><span class="si">{</span><span class="n">custom_E</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Jedi.partial_analysis"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.partial_analysis">[docs]</a>    <span class="k">def</span> <span class="nf">partial_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.partial_analysis"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.partial_analysis">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">partial_analysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="p">,</span><span class="n">ase_units</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Analyse a substructure with given indices. </span>
 
@@ -1751,7 +1751,7 @@
 
 
 
-<div class="viewcode-block" id="Jedi.post_process"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="p">):</span>             <span class="c1">#a function to get segments of all full analysis for better understanding of local strain</span>
+<div class="viewcode-block" id="Jedi.post_process"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.post_process">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">indices</span><span class="p">):</span>             <span class="c1">#a function to get segments of all full analysis for better understanding of local strain</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        get only the values of RICs inside a defined substructure</span>
 
@@ -1798,7 +1798,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span><span class="o">=</span><span class="n">custom_bonds</span> <span class="c1">#restore the user input</span>
         <span class="k">pass</span></div>
 
-    <span class="k">def</span> <span class="nf">add_custom_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bonds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_custom_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bonds</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">custom_bonds</span> <span class="o">=</span> <span class="n">bonds</span>   <span class="c1"># additional bonds for analysis of non-covalent interactions</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;Add custom bonds after creating the object.</span>
 <span class="sd">        </span>
@@ -1807,7 +1807,7 @@
 <span class="sd">                2Darray</span>
 <span class="sd">            &#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="Jedi.set_bond_params"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.set_bond_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_bond_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">covf</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span><span class="n">vdwf</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+<div class="viewcode-block" id="Jedi.set_bond_params"><a class="viewcode-back" href="../../jedi.html#strainjedi.jedi.Jedi.set_bond_params">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">set_bond_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">covf</span><span class="o">=</span><span class="mf">1.3</span><span class="p">,</span><span class="n">vdwf</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            covf: </span>

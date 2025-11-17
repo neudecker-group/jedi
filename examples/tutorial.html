@@ -92,10 +92,10 @@
   <section id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline"></a></h1>
 <p>A simple two atoms system of N<sub>2</sub> is shown as example. With the following code a N<sub>2</sub> molecule is first optimized, then a frequency analysis is performed and lastly, the molecule is stretched.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.emt</span> <span class="kn">import</span> <span class="n">EMT</span>
-<span class="kn">from</span> <span class="nn">ase.optimize</span> <span class="kn">import</span> <span class="n">BFGS</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations</span> <span class="kn">import</span> <span class="n">Vibrations</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ase</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.calculators.emt</span><span class="w"> </span><span class="kn">import</span> <span class="n">EMT</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">BFGS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vibrations</span>
 <span class="c1">#create the structure</span>
 <span class="n">n2</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="s1">&#39;N2&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)])</span>
 <span class="c1">#define the code/metod that is responsible for the electronic structure calculation</span>
@@ -113,7 +113,7 @@
 <span class="n">n2l</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">EMT</span><span class="p">()</span>
 <span class="n">n2l</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
 
-<span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span>
 
 <span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">n2l</span><span class="p">,</span> <span class="n">hessian</span><span class="p">)</span>
 

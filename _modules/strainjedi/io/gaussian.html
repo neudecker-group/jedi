@@ -87,19 +87,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for strainjedi.io.gaussian</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ase.io.gaussian</span> <span class="kn">import</span> <span class="n">_compare_merge_configs</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">ase.atoms</span> <span class="kn">import</span> <span class="n">Atoms</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.singlepoint</span> <span class="kn">import</span> <span class="n">SinglePointCalculator</span>
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Hartree</span><span class="p">,</span> <span class="n">Bohr</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">ase.units</span> <span class="kn">import</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">Hartree</span>
-<span class="kn">from</span> <span class="nn">ase.io.gaussian</span> <span class="kn">import</span> <span class="n">_format_output_type</span><span class="p">,</span> <span class="n">_xc_to_method</span><span class="p">,</span> <span class="n">_check_problem_methods</span><span class="p">,</span><span class="n">_pop_link0_params</span><span class="p">,</span><span class="n">_format_addsec</span><span class="p">,</span><span class="n">_format_basis_set</span><span class="p">,</span><span class="n">_format_method_basis</span><span class="p">,</span><span class="n">_format_route_params</span><span class="p">,</span><span class="n">_get_extra_section_params</span><span class="p">,</span><span class="n">_get_molecule_spec</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.calculator</span> <span class="kn">import</span> <span class="n">FileIOCalculator</span>
-<span class="kn">import</span> <span class="nn">ase.calculators.gaussian</span> <span class="k">as</span> <span class="nn">gaussian</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ase.io.gaussian</span><span class="w"> </span><span class="kn">import</span> <span class="n">_compare_merge_configs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.atoms</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.calculators.singlepoint</span><span class="w"> </span><span class="kn">import</span> <span class="n">SinglePointCalculator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hartree</span><span class="p">,</span> <span class="n">Bohr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bohr</span><span class="p">,</span> <span class="n">Hartree</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.io.gaussian</span><span class="w"> </span><span class="kn">import</span> <span class="n">_format_output_type</span><span class="p">,</span> <span class="n">_xc_to_method</span><span class="p">,</span> <span class="n">_check_problem_methods</span><span class="p">,</span><span class="n">_pop_link0_params</span><span class="p">,</span><span class="n">_format_addsec</span><span class="p">,</span><span class="n">_format_basis_set</span><span class="p">,</span><span class="n">_format_method_basis</span><span class="p">,</span><span class="n">_format_route_params</span><span class="p">,</span><span class="n">_get_extra_section_params</span><span class="p">,</span><span class="n">_get_molecule_spec</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.calculators.calculator</span><span class="w"> </span><span class="kn">import</span> <span class="n">FileIOCalculator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.calculators.gaussian</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gaussian</span>
 
 <span class="n">_re_l716</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^\s*\(Enter .+l716.exe\)$&#39;</span><span class="p">)</span>
 <span class="n">_re_forceblock</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^\s*Center\s+Atomic\s+Forces\s+\S+\s*$&#39;</span><span class="p">)</span>
@@ -108,7 +108,7 @@
 <span class="p">)</span>
         
 
-<div class="viewcode-block" id="read_gaussian_out"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.read_gaussian_out">[docs]</a><span class="k">def</span> <span class="nf">read_gaussian_out</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">index</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="read_gaussian_out"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.read_gaussian_out">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">read_gaussian_out</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">index</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    modified for reading gaussian geometry optimizations</span>
 <span class="sd">   label: str</span>
@@ -230,7 +230,7 @@
         
         <span class="k">return</span> <span class="n">configs</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="get_vibrations"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.get_vibrations">[docs]</a><span class="k">def</span> <span class="nf">get_vibrations</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="get_vibrations"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.get_vibrations">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">get_vibrations</span><span class="p">(</span><span class="n">label</span><span class="p">,</span><span class="n">atoms</span><span class="p">,</span><span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Read hessian.</span>
 
@@ -279,7 +279,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">write_gaussian_in</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_gaussian_in</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;energy&#39;</span><span class="p">],</span>
                       <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fitting_basis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">output_type</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">basisfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basis_set</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">xc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mult</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -459,10 +459,10 @@
 
 
 
-<span class="k">class</span> <span class="nc">GaussianDynamics</span><span class="p">(</span><span class="n">gaussian</span><span class="o">.</span><span class="n">GaussianDynamics</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GaussianDynamics</span><span class="p">(</span><span class="n">gaussian</span><span class="o">.</span><span class="n">GaussianDynamics</span><span class="p">):</span>
 
 
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">calc_old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">calc</span>
         <span class="n">params_old</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
 
@@ -492,7 +492,7 @@
         <span class="k">return</span> <span class="n">converged</span>
 
 
-<div class="viewcode-block" id="GaussianOptimizer"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.GaussianOptimizer">[docs]</a><span class="k">class</span> <span class="nc">GaussianOptimizer</span><span class="p">(</span><span class="n">GaussianDynamics</span><span class="p">):</span>
+<div class="viewcode-block" id="GaussianOptimizer"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.GaussianOptimizer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">GaussianOptimizer</span><span class="p">(</span><span class="n">GaussianDynamics</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Allowing ase to use Gaussian geometry optimizations</span>
 <span class="sd">    </span>
@@ -504,7 +504,7 @@
     <span class="p">}</span></div>
 
 
-<span class="k">class</span> <span class="nc">GaussianIRC</span><span class="p">(</span><span class="n">GaussianDynamics</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GaussianIRC</span><span class="p">(</span><span class="n">GaussianDynamics</span><span class="p">):</span>
     <span class="n">keyword</span> <span class="o">=</span> <span class="s1">&#39;irc&#39;</span>
     <span class="n">special_keywords</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;direction&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span>
@@ -512,15 +512,15 @@
     <span class="p">}</span>
 
 
-<div class="viewcode-block" id="Gaussian"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.Gaussian">[docs]</a><span class="k">class</span> <span class="nc">Gaussian</span><span class="p">(</span><span class="n">gaussian</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">):</span>
+<div class="viewcode-block" id="Gaussian"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.Gaussian">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Gaussian</span><span class="p">(</span><span class="n">gaussian</span><span class="o">.</span><span class="n">Gaussian</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Modified Gaussian calculator using modified parsers&#39;&#39;&#39;</span>
 
-<div class="viewcode-block" id="Gaussian.write_input"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.Gaussian.write_input">[docs]</a>    <span class="k">def</span> <span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system_changes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Gaussian.write_input"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.Gaussian.write_input">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system_changes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">FileIOCalculator</span><span class="o">.</span><span class="n">write_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">system_changes</span><span class="p">)</span>
         <span class="n">write_gaussian_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.com&#39;</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Gaussian.read_results"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.Gaussian.read_results">[docs]</a>    <span class="k">def</span> <span class="nf">read_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Gaussian.read_results"><a class="viewcode-back" href="../../../utils/gaussian.html#strainjedi.io.gaussian.Gaussian.read_results">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">read_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">output</span> <span class="o">=</span> <span class="n">read_gaussian_out</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">atoms</span><span class="o">=</span><span class="n">output</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">calc</span>

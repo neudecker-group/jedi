@@ -115,10 +115,10 @@
 <section id="stretching-hydrogen-bonds-using-cogef">
 <h3>Stretching Hydrogen Bonds Using COGEF<a class="headerlink" href="#stretching-hydrogen-bonds-using-cogef" title="Permalink to this headline"></a></h3>
 <p>Here, cytosine and guanine are examined.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">strainjedi.io.gaussian</span> <span class="kn">import</span> <span class="n">Gaussian</span><span class="p">,</span> <span class="n">GaussianOptimizer</span><span class="p">,</span> <span class="n">get_vibrations</span>
-<span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span><span class="p">,</span> <span class="n">get_hbonds</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.io.gaussian</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian</span><span class="p">,</span> <span class="n">GaussianOptimizer</span><span class="p">,</span> <span class="n">get_vibrations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span><span class="p">,</span> <span class="n">get_hbonds</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">VibrationsData</span>
 
 <span class="n">mol</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;cg.xyz&#39;</span><span class="p">)</span>
 
@@ -178,9 +178,9 @@
 <p><a class="reference download internal" download="" href="../_downloads/98365d3121138c0dab0b69739155a339/cg.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Start</span> <span class="pre">geometry</span></code></a></p>
 <p>The input written by ASE for the COGEF calculation has a line break too much between the coordinates section and the constraints section. So it has to be corrected manually and the job needs to be sent manually.
 The gaussian outputs can be read by the funtions delivered with the Jedi package.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span><span class="p">,</span> <span class="n">get_hbonds</span>
-<span class="kn">from</span> <span class="nn">strainjedi.io.gaussian</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">read_gaussian_out</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span><span class="p">,</span> <span class="n">get_hbonds</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.io.gaussian</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">read_gaussian_out</span>
 
 <span class="n">file</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;output/opt.log&#39;</span><span class="p">)</span>
 <span class="n">mol</span><span class="o">=</span><span class="n">read_gaussian_out</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
@@ -206,11 +206,11 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 <section id="biphenyl">
 <h3>Biphenyl<a class="headerlink" href="#biphenyl" title="Permalink to this headline"></a></h3>
 <p>It is possible to analyse substructures. This is desired when local changes of large structures need to be analysed. Here, a Hydrogen atom in a biphenyl molecule is pulled 0.1 Å away from its relaxed position. For the partial analysis, the hessian of only one phenyl ring is calculated yielding near identical values as when calculated for the whole system.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.vasp</span> <span class="kn">import</span> <span class="n">Vasp</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.calculators.vasp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vasp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="n">mol</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;start.xyz&#39;</span><span class="p">)</span>
 
@@ -317,11 +317,11 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 <section id="using-efei">
 <h3>Using EFEI<a class="headerlink" href="#using-efei" title="Permalink to this headline"></a></h3>
 <p>Stretching bonds using a predefined force is possible with the EFEI method. The following example shows an ethane molecule of which the C-C bond is stretched with a force of 4 nN.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase.build</span> <span class="kn">import</span> <span class="n">molecule</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">strainjedi.io.orca</span> <span class="kn">import</span> <span class="n">OrcaOptimizer</span><span class="p">,</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">ORCA</span>
-<span class="kn">import</span> <span class="nn">ase.io</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ase.build</span><span class="w"> </span><span class="kn">import</span> <span class="n">molecule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.io.orca</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrcaOptimizer</span><span class="p">,</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">ORCA</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
 
 <span class="n">mol</span><span class="o">=</span><span class="n">molecule</span><span class="p">(</span><span class="s1">&#39;C2H6&#39;</span><span class="p">)</span>
 
@@ -365,10 +365,10 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 <section id="hydrostatic-pressure-using-x-hcff">
 <h3>Hydrostatic Pressure using X-HCFF<a class="headerlink" href="#hydrostatic-pressure-using-x-hcff" title="Permalink to this headline"></a></h3>
 <p>A lot of models have been developed to simulate pressure. X-HCFF is one of them that simulates Hydrostatic pressure. Here, Dewar and Ladenburg benzene are analyzed under 50 GPa of pressure.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations.data</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">strainjedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span><span class="p">,</span> <span class="n">QChem</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.io.qchem</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span><span class="p">,</span> <span class="n">QChem</span>
 
 <span class="n">mol</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Dewar.xyz&#39;</span><span class="p">)</span>
 
@@ -417,10 +417,10 @@ The gaussian outputs can be read by the funtions delivered with the Jedi package
 </pre></div>
 </div>
 <p>In another folder the same for Ladenburg benzene:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations.data</span> <span class="kn">import</span> <span class="n">VibrationsData</span>
-<span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
-<span class="kn">from</span> <span class="nn">strainjedi.io.qchem</span> <span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span><span class="p">,</span> <span class="n">QChem</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">VibrationsData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.io.qchem</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_vibrations</span><span class="p">,</span> <span class="n">QChemOptimizer</span><span class="p">,</span> <span class="n">QChem</span>
 
 <span class="n">mol</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;Ladenburg.xyz&#39;</span><span class="p">)</span>
 
@@ -482,13 +482,13 @@ The HCN crystal is an interesting construct to examine bulk behavior. It consist
 Here, the distorted structure is got by moving one molecule by 0.1 Å away from its original lattice position and at the same time pulling the H atom by 0.1 Å along the covalent bond.</p>
 <p><a class="reference download internal" download="" href="../_downloads/b8c5eea2c93479d84737b5e232f003ab/start.xyz"><code class="xref download docutils literal notranslate"><span class="pre">Start</span> <span class="pre">geometry</span></code></a>
 <a class="reference download internal" download="" href="../_downloads/6c8c90624b9a928ce38529f224adad85/sp.json"><code class="xref download docutils literal notranslate"><span class="pre">Distorted</span> <span class="pre">geometry</span></code></a></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gpaw</span> <span class="kn">import</span> <span class="n">GPAW</span> <span class="p">,</span> <span class="n">PW</span>
-<span class="kn">from</span> <span class="nn">ase.optimize</span> <span class="kn">import</span> <span class="n">BFGS</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations.vibrations</span> <span class="kn">import</span> <span class="n">Vibrations</span>
-<span class="kn">import</span> <span class="nn">ase.io</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.dftd3</span> <span class="kn">import</span> <span class="n">DFTD3</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">gpaw</span><span class="w"> </span><span class="kn">import</span> <span class="n">GPAW</span> <span class="p">,</span> <span class="n">PW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">BFGS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vibrations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ase.io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.calculators.dftd3</span><span class="w"> </span><span class="kn">import</span> <span class="n">DFTD3</span>
 
-<span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span>
 
 
 <span class="n">mol</span><span class="o">=</span><span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;start.xyz&#39;</span><span class="p">)</span>
@@ -539,7 +539,7 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
 <a class="reference internal image-reference" href="../_images/allcolorbar6.png"><img alt="../_images/allcolorbar6.png" src="../_images/allcolorbar6.png" style="width: 10%;" /></a>
 <p>To include the dipole interactions for this example, a modified version of the get_hbonds() function can be modified so that C atoms are seen as possible donors.</p>
 <p><a class="reference download internal" download="" href="../_downloads/331c95e5926ead85b07504973ac5fac2/dipole.py"><code class="xref download docutils literal notranslate"><span class="pre">get_hbonds()</span></code></a></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dipole</span> <span class="kn">import</span> <span class="n">get_hbonds</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dipole</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_hbonds</span>
 
 <span class="n">j</span><span class="o">=</span><span class="n">Jedi</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span><span class="n">mol2</span><span class="p">,</span><span class="n">modes</span><span class="p">)</span>
 <span class="n">j</span><span class="o">.</span><span class="n">add_custom_bonds</span><span class="p">(</span><span class="n">get_hbonds</span><span class="p">(</span><span class="n">mol</span><span class="p">))</span>
@@ -571,10 +571,10 @@ Here, the distorted structure is got by moving one molecule by 0.1 Å away from 
 <p>It might be interesting to see the strain energy in bonds during MD simulations since it can show the energy distribution over time.
 A N2 molecule is simulated at 400 K in the following.</p>
 <video controls="True" preload="auto" width="100"><source src="../_images/output.mp4" type="video/mp4">video of N2 at 400 K</video><p>Within ASE using the EMT calculator all necessary data is got by</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">Atoms</span>
-<span class="kn">from</span> <span class="nn">ase.calculators.emt</span> <span class="kn">import</span> <span class="n">EMT</span>
-<span class="kn">from</span> <span class="nn">ase.optimize</span> <span class="kn">import</span> <span class="n">BFGS</span>
-<span class="kn">from</span> <span class="nn">ase.vibrations</span> <span class="kn">import</span> <span class="n">Vibrations</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">ase</span><span class="w"> </span><span class="kn">import</span> <span class="n">Atoms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.calculators.emt</span><span class="w"> </span><span class="kn">import</span> <span class="n">EMT</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">BFGS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.vibrations</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vibrations</span>
 <span class="n">n2</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="s1">&#39;N2&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">)],</span>
             <span class="n">calculator</span><span class="o">=</span><span class="n">EMT</span><span class="p">())</span>
 <span class="n">BFGS</span><span class="p">(</span><span class="n">n2</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">fmax</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
@@ -586,10 +586,10 @@ A N2 molecule is simulated at 400 K in the following.</p>
 
 
 
-<span class="kn">from</span> <span class="nn">ase</span> <span class="kn">import</span> <span class="n">units</span>
-<span class="kn">from</span> <span class="nn">ase.io.trajectory</span> <span class="kn">import</span> <span class="n">Trajectory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase</span><span class="w"> </span><span class="kn">import</span> <span class="n">units</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.io.trajectory</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trajectory</span>
 
-<span class="kn">from</span> <span class="nn">ase.md.langevin</span> <span class="kn">import</span> <span class="n">Langevin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ase.md.langevin</span><span class="w"> </span><span class="kn">import</span> <span class="n">Langevin</span>
 
 
 
@@ -607,7 +607,7 @@ A N2 molecule is simulated at 400 K in the following.</p>
 <span class="n">dyn</span> <span class="o">=</span> <span class="n">Langevin</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="n">T</span> <span class="o">*</span> <span class="n">units</span><span class="o">.</span><span class="n">kB</span><span class="p">,</span> <span class="mf">0.002</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">printenergy</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">atoms</span><span class="p">):</span>  <span class="c1"># store a reference to atoms in the definition.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">printenergy</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">atoms</span><span class="p">):</span>  <span class="c1"># store a reference to atoms in the definition.</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to print the potential, kinetic and total energy.&quot;&quot;&quot;</span>
     <span class="n">epot</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
     <span class="n">ekin</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get_kinetic_energy</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
@@ -627,7 +627,7 @@ A N2 molecule is simulated at 400 K in the following.</p>
 </div>
 <p>The Jedi analysis needs to be done for each time step separately. The following generates a Jedi object for each time step comparing it with the optimized state. The visualization scripts for each time step are stored in a different folder named by the parameter “label”.
 To have a consistent color coding the maximum strain in one bond over the whole simulation is set as the maimum for the color scale with the parameter “man_strain”.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">strainjedi.jedi</span> <span class="kn">import</span> <span class="n">Jedi</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">strainjedi.jedi</span><span class="w"> </span><span class="kn">import</span> <span class="n">Jedi</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">51</span><span class="p">):</span>
     <span class="n">j</span> <span class="o">=</span> <span class="n">Jedi</span><span class="p">(</span><span class="n">n2</span><span class="p">,</span> <span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">],</span> <span class="n">modes</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">Trajectory</span><span class="p">(</span><span class="s1">&#39;moldyn3.traj&#39;</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">calc</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">())</span>
