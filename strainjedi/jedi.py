@@ -658,8 +658,21 @@ class Jedi:
         rim_atoms0 = self.get_rims(self.atoms0)
         rim_atomsF = self.get_rims(self.atomsF)
         if len(rim_atoms0[0]) != len(rim_atomsF[0]):
-            print("Warning: The distorted structure has a different amount of bonds. "
-                  "In this case the Jedi strain analysis can not be applied properly.")
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of bonds ({len(rim_atomsF[0])})\n"
+                                   f"compared to the relaxed structure ({len(rim_atoms0[0])}). "
+                                   f"In this case the Jedi strain analysis can not be applied correctly.",
+                                   UserWarning, "", 0))
+        elif len(rim_atoms0[2]) != len(rim_atomsF[2]):
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of angles ({len(rim_atomsF[2])})"
+                                   f" compared to the relaxed structure ({len(rim_atoms0[2])}). ",
+                                   UserWarning, "", 0))
+        elif len(rim_atoms0[3]) != len(rim_atomsF[3]):
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of dihedral angles ({len(rim_atomsF[3])})"
+                                   f" compared to the relaxed structure ({len(rim_atoms0[3])}).",
+                                   UserWarning, "", 0))
         for i in range(len(rim_atoms0)):
             if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
                 continue
