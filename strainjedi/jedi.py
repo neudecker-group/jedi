@@ -1042,7 +1042,7 @@ class Jedi:
         for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
 
-                output[outindex].append(f'\n# Load a molecule\nmol new {destination_dir.resolve() / "xF.xyz"}\n\n')
+                output[outindex].append(f'\n# Load a molecule\nmol new {{{destination_dir.resolve() / "xF.xyz"}}} type xyz\n\n')
                 output[outindex].append('\n# Change bond radii and various resolution parameters\nmol representation '
                                         'cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
                 output[outindex].append('\n# Change the drawing method of the first graphical representation to '
