@@ -7,6 +7,7 @@ import matplotlib.cm as cm
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List
+from numpy.typing import NDArray
 import ase.neighborlist
 import ase.geometry
 from ase.atoms import Atoms
@@ -1042,7 +1043,7 @@ class Jedi:
         for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
 
-                output[outindex].append(f'\n# Load a molecule\nmol new {destination_dir.resolve() / "xF.xyz"}\n\n')
+                output[outindex].append(f'\n# Load a molecule\nmol new {{{destination_dir.resolve() / "xF.xyz"}}} type xyz\n\n')
                 output[outindex].append('\n# Change bond radii and various resolution parameters\nmol representation '
                                         'cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
                 output[outindex].append('\n# Change the drawing method of the first graphical representation to '
@@ -1714,14 +1715,15 @@ display update on """)
             self.custom_bonds=custom_bonds #restore the user input
         pass
 
-    def add_custom_bonds(self, bonds):
-        self.custom_bonds = bonds   # additional bonds for analysis of non-covalent interactions
+    def add_custom_bonds(self, bonds: NDArray) -> None:
         '''Add custom bonds after creating the object.
-        
-        Args:
-            bonds: 
-                2Darray
-            '''
+
+                Args:
+                    bonds:
+                        1D or 2Darray with atom indices, [[i,j]...]
+                    '''
+
+        self.custom_bonds = np.atleast_2d(bonds)   # additional bonds for analysis of non-covalent interactions
 
     def set_bond_params(self,covf=1.3,vdwf=0.9):
         '''
