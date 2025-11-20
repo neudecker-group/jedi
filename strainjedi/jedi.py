@@ -652,7 +652,7 @@ class Jedi:
         return rim_list
 
     def get_common_rims(self):
-        '''Get only the RICs in both structures bond breaks cannot be analysed logically
+        '''Get only the RICs in both structures, bond breaks cannot be analysed logically
 
         '''
         rim_atoms0 = self.get_rims(self.atoms0)
@@ -663,19 +663,22 @@ class Jedi:
                                    f"compared to the relaxed structure ({len(rim_atoms0[0])}). "
                                    f"In this case the Jedi strain analysis can not be applied correctly.",
                                    UserWarning, "", 0))
-        elif len(rim_atoms0[2]) != len(rim_atomsF[2]):
+        if len(rim_atoms0[2]) != len(rim_atomsF[2]):
             (warnings.
              warn_explicit(f"The distorted structure has a different number of angles ({len(rim_atomsF[2])})"
                                    f" compared to the relaxed structure ({len(rim_atoms0[2])}). ",
                                    UserWarning, "", 0))
-        elif len(rim_atoms0[3]) != len(rim_atomsF[3]):
+        if len(rim_atoms0[3]) != len(rim_atomsF[3]):
             (warnings.
              warn_explicit(f"The distorted structure has a different number of dihedral angles ({len(rim_atomsF[3])})"
                                    f" compared to the relaxed structure ({len(rim_atoms0[3])}).",
                                    UserWarning, "", 0))
+        common_rims = [np.empty(0) for _ in range(4)]
         for i in range(len(rim_atoms0)):
-            if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
+            if rim_atoms0[i].shape[0]==0:
                 continue
+            elif rim_atomsF[i].shape[0]==0:
+                common_rims[i] = np.empty(0)
             else:
                 rim_atoms0v = rim_atoms0[i].view([('', rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
                 rim_atomsFv = rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()    #get a viable input for np.intersect1d()
@@ -683,8 +686,8 @@ class Jedi:
                 rim_l,ind,z = np.intersect1d(rim_atoms0v, rim_atomsFv,return_indices=True)    #get the rims that exist in both structures
                 rim_l = rim_l[ind.argsort()]
 
-                rim_atoms0[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
-                self.rim_list = rim_atoms0
+                common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
+        self.rim_list = common_rims
 
         return rim_atoms0
 
