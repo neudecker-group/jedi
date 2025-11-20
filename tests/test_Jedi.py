@@ -89,3 +89,13 @@ class TestJEDIdiethyldisulfid:
         test = cls.diethyldisulfid.indices.round(5)
         compare = np.loadtxt(path_to_test_resources() / "diethyldisulfid/indices").round(5)
         assert np.array_equal(test, compare)
+
+class TestJediWarnings:
+    @pytest.mark.parametrize("warning", ["broken_bond", "no_dihedral"])
+    def test_rim_change_warning(self, warning):
+        mol = io.read(path_to_test_resources() / "h2o2/h2o2.json")
+        mol2 = io.read(path_to_test_resources() / f"h2o2/{warning}.json")
+        hessian = VibrationsData.read(path_to_test_resources() / "h2o2/h2o2_hessian.json")
+        analysis = Jedi(mol, mol2, hessian)
+        with pytest.warns(UserWarning):
+            analysis.run(printout=False)

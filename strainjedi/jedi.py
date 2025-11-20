@@ -21,7 +21,6 @@ from strainjedi.print_config import header, energy_comparison, rims_listing
 from strainjedi.quotes import quotes
 from strainjedi import __version__
 
-
 def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
     '''
     Analysis of strain energy stored in redundant internal coordinates.
@@ -359,7 +358,7 @@ class Jedi:
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
         self.vdwf=0.9
-        self.covf=1.3
+        self.covf=1.3                  ## cutoff for covalent bonds see Bakken et al.
         self.qF = None  # bond lengths and angles in Bohr and degree in distorted molecule
         self.q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
 
@@ -496,10 +495,10 @@ class Jedi:
         mol = mol
 
         indices = self.indices
-        cutoff = ase.neighborlist.natural_cutoffs(mol,mult=self.covf)   ## cutoff for covalent bonds see Bakken et al.
-        bl = np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
+        cutoff = ase.neighborlist.natural_cutoffs(mol, mult=self.covf)   ## cutoff for covalent bonds see Bakken et al.
+        bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=mol, cutoff=cutoff)).T   #determine covalent bonds
 
-        bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
+        bl = bl[bl[:,0] < bl[:,1]]      #remove double metioned
         bl, counts = np.unique(bl, return_counts=True, axis=0)
         if ~ np.all(counts == 1):
             print('unit cell too small hessian not calculated for self interaction \
@@ -654,15 +653,33 @@ class Jedi:
         return rim_list
 
     def get_common_rims(self):
-        '''Get only the RICs in both structures bond breaks cannot be analysed logically
+        '''Get only the RICs in both structures, bond breaks cannot be analysed logically
 
         '''
         rim_atoms0 = self.get_rims(self.atoms0)
         rim_atomsF = self.get_rims(self.atomsF)
-
+        if len(rim_atoms0[0]) != len(rim_atomsF[0]):
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of bonds ({len(rim_atomsF[0])})\n"
+                                   f"compared to the relaxed structure ({len(rim_atoms0[0])}). "
+                                   f"In this case the Jedi strain analysis can not be applied correctly.",
+                                   UserWarning, "", 0))
+        if len(rim_atoms0[2]) != len(rim_atomsF[2]):
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of angles ({len(rim_atomsF[2])})"
+                                   f" compared to the relaxed structure ({len(rim_atoms0[2])}). ",
+                                   UserWarning, "", 0))
+        if len(rim_atoms0[3]) != len(rim_atomsF[3]):
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of dihedral angles ({len(rim_atomsF[3])})"
+                                   f" compared to the relaxed structure ({len(rim_atoms0[3])}).",
+                                   UserWarning, "", 0))
+        common_rims = [np.empty(0) for _ in range(4)]
         for i in range(len(rim_atoms0)):
-            if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
+            if rim_atoms0[i].shape[0]==0:
                 continue
+            elif rim_atomsF[i].shape[0]==0:
+                common_rims[i] = np.empty(0)
             else:
                 rim_atoms0v = rim_atoms0[i].view([('', rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
                 rim_atomsFv = rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()    #get a viable input for np.intersect1d()
@@ -670,8 +687,8 @@ class Jedi:
                 rim_l,ind,z = np.intersect1d(rim_atoms0v, rim_atomsFv,return_indices=True)    #get the rims that exist in both structures
                 rim_l = rim_l[ind.argsort()]
 
-                rim_atoms0[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
-                self.rim_list = rim_atoms0
+                common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
+        self.rim_list = common_rims
 
         return rim_atoms0
 
