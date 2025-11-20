@@ -10,6 +10,6 @@ mol2= ase.io.read(path_to_test_resources() / "h2o2/broken_bond.json")
 jedianalysis = jedi.Jedi(mol, mol2, hessian)
 jedianalysis.run()
 
-mol3 = ase.io.read(path_to_test_resources() / "h2o2/no_dihedral.json")
+mol3 = ase.io.read(path_to_test_resources() / "h2o2/no_dihedral_2.json")
 jedianalysis = jedi.Jedi(mol, mol3, hessian)
 jedianalysis.run()
