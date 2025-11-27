@@ -696,7 +696,23 @@ class Jedi:
         '''Calls the hessian from the VibrationsData object
         '''
         hessian = self.modes._hessian2d
-        self.H = hessian /(Hartree/Bohr**2)
+        vibdata_atoms = self.modes._atoms
+
+        # check for correct sorted atoms in VibrationsData object
+        permutation = []
+        for atom in self.atoms0:
+            for i, vib_atom in enumerate(vibdata_atoms):
+                if atom.symbol == vib_atom.symbol and np.allclose(atom.position, vib_atom.position, atol=1e-6):
+                    permutation.append(i)
+                    break
+
+        permutation = np.array(permutation, dtype=int)
+
+        if not np.array_equal(permutation, np.arange(len(self.atoms0))):
+            perm_hess = np.repeat(permutation, 3) * 3 + np.tile(np.arange(3), len(permutation))
+            hessian = hessian[perm_hess, :][:, perm_hess]
+
+        self.H = hessian / (Hartree / Bohr ** 2)
         return hessian
 
     def get_b_matrix(self,indices=None):
