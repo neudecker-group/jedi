@@ -355,6 +355,7 @@ class Jedi:
         self.part_rim_list = None     #rim list for election of atoms
         self.indices = None           #indices to chose special atoms
         self.E_RIMs = None            #list of energies stored in the rims
+        self.E_RIMs_total = None      #sum of E_rims
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
         self.vdwf=0.9
@@ -473,14 +474,14 @@ class Jedi:
 
 
         #run the analysis
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,self.E_RIMs_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
 
         if indices:          #get only rims of interest
             self.post_process(indices)
-            E_RIMs_total = sum(self.E_RIMs)
+            self.E_RIMs_total = sum(self.E_RIMs)
             proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
         if printout:
-            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, self.E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
         pass
 
 
@@ -1673,12 +1674,12 @@ display update on """)
         E_geometries = all_E_geometries[0]
 
 
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atomsF,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,self.E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atomsF,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
         #get values of rims inside the substructure
         self.post_process(indices)
-        E_RIMs_total=sum(self.E_RIMs)
+        self.E_RIMs_total=sum(self.E_RIMs)
         proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
-        jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+        jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, self.E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
 
         if cbonds_flag == True:
             self.custom_bonds=custom_bonds #restore the user input
