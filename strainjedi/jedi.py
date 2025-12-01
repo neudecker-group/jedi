@@ -354,6 +354,7 @@ class Jedi:
         self.proc_E_RIMs = None     #list of procentual energy stored in single RIMs
         self.part_rim_list = None     #rim list for election of atoms
         self.indices = None           #indices to chose special atoms
+        self.partial_indices = None   #indices for partial analysis
         self.E_RIMs = None            #list of energies stored in the rims
         self.E_RIMs_total = None      #sum of E_rims
         self.custom_bonds = None        #list of custom added bonds
@@ -464,7 +465,6 @@ class Jedi:
         self.get_hessian()
         H_cart = self.H         #Hessian of optimized (ground state) structure
         if len(self.atoms0) != H_cart.shape[0]/3:
-
             raise ValueError('Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis')
         try:
             all_E_geometries = self.get_energies()
@@ -706,8 +706,9 @@ class Jedi:
                 if atom.symbol == vib_atom.symbol and np.allclose(atom.position, vib_atom.position, atol=1e-6):
                     permutation.append(i)
                     break
-
         permutation = np.array(permutation, dtype=int)
+        if len(permutation) != len(self.indices) and len(permutation) != len(self.partial_indices):
+            raise ValueError('Atoms in VibrationsData object are not fitting to atoms0. Maybe you selected the wrong Hessian.')
 
         if not np.array_equal(permutation, np.arange(len(self.atoms0))):
             perm_hess = np.repeat(permutation, 3) * 3 + np.tile(np.arange(3), len(permutation))
@@ -1651,6 +1652,7 @@ display update on """)
         #for calculation with partial hessian
         self.ase_units = ase_units
         self.indices = np.arange(0,len(self.atoms0)).tolist()
+        self.partial_indices = indices
         self.get_hessian()
         if 3*len(indices)<len(self.H):
             raise ValueError('to little indices for the given hessian')
