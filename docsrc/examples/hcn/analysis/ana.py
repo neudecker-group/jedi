@@ -6,7 +6,6 @@ import ase.io
 from ase.vibrations.vibrations import VibrationsData
 import os
 import numpy as np
-from ase.visualize import view
 mol=ase.io.read('opt.json')
 modes=VibrationsData.read('modes.json')
 

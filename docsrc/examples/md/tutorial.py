@@ -51,7 +51,6 @@ dyn.attach(traj.write, interval=4)
 # Now run the dynamics
 printenergy()
 dyn.run(200)
-import os
 
 from strainjedi.jedi import Jedi
 for i in range(1,51):
