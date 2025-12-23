@@ -9,7 +9,8 @@ setup(
     author_email='neudecker@uni-bremen.de',
     license='MIT',
     packages=['strainjedi','strainjedi/io'],
-    install_requires=['mpi4py>=2.0',
+    install_requires=[
+                      'mpi4py>=2.0',
                       'numpy',  
                       'ase',
                       'pytest'                   
@@ -22,4 +23,11 @@ setup(
         'Operating System :: POSIX :: Linux',       
         'Programming Language :: Python :: 3.8',
     ],
+
+entry_points={
+    'console_scripts': [
+        'strainjedi = strainjedi.main:main'
+    ]
+}
+
 )

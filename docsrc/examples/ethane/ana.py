@@ -1,6 +1,4 @@
 import ase.io
-from ase.vibrations.vibrations import VibrationsData
-import numpy as np
 from strainjedi.jedi import Jedi
 
 from strainjedi.io.orca import get_vibrations

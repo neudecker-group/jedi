@@ -1,7 +1,6 @@
 from strainjedi.jedi import Jedi
 from ase.vibrations.vibrations import VibrationsData
 import ase.io
-import numpy as np
 import os
 
 mol= ase.io.read('opt.json')

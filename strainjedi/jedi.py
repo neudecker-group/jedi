@@ -1,4 +1,4 @@
-"""A class for Jedi analysis"""
+""" A class for Jedi analysis """
 
 import collections
 import warnings
@@ -14,14 +14,22 @@ from ase.atoms import Atoms
 from ase.vibrations import VibrationsData
 from ase.atoms import Atom
 from ase.utils import jsonable
-import ase.io
 from ase.units import Hartree, Bohr, mol, kcal
+from ase.data.vdw import vdw_radii
+
 from strainjedi.colors import colors
 from strainjedi.print_config import header, energy_comparison, rims_listing
 from strainjedi.quotes import quotes
 from strainjedi import __version__
 
-def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
+def jedi_analysis(atoms : ase.atoms.Atoms, 
+                  rim_list : List,
+                  B : np.array, 
+                  H_cart : np.array, 
+                  delta_q : np.array,
+                  E_geometries : float, 
+                  printout : Union[bool,None] = None,
+                  ase_units : bool = False):
     '''
     Analysis of strain energy stored in redundant internal coordinates.
 
@@ -110,7 +118,7 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
     return proc_E_RIMs,E_RIMs, E_RIMs_total, proc_geom_RIMs,delta_q
 
 
-def jedi_printout(atoms,
+def jedi_printout(atoms : ase.atoms.Atoms,
                   rim_list: List,
                   delta_q: np.array,
                   E_geometries: float,
@@ -203,7 +211,7 @@ def jedi_printout(atoms,
     print(quotes())
 
 
-def jedi_printout_bonds(atoms,
+def jedi_printout_bonds(atoms : ase.atoms.Atoms,
                         rim_list: np.array,
                         E_geometries: float,
                         E_RIMs_total: float,
@@ -303,7 +311,7 @@ def get_hbonds(mol,covf=1.3,vdwf=0.9):
 
     bl=bl[bl[:,0]<bl[:,1]]      #remove double mentioned
     bl = np.unique(bl,axis=0)
-    from ase.data.vdw import vdw_radii
+
     hpartner = ['N','O','F']
     hpartner_ls = []
     hcutoff = {('H','N'):vdwf*(vdw_radii[1]+vdw_radii[7]),
@@ -333,7 +341,10 @@ def get_hbonds(mol,covf=1.3,vdwf=0.9):
 
 @jsonable('jedi')
 class Jedi:
-    def __init__(self, atoms0, atomsF, modes): #indices=None
+    def __init__(self, atoms0 : ase.atoms.Atoms, 
+                 atomsF : ase.atoms.Atoms, 
+                 modes : ase.vibrations.data.VibrationsData, 
+                 epot : Union[np.array, None] = None): #indices=None
         '''
 
         atoms0: class
@@ -342,6 +353,8 @@ class Jedi:
             Atoms object of strained structure with calculated energy.
         modes: class
             VibrationsData object with hessian of relaxed structure.
+        epot: np.array or None
+            Vector containing (f - i) endiff., final, initial energy or None. Default: None.
         '''
         self.atoms0 = atoms0        #ref state
         self.atomsF = atomsF        #strained state
@@ -350,7 +363,7 @@ class Jedi:
         self.delta_q = None         #strain in internal coordinates
         self.rim_list = None        #list of Redundant internal modes
         self.H = None               #cartesian Hessian of ref state
-        self.energies = None        #energies of the geometries
+        self.energies = epot        #energies of the geometries
         self.proc_E_RIMs = None     #list of procentual energy stored in single RIMs
         self.part_rim_list = None     #rim list for election of atoms
         self.indices = None           #indices to chose special atoms
@@ -466,10 +479,13 @@ class Jedi:
         if len(self.atoms0) != H_cart.shape[0]/3:
 
             raise ValueError('Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis')
-        try:
+        
+        try: # Get energies from calculator
             all_E_geometries = self.get_energies()
-        except:
+
+        except: # Fallback to custom energies
             all_E_geometries = self.energies
+
         E_geometries=all_E_geometries[0]
 
 
@@ -883,7 +899,7 @@ class Jedi:
 
         return B
 
-    def get_energies(self):
+    def get_energies(self) -> Union[float, float, float]: 
         '''Calls the energies of the Atoms objects.
 
             Returns: 
@@ -1203,7 +1219,6 @@ class Jedi:
             bond_E_array_pbc = [np.empty((0, 2)), np.empty((0, 2))]
             bond_E_array_pbc_trans = [np.empty((0, 2)), np.empty((0, 2))] # initialize list
 
-            from ase.data.vdw import vdw_radii # for long range bonds
             cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
             ex_bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
             ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
