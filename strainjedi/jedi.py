@@ -696,6 +696,7 @@ class Jedi:
     def get_hessian(self):
         '''Calls the hessian from the VibrationsData object
         '''
+        # ToDo: bug fix len(partial_indices) and test for partial_analysis
         hessian = self.modes._hessian2d
         vibdata_atoms = self.modes._atoms
 
