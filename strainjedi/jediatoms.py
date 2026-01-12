@@ -23,6 +23,11 @@ class JediAtoms(Jedi):
 
     E_atoms = None
     first_call = True
+
+    def __init__(self, atoms0, atomsF, modes):
+        super().__init__(atoms0, atomsF, modes)
+        self.E_atoms_total = None
+
     def run(self, ase_units: bool = False,
             printout_save: bool = True,
             label: Union[str] = None,
@@ -97,20 +102,20 @@ class JediAtoms(Jedi):
         # Get the energy stored in every coordinate and total energy
         E_M = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)        # energy of each distance matrix element but organised as a list
         self.E_atoms=np.sum(E_M.reshape(-1, len(self.atoms0)), axis=1)      # summed up the energies corresponding to specific atoms
-        E_atoms_total = sum(self.E_atoms[self.indices])      # only the selected atoms for run with indices
+        self.E_atoms_total = sum(self.E_atoms[self.indices])      # only the selected atoms for run with indices
 
         if ase_units==True:
             self.E_atoms*=Hartree
-            E_atoms_total*=Hartree
+            self.E_atoms_total*=Hartree
             delta_q*=Bohr
         elif ase_units == False:
             self.E_atoms *= mol/kcal*Hartree
-            E_atoms_total *= mol/kcal*Hartree
+            self.E_atoms_total *= mol/kcal*Hartree
 
         # deviation from ab initio energy
-        proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
+        proc_geom_atoms = (self.E_atoms_total / E_geometries - 1) * 100
 
-        self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units)
+        self.printout(E_geometries,self.E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units)
         if not label:
             filename = 'E_atoms'
             if indices:
@@ -118,7 +123,7 @@ class JediAtoms(Jedi):
         else:
             filename = f"E_atoms_{label}"
         if printout_save is True:
-            self.printout(E_geometries,E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units,save=True,file=filename)
+            self.printout(E_geometries,self.E_atoms_total,proc_geom_atoms,weighting,r_cut,ase_units=self.ase_units,save=True,file=filename)
         pass
 
     def get_bonds(self, mol):
@@ -364,25 +369,25 @@ class JediAtoms(Jedi):
         E_nan = np.full((len(self.full_indices)), np.nan)
         E_nan[self.indices] = self.E_atoms
         self.E_atoms = E_nan
-        E_atoms_total = np.nansum(self.E_atoms)
+        self.E_atoms_total = np.nansum(self.E_atoms)
 
         if ase_units==True:
             self.E_atoms*=Hartree
-            E_atoms_total*=Hartree
+            self.E_atoms_total*=Hartree
             delta_q*=Bohr
         elif ase_units == False:
             self.E_atoms*=mol/kcal*Hartree
-            E_atoms_total*=mol/kcal*Hartree
+            self.E_atoms_total*=mol/kcal*Hartree
 
-        proc_geom_atoms = (E_atoms_total / E_geometries - 1) * 100
+        proc_geom_atoms = (self.E_atoms_total / E_geometries - 1) * 100
 
-        self.printout(E_geometries, E_atoms_total, proc_geom_atoms, weighting, r_cut, indices, ase_units=self.ase_units)
+        self.printout(E_geometries, self.E_atoms_total, proc_geom_atoms, weighting, r_cut, indices, ase_units=self.ase_units)
         if not label:
             filename = 'E_atoms_partial'
         else:
             filename = f"E_atoms_{label}"
         if printout_save is True:
-            self.printout(E_geometries, E_atoms_total, proc_geom_atoms, weighting, r_cut, indices, ase_units=self.ase_units, save=True,
+            self.printout(E_geometries, self.E_atoms_total, proc_geom_atoms, weighting, r_cut, indices, ase_units=self.ase_units, save=True,
                           file=filename)
 
     def vmd_gen(self,
