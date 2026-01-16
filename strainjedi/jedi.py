@@ -696,7 +696,8 @@ class Jedi:
     def get_hessian(self):
         '''Calls the hessian from the VibrationsData object
         '''
-        # ToDo: bug fix len(partial_indices) and test for partial_analysis
+        # ToDo: test for partial_analysis with partial hessian from VASP
+        # ToDo: consistent naming of indices variables
         hessian = self.modes._hessian2d
         vibdata_atoms = self.modes._atoms
 
@@ -704,11 +705,12 @@ class Jedi:
         permutation = []
         for atom in self.atoms0:
             for i, vib_atom in enumerate(vibdata_atoms):
-                if atom.symbol == vib_atom.symbol and np.allclose(atom.position, vib_atom.position, atol=1e-6):
+                if atom.symbol == vib_atom.symbol and np.allclose(atom.position, vib_atom.position, atol=1e-5):
                     permutation.append(i)
                     break
         permutation = np.array(permutation, dtype=int)
-        if len(permutation) != len(self.indices) and len(permutation) != len(self.partial_indices):
+        if len(permutation) != len(self.indices) and (
+                self.partial_indices is None or len(permutation) != len(self.partial_indices)):
             raise ValueError('Atoms in VibrationsData object are not fitting to atoms0. Maybe you selected the wrong Hessian.')
 
         if not np.array_equal(permutation, np.arange(len(self.atoms0))):
