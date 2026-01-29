@@ -385,6 +385,7 @@ class Jedi:
         self.proc_E_coords = None     #list of procentual energy stored in single RIMs
         self.part_rim_list = None     #rim list for election of atoms
         self.indices = None           #indices to chose special atoms
+        self.partial_indices = None   #indices for partial analysis
         self.E_coords = None            #list of energies stored in the rims
         self.E_harm_total = None      #sum of E_rims
         self.E_RIMs_total = None
@@ -489,7 +490,6 @@ class Jedi:
         # get necessary data
         self.indices=np.arange(0,len(self.atoms0))
         self.get_common_rims()
-        # self.coords_list[4] = np.array([[0],[1],[2],[3],[4],[5]])
         rim_list = self.rim_list
         self.get_b_matrix()
         B = self.B
@@ -501,7 +501,6 @@ class Jedi:
         self.get_hessian()
         H_cart = self.H         #Hessian of optimized (ground state) structure
         if len(self.atoms0) != H_cart.shape[0]/3:
-
             raise ValueError('Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis')
         try:
             all_E_geometries = self.get_energies()
@@ -714,8 +713,10 @@ class Jedi:
                                    UserWarning, "", 0))
         common_rims = [np.empty(0) for _ in range(4)]
         for i in range(len(rim_atoms0)):
-            if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
+            if rim_atoms0[i].shape[0]==0:
                 continue
+            elif rim_atomsF[i].shape[0]==0:
+                common_rims[i] = np.empty(0)
             else:
                 rim_atoms0v = rim_atoms0[i].view([('', rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
                 rim_atomsFv = rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()    #get a viable input for np.intersect1d()
@@ -731,8 +732,28 @@ class Jedi:
     def get_hessian(self):
         '''Calls the hessian from the VibrationsData object
         '''
+        # ToDo: test for partial_analysis with partial hessian from VASP
+        # ToDo: consistent naming of indices variables
         hessian = self.modes._hessian2d
-        self.H = hessian /(Hartree/Bohr**2)
+        vibdata_atoms = self.modes._atoms
+
+        # check for correct sorted atoms in VibrationsData object
+        permutation = []
+        for atom in self.atoms0:
+            for i, vib_atom in enumerate(vibdata_atoms):
+                if atom.symbol == vib_atom.symbol and np.allclose(atom.position, vib_atom.position, atol=1e-5):
+                    permutation.append(i)
+                    break
+        permutation = np.array(permutation, dtype=int)
+        if len(permutation) != len(self.indices) and (
+                self.partial_indices is None or len(permutation) != len(self.partial_indices)):
+            raise ValueError('Atoms in VibrationsData object are not fitting to atoms0. Maybe you selected the wrong Hessian.')
+
+        if not np.array_equal(permutation, np.arange(len(self.atoms0))):
+            perm_hess = np.repeat(permutation, 3) * 3 + np.tile(np.arange(3), len(permutation))
+            hessian = hessian[perm_hess, :][:, perm_hess]
+
+        self.H = hessian / (Hartree / Bohr ** 2)
         return hessian
 
     def el_consts_unit_conversion(self):
@@ -1686,6 +1707,7 @@ display update on """)
         #for calculation with partial hessian
         self.ase_units = ase_units
         self.indices = np.arange(0,len(self.atoms0)).tolist()
+        self.partial_indices = indices
         self.get_hessian()
         if 3*len(indices)<len(self.H):
             raise ValueError('to little indices for the given hessian')
