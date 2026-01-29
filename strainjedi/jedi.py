@@ -742,7 +742,6 @@ class Jedi:
 
     def internal_strain_unit_conversion(self):
         '''Converts internal strains from eV to Hartree'''
-        V_0 = self.atoms0.get_volume()
         self.internal_strain = self.internal_strain / Hartree
 
     def get_strain_voigt(self):
