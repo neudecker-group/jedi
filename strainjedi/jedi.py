@@ -8,6 +8,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List
 from numpy.typing import NDArray
+from matscipy.elasticity import full_3x3_to_Voigt_6_strain
 import ase.neighborlist
 import ase.geometry
 from ase.atoms import Atoms
@@ -17,11 +18,12 @@ from ase.utils import jsonable
 import ase.io
 from ase.units import Hartree, Bohr, mol, kcal
 from strainjedi.colors import colors
-from strainjedi.print_config import header, energy_comparison, rims_listing
+from strainjedi.print_config import header, energy_comparison, rims_listing, lattice_listing
 from strainjedi.quotes import quotes
 from strainjedi import __version__
 
-def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
+
+def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,el_consts,internal_strain,voigt_strain,E_geometries,printout=None,ase_units=False):
     '''
     Analysis of strain energy stored in redundant internal coordinates.
 
@@ -49,8 +51,6 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
     ##  Matrix Calculations  ##
     ###########################
     B_transp = np.transpose(B)
-    # Calculate the number of RIMs (= number of rows in the B-Matrix), equivalent to number of redundant internal coordinates
-    NRIMs = int(len(rim_list))
 
     # Calculate the pseudoinverse of the B-Matrix and its transposed (take care of diatomic molecules specifically)
     if B.ndim == 1:
@@ -60,14 +60,13 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
         B_plus = np.linalg.pinv(B, 0.0001)
         B_transp_plus = np.linalg.pinv( np.transpose(B),0.0001 )
 
-
     # Calculate the P-Matrix (eq. 4 in Helgaker's paper)
     P = np.dot(B, B_plus)
-
 
     #############################################
     #	    	   JEDI analysis	        	#
     #############################################
+    Q = np.append(delta_q, voigt_strain)
 
     # Calculate the Hessian in RIMs (take care to get the correct multiplication for a diatomic molecule
     if B.ndim == 1:
@@ -75,49 +74,53 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
     else:
         H_q = P.dot( B_transp_plus ).dot( H_cart ).dot( B_plus ).dot( P )
 
-    # Calculate the total energies in RIMs and its deviation from E_geometries
-    E_RIMs_total = 0.5 * np.transpose( delta_q ).dot( H_q ).dot( delta_q )
+    internal_strain = internal_strain.reshape(-1, 6)
+    H_coupling = B_transp_plus @ internal_strain
 
+    H_full = np.block([[H_q, H_coupling],
+                       [H_coupling.T, el_consts]])
 
+    E_harm_total = 0.5 * np.transpose( Q ).dot( H_full ).dot( Q )
+    E_full = 0.5 * (Q * H_full).T * Q
+    E_coords = np.sum(E_full, axis=1)
+    E_lattice_total = E_coords[-6:].sum(axis=0)
+    E_RIMs_total = E_coords[:-6].sum(axis=0)
 
-    # Get the energy stored in every RIM (take care to get the right multiplication for a diatomic molecule)
-
-    if B.ndim == 1:
-        E_RIMs = np.array([0.5 * delta_q[0] * H_q * delta_q[0]])
-
-    else:
-        E_RIMs = np.sum(0.5*(delta_q*H_q).T*delta_q,axis=1)
+    proc_E_parts = [E_RIMs_total/E_harm_total, E_lattice_total/E_harm_total]
     # Get the percentage of the energy stored in every RIM
-    proc_E_RIMs = []
-
-    proc_E_RIMs = 100 * E_RIMs / E_RIMs_total
+    proc_E_coords = 100 * E_coords / E_harm_total
 
     if ase_units==True:
-        b=np.shape(rim_list[0])[0]+np.shape(rim_list[1])[0] #border between lengths and angles
+        b=np.shape(rims_list[0])[0]+np.shape(rims_list[1])[0] #border between lengths and angles
         delta_q[0:b] *= Bohr
         delta_q[b::] = np.degrees(delta_q[b::])
-        E_RIMs=np.array(E_RIMs)*Hartree
+        E_coords=np.array(E_coords)*Hartree
+        E_harm_total *= Hartree
         E_RIMs_total *= Hartree
+        E_lattice_total *= Hartree
+
     elif ase_units == False:
-        E_RIMs=np.array(E_RIMs)/kcal*mol*Hartree
+        E_coords=np.array(E_coords)/kcal*mol*Hartree
+        E_harm_total *= mol/kcal*Hartree
         E_RIMs_total *= mol/kcal*Hartree
+        E_lattice_total *= mol/kcal*Hartree
 
-    proc_geom_RIMs = 100 * ( E_RIMs_total - E_geometries ) / E_geometries
+    proc_geom_RIMs = 100 * ( E_harm_total - E_geometries ) / E_geometries
 
-    if printout:
-        jedi_printout(atoms,rim_list,delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,proc_E_RIMs, E_RIMs,ase_units=ase_units)
-
-    return proc_E_RIMs,E_RIMs, E_RIMs_total, proc_geom_RIMs,delta_q
+    return proc_E_coords, E_coords, E_harm_total, E_RIMs_total, E_lattice_total, proc_geom_RIMs, delta_q
 
 
 def jedi_printout(atoms,
-                  rim_list: List,
+                  rims_list: List,
                   delta_q: np.array,
+                  voigt_strain: np.array,
                   E_geometries: float,
+                  E_harm_total: float,
                   E_RIMs_total: float,
+                  E_lattice_total: float,
                   proc_geom_RIMs: float,
-                  proc_E_RIMs: List,
-                  E_RIMs: np.array,
+                  proc_E_coords: List,
+                  E_coords: np.array,
                   ase_units: bool = False):
     """
     Printout of analysis of stored strain energy in redundant internal coordinates.
@@ -160,7 +163,12 @@ def jedi_printout(atoms,
                   .format("Ab Initio", E_geometries, "-", **energy_comparison))
     # TODO save proc_e_rims as std decimal number and have print command use .2%
     output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
-                  .format("JEDI", E_RIMs_total, proc_geom_RIMs, **energy_comparison))
+                  .format("JEDI", E_harm_total, proc_geom_RIMs, **energy_comparison))
+
+    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}}'
+                  .format("JEDI RICs", E_RIMs_total, "-", **energy_comparison))
+    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}}'
+                  .format("JEDI lattice", E_lattice_total, "-", **energy_comparison))
 
     # JEDI analysis
     if not ase_units:
@@ -178,7 +186,7 @@ def jedi_printout(atoms,
                  3: "dihedral"}
     ric_counter = 0
     for ric_type, rim in rics_dict.items():
-        for k in rim_list[ric_type]:
+        for k in rims_list[ric_type]:
             if rim == "bond" or rim == "custom":
                 ind = f"{atoms.symbols[k[0]]}{k[0]}  {atoms.symbols[k[1]]}{k[1]}"
             elif rim == "angle":
@@ -195,10 +203,30 @@ def jedi_printout(atoms,
                         rim,
                         ind,
                         delta_q[ric_counter],
-                        proc_E_RIMs[ric_counter],
-                        E_RIMs[ric_counter],
+                        proc_E_coords[ric_counter],
+                        E_coords[ric_counter],
                         **rims_listing))
             ric_counter += 1
+
+    if not ase_units:
+        output.append(
+            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
+            .format("Direction", "strain", "Percentage", "Energy (kcal/mol)", **lattice_listing))
+    elif ase_units:
+        output.append(
+            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
+            .format("Direction","strain", "Percentage", "Energy (eV)", **lattice_listing))
+
+    strain_directions = ['xx', 'yy', 'zz', 'xy', 'yz', 'zx']
+    for dir_counter, direction in enumerate(strain_directions):
+        output.append(
+            '{0:^{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}''{3:^{column4}.4f}'
+            .format(direction,
+                    voigt_strain[dir_counter],
+                    proc_E_coords[ric_counter + dir_counter],
+                    E_coords[ric_counter + dir_counter],
+                    **lattice_listing))
+
     print("\n".join(output))
     print(quotes())
 
@@ -333,7 +361,7 @@ def get_hbonds(mol,covf=1.3,vdwf=0.9):
 
 @jsonable('jedi')
 class Jedi:
-    def __init__(self, atoms0, atomsF, modes): #indices=None
+    def __init__(self, atoms0, atomsF, modes, el_consts, internal_strain): #indices=None
         '''
 
         atoms0: class
@@ -350,12 +378,17 @@ class Jedi:
         self.delta_q = None         #strain in internal coordinates
         self.rim_list = None        #list of Redundant internal modes
         self.H = None               #cartesian Hessian of ref state
+        self.el_consts = el_consts       #np array with elastic constants in GPa
+        self.internal_strain = internal_strain  #np array with internal strain in eV/Å
+        self.voigt_strain = None    #lattice strain in voigt notation
         self.energies = None        #energies of the geometries
-        self.proc_E_RIMs = None     #list of procentual energy stored in single RIMs
+        self.proc_E_coords = None     #list of procentual energy stored in single RIMs
         self.part_rim_list = None     #rim list for election of atoms
         self.indices = None           #indices to chose special atoms
-        self.E_RIMs = None            #list of energies stored in the rims
-        self.E_RIMs_total = None      #sum of E_rims
+        self.E_coords = None            #list of energies stored in the rims
+        self.E_harm_total = None      #sum of E_rims
+        self.E_RIMs_total = None
+        self.E_lattice_total = None
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
         self.vdwf=0.9
@@ -456,11 +489,15 @@ class Jedi:
         # get necessary data
         self.indices=np.arange(0,len(self.atoms0))
         self.get_common_rims()
+        # self.coords_list[4] = np.array([[0],[1],[2],[3],[4],[5]])
         rim_list = self.rim_list
         self.get_b_matrix()
         B = self.B
         self.get_delta_q()
         delta_q = self.delta_q
+        self.get_strain_voigt()
+        self.el_consts_unit_conversion()
+        self.internal_strain_unit_conversion()
         self.get_hessian()
         H_cart = self.H         #Hessian of optimized (ground state) structure
         if len(self.atoms0) != H_cart.shape[0]/3:
@@ -474,14 +511,14 @@ class Jedi:
 
 
         #run the analysis
-        self.proc_E_RIMs,self.E_RIMs,self.E_RIMs_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_coords,self.E_coords,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,self.el_consts,self.internal_strain,self.voigt_strain,E_geometries,ase_units=ase_units)
 
         if indices:          #get only rims of interest
             self.post_process(indices)
-            self.E_RIMs_total = sum(self.E_RIMs)
-            proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
+            self.E_harm_total = sum(self.E_coords)
+            proc_geom_RIMs = 100*(sum(self.E_coords)-E_geometries)/E_geometries
         if printout:
-            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, self.E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+            jedi_printout(self.atoms0,self.rim_list,self.delta_q,self.voigt_strain,E_geometries,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_geom_RIMs,self.proc_E_coords,self.E_coords,ase_units=ase_units)
         pass
 
 
@@ -699,6 +736,23 @@ class Jedi:
         hessian = self.modes._hessian2d
         self.H = hessian /(Hartree/Bohr**2)
         return hessian
+
+    def el_consts_unit_conversion(self):
+        '''Converts elastic constants from GPa to Hartree'''
+        V_0 = self.atoms0.get_volume()
+        self.el_consts = self.el_consts * 0.006241509 * V_0 / Hartree
+
+    def internal_strain_unit_conversion(self):
+        '''Converts internal strains from eV to Hartree'''
+        V_0 = self.atoms0.get_volume()
+        self.internal_strain = self.internal_strain / Hartree
+
+    def get_strain_voigt(self):
+        a0_cell = self.atoms0.get_cell()
+        aF_cell = self.atomsF.get_cell()
+        F = aF_cell @ np.linalg.inv(a0_cell)
+        e = 0.5 * (F.T @ F - np.eye(3))  # Green-Lagrange-strain
+        self.voigt_strain = full_3x3_to_Voigt_6_strain(e)
 
     def get_b_matrix(self,indices=None):
         '''Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions
