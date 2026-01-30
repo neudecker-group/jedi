@@ -385,7 +385,7 @@ class Jedi:
         self.proc_E_coords = None     #list of procentual energy stored in single RIMs
         self.part_rim_list = None     #rim list for election of atoms
         self.indices = None           #indices to chose special atoms
-        self.partial_indices = None   #indices for partial analysis
+        self.partial_indices = None  # indices for partial analysis
         self.E_coords = None            #list of energies stored in the rims
         self.E_harm_total = None      #sum of E_rims
         self.E_RIMs_total = None
