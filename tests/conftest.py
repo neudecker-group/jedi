@@ -47,8 +47,6 @@ def hcn_rim_list():
     ref_file = np.load(path_to_test_resources() / "hcn/rim_list.npz")
     return [ref_file["bonds"], ref_file["custom"], ref_file["angles"], ref_file["dihedrals"]]
 
-
-
 ########## REFERENCE DATA ###########
 
 # Diethyldisulfide
@@ -100,6 +98,21 @@ def deds_jedi_full_run(deds_opt, deds_dist, deds_vibdata):
     """Jedi instance after full run()"""
     j = Jedi(deds_opt, deds_dist, deds_vibdata)
     j.run(printout=False)
+    return j
+
+@pytest.fixture(scope="session")
+def hcn_jedi_full_run(hcn_opt, hcn_dist, hcn_vibdata):
+    """Jedi instance for HCN after full run()"""
+    j = Jedi(hcn_opt, hcn_dist, hcn_vibdata)
+    j.run(printout=False)
+    return j
+
+@pytest.fixture(scope="session")
+def hcn_jedi_partial(hcn_opt, hcn_dist, hcn_ref):
+    """Jedi instance for HCN after partial_analysis()."""
+    parthess = VibrationsData.from_2d(hcn_opt, hcn_ref["parthess"], indices=[2, 3, 5, 8, 9, 11])
+    j = Jedi(hcn_opt, hcn_dist, parthess)
+    j.partial_analysis(indices=[2, 3, 5, 8, 9, 11])
     return j
 
 ########### RESULTS OF JEDI_ANALYSIS() ############
