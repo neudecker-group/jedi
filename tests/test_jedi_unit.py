@@ -120,3 +120,30 @@ class TestSetBondParams:
         j.set_bond_params(covf=1.6, vdwf=0.75)
         assert j.covf == 1.6
         assert j.vdwf == 0.75
+
+class TestVMDGen:
+    """
+    TEMPORARY tests for the vmd_gen() function.
+    Fragile as it compares strings.
+    Should be replaced/removed once new default visualization is implemented!
+    """
+    def test_vmd_gen(self, deds_jedi_full_run, tmp_path, monkeypatch):
+        monkeypatch.chdir(tmp_path)
+
+
+        j = copy.deepcopy(deds_jedi_full_run)
+        j.vmd_gen(label=tmp_path)
+
+        from tests.resources import path_to_test_resources
+        ref_dir = path_to_test_resources() / "diethyldisulfid"
+        fl = ["bl.vmd", "ba.vmd", "da.vmd", "all.vmd"]
+
+        for f in fl:
+            gen = (tmp_path / f).read_text()
+            ref = (ref_dir / f).read_text()
+
+            gen_cmp = "\n".join(gen.splitlines()[4:])
+            ref_cmp = "\n".join(ref.splitlines()[4:])
+
+            assert gen_cmp == ref_cmp, f"{fname} differs from reference"
+
