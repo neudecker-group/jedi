@@ -145,5 +145,5 @@ class TestVMDGen:
             gen_cmp = "\n".join(gen.splitlines()[4:])
             ref_cmp = "\n".join(ref.splitlines()[4:])
 
-            assert gen_cmp == ref_cmp, f"{fname} differs from reference"
+            assert gen_cmp == ref_cmp
 
