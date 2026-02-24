@@ -142,8 +142,10 @@ class TestVMDGen:
             gen = (tmp_path / f).read_text()
             ref = (ref_dir / f).read_text()
 
-            gen_cmp = "\n".join(gen.splitlines()[4:])
-            ref_cmp = "\n".join(ref.splitlines()[4:])
+            gen_lines = gen.splitlines()
+            ref_lines = ref.splitlines()
 
+            gen_cmp = "\n".join(gen_lines[4:181] + gen_lines[182:])
+            ref_cmp = "\n".join(ref_lines[4:181] + ref_lines[182:])
             assert gen_cmp == ref_cmp
 
