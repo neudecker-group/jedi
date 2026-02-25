@@ -1,5 +1,3 @@
-import ase.io
-from ase.vibrations.vibrations import VibrationsData
 from strainjedi.jedi import Jedi
 from strainjedi.jedi import get_hbonds
 from strainjedi.io.gaussian import get_vibrations,read_gaussian_out

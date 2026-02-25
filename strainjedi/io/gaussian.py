@@ -6,8 +6,7 @@ from ase.atoms import Atoms
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.units import Hartree, Bohr
 from copy import deepcopy
-from ase.units import Bohr, Hartree
-from ase.io.gaussian import _format_output_type, _xc_to_method, _check_problem_methods,_pop_link0_params,_format_addsec,_format_basis_set,_format_method_basis,_format_route_params,_get_extra_section_params,_get_molecule_spec
+from ase.io.gaussian import _format_output_type, _xc_to_method, _check_problem_methods,_pop_link0_params,_format_addsec,_format_basis_set,_format_method_basis,_format_route_params,_get_molecule_spec
 import copy
 from ase.calculators.calculator import FileIOCalculator
 import ase.calculators.gaussian as gaussian

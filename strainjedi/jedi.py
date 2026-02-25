@@ -1,4 +1,4 @@
-"""A class for Jedi analysis"""
+""" A class for Jedi analysis """
 
 import collections
 import warnings
@@ -7,21 +7,29 @@ import matplotlib.cm as cm
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List
+from numpy.typing import NDArray
 import ase.neighborlist
 import ase.geometry
 from ase.atoms import Atoms
 from ase.vibrations import VibrationsData
 from ase.atoms import Atom
 from ase.utils import jsonable
-import ase.io
 from ase.units import Hartree, Bohr, mol, kcal
+from ase.data.vdw import vdw_radii
+
 from strainjedi.colors import colors
 from strainjedi.print_config import header, energy_comparison, rims_listing
 from strainjedi.quotes import quotes
 from strainjedi import __version__
 
-
-def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase_units=False):
+def jedi_analysis(atoms : ase.atoms.Atoms, 
+                  rim_list : List,
+                  B : np.array, 
+                  H_cart : np.array, 
+                  delta_q : np.array,
+                  E_geometries : float, 
+                  printout : Union[bool,None] = None,
+                  ase_units : bool = False):
     '''
     Analysis of strain energy stored in redundant internal coordinates.
 
@@ -110,7 +118,7 @@ def jedi_analysis(atoms,rim_list,B,H_cart,delta_q,E_geometries,printout=None,ase
     return proc_E_RIMs,E_RIMs, E_RIMs_total, proc_geom_RIMs,delta_q
 
 
-def jedi_printout(atoms,
+def jedi_printout(atoms : ase.atoms.Atoms,
                   rim_list: List,
                   delta_q: np.array,
                   E_geometries: float,
@@ -203,7 +211,7 @@ def jedi_printout(atoms,
     print(quotes())
 
 
-def jedi_printout_bonds(atoms,
+def jedi_printout_bonds(atoms : ase.atoms.Atoms,
                         rim_list: np.array,
                         E_geometries: float,
                         E_RIMs_total: float,
@@ -303,7 +311,7 @@ def get_hbonds(mol,covf=1.3,vdwf=0.9):
 
     bl=bl[bl[:,0]<bl[:,1]]      #remove double mentioned
     bl = np.unique(bl,axis=0)
-    from ase.data.vdw import vdw_radii
+
     hpartner = ['N','O','F']
     hpartner_ls = []
     hcutoff = {('H','N'):vdwf*(vdw_radii[1]+vdw_radii[7]),
@@ -333,7 +341,10 @@ def get_hbonds(mol,covf=1.3,vdwf=0.9):
 
 @jsonable('jedi')
 class Jedi:
-    def __init__(self, atoms0, atomsF, modes): #indices=None
+    def __init__(self, atoms0 : ase.atoms.Atoms, 
+                 atomsF : ase.atoms.Atoms, 
+                 modes : ase.vibrations.data.VibrationsData, 
+                 epot : Union[np.array, None] = None): #indices=None
         '''
 
         atoms0: class
@@ -342,6 +353,8 @@ class Jedi:
             Atoms object of strained structure with calculated energy.
         modes: class
             VibrationsData object with hessian of relaxed structure.
+        epot: np.array or None
+            Vector containing (f - i) endiff., final, initial energy or None. Default: None.
         '''
         self.atoms0 = atoms0        #ref state
         self.atomsF = atomsF        #strained state
@@ -350,15 +363,16 @@ class Jedi:
         self.delta_q = None         #strain in internal coordinates
         self.rim_list = None        #list of Redundant internal modes
         self.H = None               #cartesian Hessian of ref state
-        self.energies = None        #energies of the geometries
+        self.energies = epot        #energies of the geometries
         self.proc_E_RIMs = None     #list of procentual energy stored in single RIMs
         self.part_rim_list = None     #rim list for election of atoms
         self.indices = None           #indices to chose special atoms
         self.E_RIMs = None            #list of energies stored in the rims
+        self.E_RIMs_total = None      #sum of E_rims
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
         self.vdwf=0.9
-        self.covf=1.3
+        self.covf=1.3                  ## cutoff for covalent bonds see Bakken et al.
         self.qF = None  # bond lengths and angles in Bohr and degree in distorted molecule
         self.q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
 
@@ -465,22 +479,25 @@ class Jedi:
         if len(self.atoms0) != H_cart.shape[0]/3:
 
             raise ValueError('Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis')
-        try:
+        
+        try: # Get energies from calculator
             all_E_geometries = self.get_energies()
-        except:
+
+        except: # Fallback to custom energies
             all_E_geometries = self.energies
+
         E_geometries=all_E_geometries[0]
 
 
         #run the analysis
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,self.E_RIMs_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
 
         if indices:          #get only rims of interest
             self.post_process(indices)
-            E_RIMs_total = sum(self.E_RIMs)
+            self.E_RIMs_total = sum(self.E_RIMs)
             proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
         if printout:
-            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, self.E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
         pass
 
 
@@ -495,10 +512,10 @@ class Jedi:
         mol = mol
 
         indices = self.indices
-        cutoff = ase.neighborlist.natural_cutoffs(mol,mult=self.covf)   ## cutoff for covalent bonds see Bakken et al.
-        bl = np.vstack(ase.neighborlist.neighbor_list('ij',a=mol,cutoff=cutoff)).T   #determine covalent bonds
+        cutoff = ase.neighborlist.natural_cutoffs(mol, mult=self.covf)   ## cutoff for covalent bonds see Bakken et al.
+        bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=mol, cutoff=cutoff)).T   #determine covalent bonds
 
-        bl=bl[bl[:,0]<bl[:,1]]      #remove double metioned
+        bl = bl[bl[:,0] < bl[:,1]]      #remove double metioned
         bl, counts = np.unique(bl, return_counts=True, axis=0)
         if ~ np.all(counts == 1):
             print('unit cell too small hessian not calculated for self interaction \
@@ -653,15 +670,33 @@ class Jedi:
         return rim_list
 
     def get_common_rims(self):
-        '''Get only the RICs in both structures bond breaks cannot be analysed logically
+        '''Get only the RICs in both structures, bond breaks cannot be analysed logically
 
         '''
         rim_atoms0 = self.get_rims(self.atoms0)
         rim_atomsF = self.get_rims(self.atomsF)
-
+        if len(rim_atoms0[0]) != len(rim_atomsF[0]):
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of bonds ({len(rim_atomsF[0])})\n"
+                                   f"compared to the relaxed structure ({len(rim_atoms0[0])}). "
+                                   f"In this case the Jedi strain analysis can not be applied correctly.",
+                                   UserWarning, "", 0))
+        if len(rim_atoms0[2]) != len(rim_atomsF[2]):
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of angles ({len(rim_atomsF[2])})"
+                                   f" compared to the relaxed structure ({len(rim_atoms0[2])}). ",
+                                   UserWarning, "", 0))
+        if len(rim_atoms0[3]) != len(rim_atomsF[3]):
+            (warnings.
+             warn_explicit(f"The distorted structure has a different number of dihedral angles ({len(rim_atomsF[3])})"
+                                   f" compared to the relaxed structure ({len(rim_atoms0[3])}).",
+                                   UserWarning, "", 0))
+        common_rims = [np.empty(0) for _ in range(4)]
         for i in range(len(rim_atoms0)):
-            if rim_atoms0[i].shape[0]==0 or rim_atomsF[i].shape[0]==0:
+            if rim_atoms0[i].shape[0]==0:
                 continue
+            elif rim_atomsF[i].shape[0]==0:
+                common_rims[i] = np.empty(0)
             else:
                 rim_atoms0v = rim_atoms0[i].view([('', rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
                 rim_atomsFv = rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()    #get a viable input for np.intersect1d()
@@ -669,8 +704,8 @@ class Jedi:
                 rim_l,ind,z = np.intersect1d(rim_atoms0v, rim_atomsFv,return_indices=True)    #get the rims that exist in both structures
                 rim_l = rim_l[ind.argsort()]
 
-                rim_atoms0[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
-                self.rim_list = rim_atoms0
+                common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
+        self.rim_list = common_rims
 
         return rim_atoms0
 
@@ -864,7 +899,7 @@ class Jedi:
 
         return B
 
-    def get_energies(self):
+    def get_energies(self) -> Union[float, float, float]: 
         '''Calls the energies of the Atoms objects.
 
             Returns: 
@@ -1042,7 +1077,7 @@ class Jedi:
         for outindex, filename in enumerate(file_list):
             if filename == "bl" or filename == "ba" or filename == "da" or filename == "all":
 
-                output[outindex].append(f'\n# Load a molecule\nmol new {destination_dir.resolve() / "xF.xyz"}\n\n')
+                output[outindex].append(f'\n# Load a molecule\nmol new {{{destination_dir.resolve() / "xF.xyz"}}} type xyz\n\n')
                 output[outindex].append('\n# Change bond radii and various resolution parameters\nmol representation '
                                         'cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n')
                 output[outindex].append('\n# Change the drawing method of the first graphical representation to '
@@ -1184,7 +1219,6 @@ class Jedi:
             bond_E_array_pbc = [np.empty((0, 2)), np.empty((0, 2))]
             bond_E_array_pbc_trans = [np.empty((0, 2)), np.empty((0, 2))] # initialize list
 
-            from ase.data.vdw import vdw_radii # for long range bonds
             cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
             ex_bl = np.vstack(ase.neighborlist.neighbor_list('ij', a=self.atomsF, cutoff=cutoff)).T
             ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list('S', a=self.atomsF, cutoff=cutoff)))
@@ -1655,12 +1689,12 @@ display update on """)
         E_geometries = all_E_geometries[0]
 
 
-        self.proc_E_RIMs,self.E_RIMs,E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atomsF,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,self.E_RIMs_total,proc_geom_RIMs,self.delta_q=jedi_analysis(self.atomsF,rim_list,B,H_cart,delta_q,E_geometries,ase_units=ase_units)
         #get values of rims inside the substructure
         self.post_process(indices)
-        E_RIMs_total=sum(self.E_RIMs)
+        self.E_RIMs_total=sum(self.E_RIMs)
         proc_geom_RIMs=100*(sum(self.E_RIMs)-E_geometries)/E_geometries
-        jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
+        jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries, self.E_RIMs_total, proc_geom_RIMs,self.proc_E_RIMs, self.E_RIMs,ase_units=ase_units)
 
         if cbonds_flag == True:
             self.custom_bonds=custom_bonds #restore the user input
@@ -1714,14 +1748,15 @@ display update on """)
             self.custom_bonds=custom_bonds #restore the user input
         pass
 
-    def add_custom_bonds(self, bonds):
-        self.custom_bonds = bonds   # additional bonds for analysis of non-covalent interactions
+    def add_custom_bonds(self, bonds: NDArray) -> None:
         '''Add custom bonds after creating the object.
-        
-        Args:
-            bonds: 
-                2Darray
-            '''
+
+                Args:
+                    bonds:
+                        1D or 2Darray with atom indices, [[i,j]...]
+                    '''
+
+        self.custom_bonds = np.atleast_2d(bonds)   # additional bonds for analysis of non-covalent interactions
 
     def set_bond_params(self,covf=1.3,vdwf=0.9):
         '''
