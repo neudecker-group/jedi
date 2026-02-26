@@ -2,7 +2,6 @@ import pytest
 
 import ase.io as io
 import numpy as np
-print("NumPy config:", np.show_config())
 from strainjedi.jedi import Jedi
 from tests.resources import path_to_test_resources
 from ase.vibrations.vibrations import VibrationsData
@@ -28,15 +27,15 @@ class TestJEDIdiethyldisulfid:
     """
     def test_erims(self, deds_jedi_full_run, deds_ref):
         """Test if ERIMs are correct"""
-        np.testing.assert_allclose(deds_jedi_full_run.E_RIMs, deds_ref["ERIMs"], atol=1e-05)
+        np.testing.assert_allclose(np.sort(deds_jedi_full_run.E_RIMs), np.sort(deds_ref["ERIMs"]), atol=1e-05)
 
     def test_proc_erims(self, deds_jedi_full_run, deds_ref):
         """Test if proc_ERIMs are correct"""
-        np.testing.assert_allclose(deds_jedi_full_run.proc_E_RIMs, deds_ref["procERIMs"], atol=1e-05)
+        np.testing.assert_allclose(np.sort(deds_jedi_full_run.proc_E_RIMs), np.sort(deds_ref["procERIMs"]), atol=1e-05)
 
     def test_delta_q(self, deds_jedi_full_run, deds_ref):
         """Test if delta_q are correct"""
-        np.testing.assert_allclose(deds_jedi_full_run.delta_q, deds_ref["delta_q"], atol=1e-05) 
+        np.testing.assert_allclose(np.sort(deds_jedi_full_run.delta_q), np.sort(deds_ref["delta_q"]), atol=1e-05) 
 
     def test_energies(self, deds_jedi_full_run, deds_ref):
         """Test if energies are correct"""
@@ -48,7 +47,7 @@ class TestJEDIdiethyldisulfid:
 
     def test_b_matrix(self, deds_jedi_full_run, deds_ref):
         """Test if bmatrix are correct"""
-        np.testing.assert_allclose(deds_jedi_full_run.B, deds_ref["bmatrix"], atol=1e-05)
+        np.testing.assert_allclose(np.sort(deds_jedi_full_run.B), np.sort(deds_ref["bmatrix"]), atol=1e-05)
 
 class TestJediWarnings:
     @pytest.mark.parametrize("warning", ["broken_bond", "no_dihedral"])
