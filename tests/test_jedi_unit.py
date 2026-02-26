@@ -38,7 +38,7 @@ class TestGetHessian:
     def test_hessian_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
         j.get_hessian()
-        assert np.allclose(j.H, deds_ref["jediInternalHessian"], atol=1e-05)
+        np.testing.assert_allclose(j.H, deds_ref["jediInternalHessian"], atol=1e-05)
 
 
 class TestGetBMatrix:
@@ -50,7 +50,7 @@ class TestGetBMatrix:
         j = copy.deepcopy(deds_jedi_fresh)
         j.rim_list = deds_rim_list
         j.get_b_matrix()
-        assert np.allclose(j.B, deds_ref["bmatrix"], atol=1e-05)
+        np.testing.assert_allclose(j.B, deds_ref["bmatrix"], atol=1e-05)
 
 
 class TestGetDeltaQ:
@@ -63,14 +63,14 @@ class TestGetDeltaQ:
         j.get_common_rims()
         j.get_b_matrix()
         j.get_delta_q()
-        assert np.allclose(j.delta_q, 0.0, atol=1e-05)
+        np.testing.assert_allclose(j.delta_q, 0.0, atol=1e-05)
 
     def test_delta_q_deds_reference(self, deds_jedi_fresh, deds_rim_list, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
         j.rim_list = deds_rim_list
         j.B = deds_ref["bmatrix"]
         j.get_delta_q()
-        assert np.allclose(j.delta_q, deds_ref["delta_q"], atol=1e-05)
+        np.testing.assert_allclose(j.delta_q, deds_ref["delta_q"], atol=1e-05)
 
 
 class TestGetEnergy:
@@ -85,7 +85,7 @@ class TestGetEnergy:
     def test_energies_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
         j.get_energies()
-        assert np.allclose(np.array(j.energies), deds_ref["energies"], atol=1e-05)
+        np.testing.assert_allclose(np.array(j.energies), deds_ref["energies"], atol=1e-05)
 
 class TestJediAnalysis:
     """
@@ -96,14 +96,14 @@ class TestJediAnalysis:
         assert abs(deds_analysis["ERIMs_total"] - sum(deds_analysis["ERIMs"])) < 1e-05
 
     def test_e_rims_reference(self, deds_analysis, deds_ref):
-        assert np.allclose(deds_analysis["ERIMs"], deds_ref["ERIMs"], atol = 1e-05)
+        np.testing.assert_allclose(deds_analysis["ERIMs"], deds_ref["ERIMs"], atol = 1e-05)
 
     def test_proc_e_rims_reference(self, deds_analysis, deds_ref):
-        assert np.allclose(deds_analysis["procERIMs"], deds_ref["procERIMs"], atol = 1e-05)
+        np.testing.assert_allclose(deds_analysis["procERIMs"], deds_ref["procERIMs"], atol = 1e-05)
 
     def test_e_rims_linear_molecule(self, hcn_analysis, hcn_ref):
         """Tests B.ndim==1 edge case in jedi_analysis()"""
-        assert np.allclose(hcn_analysis["ERIMs"], hcn_ref["ERIMs"], atol=1e-05)
+        np.testing.assert_allclose(hcn_analysis["ERIMs"], hcn_ref["ERIMs"], atol=1e-05)
 
     
 class TestSetBondParams:
