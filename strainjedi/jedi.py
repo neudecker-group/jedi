@@ -523,7 +523,7 @@ class Jedi:
         bl = np.atleast_2d(bl)
 
         if  len(indices) != len(mol):
-            bl = bl[np.all([np.in1d(bl[:,0], indices),  np.in1d(bl[:,1], indices)],axis=0)]
+            bl = bl[np.all([np.isin(bl[:,0], indices),  np.isin(bl[:,1], indices)],axis=0)]
 
         rim_list = [bl]
 
