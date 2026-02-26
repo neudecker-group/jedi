@@ -11,11 +11,11 @@ class TestJEDIHCN:
 
     def test_erims(self, hcn_jedi_full_run, hcn_ref):
         """Test if ERIMs are correct"""
-        assert np.array_equal(hcn_jedi_full_run.E_RIMs.round(5), hcn_ref["ERIMs"].round(5))
+        assert np.allclose(hcn_jedi_full_run.E_RIMs, hcn_ref["ERIMs"], atol=1e-05)
 
     def test_partial_erims(self, hcn_jedi_partial, hcn_ref):
         """Test if ERIMs are correct for a partial analysis"""
-        assert np.array_equal(hcn_jedi_partial.E_RIMs.round(5), hcn_ref["procERIMs"].round(5))
+        assert np.allclose(hcn_jedi_partial.E_RIMs, hcn_ref["procERIMs"], atol=1e-05)
 
 
 
@@ -27,27 +27,27 @@ class TestJEDIdiethyldisulfid:
     """
     def test_erims(self, deds_jedi_full_run, deds_ref):
         """Test if ERIMs are correct"""
-        assert np.array_equal(deds_jedi_full_run.E_RIMs.round(5), deds_ref["ERIMs"].round(5))
+        assert np.allclose(deds_jedi_full_run.E_RIMs, deds_ref["ERIMs"], atol=1e-05)
 
     def test_proc_erims(self, deds_jedi_full_run, deds_ref):
         """Test if proc_ERIMs are correct"""
-        assert np.array_equal(deds_jedi_full_run.proc_E_RIMs.round(5), deds_ref["procERIMs"].round(5))
+        assert np.allclose(deds_jedi_full_run.proc_E_RIMs, deds_ref["procERIMs"], atol=1e-05)
 
     def test_delta_q(self, deds_jedi_full_run, deds_ref):
         """Test if delta_q are correct"""
-        assert np.array_equal(deds_jedi_full_run.delta_q.round(5), deds_ref["delta_q"].round(5)) 
+        assert np.allclose(deds_jedi_full_run.delta_q, deds_ref["delta_q"], atol=1e-05) 
 
     def test_energies(self, deds_jedi_full_run, deds_ref):
         """Test if energies are correct"""
-        assert np.array_equal(np.array(deds_jedi_full_run.energies).round(5), deds_ref["energies"].round(5))
+        assert np.allclose(np.array(deds_jedi_full_run.energies), deds_ref["energies"], atol=1e-05)
 
     def test_hessian(self, deds_jedi_full_run, deds_ref):
         """Test if hessian inside of JEDI is correct (JEDI-hessian has transformed units)"""
-        assert np.array_equal(np.array(deds_jedi_full_run.energies).round(5), deds_ref["energies"].round(5))
+        assert np.allclose(np.array(deds_jedi_full_run.energies), deds_ref["energies"], atol=1e-05)
 
     def test_b_matrix(self, deds_jedi_full_run, deds_ref):
         """Test if bmatrix are correct"""
-        assert np.array_equal(deds_jedi_full_run.B.round(5), deds_ref["bmatrix"].round(5))
+        assert np.allclose(deds_jedi_full_run.B, deds_ref["bmatrix"], atol=1e-05)
 
 class TestJediWarnings:
     @pytest.mark.parametrize("warning", ["broken_bond", "no_dihedral"])
