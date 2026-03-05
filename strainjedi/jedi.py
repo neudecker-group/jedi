@@ -709,7 +709,8 @@ class Jedi:
                 rim_l = rim_l[ind.argsort()]
 
                 common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
-        self.rim_list = common_rims
+        common_rims_sorted = [arr if arr.size==0 else np.sort(arr, axis=1, kind="mergesort") for arr in common_rims]
+        self.rim_list = common_rims_sorted
 
         return rim_atoms0
 
