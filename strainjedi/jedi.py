@@ -311,7 +311,6 @@ def get_hbonds(mol,covf=1.3,vdwf=0.9):
 
     bl=bl[bl[:,0]<bl[:,1]]      #remove double mentioned
     bl = np.unique(bl,axis=0)
-    bl = np.sort(bl, kind='mergesort')
 
     hpartner = ['N','O','F']
     hpartner_ls = []
@@ -518,7 +517,6 @@ class Jedi:
 
         bl = bl[bl[:,0] < bl[:,1]]      #remove double metioned
         bl, counts = np.unique(bl, return_counts=True, axis=0)
-        bl = np.sort(bl, kind = 'mergesort')
         if ~ np.all(counts == 1):
             print('unit cell too small hessian not calculated for self interaction \
                    jedi analysis for a finite system consisting of the cell will be conducted')
@@ -669,7 +667,10 @@ class Jedi:
             rim_list.append(np.array([]))
 
 
-        return rim_list
+        rim_list_sorted = np.sort(rim_list, axis=1, kind='mergesort')
+
+        return rim_list_sorted
+
 
     def get_common_rims(self):
         '''Get only the RICs in both structures, bond breaks cannot be analysed logically
