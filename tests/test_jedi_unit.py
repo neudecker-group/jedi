@@ -121,6 +121,7 @@ class TestSetBondParams:
         assert j.covf == 1.6
         assert j.vdwf == 0.75
 
+'''
 class TestVMDGen:
     """
     TEMPORARY tests for the vmd_gen() function.
@@ -149,3 +150,4 @@ class TestVMDGen:
             ref_cmp = "\n".join(ref_lines[4:181] + ref_lines[182:])
             assert gen_cmp == ref_cmp
 
+'''

@@ -667,7 +667,8 @@ class Jedi:
             rim_list.append(np.array([]))
 
 
-        rim_list_sorted = np.sort(rim_list, axis=1, kind='mergesort')
+
+        rim_list_sorted = [arr if arr.size==0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
 
         return rim_list_sorted
 
