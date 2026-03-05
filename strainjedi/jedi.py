@@ -517,7 +517,6 @@ class Jedi:
 
         bl = bl[bl[:,0] < bl[:,1]]      #remove double metioned
         bl, counts = np.unique(bl, return_counts=True, axis=0)
-        bl = bl[np.lexsort(bl.T)]
         if ~ np.all(counts == 1):
             print('unit cell too small hessian not calculated for self interaction \
                    jedi analysis for a finite system consisting of the cell will be conducted')
@@ -565,7 +564,8 @@ class Jedi:
 
         if ba_flag == True :
             ba = np.atleast_2d(ba)
-            ba = ba[np.lexsort(ba.T)]
+            ba = ba[ba[:, 1].argsort()]  #sort by atom2
+            ba = ba[ba[:, 0].argsort(kind='mergesort')]  # sort by atom1
 
             nan=np.full((len(ba),1),-1)
             nan=np.hstack((nan,ba))
@@ -668,8 +668,9 @@ class Jedi:
 
 
 
+        rim_list_sorted = [arr if arr.size==0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
 
-        return rim_list
+        return rim_list_sorted
 
 
     def get_common_rims(self):
@@ -708,8 +709,6 @@ class Jedi:
                 rim_l = rim_l[ind.argsort()]
 
                 common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
-                if common_rims[i].shape[0] > 0:
-                    common_rims[i] = common_rims[i][np.lexsort(common_rims[i].T)]
         self.rim_list = common_rims
 
         return rim_atoms0
