@@ -505,9 +505,8 @@ class Jedi:
 
 
     def get_rims(self,mol):
-        '''Gets the redundant internal coordinates
+        '''Gets the redundant internal coordinates'''
 
-        '''
         ###bondlengths####
         mol = mol
 
@@ -523,7 +522,7 @@ class Jedi:
         bl = np.atleast_2d(bl)
 
         if  len(indices) != len(mol):
-            bl = bl[np.all([np.in1d(bl[:,0], indices),  np.in1d(bl[:,1], indices)],axis=0)]
+            bl = bl[np.all([np.isin(bl[:,0], indices),  np.isin(bl[:,1], indices)],axis=0)]
 
         rim_list = [bl]
 
@@ -564,8 +563,8 @@ class Jedi:
 
         if ba_flag == True :
             ba = np.atleast_2d(ba)
-            ba = ba[ba[:, 1].argsort()]  #sort by atom2
-            ba = ba[ba[:, 0].argsort(kind='mergesort')]  # sort by atom1
+            ba = ba[ba[:, 1].argsort(kind='stable')]  #sort by atom2
+            ba = ba[ba[:, 0].argsort(kind='stable')]  # sort by atom1
 
             nan=np.full((len(ba),1),-1)
             nan=np.hstack((nan,ba))
@@ -667,7 +666,11 @@ class Jedi:
             rim_list.append(np.array([]))
 
 
-        return rim_list
+
+        rim_list_sorted = [arr if arr.size==0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
+
+        return rim_list_sorted
+
 
     def get_common_rims(self):
         '''Get only the RICs in both structures, bond breaks cannot be analysed logically
@@ -702,10 +705,11 @@ class Jedi:
                 rim_atomsFv = rim_atomsF[i].view([('', rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()    #get a viable input for np.intersect1d()
 
                 rim_l,ind,z = np.intersect1d(rim_atoms0v, rim_atomsFv,return_indices=True)    #get the rims that exist in both structures
-                rim_l = rim_l[ind.argsort()]
+                rim_l = rim_l[ind.argsort(kind='stable')]
 
                 common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
-        self.rim_list = common_rims
+        common_rims_sorted = [arr if arr.size==0 else np.sort(arr, axis=1, kind="mergesort") for arr in common_rims]
+        self.rim_list = common_rims_sorted
 
         return rim_atoms0
 
