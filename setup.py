@@ -8,7 +8,7 @@ setup(
     author='Tim Neudecker, Sanna Benter, Henry Wang, Wilke Dononelli',
     author_email='neudecker@uni-bremen.de',
     license='MIT',
-    packages=['strainjedi','strainjedi/io'],
+    packages=['strainjedi','strainjedi/io', 'strainjedi/visualization'],
     install_requires=[
                       'mpi4py>=2.0',
                       'numpy',  
