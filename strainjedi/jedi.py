@@ -23,7 +23,7 @@ from strainjedi.quotes import quotes
 from strainjedi import __version__
 
 
-def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,el_consts,internal_strain,lattice_strain,E_geometries,printout=None,ase_units=False):
+def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,el_consts,internal_strain,lattice_strain,lattice_B,E_geometries,ase_units=False):
     '''
     Analysis of strain energy stored in redundant internal coordinates.
 
@@ -46,7 +46,6 @@ def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,el_consts,internal_strain,lat
     Returns:
         Analysis of RIMs.
     '''
-    #jedi analysis function
     ###########################
     ##  Matrix Calculations  ##
     ###########################
@@ -74,17 +73,20 @@ def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,el_consts,internal_strain,lat
     else:
         H_q = P.dot( B_transp_plus ).dot( H_cart ).dot( B_plus ).dot( P )
 
-    internal_strain = internal_strain.reshape(-1, 6)
     H_coupling = B_transp_plus @ internal_strain
+    # H_coupling = H_coupling @ lattice_B.T
+    #
+    # el_consts_q = lattice_B.dot( el_consts ).dot( np.transpose(lattice_B) )
 
-    H_full = np.block([[H_q, H_coupling],
-                       [H_coupling.T, el_consts]])
+    H_full = np.block([[H_q, H_coupling],[H_coupling.T, el_consts]])
 
     E_harm_total = 0.5 * np.transpose( Q ).dot( H_full ).dot( Q )
     E_full = 0.5 * (Q * H_full).T * Q
+    # m = int(E_full.shape[0] / 2)
+    # E_coords = np.sum(E_full, axis=1)[:m] + np.sum(E_full, axis=1)[m:]
     E_coords = np.sum(E_full, axis=1)
-    E_lattice_total = E_coords[-6:].sum(axis=0)
-    E_RIMs_total = E_coords[:-6].sum(axis=0)
+    E_lattice_total = E_coords[-9:].sum(axis=0)
+    E_RIMs_total = E_coords[:-9].sum(axis=0)
 
     proc_E_parts = [E_RIMs_total/E_harm_total, E_lattice_total/E_harm_total]
     # Get the percentage of the energy stored in every RIM
@@ -113,7 +115,7 @@ def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,el_consts,internal_strain,lat
 def jedi_printout(atoms,
                   rims_list: List,
                   delta_q: np.array,
-                  voigt_strain: np.array,
+                  lattice_strain: np.array,
                   E_geometries: float,
                   E_harm_total: float,
                   E_RIMs_total: float,
@@ -159,6 +161,7 @@ def jedi_printout(atoms,
         output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
                       .format(" ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison))
 
+    # ToDo: addition of proportion of lattice strain and ion relaxation
     output.append('{0:<{column1}}' '{1:^{column2}.4f}' '{2:^{column3}}'
                   .format("Ab Initio", E_geometries, "-", **energy_comparison))
     # TODO save proc_e_rims as std decimal number and have print command use .2%
@@ -217,12 +220,12 @@ def jedi_printout(atoms,
             '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
             .format("Direction","strain", "Percentage", "Energy (eV)", **lattice_listing))
 
-    strain_directions = ['xx', 'yy', 'zz', 'xy', 'yz', 'zx']
+    strain_directions = ['ax', 'ay', 'az', 'bx', 'by', 'bz', 'cx', 'cy', 'cz']
     for dir_counter, direction in enumerate(strain_directions):
         output.append(
             '{0:^{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}''{3:^{column4}.4f}'
             .format(direction,
-                    voigt_strain[dir_counter],
+                    lattice_strain[dir_counter],
                     proc_E_coords[ric_counter + dir_counter],
                     E_coords[ric_counter + dir_counter],
                     **lattice_listing))
@@ -402,6 +405,7 @@ class Jedi:
         self.modes = modes          #VibrationsData object
         self.B = None               #Wilson's B
         self.lattice_B = None
+        self.J = None
         self.delta_q = None         #strain in internal coordinates
         self.rim_list = None        #list of Redundant internal modes
         self.H = None               #cartesian Hessian of ref state
@@ -519,6 +523,7 @@ class Jedi:
         self.get_b_matrix()
         B = self.B
         self.get_lattice_b_matrix()
+        self.get_strain_to_lattice_vectors_jacobian()
         self.get_delta_q()
         delta_q = self.delta_q
         self.get_lattice_strain()
@@ -534,9 +539,8 @@ class Jedi:
             all_E_geometries = self.energies
         E_geometries=all_E_geometries[0]
 
-
         #run the analysis
-        self.proc_E_coords,self.E_coords,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,self.el_consts,self.internal_strain,self.voigt_strain,E_geometries,ase_units=ase_units)
+        self.proc_E_coords,self.E_coords,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_geom_RIMs,self.delta_q = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,self.el_consts,self.internal_strain,self.lattice_strain,self.lattice_B,E_geometries,ase_units=ase_units)
 
         if indices:          #get only rims of interest
             self.post_process(indices)
@@ -545,9 +549,6 @@ class Jedi:
         if printout:
             jedi_printout(self.atoms0,self.rim_list,self.delta_q,self.lattice_strain,E_geometries,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_geom_RIMs,self.proc_E_coords,self.E_coords,ase_units=ase_units)
         pass
-
-
-
 
 
     def get_rims(self,mol):
@@ -782,11 +783,42 @@ class Jedi:
         self.H = hessian / (Hartree / Bohr ** 2)
         return hessian
 
+    def get_strain_to_lattice_vectors_jacobian(self):
+        # ToDo: check for correct derivation
+        L = self.atomsF.cell.array # 3x3
+        L0 = self.atoms0.cell.array # 3x3
+        L0_inv = np.linalg.inv(L0)
+
+        # deformation gradient
+        F = L @ L0_inv
+
+        # helper matrix
+        A = F @ L0_inv
+
+        J = np.zeros((9, 9))
+        for i in range(3):
+            for j in range(3):
+                p = 3 * i + j
+                for a in range(3):
+                    for b in range(3):
+                        q = 3 * a + b
+                        term = 0.0
+                        if i == a:
+                            term += A[b, j]
+                        if j == a:
+                            term += A[b, i]
+                        J[p, q] = 0.5 * term
+
+        self.J = J
+
     def el_consts_unit_conversion(self):
-        '''Converts elastic constants from GPa to Hartree'''
+        '''Converts elastic constants from strain (6x6) to lattice vector (9x9) dependent and from GPa to Hartree/Bohr^2'''
+        # ToDo: imported constants instead of float for unit conversion
         V_0 = self.atoms0.get_volume()
-        C_3333 = Voigt_6x6_to_full_3x3x3x3(self.el_consts)
-        C_99 = C_3333.transpose(0, 2, 1, 3).reshape(9, 9)
+        vasp_to_voigt = [0, 1, 2, 4, 5, 3]
+        C_voigt = self.el_consts[np.ix_(vasp_to_voigt, vasp_to_voigt)]
+        C_3333 = Voigt_6x6_to_full_3x3x3x3(C_voigt)
+        C_99 = self.J.T @ C_3333.reshape(9,9) @ self.J
         self.el_consts = C_99 * 0.006241509 * V_0 / Hartree
 
     def internal_strain_voigt_to_9(self, Lambda_voigt):
@@ -809,16 +841,20 @@ class Jedi:
         return Lambda_9
 
     def internal_strain_unit_conversion(self):
-        '''Converts internal strains from eV to Hartree'''
+        '''Converts internal strains from strain (3Nx6) to lattice vector (3Nx9) dependent, from eV/Å to Hartree/Bohr^2'''
+        # ToDo: negative sign because of definition of force?
         Lambda_voigt = self.internal_strain.reshape(-1, 6)
         Lambda_9 = self.internal_strain_voigt_to_9(Lambda_voigt)
-        self.internal_strain = Lambda_9 / Hartree
+        self.internal_strain =  Lambda_9 @ self.J / (Hartree / Bohr)
 
     def get_lattice_strain(self):
+        # ToDo: rename to lattice vector change
         a0_cell = self.atoms0.get_cell()
         aF_cell = self.atomsF.get_cell()
-        F = aF_cell @ np.linalg.inv(a0_cell)
-        self.lattice_strain = 0.5 * (F.T @ F - np.eye(3))  # Green-Lagrange-strain
+        # F = aF_cell @ np.linalg.inv(a0_cell)
+        # self.lattice_strain = 0.5 * (F.T @ F - np.eye(3))  # Green-Lagrange-strain
+        delta_h = aF_cell - a0_cell
+        self.lattice_strain = delta_h.reshape(9,)
 
     def get_b_matrix(self,indices=None):
         '''Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions
@@ -980,8 +1016,8 @@ class Jedi:
 
     def get_lattice_b_matrix(self):
         '''Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions'''
-        # ToDo: units
         # ToDo: custom bonds
+        # ToDo: comparison to vector definitions from the B-matrix
         atoms = self.atoms0
         frac = atoms.get_scaled_positions(wrap=False)
         cutoff = ase.neighborlist.natural_cutoffs(atoms, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
@@ -1012,8 +1048,8 @@ class Jedi:
 
         for (q_i, q_j, q_k) in self.rim_list[2]:
             S = np.zeros((3,3))
-            S[1] = bond_S[(q_j, q_i)]
-            S[2] = S[1] - bond_S[(q_j, q_k)]
+            S[0] = bond_S[(q_j, q_i)]
+            S[2] = bond_S[(q_j, q_k)]
 
             for i, a in enumerate((q_i, q_j, q_k)):
                 sa = frac[a] + S[i]
@@ -1021,16 +1057,16 @@ class Jedi:
                 for beta in range(3):
                     for alpha in range(3):
                         col = 3 * beta + alpha
-                        u = atoms.get_distance(q_i, q_j, mic=True, vector=True)
-                        v = atoms.get_distance(q_k, q_j, mic=True, vector=True)
-                        lattice_B[row, col] += get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][i][alpha] * sa[beta]
+                        u = atoms.get_distance(q_j, q_i, mic=True, vector=True)
+                        v = atoms.get_distance(q_j, q_k, mic=True, vector=True)
+                        lattice_B[row, col] += -get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][i][alpha] * sa[beta]
             row += 1
 
         for (q_i, q_j, q_k, q_l) in self.rim_list[3]:
             S = np.zeros((4,3))
-            S[1] = bond_S[(q_i, q_j)]
-            S[2] = S[1] - bond_S[(q_j, q_k)]
-            S[3] = S[2] - bond_S[(q_k, q_l)]
+            S[0] = bond_S[(q_j, q_i)]
+            S[2] = bond_S[(q_j, q_k)]
+            S[3] = bond_S[(q_k, q_l)]
 
             for i, a in enumerate((q_i, q_j, q_k, q_l)):
                 sa = frac[a] + S[i]
@@ -1039,7 +1075,7 @@ class Jedi:
                     for alpha in range(3):
                         col = 3 * beta + alpha
                         # copy needed because derivative function rewrites vector variable as normed vector
-                        u = np.copy(np.atleast_2d(atoms.get_distance(q_i, q_j, mic=True,vector=True)))
+                        u = np.copy(np.atleast_2d(atoms.get_distance(q_j, q_i, mic=True,vector=True)))
                         v = np.copy(np.atleast_2d(atoms.get_distance(q_j, q_k, mic=True, vector=True)))
                         w = np.copy(np.atleast_2d(atoms.get_distance(q_k, q_l, mic=True, vector=True)))
                         lattice_B[row, col] += np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][i][alpha])*Bohr * sa[beta]
@@ -1069,6 +1105,7 @@ class Jedi:
             Returns: 
                 2D array of the values.
         '''
+        # ToDo: check of still correct for changing lattice parameters
 
         try:
             len(self.rim_list)  # TODO what happens here?
