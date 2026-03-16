@@ -13,7 +13,7 @@ class MatplotlibVisualizer:
         self.output_dir = Path(output_dir)
         self.energy_unit = energy_unit
 
-    def run(self, show, box=False):
+    def run(self, show, show_indices, box=False):
         for mode in self.visualization_data.keys():
             self.mode = mode
             self.atomsF = self.visualization_data[self.mode]['bond_data']['atoms']
@@ -33,7 +33,7 @@ class MatplotlibVisualizer:
             ax.set_zticks([])
 
             self.plot_bonds(ax, pos)
-            self.plot_atoms(ax, pos)
+            self.plot_atoms(ax, pos, show_indices)
 
             if box and self.atomsF.pbc.any():
                 self.plot_pbc_box(ax)
@@ -82,12 +82,20 @@ class MatplotlibVisualizer:
             ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]],
                     color=color, linewidth=2, linestyle='--')
 
-    def plot_atoms(self, ax, pos):
+    def plot_atoms(self, ax, pos, show_indices):
         atom_colors = self.visualization_data[self.mode]['color_data']['atom_colors']
         symbols = self.atomsF.get_chemical_symbols()
+        
         for idx, (p, (sym, col)) in enumerate(zip(pos, zip(symbols, atom_colors))):
-            size = 50 if sym == 'H' else 150
+            size = 100 if sym == 'H' else 200
             ax.scatter(p[0], p[1], p[2], color=col, s=size, linewidths=0.5, edgecolor='0.3')
+            if show_indices:
+                ax.text(p[0], p[1], p[2], str(idx),
+                        fontsize=6 if sym == 'H' else 8,
+                        color='k',
+                        ha='center',
+                        va='center',
+                        zorder=100)
 
     def plot_pbc_box(self, ax):
         cell = self.atomsF.get_cell()

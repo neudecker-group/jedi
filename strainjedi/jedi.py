@@ -986,6 +986,7 @@ class Jedi:
                   single_mode: Optional[str] = None,
                   man_strain: Optional[float] = None,
                   show: Optional[bool] = False,
+                  show_indices: Optional[bool] = False,
                   box: Optional[bool] = False):
         """
         Args:
@@ -1013,6 +1014,9 @@ class Jedi:
                 Display the plot interactively. Only works with the
                 Matplotlib visualizer.
                 default: False
+            show_indices: (bool)
+                Display atom indices. Only works with the
+                Matplotlib visualizer.
             box: (bool)
                 Draw the unit cell box. Only applies to periodic structures.
                 default: False
@@ -1022,7 +1026,13 @@ class Jedi:
             raise ValueError("Analysis has not been run. Jedi.run() must be called before Jedi.visualize()")
         
         if show and not visualizer == 'mpl':
-            warnings.warn("'show=True' only works for the Matplotlib Visualizer and will be ignored.", UserWarning)
+            warnings.warn("'show=True' only works for the Matplotlib Visualizer and will be ignored.", 
+                          UserWarning)
+        
+        if show_indices and not visualizer == 'mpl':
+            warnings.warn("'show_indices=True' only works for the Matplotlib Visualizer and will be ignored.", 
+                          UserWarning)
+
 
         energy_unit = "eV" if self.ase_units else "kcal/mol"
 
@@ -1044,7 +1054,7 @@ class Jedi:
                                 mapper,
                                 output_dir,
                                 energy_unit)
-            vis.run(show, box)
+            vis.run(show, show_indices, box)
        
        
         elif visualizer == 'vmd':
