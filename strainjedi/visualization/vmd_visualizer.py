@@ -29,7 +29,6 @@ class VMDVisualizer:
 
             if self.atomsF.pbc.any() and box:
                 lines.extend(self.draw_box())
-            lines.extend(self.vmd_colorbar())
             self.pdf_colorbar()
 
             with open(self.output_dir / f'{mode}.vmd', 'w') as f:
@@ -151,69 +150,6 @@ class VMDVisualizer:
 
         return lines
     
-    def vmd_colorbar(self):
-        """Generate TCL code for interactive colorbar in VMD."""
-       
-        lines = [f"""display update off
-display resetview
-variable bar_mol
-                 
-
-
-set old_top [molinfo top]
-set bar_mol [mol new]
-mol top $bar_mol
-                 
-#bar can be fixed with mol fix 'molid of the bar' 
-
-                 
-
-# We want to draw relative to the location of the top mol so that the bar 
-# will always show up nicely.
-set center [molinfo $old_top get center]
-set center [regsub -all {[{}]} $center ""]
-set center [split $center]
-set min 0.0
-set max 2.219368753453463
-set length 30.0
-set width [expr $length / 6]
-
-# draw the color bar
-set start_y [expr 1 + [lindex $center 1] ]
-
-set use_x [expr 1 + [lindex $center 0] ]
-
-set use_z [expr 1+ [lindex $center 2 ]]
-
-set step [expr $length / 29]
-
-set label_num 8
-
-for {{set colorid 1 }} {{ $colorid <= {self.n_colors} }} {{incr colorid 1 }} {{
-    draw color $colorid
-    set cur_y [ expr $start_y + ($colorid -0.5 ) * $step ]
-    draw line "$use_x $cur_y $use_z"  "[expr $use_x+$width] $cur_y $use_z" width 10000
-}}
-# draw the labels
-set coord_x [expr (1.1*$width)+$use_x];
-set step_size [expr $length / $label_num]
-set color_step [expr 29/$label_num]
-set value_step [expr ($max - $min ) / double ($label_num)]
-
-
-for {{set i 0}} {{$i <= $label_num }} {{ incr i 1}} {{
-    set cur_color_id 32
-    draw color $cur_color_id
-    set coord_y [expr $start_y+$i * $step_size ]
-    set cur_text [expr $min + $i * $value_step ]
-    draw text  " $coord_x $coord_y $use_z"  [format %6.3f  $cur_text]
-}}
-draw text " $coord_x [expr $coord_y + $step_size] $use_z"   "kcal/mol"
-# re-set top
-mol top $old_top
-display update on 
-"""]
-        return lines
     
     def draw_box(self):
         lines = []
