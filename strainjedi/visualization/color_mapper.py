@@ -50,10 +50,6 @@ class ColorMapper:
             E_array[i][1] = self.bl[i][1]
 
         E_array = self.get_energies_per_bond(E_array, mode)
-
-        # Bonds that received no energy contribution in this mode have NaN.
-        # Set them to 0.0: no contribution means zero energy, not unknown.
-        # This ensures PBC replacement bonds also inherit 0.0 instead of NaN.
         E_array[np.isnan(E_array[:, 2]), 2] = 0.0
 
         n_regular = len(self.rim_list[0])
@@ -122,6 +118,8 @@ class ColorMapper:
                 or (dihedral[2] == bond[1] and dihedral[3] == bond[0]))
 
     def add_unanalyzed_bonds(self, E_array):
+        
+        self.j.indices = np.arange(0, len(self.atomsF))
         full_rims = self.j.get_rims(self.atomsF)
         analyzed_bonds = set(tuple(sorted([int(b[0]), int(b[1])])) for b in E_array[:, :2])
 
