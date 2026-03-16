@@ -6,6 +6,7 @@ from strainjedi.visualization.colors import colors as symbol_colors
 from typing import Dict, Optional, Tuple
 from matplotlib import colormaps, cm
 from matplotlib.colors import Colormap
+import warnings
 
 
 class ColorMapper:
@@ -323,6 +324,13 @@ class ColorMapper:
 
             all_energies = np.concatenate([bond_data["energies"], bond_data["custom_energies"]])
             max_strain = man_strain if man_strain else np.nanmax(all_energies)
+
+            if max_strain == 0 or np.isnan(max_strain) or max_strain is None:
+                warnings.warn(
+                    f"Mode '{m}' has no strain energy (max_strain = {max_strain})",
+                               UserWarning
+                            )
+                max_strain = 1.0 # dummy value to avoid division by zero
 
             bond_data["norm_energies"] = np.clip(bond_data["energies"] / max_strain, 0, 1)
             bond_data["norm_custom_energies"] = np.clip(bond_data["custom_energies"] / max_strain, 0, 1)

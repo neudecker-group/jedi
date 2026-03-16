@@ -44,7 +44,7 @@ class MatplotlibVisualizer:
 
             ax.view_init(60, 0, 90)
 
-            plt.tight_layout()
+            #plt.tight_layout()
             plt.savefig(self.output_dir / f'{self.mode}_matplotlib.pdf', bbox_inches='tight')
             if show:
                 plt.show()
