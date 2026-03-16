@@ -11,7 +11,6 @@ class MatplotlibVisualizer:
         self.visualization_data = visualization_data
         self.mapper = mapper
         self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
         self.energy_unit = energy_unit
 
     def run(self, show, box=False):
@@ -45,9 +44,11 @@ class MatplotlibVisualizer:
             ax.view_init(60, 0, 90)
 
             #plt.tight_layout()
-            plt.savefig(self.output_dir / f'{self.mode}_matplotlib.pdf', bbox_inches='tight')
             if show:
                 plt.show()
+            else:
+                self.output_dir.mkdir(parents=True, exist_ok=True)
+                plt.savefig(self.output_dir / f'{self.mode}_matplotlib.pdf', bbox_inches='tight')
             plt.close()
 
     def plot_bonds(self, ax, pos):
