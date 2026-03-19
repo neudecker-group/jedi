@@ -56,6 +56,10 @@ class MatplotlibVisualizer:
         custom_bonds = self.visualization_data[self.mode]['bond_data']['custom_bonds']
         norm_energies = self.visualization_data[self.mode]['bond_data']['norm_energies']
         norm_custom_energies = self.visualization_data[self.mode]['bond_data']['norm_custom_energies']
+        split_bonds = self.visualization_data[self.mode]['bond_data']['split_bonds']
+        pbc_split_bonds = self.visualization_data[self.mode]['bond_data']['pbc_split_bonds']
+
+
         self.max_strain = self.visualization_data[self.mode]['color_data']['max_strain']
         colormap = self.visualization_data[self.mode]['color_data']['colormap']
 
@@ -82,12 +86,41 @@ class MatplotlibVisualizer:
             ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]],
                     color=color, linewidth=2, linestyle='--')
 
+
+        if split_bonds and len(pbc_split_bonds) > 0:
+            for idx, pbc_bond in enumerate(pbc_split_bonds[:3]):  # Nur erste 3
+                atom_idx = pbc_bond['atom_index']
+                p1 = pos[atom_idx]
+                p2 = pbc_bond['dummy_position']
+                midpoint = (p1+p2) / 2
+        
+            for pbc_bond in pbc_split_bonds:
+                atom_idx = pbc_bond['atom_index']
+                p1 = pos[atom_idx]
+                p2 = pbc_bond['dummy_position']
+                energy = pbc_bond['norm_energy']
+
+                midpoint = (p1+p2) / 2
+
+                if np.isnan(energy):
+                    color = 'black'
+                else:
+                    color = self.cmap(energy)
+                
+                is_custom = pbc_bond.get('is_custom', False)
+                linestyle = 'solid' if not is_custom else '--'
+                linewidth = 5 if not is_custom else 2
+
+                ax.plot([p1[0], midpoint[0]], [p1[1], midpoint[1]], [p1[2], midpoint[2]],
+                color=color, linewidth=linewidth, linestyle=linestyle, alpha=0.7)
+
+
     def plot_atoms(self, ax, pos, show_indices):
         atom_colors = self.visualization_data[self.mode]['color_data']['atom_colors']
         symbols = self.atomsF.get_chemical_symbols()
         
         for idx, (p, (sym, col)) in enumerate(zip(pos, zip(symbols, atom_colors))):
-            size = 100 if sym == 'H' else 200
+            size = 100 if sym == 'H' else 150
             ax.scatter(p[0], p[1], p[2], color=col, s=size, linewidths=0.5, edgecolor='0.3')
             if show_indices:
                 ax.text(p[0], p[1], p[2], str(idx),

@@ -987,7 +987,8 @@ class Jedi:
                   man_strain: Optional[float] = None,
                   show: Optional[bool] = False,
                   show_indices: Optional[bool] = False,
-                  box: Optional[bool] = False):
+                  box: Optional[bool] = False,
+                  split_bonds: Optional[bool] = True):
         """
         Args:
             visualizer: ('mpl' or 'vmd')
@@ -1017,6 +1018,8 @@ class Jedi:
             show_indices: (bool)
                 Display atom indices. Only works with the
                 Matplotlib visualizer.
+            split_bonds: (bool)
+                Display PBC bonds as half-bonds at each side of the unit cell.
             box: (bool)
                 Draw the unit cell box. Only applies to periodic structures.
                 default: False
@@ -1046,7 +1049,7 @@ class Jedi:
         
 
         mapper = ColorMapper(self)
-        self.visualization_data = mapper.get_visualization_data(mode_list, colormap, man_strain)
+        self.visualization_data = mapper.get_visualization_data(mode_list, colormap, man_strain, split_bonds)
 
         
         if visualizer == 'mpl':

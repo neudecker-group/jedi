@@ -74,6 +74,8 @@ class ColorMapper:
             'custom_bonds': custom_bonds_section[:, :2].astype(int) if len(custom_bonds_section) > 0 else np.empty((0, 2), dtype=int),
             'custom_energies': custom_bonds_section[:, 2] if len(custom_bonds_section) > 0 else np.array([]),
             'atoms': self.atoms_vis,
+            'split_bonds': getattr(self, 'split_bonds', False),
+            'pbc_split_bonds': getattr(self, 'pbc_split_bonds')
         }
 
     def get_energies_per_bond(self, E_array, mode):
@@ -138,7 +140,6 @@ class ColorMapper:
     def handle_pbc(self, E_array, n_regular, n_custom):
 
         mol = self.atomsF.copy()
-        mol.wrap()
 
         rim_list = self.rim_list
         n_orig = len(self.atomsF)
@@ -170,11 +171,14 @@ class ColorMapper:
         custom_pbc = []
         regular_to_remove = set()
         custom_to_remove = set()
+        pbc_split_bonds = []
 
         for i in range(len(atoms_ex_cell)):
             atom_i = int(atoms_ex_cell[i, 0])
             atom_j = int(atoms_ex_cell[i, 1])
             disp = atoms_ex_cell[i, 5:8]
+
+
 
             # Aux position: wrapped pos of atom_i + displacement vector
             pos_ex_atom = mol.get_positions()[atom_i] + disp
@@ -189,28 +193,55 @@ class ColorMapper:
 
             if not is_regular and not is_custom:
                 continue
+            
 
-            # Only reuse aux atoms (index >= n_orig), never originals
-            existing_aux = []
-            for idx in range(n_orig, len(mol)):
-                if np.allclose(mol.positions[idx], pos_ex_atom, atol=1e-6):
-                    existing_aux.append(idx)
+            if self.split_bonds:
+                if is_regular:
+                    energy = translate.get(original_tuple, np.nan)
+                    pbc_split_bonds.append({
+                        'atom_index': atom_i,
+                        'dummy_position': pos_ex_atom,
+                        'energy': energy,
+                        'original_bond': original_tuple
+                    })
+                    regular_to_remove.add(original_tuple)
+                
+                elif is_custom:
+                    energy = translate.get(original_tuple, np.nan)
+                    pbc_split_bonds.append({
+                        'atom_index': atom_i,
+                        'dummy_position': pos_ex_atom,
+                        'energy': energy,
+                        'original_bond': original_tuple,
+                        'is_custom': True
+                    })
+                    custom_to_remove.add(original_tuple)
 
-            if len(existing_aux) > 0:
-                ex_ind = existing_aux[0]
+
             else:
-                ex_ind = len(mol)
-                mol.append(Atom(symbol=mol.symbols[atom_j], position=pos_ex_atom))
+                # Only reuse aux atoms (index >= n_orig), never originals
+                existing_aux = []
+                for idx in range(n_orig, len(mol)):
+                    if np.allclose(mol.positions[idx], pos_ex_atom, atol=1e-6):
+                        existing_aux.append(idx)
 
-            if is_regular:
-                energy = translate.get(original_tuple, np.nan)
-                bond_pbc.append([atom_i, ex_ind, energy])
-                regular_to_remove.add(original_tuple)
+                if len(existing_aux) > 0:
+                    ex_ind = existing_aux[0]
+                else:
+                    ex_ind = len(mol)
+                    mol.append(Atom(symbol=mol.symbols[atom_j], position=pos_ex_atom))
 
-            elif is_custom:
-                energy = ctranslate.get(original_tuple, np.nan)
-                custom_pbc.append([atom_i, ex_ind, energy])
-                custom_to_remove.add(original_tuple)
+                if is_regular:
+                    energy = translate.get(original_tuple, np.nan)
+                    bond_pbc.append([atom_i, ex_ind, energy])
+                    regular_to_remove.add(original_tuple)
+
+                elif is_custom:
+                    energy = ctranslate.get(original_tuple, np.nan)
+                    custom_pbc.append([atom_i, ex_ind, energy])
+                    custom_to_remove.add(original_tuple)
+
+
 
         # Remove original cross-cell regular bonds
         regular_section = E_array[:n_regular]
@@ -233,7 +264,7 @@ class ColorMapper:
                 if key in custom_to_remove:
                     keep_mask[idx] = False
             custom_section = custom_section[keep_mask]
-        if custom_pbc:
+        if not self.split_bonds and custom_pbc:
             custom_section = np.vstack([custom_section, np.array(custom_pbc)]) \
                 if len(custom_section) > 0 else np.array(custom_pbc)
         n_custom = len(custom_section)
@@ -246,40 +277,12 @@ class ColorMapper:
             parts.append(np.array(bond_pbc))
         E_array = np.vstack(parts) if len(parts) > 1 else parts[0]
 
-        # replace remaining long bonds after wrapping
-        positions = mol.get_positions()
-        long_threshold = 3.0  # Angstrom
-        extra_bonds = []
-        rows_to_remove = []
-
-        for row_idx in range(len(E_array)):
-            a, b = int(E_array[row_idx][0]), int(E_array[row_idx][1])
-            if a >= len(positions) or b >= len(positions):
-                continue
-            dist = np.linalg.norm(positions[a] - positions[b])
-            if dist > long_threshold:
-                # Get the real short vector using minimum image convention
-                mic_vec = self.atomsF.get_distance(a, b, mic=True, vector=True)
-                # Create aux atom near atom a at the correct short distance
-                pos_aux = positions[a] + mic_vec
-                ex_ind = len(mol)
-                mol.append(Atom(symbol=mol.symbols[b], position=pos_aux))
-                extra_bonds.append([a, ex_ind, E_array[row_idx][2]])
-                rows_to_remove.append(row_idx)
-
-        if rows_to_remove:
-            keep_mask = np.ones(len(E_array), dtype=bool)
-            for idx in rows_to_remove:
-                keep_mask[idx] = False
-                # Adjust n_regular if a regular bond was removed
-                if idx < n_regular:
-                    n_regular -= 1
-            E_array = E_array[keep_mask]
-            E_array = np.vstack([E_array, np.array(extra_bonds)])
-
         self.atoms_vis = mol
+        self.pbc_split_bonds = pbc_split_bonds if self.split_bonds else []
 
         return E_array, n_regular, n_custom
+
+
 
     def generate_colors(self, colormap, n_colors):
         colors = []
@@ -315,8 +318,9 @@ class ColorMapper:
     
         return np.array(colors)
 
-    def get_visualization_data(self, modes, colormap='green_red', man_strain=None):
+    def get_visualization_data(self, modes, colormap='green_red', man_strain=None, split_bonds=True):
         visualization_data = {}
+        self.split_bonds = split_bonds
 
         for m in modes:
             bond_data = self.map_to_bonds(m)
@@ -334,6 +338,10 @@ class ColorMapper:
 
             bond_data["norm_energies"] = np.clip(bond_data["energies"] / max_strain, 0, 1)
             bond_data["norm_custom_energies"] = np.clip(bond_data["custom_energies"] / max_strain, 0, 1)
+
+            for pbc_bond in bond_data['pbc_split_bonds']:
+                norm_energy = np.clip(pbc_bond['energy'] / max_strain, 0, 1)
+                pbc_bond['norm_energy'] = norm_energy
 
 
             color_data = {
