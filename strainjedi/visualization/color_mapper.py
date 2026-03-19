@@ -75,7 +75,7 @@ class ColorMapper:
             'custom_energies': custom_bonds_section[:, 2] if len(custom_bonds_section) > 0 else np.array([]),
             'atoms': self.atoms_vis,
             'split_bonds': getattr(self, 'split_bonds', False),
-            'pbc_split_bonds': getattr(self, 'pbc_split_bonds')
+            'pbc_split_bonds': getattr(self, 'pbc_split_bonds', [])
         }
 
     def get_energies_per_bond(self, E_array, mode):
