@@ -123,12 +123,17 @@ class MatplotlibVisualizer:
             size = 100 if sym == 'H' else 150
             ax.scatter(p[0], p[1], p[2], color=col, s=size, linewidths=0.5, edgecolor='0.3')
             if show_indices:
-                ax.text(p[0], p[1], p[2], str(idx),
+                if self.atomsF[idx].tag == -1:
+                    atom_txt = self.atomsF[idx].index
+                else:
+                    atom_txt = self.atomsF[idx].tag
+                ax.text(p[0], p[1], p[2], str(atom_txt),
                         fontsize=6 if sym == 'H' else 8,
                         color='k',
                         ha='center',
                         va='center',
                         zorder=100)
+
 
     def plot_pbc_box(self, ax):
         cell = self.atomsF.get_cell()

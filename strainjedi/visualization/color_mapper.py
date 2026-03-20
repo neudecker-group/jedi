@@ -140,6 +140,8 @@ class ColorMapper:
     def handle_pbc(self, E_array, n_regular, n_custom):
 
         mol = self.atomsF.copy()
+        for atom in mol:
+            atom.tag = -1
 
         rim_list = self.rim_list
         n_orig = len(self.atomsF)
@@ -229,7 +231,7 @@ class ColorMapper:
                     ex_ind = existing_aux[0]
                 else:
                     ex_ind = len(mol)
-                    mol.append(Atom(symbol=mol.symbols[atom_j], position=pos_ex_atom))
+                    mol.append(Atom(symbol=mol.symbols[atom_j], position=pos_ex_atom, tag = atom_j))
 
                 if is_regular:
                     energy = translate.get(original_tuple, np.nan)
