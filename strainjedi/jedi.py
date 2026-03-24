@@ -1112,7 +1112,6 @@ class Jedi:
             Returns: 
                 2D array of the values.
         '''
-        # ToDo: check of still correct for changing lattice parameters
 
         try:
             len(self.rim_list)  # TODO what happens here?
