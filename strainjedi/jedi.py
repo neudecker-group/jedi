@@ -18,12 +18,12 @@ from ase.utils import jsonable
 import ase.io
 from ase.units import Hartree, Bohr, mol, kcal, GPa, eV, Angstrom
 from strainjedi.colors import colors
-from strainjedi.print_config import header, energy_comparison, energy_comparison_2, rims_listing, lattice_listing
+from strainjedi.print_config import header, energy_comparison, energy_comparison_2, rims_listing
 from strainjedi.quotes import quotes
 from strainjedi import __version__
 
 
-def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,C,internal_strain,delta_h,lattice_B,E_geometries,ase_units=False):
+def jedi_analysis(rims_list,B,H_cart,delta_q,Q,C,internal_strain,lattice_B,E_geometries,ase_units=False):
     '''
     Analysis of strain energy stored in redundant internal coordinates.
 
@@ -50,7 +50,7 @@ def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,C,internal_strain,delta_h,lat
     ##  Matrix Calculations  ##
     ###########################
     B_transp = np.transpose(B)
-
+    lattice_B_plus = np.linalg.pinv(lattice_B, 0.0001)
     # Calculate the pseudoinverse of the B-Matrix and its transposed (take care of diatomic molecules specifically)
     if B.ndim == 1:
         B_plus = B_transp/2
@@ -65,8 +65,6 @@ def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,C,internal_strain,delta_h,lat
     #############################################
     #	    	   JEDI analysis	        	#
     #############################################
-    Q = np.append(delta_q, delta_h)
-
     # Calculate the Hessian in RIMs (take care to get the correct multiplication for a diatomic molecule
     if B.ndim == 1:
         H_q = B_transp_plus.dot( H_cart ).dot( B_plus )
@@ -74,57 +72,55 @@ def jedi_analysis(atoms,rims_list,B,H_cart,delta_q,C,internal_strain,delta_h,lat
         H_q = P.dot( B_transp_plus ).dot( H_cart ).dot( B_plus ).dot( P )
 
     H_coupling = B_transp_plus @ internal_strain
-    # H_coupling = H_coupling @ lattice_B.T
-    #
-    # el_consts_q = lattice_B.dot( el_consts ).dot( np.transpose(lattice_B) )
+    H_coupling = H_coupling @ lattice_B_plus
 
-    H_full = np.block([[H_q, H_coupling],[H_coupling.T, C]])
+    C_q = np.transpose(lattice_B_plus).dot( C ).dot( lattice_B_plus )
+
+    H_full = np.block([[H_q, H_coupling],[H_coupling.T, C_q]])
 
     E_harm_total = 0.5 * np.transpose( Q ).dot( H_full ).dot( Q )
     E_full = 0.5 * (Q * H_full).T * Q
-    # m = int(E_full.shape[0] / 2)
-    # E_coords = np.sum(E_full, axis=1)[:m] + np.sum(E_full, axis=1)[m:]
     E_coords = np.sum(E_full, axis=1)
-    E_lattice_total = E_coords[-9:].sum(axis=0)
-    E_RIMs_total = E_coords[:-9].sum(axis=0)
+    m = int(E_full.shape[0] / 2)
+    E_RIMs_total = E_coords[:m].sum(axis=0)
+    E_lattice_total = E_coords[m:].sum(axis=0)
+    E_RIMs = np.sum(E_full, axis=1)[:m] + np.sum(E_full, axis=1)[m:]
 
     proc_E_parts = [E_RIMs_total/E_harm_total*100, E_lattice_total/E_harm_total*100]
     # Get the percentage of the energy stored in every RIM
-    proc_E_coords = 100 * E_coords / E_harm_total
+    proc_E_RIMs = 100 * E_RIMs / E_harm_total
 
     if ase_units==True:
         b=np.shape(rims_list[0])[0]+np.shape(rims_list[1])[0] #border between lengths and angles
         delta_q[0:b] *= Bohr
         delta_q[b::] = np.degrees(delta_q[b::])
-        delta_h *= Bohr
-        E_coords=np.array(E_coords)*Hartree
+        E_RIMs=np.array(E_RIMs)*Hartree
         E_harm_total *= Hartree
         E_RIMs_total *= Hartree
         E_lattice_total *= Hartree
 
     elif ase_units == False:
-        E_coords=np.array(E_coords)/kcal*mol*Hartree
+        E_RIMs=np.array(E_RIMs)/kcal*mol*Hartree
         E_harm_total *= mol/kcal*Hartree
         E_RIMs_total *= mol/kcal*Hartree
         E_lattice_total *= mol/kcal*Hartree
 
     proc_geom_RIMs = 100 * ( E_harm_total - E_geometries ) / E_geometries
 
-    return proc_E_coords, E_coords, E_harm_total, E_RIMs_total, E_lattice_total, proc_E_parts, proc_geom_RIMs, delta_q, delta_h
+    return proc_E_RIMs, E_RIMs, E_harm_total, E_RIMs_total, E_lattice_total, proc_E_parts, proc_geom_RIMs, delta_q
 
 
 def jedi_printout(atoms,
                   rims_list: List,
                   delta_q: np.array,
-                  delta_h: np.array,
                   E_geometries: float,
                   E_harm_total: float,
                   E_RIMs_total: float,
                   E_lattice_total: float,
                   proc_E_parts,
                   proc_geom_RIMs: float,
-                  proc_E_coords: List,
-                  E_coords: np.array,
+                  proc_E_RIMs: List,
+                  E_RIMs: np.array,
                   ase_units: bool = False):
     """
     Printout of analysis of stored strain energy in redundant internal coordinates.
@@ -215,29 +211,10 @@ def jedi_printout(atoms,
                         rim,
                         ind,
                         delta_q[ric_counter],
-                        proc_E_coords[ric_counter],
-                        E_coords[ric_counter],
+                        proc_E_RIMs[ric_counter],
+                        E_RIMs[ric_counter],
                         **rims_listing))
             ric_counter += 1
-
-    if not ase_units:
-        output.append(
-            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
-            .format("Direction", "delta_h (a.u.)", "Percentage", "Energy (kcal/mol)", **lattice_listing))
-    elif ase_units:
-        output.append(
-            '{0:^{column1}}''{1:^{column2}}''{2:^{column3}}''{3:^{column4}}'
-            .format("Direction","delta_h (Å)", "Percentage", "Energy (eV)", **lattice_listing))
-
-    strain_directions = ['ax', 'ay', 'az', 'bx', 'by', 'bz', 'cx', 'cy', 'cz']
-    for dir_counter, direction in enumerate(strain_directions):
-        output.append(
-            '{0:^{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}''{3:^{column4}.4f}'
-            .format(direction,
-                    delta_h[dir_counter],
-                    proc_E_coords[ric_counter + dir_counter],
-                    E_coords[ric_counter + dir_counter],
-                    **lattice_listing))
 
     print("\n".join(output))
     print(quotes())
@@ -414,19 +391,21 @@ class Jedi:
         self.modes = modes          #VibrationsData object
         self.B = None               #Wilson's B
         self.lattice_B = None
+        self.num_lattice_B = None
         self.J = None
         self.delta_q = None         #strain in internal coordinates
+        self.Q = None
         self.rim_list = None        #list of Redundant internal modes
         self.H = None               #cartesian Hessian of ref state
         self.C = el_consts       #np array with elastic constants in GPa
         self.internal_strain = internal_strain  #np array with internal strain in eV/Å
         self.delta_h = None    #lattice strain
         self.energies = None        #energies of the geometries
-        self.proc_E_coords = None     #list of procentual energy stored in single RIMs
+        self.proc_E_RIMs = None     #list of procentual energy stored in single RIMs
         self.part_rim_list = None     #rim list for election of atoms
         self.indices = None           #indices to chose special atoms
         self.partial_indices = None  # indices for partial analysis
-        self.E_coords = None            #list of energies stored in the rims
+        self.E_RIMs = None            #list of energies stored in the rims
         self.E_harm_total = None      #sum of E_rims
         self.E_RIMs_total = None
         self.E_lattice_total = None
@@ -532,6 +511,7 @@ class Jedi:
         self.get_b_matrix()
         B = self.B
         # self.get_lattice_b_matrix()
+        self.get_num_lattice_b_matrix()
         self.get_J()
         self.get_delta_q()
         delta_q = self.delta_q
@@ -549,14 +529,14 @@ class Jedi:
         E_geometries=all_E_geometries[0]
 
         #run the analysis
-        self.proc_E_coords,self.E_coords,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_E_parts,proc_geom_RIMs,self.delta_q, self.delta_h = jedi_analysis(self.atoms0,rim_list,B,H_cart,delta_q,self.C,self.internal_strain,self.delta_h,self.lattice_B,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_E_parts,proc_geom_RIMs,self.delta_q = jedi_analysis(rim_list,B,H_cart,delta_q,self.Q,self.C,self.internal_strain,self.num_lattice_B,E_geometries,ase_units=ase_units)
 
         if indices:          #get only rims of interest
             self.post_process(indices)
-            self.E_harm_total = sum(self.E_coords)
-            proc_geom_RIMs = 100*(sum(self.E_coords)-E_geometries)/E_geometries
+            self.E_harm_total = sum(self.E_RIMs)
+            proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
         if printout:
-            jedi_printout(self.atoms0,self.rim_list,self.delta_q,self.delta_h,E_geometries,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_E_parts,proc_geom_RIMs,self.proc_E_coords,self.E_coords,ase_units=ase_units)
+            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_E_parts,proc_geom_RIMs,self.proc_E_RIMs,self.E_RIMs,ase_units=ase_units)
         pass
 
 
@@ -1021,74 +1001,133 @@ class Jedi:
 
         return B
 
-    # def get_lattice_b_matrix(self):
-    #     '''Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions'''
-    #     # ToDo: custom bonds
-    #     # ToDo: comparison to vector definitions from the B-matrix
-    #     atoms = self.atoms0
-    #     frac = atoms.get_scaled_positions(wrap=False)
-    #     cutoff = ase.neighborlist.natural_cutoffs(atoms, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
-    #     i_list, j_list, S_list = ase.neighborlist.neighbor_list('ijS', a=atoms, cutoff=cutoff)
-    #     bond_S = {}
-    #     for i, j, S in zip(i_list, j_list, S_list):
-    #         if (i, j) in self.rim_list[0]:
-    #             bond_S[(i, j)] = S
-    #             bond_S[(j, i)] = -S
-    #
-    #     rim_size = sum([np.shape(l)[0] for l in self.rim_list])
-    #     lattice_B = np.zeros((rim_size, 9))
-    #     row = 0
-    #
-    #     for (q_i, q_j) in self.rim_list[0]:
-    #         S = np.zeros((2,3))
-    #         S[1] = bond_S[(q_i, q_j)]
-    #
-    #         for i, a in enumerate((q_i, q_j)):
-    #             sa = frac[a] + S[i]
-    #
-    #             for beta in range(3):           # lattice vector
-    #                 for alpha in range(3):      # cart. coordinate
-    #                     col = 3 * beta + alpha
-    #                     u = atoms.get_distance(q_i, q_j, mic=True, vector=True)
-    #                     lattice_B[row, col] += ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][i][alpha] * sa[beta]
-    #         row += 1
-    #
-    #     for (q_i, q_j, q_k) in self.rim_list[2]:
-    #         S = np.zeros((3,3))
-    #         S[0] = bond_S[(q_j, q_i)]
-    #         S[2] = bond_S[(q_j, q_k)]
-    #
-    #         for i, a in enumerate((q_i, q_j, q_k)):
-    #             sa = frac[a] + S[i]
-    #
-    #             for beta in range(3):
-    #                 for alpha in range(3):
-    #                     col = 3 * beta + alpha
-    #                     u = atoms.get_distance(q_j, q_i, mic=True, vector=True)
-    #                     v = atoms.get_distance(q_j, q_k, mic=True, vector=True)
-    #                     lattice_B[row, col] += -get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][i][alpha] * sa[beta]
-    #         row += 1
-    #
-    #     for (q_i, q_j, q_k, q_l) in self.rim_list[3]:
-    #         S = np.zeros((4,3))
-    #         S[0] = bond_S[(q_j, q_i)]
-    #         S[2] = bond_S[(q_j, q_k)]
-    #         S[3] = bond_S[(q_k, q_l)]
-    #
-    #         for i, a in enumerate((q_i, q_j, q_k, q_l)):
-    #             sa = frac[a] + S[i]
-    #
-    #             for beta in range(3):
-    #                 for alpha in range(3):
-    #                     col = 3 * beta + alpha
-    #                     # copy needed because derivative function rewrites vector variable as normed vector
-    #                     u = np.copy(np.atleast_2d(atoms.get_distance(q_j, q_i, mic=True,vector=True)))
-    #                     v = np.copy(np.atleast_2d(atoms.get_distance(q_j, q_k, mic=True, vector=True)))
-    #                     w = np.copy(np.atleast_2d(atoms.get_distance(q_k, q_l, mic=True, vector=True)))
-    #                     lattice_B[row, col] += np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][i][alpha])*Bohr * sa[beta]
-    #         row += 1
-    #
-    #     self.lattice_B = lattice_B
+    def get_lattice_b_matrix(self):
+        '''Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions'''
+        # ToDo: custom bonds (neighborlist for custom bonds and appending of self.rim_list[0]
+        # ToDo: comparison to vector definitions from the B-matrix
+        atoms = self.atoms0
+        frac = atoms.get_scaled_positions(wrap=False)
+        cutoff = ase.neighborlist.natural_cutoffs(atoms, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
+        i_list, j_list, S_list = ase.neighborlist.neighbor_list('ijS', a=atoms, cutoff=cutoff)
+        bond_S = {}
+        for i, j, S in zip(i_list, j_list, S_list):
+            if (i, j) in self.rim_list[0]:
+                bond_S[(i, j)] = S
+                bond_S[(j, i)] = -S
+
+        rim_size = sum([np.shape(l)[0] for l in self.rim_list])
+        lattice_B = np.zeros((rim_size, 9))
+        row = 0
+
+        for (q_i, q_j) in self.rim_list[0]:
+            S = np.zeros((2,3))
+            S[1] = bond_S[(q_i, q_j)]
+
+            for i, a in enumerate((q_i, q_j)):
+                sa = frac[a] + S[i]
+
+                for beta in range(3):           # lattice vector
+                    for alpha in range(3):      # cart. coordinate
+                        col = 3 * beta + alpha
+                        u = atoms.get_distance(q_i, q_j, mic=True, vector=True)
+                        lattice_B[row, col] += ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][i][alpha] * sa[beta]
+            row += 1
+
+        for (q_i, q_j, q_k) in self.rim_list[2]:
+            S = np.zeros((3,3))
+            S[0] = bond_S[(q_j, q_i)]
+            S[2] = bond_S[(q_j, q_k)]
+
+            for i, a in enumerate((q_i, q_j, q_k)):
+                sa = frac[a] + S[i]
+
+                for beta in range(3):
+                    for alpha in range(3):
+                        col = 3 * beta + alpha
+                        u = atoms.get_distance(q_j, q_i, mic=True, vector=True)
+                        v = atoms.get_distance(q_j, q_k, mic=True, vector=True)
+                        lattice_B[row, col] += -get_B_matrix_angles_derivatives(np.atleast_2d(u),np.atleast_2d(v))[0][i][alpha] * sa[beta]
+            row += 1
+
+        for (q_i, q_j, q_k, q_l) in self.rim_list[3]:
+            S = np.zeros((4,3))
+            S[0] = bond_S[(q_j, q_i)]
+            S[2] = bond_S[(q_j, q_k)]
+            S[3] = bond_S[(q_k, q_l)]
+
+            for i, a in enumerate((q_i, q_j, q_k, q_l)):
+                sa = frac[a] + S[i]
+
+                for beta in range(3):
+                    for alpha in range(3):
+                        col = 3 * beta + alpha
+                        # copy needed because derivative function rewrites vector variable as normed vector
+                        u = np.copy(np.atleast_2d(atoms.get_distance(q_j, q_i, mic=True,vector=True)))
+                        v = np.copy(np.atleast_2d(atoms.get_distance(q_j, q_k, mic=True, vector=True)))
+                        w = np.copy(np.atleast_2d(atoms.get_distance(q_k, q_l, mic=True, vector=True)))
+                        lattice_B[row, col] += np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][i][alpha])*Bohr * sa[beta]
+            row += 1
+
+        self.lattice_B = lattice_B
+
+    def get_num_lattice_b_matrix(self):
+        def get_q(atoms):
+            q = []
+            # for loops for all redunant internal coordinates
+            # bonds
+            for q_i in self.rim_list[0]:
+                q.append(atoms.get_distance(int(q_i[0]), int(q_i[1]), mic=True) / Bohr)
+            # custom bonds
+            for q_i in self.rim_list[1]:
+                q.append(atoms.get_distance(int(q_i[0]), int(q_i[1]), mic=True) / Bohr)
+            # angles
+            for q_i in self.rim_list[2]:
+                q.append(np.radians(atoms.get_angle(int(q_i[0]), int(q_i[1]), int(q_i[2]), mic=True)))
+            # dihedral angles
+            for q_i in self.rim_list[3]:
+                q.append(np.radians(
+                    atoms.get_dihedral(int(q_i[0]), int(q_i[1]), int(q_i[2]), int(q_i[3]), mic=True)))
+
+            return np.array(q)
+
+        cell0 = self.atoms0.get_cell().array.copy()
+        q0 = get_q(self.atoms0)
+        n_bonds = len(self.rim_list[0])
+        n_cbonds = len(self.rim_list[1])
+        n_angles = len(self.rim_list[2])
+        n_dihedrals = len(self.rim_list[3])
+        dihedral_start = n_bonds + n_cbonds + n_angles
+        dihedral_end = dihedral_start + n_dihedrals
+        M = len(q0)
+        B = np.zeros((M, 9))
+        delta = 1e-4
+
+        for a in range(3):
+            for b in range(3):
+                idx = 3 * a + b
+
+                atoms_plus = self.atoms0.copy()
+                cell_plus = cell0.copy()
+                cell_plus[a, b] += delta
+                atoms_plus.set_cell(cell_plus, scale_atoms=True)
+                q_plus = get_q(atoms_plus)
+
+                atoms_minus = self.atoms0.copy()
+                cell_minus = cell0.copy()
+                cell_minus[a, b] -= delta
+                atoms_minus.set_cell(cell_minus, scale_atoms=True)
+                q_minus = get_q(atoms_minus)
+
+                dq = q_plus - q_minus
+
+                # correction for dihedrals
+                if n_dihedrals > 0:
+                    dphi = dq[dihedral_start:dihedral_end]
+                    dq[dihedral_start:dihedral_end] = np.arctan2(np.sin(dphi), np.cos(dphi))
+
+                B[:, idx] = dq / (2 * delta / Bohr)
+
+        self.num_lattice_B = B
 
     def get_energies(self):
         '''Calls the energies of the Atoms objects.
@@ -1112,7 +1151,6 @@ class Jedi:
             Returns: 
                 2D array of the values.
         '''
-
         try:
             len(self.rim_list)  # TODO what happens here?
         except:
@@ -1126,48 +1164,56 @@ class Jedi:
         atomsF_const_cell.set_cell(self.atoms0.cell)
         atomsF_const_cell.set_positions(self.atomsF.get_scaled_positions() @ self.atoms0.cell)
 
-        q0 = []
-        qF = []
-        dq_da = []
+        atomsF_const_fracs = self.atomsF.copy()
+        atomsF_const_fracs.set_positions(self.atoms0.get_scaled_positions() @ self.atomsF.cell)
 
-  # for loops for all redunant internal coordinates
+        Q = np.array([])
+        for atomsF in [atomsF_const_cell, atomsF_const_fracs, self.atomsF]:
+            q0 = []
+            qF = []
+            dq_da = []
 
-        #bonds
-        for q in self.rim_list[0]:
-            q0.append(self.atoms0.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
-            qF.append(atomsF_const_cell.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
-        #custom bonds
-        for q in self.rim_list[1]:
-            q0.append(self.atoms0.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
-            qF.append(atomsF_const_cell.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
-        #angles
-        for q in self.rim_list[2]:
-            q0.append(np.radians(self.atoms0.get_angle(int(q[0]),int(q[1]),int(q[2]),mic=True)))
-            qF.append(np.radians(atomsF_const_cell.get_angle(int(q[0]),int(q[1]),int(q[2]),mic=True)))
-        #dihedral angles
-        for q in self.rim_list[3]:
-            q0_preliminary=np.radians(self.atoms0.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
-            qF_preliminary=np.radians(atomsF_const_cell.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
+            # for loops for all redunant internal coordinates
 
-        # get the smallest absolute value of the two possible rotational directions
-            dda=qF_preliminary-q0_preliminary
-            if 2*np.pi-abs(dda)<abs(dda):
-                dda = (2*np.pi-abs(dda))*-np.sign(dda)
-            dq_da.append(dda)
+            #bonds
+            for q in self.rim_list[0]:
+                q0.append(self.atoms0.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
+                qF.append(atomsF.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
+            #custom bonds
+            for q in self.rim_list[1]:
+                q0.append(self.atoms0.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
+                qF.append(atomsF.get_distance(int(q[0]),int(q[1]),mic=True)/Bohr)
+            #angles
+            for q in self.rim_list[2]:
+                q0.append(np.radians(self.atoms0.get_angle(int(q[0]),int(q[1]),int(q[2]),mic=True)))
+                qF.append(np.radians(atomsF.get_angle(int(q[0]),int(q[1]),int(q[2]),mic=True)))
+            #dihedral angles
+            for q in self.rim_list[3]:
+                q0_preliminary=np.radians(self.atoms0.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
+                qF_preliminary=np.radians(atomsF.get_dihedral(int(q[0]),int(q[1]),int(q[2]),int(q[3]),mic=True))
 
-        delta_q = np.subtract(qF, q0)
+            # get the smallest absolute value of the two possible rotational directions
+                dda=qF_preliminary-q0_preliminary
+                if 2*np.pi-abs(dda)<abs(dda):
+                    dda = (2*np.pi-abs(dda))*-np.sign(dda)
+                dq_da.append(dda)
 
-        try:
-            delta_q=np.append(delta_q,dq_da)
-        except:
-            pass
+            delta_q = np.subtract(qF, q0)
 
-        self.delta_q = delta_q # TODO make void function setting self.delta_q
+            try:
+                delta_q=np.append(delta_q,dq_da)
+            except:
+                pass
 
-        self.qF = qF
-        self.q0 = q0
+            if atomsF == atomsF_const_cell or atomsF == atomsF_const_fracs:
+                Q = np.append(Q, delta_q)
 
-        return delta_q
+            else:
+                self.qF = qF
+                self.q0 = q0
+                self.delta_q = delta_q
+
+        self.Q = Q
 
     def vmd_gen(self,
                 des_colors: Optional[Dict] = None,
