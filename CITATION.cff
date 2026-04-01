@@ -1,0 +1,86 @@
+# This CITATION.cff file was generated with cffinit.
+# YAML 1.2
+---
+cff-version: 1.2.0
+title: JEDI (Judgement of Energy DIstribution)
+message: >-
+  If you use this software, please cite the papers listed in
+  preferred-citation and references.
+type: software
+authors:
+  - name: 'AG Neudecker, Universität Bremen'
+    website: 'https://www.uni-bremen.de/ag-neudecker'
+repository-code: 'https://github.com/neudecker-group/jedi'
+url: 'https://neudecker-group.github.io/jedi/'
+license: MIT
+preferred-citation:
+  type: article
+  title: >-
+    JEDI: A versatile code for strain analysis of molecular and periodic systems
+    under deformation
+  journal: The Journal of Chemical Physics
+  year: 2024
+  volume: 160
+  number: 152501
+  authors:
+    - family-names: Wang
+      given-names: H.
+    - family-names: Benter
+      given-names: S.
+    - family-names: Dononelli
+      given-names: W.
+    - family-names: Neudecker
+      given-names: T.
+references:
+  - type: article
+    title: >-
+      A quantitative quantum-chemical analysis tool for the distribution of
+      mechanical force in molecules
+    journal: The Journal of Chemical Physics
+    year: 2014
+    volume: 140
+    number: 134107
+    doi: 10.1063/1.4870334
+    authors:
+      - family-names: Stauch
+        given-names: T.
+      - family-names: Dreuw
+        given-names: A.
+  - type: article
+    title: >-
+      On the use of different coordinate systems in mechanochemical force
+      analyses
+    journal: The Journal of Chemical Physics
+    year: 2015
+    volume: 143
+    number: 074118
+    doi: 10.1063/1.4928973
+    authors:
+      - family-names: Stauch
+        given-names: T.
+      - family-names: Dreuw
+        given-names: A.
+  - type: article
+    title: Predicting the Efficiency of Photoswitches Using Force Analysis
+    journal: The Journal of Physical Chemistry Letters
+    year: 2016
+    volume: 7
+    pages: 1298-1302
+    doi: 10.1021/acs.jpclett.6b00455
+    authors:
+      - family-names: Stauch
+        given-names: T.
+      - family-names: Dreuw
+        given-names: A.
+  - type: article
+    title: Quantum Chemical Strain Analysis For Mechanochemical Processes
+    journal: Accounts of Chemical Research
+    year: 2017
+    volume: 50
+    pages: 1041-1048
+    doi: 10.1021/acs.accounts.7b00038
+    authors:
+      - family-names: Stauch
+        given-names: T.
+      - family-names: Dreuw
+        given-names: A.
