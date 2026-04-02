@@ -7,7 +7,6 @@ setup(
     url='https://github.com/neudecker-group/jedi',
     author='Tim Neudecker, Sanna Benter, Henry Wang, Wilke Dononelli',
     author_email='neudecker@uni-bremen.de',
-    license='MIT',
     packages=['strainjedi','strainjedi/io'],
     install_requires=[
                       'mpi4py>=2.0',
