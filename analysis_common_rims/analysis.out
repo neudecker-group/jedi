@@ -1,0 +1,237 @@
+
+
+
+135.0
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   21.4659                    -            
+JEDI                        10.4038                  -51.53         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1             -0.0014              -0.04              -0.0042       
+         2                  bond               C1  C2             -0.0212              -1.03              -0.1069       
+         3                  bond               C2  C3             -0.0024              -0.09              -0.0097       
+         4                 angle              C0 C1 C2             0.3756              99.68              10.3705       
+         5                 angle              C1 C2 C3             0.0330               1.27               0.1318       
+         6                dihedral          C0 C1 C2 C3           -0.0393               0.21               0.0224       
+"These aren't the droids you're looking for." (Obi-Wan Kenobi)
+
+
+
+160.0
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   88.4921                    -            
+JEDI                        220.2702                 148.92         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.0630               0.36               0.7967       
+         2                  bond               C1  C2              0.0373               0.30               0.6552       
+         3                  bond               C2  C3              0.0633               0.44               0.9641       
+         4                 angle              C0 C1 C2             0.8120              24.23              53.3662       
+         5                 angle              C1 C2 C3             0.0691               1.16               2.5449       
+         6                dihedral          C0 C1 C2 C3           -3.0658              73.52              161.9430      
+"So what I told you was true... from a certain point of view." "...A certain point of view?!" (Obi-Wan Kenobi and Luke Skywalker)
+
+
+
+170.0
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   124.1411                   -            
+JEDI                        262.8429                 111.73         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.1057               0.72               1.8803       
+         2                  bond               C1  C2              0.0962               0.91               2.4014       
+         3                  bond               C2  C3              0.1056               0.86               2.2508       
+         4                 angle              C0 C1 C2             0.9865              31.01              81.5106       
+         5                 angle              C1 C2 C3             0.0805               1.22               3.1953       
+         6                dihedral          C0 C1 C2 C3           -3.1336              65.29              171.6045      
+"You are a member of the rebel alliance, and a traitor." (Darth Vader)
+
+
+
+175.0
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   143.0639                   -            
+JEDI                        285.1123                 99.29          
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.1289               0.93               2.6458       
+         2                  bond               C1  C2              0.1390               1.44               4.1131       
+         3                  bond               C2  C3              0.1280               1.10               3.1403       
+         4                 angle              C0 C1 C2             1.0738              34.52              98.4076       
+         5                 angle              C1 C2 C3             0.0848               1.21               3.4626       
+         6                dihedral          C0 C1 C2 C3           -3.1364              60.80              173.3429      
+"I happen to like... nice men." (Princess Leia)
+
+
+
+177.0
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   150.8115                   -            
+JEDI                       -237.0724                -257.20         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.1289              -9.57              22.6771       
+         2                  bond               C1  C2              0.1390               0.19              -0.4468       
+         3                  bond               C2  C3              0.1280              -6.18              14.6481       
+         4                 angle              C0 C1 C2             1.1087              24.52              -58.1343      
+         5                 angle              C1 C2 C3             1.1087              92.01             -218.1251      
+         6                dihedral          C0 C1 C2 C3           -0.0844              -0.97               2.3087       
+"Wait. I know that laugh..." (Han Solo)
+
+
+
+178.0
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   154.6935                   -            
+JEDI                       -215.0872                -239.04         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.1289              -10.61             22.8281       
+         2                  bond               C1  C2              0.1390              -0.02               0.0498       
+         3                  bond               C2  C3              0.1280              -6.91              14.8559       
+         4                 angle              C0 C1 C2             1.1261              21.75              -46.7904      
+         5                 angle              C1 C2 C3             1.1261              96.87             -208.3498      
+         6                dihedral          C0 C1 C2 C3           -0.0844              -1.08               2.3191       
+"Keep your distance, Chewie, but don't, y'know, look like you're keeping your distance." (Grumbled questioning bark) "...I don't know. Fly casual." (Han Solo and Chewbacca)
+
+
+
+179.0
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   158.5978                   -            
+JEDI                       -192.2599                -221.22         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.1289              -11.95             22.9783       
+         2                  bond               C1  C2              0.1390              -0.28               0.5465       
+         3                  bond               C2  C3              0.1280              -7.84              15.0644       
+         4                 angle              C0 C1 C2             1.1436              18.24              -35.0606      
+         5                 angle              C1 C2 C3             1.1436              103.05            -198.1189      
+         6                dihedral          C0 C1 C2 C3           -0.0844              -1.21               2.3304       
+"I never doubted you! Wonderful!" (C-3PO)
+
+
+
+179.5
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   160.5572                   -            
+JEDI                       -182.7788                -213.84         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.1289              -12.61             23.0516       
+         2                  bond               C1  C2              0.1390              -0.44               0.7953       
+         3                  bond               C2  C3              0.1280              -8.30              15.1698       
+         4                 angle              C0 C1 C2             1.1523              15.89              -29.0428      
+         5                 angle              C1 C2 C3             1.1523              105.46            -192.7526      
+"I saw... a city in the clouds." (Luke Skywalker)
+
+
+
+179.9
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   162.1272                   -            
+JEDI                       -173.2564                -206.86         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.1289              -13.34             23.1110       
+         2                  bond               C1  C2              0.1390              -0.57               0.9937       
+         3                  bond               C2  C3              0.1280              -8.80              15.2538       
+         4                 angle              C0 C1 C2             1.1593              13.96              -24.1824      
+         5                 angle              C1 C2 C3             1.1593              108.76            -188.4325      
+"So, what do you think? You think a princess and a guy like me-" (Han Solo)
+
+
+
+180.0
+
+ 
+
+                                    ************************************************                                    
+                                    *                 JEDI ANALYSIS                *                                    
+                                    *       Judgement of Energy DIstribution       *                                    
+                                    ************************************************                                    
+                                                     version 1.0.0
+                                                     
+                    Strain Energy (kcal/mol)     Deviation (%)      
+Ab Initio                   162.3323                   -            
+JEDI                        125.1799                 -22.89         
+      RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)  
+         1                  bond               C0  C1              0.1507               2.78               3.4832       
+         2                  bond               C1  C2              0.1962               5.62               7.0383       
+         3                  bond               C2  C3              0.1510               3.30               4.1275       
+         4                 angle              C0 C1 C2             1.1610              87.38              109.3863      
+         5                 angle              C1 C2 C3             0.0877               0.91               1.1446       
+"Travelling through hyperspace ain't like dustin' crops, boy!" (Han Solo)
