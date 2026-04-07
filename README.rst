@@ -25,12 +25,21 @@ This project uses uv_ to manage dependencies; ensure it is installed on your sys
    uv sync  # install dependencies
    uv build # build the python wheel
 
+To run tests, install the `test` dependency group:
+
+.. code-block::
+
+   uv sync --group=test
+   uv run pytest
+
 To build the documentation, ensure that the ``docs`` dependency group is installed.
 
 .. code-block::
 
    uv sync --group=docs
    uv run sphinx-build -b html docs docs/_build/
+
+.. tip:: Run ``uv sync --all-groups`` to install all dependencies for all the above scenarios.
 
 Tutorial
 ------------
