@@ -57,4 +57,4 @@ Additional information on the theoretical background of the JEDI analysis can be
 .. _Python: http://www.python.org/
 .. _NumPy: http://docs.scipy.org/doc/numpy/reference/
 .. _ase: https://wiki.fysik.dtu.dk/ase/
-.. _uv: https://docs.astral.sh/uv
+.. _uv: https://docs.astral.sh/uv/getting-started/installation/
