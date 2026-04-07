@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.8]
+        python-version: ["3.10"]
 
     name: Test
     runs-on: ${{ matrix.os }}
@@ -33,4 +33,4 @@ jobs:
 
           
       - name: Run tests
-        run: pytest
+        run: python -m pytest -vv --tb=long
