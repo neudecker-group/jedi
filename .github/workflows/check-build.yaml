@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.os }}-${{ inputs.python }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ inputs.os }}-${{ inputs.python }}-${{ github.head_ref || github.run_id }}-build
   cancel-in-progress: true
 
 jobs:
