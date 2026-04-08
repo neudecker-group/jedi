@@ -56,3 +56,9 @@ packages = [
     "strainjedi",
     "strainjedi.io",
 ]
+
+[tool.pytest]
+addopts = ["-v", "--tb=long"]
+testpaths = [
+    "tests",
+]
