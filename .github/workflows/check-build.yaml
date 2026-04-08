@@ -1,0 +1,60 @@
+name: Build wheel
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: 'the OS to run on'
+        default: 'ubuntu-latest'
+        required: false
+        type: string
+      python:
+        description: 'the Python version to use'
+        default: '3.12'
+        required: false
+        type: string
+      release:
+        description: 'whether we are attempting to release'
+        default: false
+        required: false
+        type: boolean
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.os }}-${{ inputs.python }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build-${{ inputs.python }}-${{ inputs.os }}
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.python }}
+
+      - name: install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: install dependencies
+        run: uv sync
+
+      - name: build wheel
+        run: uv build
+
+      - name: upload artifact
+        if: always() && inputs.release
+        uses: actions/upload-artifact@v6
+        with:
+          path: ./dist/
