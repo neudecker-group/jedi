@@ -8,6 +8,12 @@ permissions:
   contents: read # for checkout
 
 jobs:
+  format:
+    if: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      contents: write # to push the formatting changes
+    uses: ./.github/workflows/check-format.yaml
+
   run-tests:
     strategy:
       fail-fast: false
