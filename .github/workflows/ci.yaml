@@ -15,6 +15,7 @@ jobs:
     uses: ./.github/workflows/check-format.yaml
 
   run-tests:
+    needs: [format] # format first
     strategy:
       fail-fast: false
       matrix:
@@ -27,6 +28,7 @@ jobs:
       python: ${{ matrix.python-version }}
 
   build:
+    needs: [format] # format first
     strategy:
       fail-fast: false
       matrix:
