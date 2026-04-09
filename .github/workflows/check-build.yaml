@@ -57,4 +57,4 @@ jobs:
         if: always() && inputs.release
         uses: actions/upload-artifact@v6
         with:
-          path: ./dist/
+          path: ./dist
