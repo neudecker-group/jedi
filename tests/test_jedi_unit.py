@@ -135,44 +135,46 @@ class TestSetBondParams:
         assert j.covf == 1.6
         assert j.vdwf == 0.75
 
+
 class TestVisualize:
     """
     Tests the visualize() method.
     """
+
     def test_visualization_data_keys(self, deds_jedi_fresh, tmp_path):
         """visualization_data should contain correct mode keys."""
         j = copy.deepcopy(deds_jedi_fresh)
         j.run(printout=False)
         j.visualize(output_dir=tmp_path, show=False)
-        assert set(j.visualization_data.keys()) == {'bl', 'ba', 'da', 'all'}
+        assert set(j.visualization_data.keys()) == {"bl", "ba", "da", "all"}
 
     def test_visualization_data_bond_structure(self, deds_jedi_fresh, tmp_path):
         """Each mode should have the expected bond_data structure."""
         j = copy.deepcopy(deds_jedi_fresh)
         j.run(printout=False)
-        j.visualize(output_dir=tmp_path, single_mode='all', show=False)
-        bond_data = j.visualization_data['all']['bond_data']
-        assert 'bonds' in bond_data
-        assert 'energies' in bond_data
-        assert 'custom_bonds' in bond_data
-        assert 'custom_energies' in bond_data
-        assert 'atoms' in bond_data
+        j.visualize(output_dir=tmp_path, single_mode="all", show=False)
+        bond_data = j.visualization_data["all"]["bond_data"]
+        assert "bonds" in bond_data
+        assert "energies" in bond_data
+        assert "custom_bonds" in bond_data
+        assert "custom_energies" in bond_data
+        assert "atoms" in bond_data
 
     def test_bonds_and_energies_same_length(self, deds_jedi_fresh, tmp_path):
         """Number of bonds and energies must match."""
         j = copy.deepcopy(deds_jedi_fresh)
         j.run(printout=False)
-        j.visualize(output_dir=tmp_path, single_mode='all', show=False)
-        bond_data = j.visualization_data['all']['bond_data']
-        assert len(bond_data['bonds']) == len(bond_data['energies'])
-        assert len(bond_data['custom_bonds']) == len(bond_data['custom_energies'])
+        j.visualize(output_dir=tmp_path, single_mode="all", show=False)
+        bond_data = j.visualization_data["all"]["bond_data"]
+        assert len(bond_data["bonds"]) == len(bond_data["energies"])
+        assert len(bond_data["custom_bonds"]) == len(bond_data["custom_energies"])
 
     def test_color_data_structure(self, deds_jedi_fresh, tmp_path):
         """color_data should have the expected keys."""
         j = copy.deepcopy(deds_jedi_fresh)
         j.run(printout=False)
-        j.visualize(output_dir=tmp_path, single_mode='all', show=False)
-        color_data = j.visualization_data['all']['color_data']
-        assert 'atom_colors' in color_data
-        assert 'max_strain' in color_data
-        assert 'colormap' in color_data
+        j.visualize(output_dir=tmp_path, single_mode="all", show=False)
+        color_data = j.visualization_data["all"]["color_data"]
+        assert "atom_colors" in color_data
+        assert "max_strain" in color_data
+        assert "colormap" in color_data
