@@ -13,6 +13,7 @@ dependencies = [
     "mpi4py>=2.0",
     "numpy",
     "ase",
+    "matplotlib==3.10.8",
 ]
 
 classifiers = [

@@ -1086,6 +1086,7 @@ version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "ase" },
+    { name = "matplotlib" },
     { name = "mpi4py" },
     { name = "numpy" },
 ]
@@ -1113,6 +1114,7 @@ types = [
 [package.metadata]
 requires-dist = [
     { name = "ase" },
+    { name = "matplotlib", specifier = "==3.10.8" },
     { name = "mpi4py", specifier = ">=2.0" },
     { name = "numpy" },
 ]
