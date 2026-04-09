@@ -1,8 +1,11 @@
-import pytest
-
-from strainjedi.jedi import Jedi, jedi_analysis
+from strainjedi.jedi import Jedi
 import numpy as np
 import copy
+
+import matplotlib
+
+# Headless backend for testing
+matplotlib.use("agg")
 
 
 class TestGetRims:
@@ -136,33 +139,45 @@ class TestSetBondParams:
         assert j.vdwf == 0.75
 
 
-'''
-class TestVMDGen:
+class TestVisualize:
     """
-    TEMPORARY tests for the vmd_gen() function.
-    Fragile as it compares strings.
-    Should be replaced/removed once new default visualization is implemented!
+    Tests the visualize() method.
     """
-    def test_vmd_gen(self, deds_jedi_full_run, tmp_path, monkeypatch):
-        monkeypatch.chdir(tmp_path)
 
+    def test_visualization_data_keys(self, deds_jedi_fresh, tmp_path):
+        """visualization_data should contain correct mode keys."""
+        j = copy.deepcopy(deds_jedi_fresh)
+        j.run(printout=False)
+        j.visualize(output_dir=tmp_path, show=False)
+        assert set(j.visualization_data.keys()) == {"bl", "ba", "da", "all"}
 
-        j = copy.deepcopy(deds_jedi_full_run)
-        j.vmd_gen(label=tmp_path)
+    def test_visualization_data_bond_structure(self, deds_jedi_fresh, tmp_path):
+        """Each mode should have the expected bond_data structure."""
+        j = copy.deepcopy(deds_jedi_fresh)
+        j.run(printout=False)
+        j.visualize(output_dir=tmp_path, single_mode="all", show=False)
+        bond_data = j.visualization_data["all"]["bond_data"]
+        assert "bonds" in bond_data
+        assert "energies" in bond_data
+        assert "custom_bonds" in bond_data
+        assert "custom_energies" in bond_data
+        assert "atoms" in bond_data
 
-        from tests.resources import path_to_test_resources
-        ref_dir = path_to_test_resources() / "diethyldisulfid"
-        fl = ["bl.vmd", "ba.vmd", "da.vmd", "all.vmd"]
+    def test_bonds_and_energies_same_length(self, deds_jedi_fresh, tmp_path):
+        """Number of bonds and energies must match."""
+        j = copy.deepcopy(deds_jedi_fresh)
+        j.run(printout=False)
+        j.visualize(output_dir=tmp_path, single_mode="all", show=False)
+        bond_data = j.visualization_data["all"]["bond_data"]
+        assert len(bond_data["bonds"]) == len(bond_data["energies"])
+        assert len(bond_data["custom_bonds"]) == len(bond_data["custom_energies"])
 
-        for f in fl:
-            gen = (tmp_path / f).read_text()
-            ref = (ref_dir / f).read_text()
-
-            gen_lines = gen.splitlines()
-            ref_lines = ref.splitlines()
-
-            gen_cmp = "\n".join(gen_lines[4:181] + gen_lines[182:])
-            ref_cmp = "\n".join(ref_lines[4:181] + ref_lines[182:])
-            assert gen_cmp == ref_cmp
-
-'''
+    def test_color_data_structure(self, deds_jedi_fresh, tmp_path):
+        """color_data should have the expected keys."""
+        j = copy.deepcopy(deds_jedi_fresh)
+        j.run(printout=False)
+        j.visualize(output_dir=tmp_path, single_mode="all", show=False)
+        color_data = j.visualization_data["all"]["color_data"]
+        assert "atom_colors" in color_data
+        assert "max_strain" in color_data
+        assert "colormap" in color_data

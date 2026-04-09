@@ -17,7 +17,8 @@ from ase.utils import jsonable
 from ase.units import Hartree, Bohr, mol, kcal
 from ase.data.vdw import vdw_radii
 
-from strainjedi.colors import colors
+from strainjedi.visualization.colors import colors
+from strainjedi.visualization import ColorMapper, VMDVisualizer, MatplotlibVisualizer
 from strainjedi.print_config import header, energy_comparison, rims_listing
 from strainjedi.quotes import quotes
 from strainjedi import __version__
@@ -1362,6 +1363,103 @@ class Jedi:
 
         return delta_q
 
+    def visualize(
+        self,
+        visualizer="mpl",
+        colormap="green_red",
+        output_dir: Union[Path, str] = "visualization",
+        single_mode: Optional[str] = None,
+        man_strain: Optional[float] = None,
+        show: Optional[bool] = False,
+        show_indices: Optional[bool] = False,
+        box: Optional[bool] = False,
+        split_bonds: Optional[bool] = True,
+    ):
+        """
+        Args:
+            visualizer: ('mpl' or 'vmd')
+                Defines visualizer used for visualization.
+            colormap: (str or matplotlib Colormap object)
+                Color scheme for strain energy mapping. Built-in options are
+                'green_red', 'cyan_red', 'magma', or any matplotlib colormap
+                name (e.g. 'viridis', 'inferno'). Alternatively, a custom
+                matplotlib Colormap object can be passed directly.
+                default: 'green_red'
+            output_dir: (str or Path)
+                Directory to save the visualization output files.
+                default: 'visualization'
+            single_mode: (str or None)
+                Restrict visualization to a single mode. Options are 'bl'
+                (bond lengths), 'ba' (bond angles), 'da' (dihedral angles),
+                or 'all' (combined). If None, all modes are generated.
+                default: None
+            man_strain: (float or None)
+                Manual reference value for the maximum of the color scale.
+                If None, the maximum strain energy in the data is used.
+                default: None
+            show: (bool)
+                Display the plot interactively. Only works with the
+                Matplotlib visualizer.
+                default: False
+            show_indices: (bool)
+                Display atom indices. Only works with the
+                Matplotlib visualizer.
+            split_bonds: (bool)
+                Display PBC bonds as half-bonds at each side of the unit cell.
+            box: (bool)
+                Draw the unit cell box. Only applies to periodic structures.
+                default: False
+        """
+
+        if len(self.proc_E_RIMs) == 0:
+            raise ValueError(
+                "Analysis has not been run. Jedi.run() must be called before Jedi.visualize()"
+            )
+
+        if show and not visualizer == "mpl":
+            warnings.warn(
+                "'show=True' only works for the Matplotlib Visualizer and will be ignored.",
+                UserWarning,
+            )
+
+        if show_indices and not visualizer == "mpl":
+            warnings.warn(
+                "'show_indices=True' only works for the Matplotlib Visualizer and will be ignored.",
+                UserWarning,
+            )
+
+        energy_unit = "eV" if self.ase_units else "kcal/mol"
+
+        valid_modes = ["bl", "ba", "da", "all"]
+        if not single_mode:
+            mode_list = valid_modes
+        elif single_mode in valid_modes:
+            mode_list = [single_mode]
+        else:
+            raise ValueError(
+                f"Unknown mode '{single_mode}'. single_mode must be in: {valid_modes} or None"
+            )
+
+        mapper = ColorMapper(self)
+        self.visualization_data = mapper.get_visualization_data(
+            mode_list, colormap, man_strain, split_bonds
+        )
+
+        if visualizer == "mpl":
+            vis = MatplotlibVisualizer(
+                self.visualization_data, mapper, output_dir, energy_unit
+            )
+            vis.run(show, show_indices, box)
+
+        elif visualizer == "vmd":
+            vis = VMDVisualizer(
+                self.visualization_data, mapper, output_dir, energy_unit
+            )
+            vis.write_inputs(box)
+
+        else:
+            raise ValueError("Unknown visualizer. Visualizer must be 'mpl' or 'vmd'.")
+
     def vmd_gen(
         self,
         des_colors: Optional[Dict] = None,
@@ -1372,7 +1470,9 @@ class Jedi:
         label: Union[Path, str] = "vmd",
         incl_coloring: Optional[str] = None,
     ):
-        """Generates vmd scripts and files to save the values for the color coding
+        """
+        DEPRECATED! This method is kept for backwards compatibility.
+        Please Use Jedi.visualize(visualizer='vmd') for visualizations with VMD.
 
         Args:
             des_colors: (dict)
@@ -1396,975 +1496,21 @@ class Jedi:
                 "magma": matplotlib magma gradient
                 default: 'None'
         """
-        if isinstance(label, str):
-            destination_dir = Path(label)
-        elif isinstance(label, Path):
-            destination_dir = label
-        else:
-            raise TypeError(
-                "Please specify the directory (label) to write vmd scripts to as Path or string"
-            )
-        destination_dir.mkdir(parents=True, exist_ok=True)
 
-        #########################
-        #       Basic stuff     #
-        #########################
-        if man_strain is not None and modus is None:
-            print("\nPlease set a modus otherwise man_strain will be neglected")
-        if not self.ase_units:
-            unit = "kcal/mol"
-        elif self.ase_units:
-            unit = "eV"
-        rim_list = self.rim_list
-        self.atomsF.write(destination_dir / "xF.xyz")
-        if len(self.proc_E_RIMs) == 0:
-            self.run()
-        proc_E_RIMs = self.proc_E_RIMs
-        pbc_flag = False
-        if self.atomsF.get_pbc().any():
-            pbc_flag = True
-        # Check whether we need to write ba, da and all and read basic stuff
-        file_list = []
-        bl = []
-        ba = []
-        da = []
-        ba_flag = False
-        da_flag = False
-
-        for i in rim_list[0]:
-            # Bond lengths (a molecule has at least one bond):
-            numbers = [int(i[0]), int(i[1])]
-            bl.append(numbers)
-            if "bl" not in file_list:
-                file_list.append("bl")
-                # All (to sum up the values with angles and dihedrals:
-                file_list.append("all")
-
-        # custom bonds
-        for i in rim_list[1]:
-            numbers = [int(i[0]), int(i[1])]
-            bl.append(numbers)
-
-        # Bond angles:
-        for i in rim_list[2]:
-            ba_flag = True
-            numbers = [int(i[0]), int(i[1]), int(i[2])]
-            ba.append(numbers)
-            if "ba" not in file_list:
-                file_list.append("ba")
-
-        # Dihedral angles:
-        for i in rim_list[3]:
-            da_flag = True
-            numbers = [int(n) for n in i]
-            da.append(numbers)
-            if "da" not in file_list:
-                file_list.append("da")
-
-        # percental energy of RIMs
-        E_RIMs_perc = np.array(proc_E_RIMs)
-        E_RIMs = self.E_RIMs
-
-        # Write some basic stuff to the tcl scripts
-        output = [[], [], [], []]
-        for outindex, filename in enumerate(file_list):
-            if (
-                filename == "bl"
-                or filename == "ba"
-                or filename == "da"
-                or filename == "all"
-            ):
-                output[outindex].append(
-                    f"\n# Load a molecule\nmol new {{{destination_dir.resolve() / 'xF.xyz'}}} type xyz\n\n"
-                )
-                output[outindex].append(
-                    "\n# Change bond radii and various resolution parameters\nmol representation "
-                    "cpk 0.8 0.0 30 5\nmol representation bonds 0.2 30\n\n"
-                )
-                output[outindex].append(
-                    "\n# Change the drawing method of the first graphical representation to "
-                    "CPK\nmol modstyle 0 top cpk\n"
-                )
-                output[outindex].append(
-                    "\n# Color only H atoms white\nmol modselect 0 top {name H}\n"
-                )
-                output[outindex].append(
-                    "\n# Change the color of the graphical representation 0 to white\ncolor "
-                    "change rgb 0 1.00 1.00 1.00\nmol modcolor 0 top {colorid 0}\n"
-                )
-                output[outindex].append(
-                    '\n# The background should be white ("blue" has the colorID 0, which we have '
-                    "changed to white)\ncolor Display Background blue\n\n"
-                )
-                output[outindex].append("\n# Define the other colorIDs\n")
-
-        # Define colorcodes for various atomtypes
-        if des_colors is not None:
-            for i in des_colors:
-                colors[i] = des_colors[i]  # desired colors overwrite the standard ones
-
-        symbols = np.unique(self.atomsF.get_chemical_symbols())
-        symbols = symbols[symbols != "H"]  # get all symbols except H, H is white
-
-        N_colors_atoms = len(symbols)
-        N_colors = 32 - N_colors_atoms - 1  # vmd only supports 32 colors for modcolor
-
-        # Generate the color-code and write it to the tcl scripts
-        for outindex, filename in enumerate(file_list):
-            if (
-                filename == "bl"
-                or filename == "ba"
-                or filename == "da"
-                or filename == "all"
-            ):
-                colorbar_colors = []
-                if incl_coloring is None:
-                    # get green to red gradient
-                    for i in range(N_colors):
-                        R_value = float(i) / (N_colors / 2)
-                        if R_value > 1:
-                            R_value = 1
-                        if N_colors % 2 == 0:
-                            G_value = 2 - float(i + 1) / (N_colors / 2)
-                        if N_colors % 2 != 0:
-                            G_value = 2 - float(i) / (N_colors / 2)
-                        if G_value > 1:
-                            G_value = 1
-
-                        B_value = 0
-
-                        output[outindex].append(
-                            "%1s%5i%10.6f%10.6f%10.6f%1s"
-                            % (
-                                "color change rgb",
-                                i + 1,
-                                R_value,
-                                G_value,
-                                B_value,
-                                "\n",
-                            )
-                        )
-                        colorbar_colors.append((R_value, G_value, B_value))
-
-                elif incl_coloring == "cyan":
-                    # get cyan to red gradient
-                    for i in range(N_colors):
-                        R_value = float(i) / (N_colors / 2)
-                        if R_value > 1:
-                            R_value = 1
-                        B_value = 2 - float(i + 1) / (N_colors / 2)
-                        if B_value > 1:
-                            B_value = 1
-                        if i <= (N_colors / 2):
-                            G_value = ((N_colors / 2) - i) / (N_colors / 2)
-                        if i > (N_colors / 2):
-                            G_value = 0
-
-                        output[outindex].append(
-                            "%1s%5i%10.6f%10.6f%10.6f%1s"
-                            % (
-                                "color change rgb",
-                                i + 1,
-                                R_value,
-                                G_value,
-                                B_value,
-                                "\n",
-                            )
-                        )
-                        colorbar_colors.append((R_value, G_value, B_value))
-
-                elif incl_coloring == "magma":
-                    # get magma gradient from matplotlib
-                    gradient = np.linspace(0, 1, N_colors)
-                    cmap = cm.get_cmap("magma").reversed()
-                    cut_off_blue = 0.175
-                    cut_off_beige = 0.15
-                    adjusted_gradient = (
-                        gradient * (1 - cut_off_blue - cut_off_beige) + cut_off_beige
-                    )
-                    colors_rgb = cmap(adjusted_gradient)
-                    R_values = colors_rgb[:, 0]
-                    G_values = colors_rgb[:, 1]
-                    B_values = colors_rgb[:, 2]
-                    for i in range(N_colors):
-                        output[outindex].append(
-                            "%1s%5i%10.6f%10.6f%10.6f%1s"
-                            % (
-                                "color change rgb",
-                                i + 1,
-                                R_values[i],
-                                G_values[i],
-                                B_values[i],
-                                "\n",
-                            )
-                        )
-                        colorbar_colors.append((R_values[i], G_values[i], B_values[i]))
-
-                # add color codes of atoms
-                for j in range(N_colors_atoms):
-                    output[outindex].append(
-                        "\n%1s%5i%10.6f%10.6f%10.6f%1s"
-                        % (
-                            "color change rgb",
-                            N_colors + j + 1,
-                            float(colors[symbols[j]][0]),
-                            float(colors[symbols[j]][1]),
-                            float(colors[symbols[j]][2]),
-                            "\n",
-                        )
-                    )
-
-                # add color code for axes and box
-                output[outindex].append(
-                    "\n%1s%5i%10.6f%10.6f%10.6f%1s"
-                    % ("color change rgb", 32, float(0), float(0), float(0), "\n")
-                )  # black
-                output[outindex].append(
-                    "\n%1s%5i%10.6f%10.6f%10.6f%1s"
-                    % ("color change rgb", 1039, float(1), float(0), float(0), "\n")
-                )  # red
-                output[outindex].append(
-                    "\n%1s%5i%10.6f%10.6f%10.6f%1s"
-                    % ("color change rgb", 1038, float(0), float(1), float(0), "\n")
-                )  # green
-                output[outindex].append(
-                    "\n%1s%5i%10.6f%10.6f%10.6f%1s"
-                    % ("color change rgb", 1037, float(0), float(0), float(1), "\n")
-                )  # blue
-                output[outindex].append(
-                    "\n%1s%5i%10.6f%10.6f%10.6f%1s"
-                    % (
-                        "color change rgb",
-                        1036,
-                        float(0.25),
-                        float(0.75),
-                        float(0.75),
-                        "\n",
-                    )
-                )  # cyan
-                output[outindex].append(
-                    "\ncolor Axes X 1039\ncolor Axes Y 1038\ncolor Axes Z 1037\ncolor Axes Origin "
-                    "1036\ncolor Axes Labels 32"
-                )
-
-                # define color of atoms with the color code above
-                for j in range(N_colors_atoms):
-                    output[outindex].append("\n\nmol representation cpk 0.7 0.0 30 5")
-                    output[outindex].append("\nmol addrep top")
-                    output[outindex].append(
-                        "\n%s%i%s" % ("mol modstyle ", j + 1, " top cpk")
-                    )
-                    output[outindex].append(
-                        "\n%s%i%s%i%s"
-                        % (
-                            "mol modcolor ",
-                            j + 1,
-                            " top {colorid ",
-                            N_colors + j + 1,
-                            "}",
-                        )
-                    )
-                    output[outindex].append(
-                        "\n%s%i%s%s%s"
-                        % ("mol modselect ", j + 1, " top {name ", symbols[j], "}")
-                    )
-
-        #########################
-        # Binning		#
-        #########################
-        # Welcome
-        print(
-            "\n\nCreating tcl scripts for generating color-coded structures in VMD..."
+        warnings.warn(
+            "vmd_gen() is deprecated. Please use visualize(visualizer='vmd') instead.",
+            DeprecationWarning,
         )
-        if len(self.indices) < len(
-            self.atomsF
-        ):  # if there are only values for a substructure
-            p_rim = self.rim_list.copy()  # store rims that were analyzed
-            p_indices = self.indices
-            self.indices = range(len(self.atomsF))
 
-            rim = (
-                self.get_common_rims().copy()
-            )  # get rims of whole structure to show the whole structure
-
-            for i in range(2):
-                if rim[i].shape[0] == 0:
-                    break
-
-                rim[i] = np.ascontiguousarray(rim[i])
-                a = (
-                    np.array(rim_list[i])
-                    .view(
-                        [("", np.array(rim_list[i]).dtype)]
-                        * np.array(rim_list[i]).shape[1]
-                    )
-                    .ravel()
-                )
-                b = (
-                    np.array(rim[i])
-                    .view(
-                        [("", np.array(rim_list[i]).dtype)]
-                        * np.array(rim_list[i]).shape[1]
-                    )
-                    .ravel()
-                )
-                rim[i] = np.setxor1d(a, b)
-                rim[i] = (
-                    rim[i].view(np.array(rim_list[i]).dtype).reshape(-1, 2)
-                )  # get unconsidered rims
-                nan = np.full((len(rim[i]), 1), np.nan)  # nan for special color (black)
-                rim[i] = np.hstack(
-                    (rim[i], nan)
-                )  # stack unanalyzed rims for later vmd visualization
-            bond_E_array_app = rim
-
-            self.indices = p_indices  # TODO ? see line 1079
-
-        # get bonds that reach out of the unit cell
-        if pbc_flag:
-            bond_E_array_pbc = [np.empty((0, 2)), np.empty((0, 2))]
-            bond_E_array_pbc_trans = [
-                np.empty((0, 2)),
-                np.empty((0, 2)),
-            ]  # initialize list
-
-            cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
-            ex_bl = np.vstack(
-                ase.neighborlist.neighbor_list("ij", a=self.atomsF, cutoff=cutoff)
-            ).T
-            ex_bl = np.hstack(
-                (
-                    ex_bl,
-                    ase.neighborlist.neighbor_list("S", a=self.atomsF, cutoff=cutoff),
-                )
-            )
-            ex_bl = np.hstack(
-                (
-                    ex_bl,
-                    ase.neighborlist.neighbor_list("D", a=self.atomsF, cutoff=cutoff),
-                )
-            )
-            atoms_ex_cell = ex_bl[
-                (ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (ex_bl[:, 4] != 0)
-            ]  # determines which
-            # nearest neighbors are outside the unit cell
-            mol = self.atomsF.copy()  # an extended cell is needed for vmd since it does not show intercellular bonds
-            mol.wrap()  # wrap molecule important for atoms close to the boundaries
-
-            # check if bond or custom bond
-            bondscheck = self.rim_list[0][:, (0, 1)]
-            if self.rim_list[1].shape[0] != 0:
-                customcheck = self.rim_list[1][:, (0, 1)]
-
-            for i in range(len(atoms_ex_cell)):
-                # get positions of cell external atoms by adding the vector
-                pos_ex_atom = (
-                    mol.get_positions()[int(atoms_ex_cell[i, 0])]
-                    + atoms_ex_cell[i, 5:8]
-                )
-                # if pos_ex_atom in mol.positions:
-                # get the indices of the corresponding atoms inside the cell
-                original_rim = [int(atoms_ex_cell[i, 0]), int(atoms_ex_cell[i, 1])]
-                original_rim.sort()  # needs to be sorted because rim list only covers one direction
-                if len(np.where(np.all(mol.positions == pos_ex_atom, axis=1))[0]) > 0:
-                    ex_ind = np.where(np.all(mol.positions == pos_ex_atom, axis=1))[0][
-                        0
-                    ]
-                else:
-                    ex_ind = len(mol)
-                    # TODO how often is len(np.where(np.all())) check exec
-                    if len(
-                        np.where(np.all(original_rim == bondscheck, axis=1))[0]
-                    ) > 0 or (
-                        self.rim_list[1].shape[0] != 0
-                        and len(
-                            np.where(np.all(original_rim == customcheck, axis=1))[0]
-                        )
-                        > 0
-                    ):
-                        # append to the virtual atoms object
-                        mol.append(
-                            Atom(
-                                symbol=mol.symbols[int(atoms_ex_cell[i, 1])],
-                                position=pos_ex_atom,
-                            )
-                        )
-
-                if len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0:
-                    # add to bond list with auxiliary index
-                    bond_E_array_pbc[0] = np.append(
-                        bond_E_array_pbc[0], [[atoms_ex_cell[i, 0], ex_ind]], axis=0
-                    )
-                    bond_E_array_pbc_trans[0] = np.append(
-                        bond_E_array_pbc_trans[0], [original_rim], axis=0
-                    )
-
-                elif (
-                    self.rim_list[1].shape[0] != 0
-                    and len(np.where(np.all(original_rim == customcheck, axis=1))[0])
-                    > 0
-                ):
-                    # add to bond list with auxiliary index
-                    bond_E_array_pbc[1] = np.append(
-                        bond_E_array_pbc[1], [[atoms_ex_cell[i, 0], ex_ind]], axis=0
-                    )
-                    bond_E_array_pbc_trans[1] = np.append(
-                        bond_E_array_pbc_trans[1], [original_rim], axis=0
-                    )
-
-            mol.write(
-                destination_dir / "xF.xyz"
-            )  # save the modified structure with auxilliary atoms for vmd
-
-        if len(self.indices) < len(self.atomsF):
-            self.rim_list = (
-                p_rim  # restore the partial rim list # TODO class attribute is changed?
-            )
-
-        # Achieve the binning for bl, ba, da an all simultaneously
-        for outindex, filename in enumerate(file_list):
-            if (
-                filename == "bl"
-                or filename == "ba"
-                or filename == "da"
-                or filename == "all"
-            ):
-                # Create an array that stores the bond connectivity as the first two entries.
-                # The energy will be added as the third entry.
-                E_array = np.full((len(bl), 3), np.nan)
-                for i in range(len(bl)):
-                    E_array[i][0] = bl[i][0]
-                    E_array[i][1] = bl[i][1]
-
-                # Create an array that stores only the energies in the coordinate of interest and print some information
-                # Get rid of ridiculously small values and treat diatomic molecules explicitly
-                # (in order to create a unified picture, we have to create all these arrays in any case)
-
-                # Bonds
-                if filename == "bl" or filename == "all":
-                    if len(bl) == 1:
-                        E_bl_perc = E_RIMs_perc[0]
-                        E_bl = E_RIMs
-                    else:
-                        E_bl_perc = E_RIMs_perc[0 : len(bl)]
-                        E_bl = E_RIMs[0 : len(bl)]
-                        if E_bl_perc.max() <= 0.001:
-                            E_bl_perc = np.zeros(len(bl))
-                    if filename == "bl":
-                        print("\nProcessing bond lengths...")
-                        print(
-                            "%s%6.2f%s"
-                            % (
-                                "Maximum energy in a bond length:      ",
-                                E_bl_perc.max(),
-                                "%",
-                            )
-                        )
-                        print(
-                            "%s%6.2f%s"
-                            % (
-                                "Total energy in the bond lengths:     ",
-                                E_bl_perc.sum(),
-                                "%",
-                            )
-                        )
-
-                # Bendings
-                if (filename == "ba" and ba_flag == True) or (
-                    filename == "all" and ba_flag == True
-                ):
-                    E_ba_perc = E_RIMs_perc[len(bl) : len(bl) + len(ba)]
-                    E_ba = E_RIMs[len(bl) : len(bl) + len(ba)]
-                    if E_ba_perc.max() <= 0.001:
-                        E_ba_perc = np.zeros(len(ba))
-                    if filename == "ba":
-                        print("\nProcessing bond angles...")
-                        print(
-                            "%s%6.2f%s"
-                            % (
-                                "Maximum energy in a bond angle:       ",
-                                E_ba_perc.max(),
-                                "%",
-                            )
-                        )
-                        print(
-                            "%s%6.2f%s"
-                            % (
-                                "Total energy in the bond angles:      ",
-                                E_ba_perc.sum(),
-                                "%",
-                            )
-                        )
-
-                # Torsions (handle stdout separately)
-                if (filename == "da" and da_flag == True) or (
-                    filename == "all" and da_flag == True
-                ):
-                    E_da_perc = E_RIMs_perc[
-                        len(bl) + len(ba) : len(bl) + len(ba) + len(da)
-                    ]
-                    E_da = E_RIMs[len(bl) + len(ba) : len(bl) + len(ba) + len(da)]
-                    if E_da_perc.max() <= 0.001:
-                        E_da_perc = np.zeros(len(da))
-                if filename == "da" and da_flag == True:
-                    print("\nProcessing dihedral angles...")
-                    print(
-                        "%s%6.2f%s"
-                        % (
-                            "Maximum energy in a dihedral angle:   ",
-                            E_da_perc.max(),
-                            "%",
-                        )
-                    )
-                    print(
-                        "%s%6.2f%s"
-                        % (
-                            "Total energy in the dihedral angles:  ",
-                            E_da_perc.sum(),
-                            "%",
-                        )
-                    )
-
-                # Map onto the bonds (create "all" on the fly and treat diatomic molecules explicitly)
-                # Bonds (trivial)
-                if filename == "bl" or filename == "all":
-                    for i in range(len(bl)):
-                        if len(bl) == 1:
-                            E_array[i][2] = E_bl[i]
-                        else:  # TODO if and else are equal?
-                            E_array[i][2] = E_bl[i]
-
-                # Bendings
-                if (filename == "ba" and ba_flag == True) or (
-                    filename == "all" and ba_flag == True
-                ):
-                    for i in range(len(ba)):
-                        for j in range(len(bl)):
-                            # look for the right connectivity
-                            if (
-                                (ba[i][0] == bl[j][0] and ba[i][1] == bl[j][1])
-                                or (ba[i][0] == bl[j][1] and ba[i][1] == bl[j][0])
-                                or (ba[i][1] == bl[j][0] and ba[i][2] == bl[j][1])
-                                or (ba[i][1] == bl[j][1] and ba[i][2] == bl[j][0])
-                            ):
-                                E_array[j][2] += 0.5 * E_ba[i]
-                                if np.isnan(E_array[j][2]):
-                                    E_array[j][2] = 0.5 * E_ba[i]
-
-                # Torsions
-                if (filename == "da" and da_flag == True) or (
-                    filename == "all" and da_flag == True
-                ):
-                    for i in range(len(da)):
-                        for j in range(len(bl)):
-                            if (
-                                (da[i][0] == bl[j][0] and da[i][1] == bl[j][1])
-                                or (da[i][0] == bl[j][1] and da[i][1] == bl[j][0])
-                                or (da[i][1] == bl[j][0] and da[i][2] == bl[j][1])
-                                or (da[i][1] == bl[j][1] and da[i][2] == bl[j][0])
-                                or (da[i][2] == bl[j][0] and da[i][3] == bl[j][1])
-                                or (da[i][2] == bl[j][1] and da[i][3] == bl[j][0])
-                            ):
-                                E_array[j][2] += (float(1) / 3) * E_da[i]
-                                if np.isnan(E_array[j][2]):
-                                    E_array[j][2] = (float(1) / 3) * E_da[i]
-
-                if filename == "all" and rim_list[1].shape[0] != 0:
-                    custom_E = sum(
-                        E_array[:, 2][len(bl) - len(self.custom_bonds) : len(bl)]
-                    )
-                elif filename == "all" and rim_list[1].shape[0] == 0:
-                    custom_E = np.nan
-
-                custom_E_array = E_array[len(rim_list[0]) : len(bl)]
-                bond_E_array = E_array[0 : len(rim_list[0])]
-
-                if len(self.indices) < len(self.atomsF):
-                    # stack bonds that were neglected before to show the whole structure
-                    bond_E_array = np.vstack((bond_E_array, bond_E_array_app[0]))
-                    try:
-                        custom_E_array = np.vstack(
-                            (custom_E_array, bond_E_array_app[1])
-                        )
-                    except:
-                        pass
-
-                # get energies for bonds that reach out of the unit cell
-                if pbc_flag:
-                    translate = {}  # the new bonds need to get the same values as the original ones inside the cell
-                    for i in range(len(bond_E_array)):
-                        translate[
-                            (
-                                np.min([bond_E_array[i, 0], bond_E_array[i, 1]]),
-                                np.max([bond_E_array[i, 0], bond_E_array[i, 1]]),
-                            )
-                        ] = bond_E_array[i, 2]
-                    ctranslate = {}
-                    for i in range(len(custom_E_array)):
-                        ctranslate[
-                            (
-                                np.min([custom_E_array[i, 0], custom_E_array[i, 1]]),
-                                np.max([custom_E_array[i, 0], custom_E_array[i, 1]]),
-                            )
-                        ] = custom_E_array[i, 2]
-
-                    for i in range(len(bond_E_array_pbc[0])):
-                        # get the indices of the corresponding atoms inside the cell
-                        original_rim = bond_E_array_pbc_trans[0][i]
-                        # add to bond list with auxillary index
-                        bond_E_array = np.vstack(
-                            (
-                                bond_E_array,
-                                [
-                                    int(bond_E_array_pbc[0][i][0]),
-                                    int(bond_E_array_pbc[0][i][1]),
-                                    translate[tuple(original_rim)],
-                                ],
-                            )
-                        )
-                    for i in range(len(bond_E_array_pbc[1])):
-                        # get the indices of the corresponding atoms inside the cell
-                        original_rim = [
-                            int(bond_E_array_pbc_trans[1][i][0]),
-                            int(bond_E_array_pbc_trans[1][i][1]),
-                        ]
-                        custom_E_array = np.delete(
-                            custom_E_array,
-                            np.where(
-                                (custom_E_array[:, 0] == original_rim[0])
-                                & (custom_E_array[:, 1] == original_rim[1])
-                            )[0],
-                            axis=0,
-                        )
-                        original_rim.sort()  # needs to be sorted because rim list only covers one direction
-                        custom_E_array = np.vstack(
-                            (
-                                custom_E_array,
-                                [
-                                    int(bond_E_array_pbc[1][i][0]),
-                                    int(bond_E_array_pbc[1][i][1]),
-                                    ctranslate[tuple(original_rim)],
-                                ],
-                            )
-                        )
-
-            # Store the maximum energy in a variable for later call
-            if filename == "all":
-                max_energy = float(
-                    np.nanmax(E_array, axis=0)[2]
-                )  # maximum energy in one bond
-                for row in E_array:
-                    if max_energy in row:
-                        atom_1_max_energy = int(row[0])
-                        atom_2_max_energy = int(row[1])
-
-            # Generate the binning windows by splitting bond_E_array into N_colors equal windows
-            # TODO lots of code duplicates as filename changes E_array and therefore binning window
-            # -> define function with parameters e_array and man strain returning binning window
-            if filename == "all":
-                if modus == "all":
-                    if man_strain is None:
-                        print(
-                            f"modus {modus} was called, but no maximum strain is given."
-                        )
-                        binning_windows = np.linspace(
-                            0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                        )
-                    else:
-                        binning_windows = np.linspace(
-                            0, float(man_strain), num=N_colors
-                        )
-                else:
-                    binning_windows = np.linspace(
-                        0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                    )
-
-            elif filename == "bl":
-                if modus == "bl":
-                    if man_strain is None:
-                        print(
-                            f"modus {modus} was called, but no maximum strain is given."
-                        )
-                        binning_windows = np.linspace(
-                            0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                        )
-                    else:
-                        binning_windows = np.linspace(
-                            0, float(man_strain), num=N_colors
-                        )
-                else:
-                    binning_windows = np.linspace(
-                        0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                    )
-
-            elif filename == "ba":
-                if modus == "ba":
-                    if man_strain is None:
-                        print(
-                            f"modus {modus} was called, but no maximum strain is given."
-                        )
-                        binning_windows = np.linspace(
-                            0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                        )
-                    else:
-                        binning_windows = np.linspace(
-                            0, float(man_strain), num=N_colors
-                        )
-                else:
-                    binning_windows = np.linspace(
-                        0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                    )
-
-            elif filename == "da":
-                if modus == "da":
-                    if man_strain is None:
-                        print(
-                            f"modus {modus} was called, but no maximum strain is given."
-                        )
-                        binning_windows = np.linspace(
-                            0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                        )
-                    else:
-                        binning_windows = np.linspace(
-                            0, float(man_strain), num=N_colors
-                        )
-                else:
-                    binning_windows = np.linspace(
-                        0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                    )
-            else:
-                binning_windows = np.linspace(
-                    0, np.nanmax(E_array, axis=0)[2], num=N_colors
-                )
-
-            if pbc_flag & box:
-                output[outindex].append("\n\n# Adding a pbc box")
-                output[outindex].append(
-                    "\npbc set {%f %f %f %f %f %f}"
-                    % (
-                        self.atomsF.cell.cellpar()[0],
-                        self.atomsF.cell.cellpar()[1],
-                        self.atomsF.cell.cellpar()[2],
-                        self.atomsF.cell.cellpar()[3],
-                        self.atomsF.cell.cellpar()[4],
-                        self.atomsF.cell.cellpar()[5],
-                    )
-                )
-                output[outindex].append("\npbc box -color 32")
-                output[outindex].append(
-                    "\n\n# Adding a representation with the appropriate colorID for each bond"
-                )
-
-            # Calculate which binning_windows value is closest to the bond-percentage and do the output
-            for i, b in enumerate(bond_E_array):
-                if np.isnan(b[2]):
-                    colorID = 32  # black
-                else:
-                    colorID = np.abs(binning_windows - b[2]).argmin() + 1
-                output[outindex].append("\nmol addrep top")
-                output[outindex].append(
-                    "\n%s%i%s" % ("mol modstyle ", N_colors_atoms + i + 1, " top bonds")
-                )
-                output[outindex].append(
-                    "\n%s%i%s%i%s"
-                    % (
-                        "mol modcolor ",
-                        N_colors_atoms + i + 1,
-                        " top {colorid ",
-                        colorID,
-                        "}",
-                    )
-                )
-                output[outindex].append(
-                    "\n%s%i%s%i%s%i%s"
-                    % (
-                        "mol modselect ",
-                        N_colors_atoms + i + 1,
-                        " top {index ",
-                        b[0],
-                        " ",
-                        b[1],
-                        "}\n",
-                    )
-                )
-            for i in custom_E_array:
-                if np.isnan(i[2]):
-                    colorID = 32  # black
-                else:
-                    colorID = np.abs(binning_windows - i[2]).argmin() + 1
-                output[outindex].append(
-                    '\nset x [[atomselect top "index %d %d"] get {x y z}]'
-                    % (i[0], i[1])
-                )
-                output[outindex].append("\nset a [lindex $x 0] ")
-                output[outindex].append("\nset b [lindex $x 1] ")
-                output[outindex].append("\ndraw  color %d" % colorID)
-                output[outindex].append("\ndraw line  $a $b width 3 style dashed")
-
-            # colorbar
-            if colorbar:
-                min = 0.000
-                if filename == "all":
-                    if modus == "all":
-                        if man_strain is None:
-                            max = np.nanmax(E_array, axis=0)[2]
-                        else:
-                            max = man_strain
-                    else:
-                        max = np.nanmax(E_array, axis=0)[2]
-
-                elif filename == "bl":
-                    if modus == "bl":
-                        if man_strain is None:
-                            max = np.nanmax(E_array, axis=0)[2]
-                        else:
-                            max = man_strain
-                    else:
-                        max = np.nanmax(E_array, axis=0)[2]
-
-                elif filename == "ba":
-                    if modus == "ba":
-                        if man_strain is None:
-                            max = np.nanmax(E_array, axis=0)[2]
-                        else:
-                            max = man_strain
-                    else:
-                        max = np.nanmax(E_array, axis=0)[2]
-
-                elif filename == "da":
-                    if modus == "da":
-                        if man_strain is None:
-                            max = np.nanmax(E_array, axis=0)[2]
-                        else:
-                            max = man_strain
-                    else:
-                        max = np.nanmax(E_array, axis=0)[2]
-
-                output[outindex].append(
-                    f"""\ndisplay update off
-display resetview
-variable bar_mol
-
-
-
-set old_top [molinfo top]
-set bar_mol [mol new]
-mol top $bar_mol
-
-#bar can be fixed with mol fix 'molid of the bar' 
-
-
-
-# We want to draw relative to the location of the top mol so that the bar 
-# will always show up nicely.
-set center [molinfo $old_top get center]
-set center [regsub -all {{[{{}}]}} $center ""]
-set center [split $center]
-set min {min}
-set max {max}
-set length 30.0
-set width [expr $length / 6]
-
-# draw the color bar
-set start_y [expr 1 + [lindex $center 1] ]
-
-set use_x [expr 1 + [lindex $center 0] ]
-
-set use_z [expr 1+ [lindex $center 2 ]]
-
-set step [expr $length / {N_colors}]
-
-set label_num 8
-
-for {{set colorid 1 }} {{ $colorid <= {N_colors} }} {{incr colorid 1 }} {{
-    draw color $colorid
-    set cur_y [ expr $start_y + ($colorid -0.5 ) * $step ]
-    draw line "$use_x $cur_y $use_z"  "[expr $use_x+$width] $cur_y $use_z" width 10000
-}}
-
-# draw the labels
-set coord_x [expr (1.1*$width)+$use_x];
-set step_size [expr $length / $label_num]
-set color_step [expr {N_colors}/$label_num]
-set value_step [expr ($max - $min ) / double ($label_num)]
-
-for {{set i 0}} {{$i <= $label_num }} {{ incr i 1}} {{
-    set cur_color_id 32
-    draw color $cur_color_id
-    set coord_y [expr $start_y+$i * $step_size ]
-    set cur_text [expr $min + $i * $value_step ]
-    draw text  " $coord_x $coord_y $use_z"  [format %6.3f  $cur_text]
-}}
-draw text " $coord_x [expr $coord_y + $step_size] $use_z"   "{unit}"
-# re-set top
-mol top $old_top
-display update on """
-                )
-
-                # highresolution colorbar with matplotlib
-                # TODO move import statements to top of file
-                import matplotlib.pyplot as plt
-                from matplotlib.colorbar import ColorbarBase
-                from matplotlib.colors import LinearSegmentedColormap, Normalize
-
-                plt.rc("font", size=20)
-                fig = plt.figure()
-                ax = fig.add_axes([0.05, 0.08, 0.1, 0.9])
-                cmap_name = "my_list"
-                cmap = LinearSegmentedColormap.from_list(
-                    cmap_name, colorbar_colors, N=N_colors
-                )
-                cb = ColorbarBase(
-                    ax,
-                    orientation="vertical",
-                    cmap=cmap,
-                    norm=Normalize(min, round(max, 3)),
-                    label=unit,
-                    ticks=np.round(np.linspace(min, max, 8), decimals=3),
-                )
-                # TODO cb colorbase is never used?
-
-                fig.savefig(
-                    f"{destination_dir / filename}colorbar.pdf", bbox_inches="tight"
-                )
-
-            # total strain in the bonds
-            proc_geom_RIMs = (
-                100 * (sum(E_array[:, 2]) - self.energies[0]) / self.energies[0]
-            )
-            warnings.filterwarnings("ignore")
-            percent = 100 * E_array[:, 2] / sum(E_array[:, 2])
-            jedi_printout_bonds(
-                self.atoms0,
-                self.rim_list[0:2],
-                self.energies[0],
-                sum(E_array[:, 2]),
-                proc_geom_RIMs,
-                percent,
-                E_array[:, 2],
-                ase_units=self.ase_units,
-                file=f"E_{filename}",
-            )
-
-        if not man_strain:
-            print(
-                "\nAdding all energies for the stretch, bending and torsion of the bond with maximum strain..."
-            )
-            print(
-                f"Maximum energy in bond between atoms "
-                f"{atom_1_max_energy} and {atom_2_max_energy}: {float(max_energy):.3f} {unit}."
-            )
-
-        # write tcl scripts
-        for _, mode in enumerate(output):
-            if len(mode) > 0:
-                f = open(
-                    f"{destination_dir / file_list[_]}.vmd", "w"
-                )  # TODO _ variable is actually used, rename?
-                f.writelines(mode)
-
-        if self.custom_bonds is not None:
-            print(f"\nTotal energy custom bonds: {custom_E} {unit}")
+        if not incl_coloring:
+            incl_coloring = "green_red"
+        self.visualize(
+            visualizer="vmd",
+            colormap=incl_coloring,
+            output_dir=label,
+            single_mode=modus,
+            man_strain=man_strain,
+        )
 
     def partial_analysis(self, indices, ase_units=False):
         """
