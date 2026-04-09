@@ -8,24 +8,55 @@ permissions:
   contents: read # for checkout
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      python-changed: ${{ steps.plan.outputs.python_changed }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Plan CI
+        id: plan
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # detect changed files
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+            [[ "$file" =~ \.py$ ]] && python_changed=1
+          done <<< "$(git diff --name-only "$BASE_SHA:-origin/main}...HEAD")"
+
+          # convert 1/empty to true/false respectively for GHA output
+          out() { [[ "$2" ]] && echo "$1=true" || echo "$1=false"; }
+          {
+            out python_changed "$python_changed"
+          } >> "$GITHUB_OUTPUT"
+
   format:
-    if: ${{ github.event_name == 'pull_request' }}
+    needs: [plan]
+    # only run if python code changed and we're inside a PR
+    if: |
+      needs.plan.outputs.python-changed
+      && github.event_name == 'pull_request'
     permissions:
       contents: write # to push the formatting changes
     uses: ./.github/workflows/check-format.yaml
 
   lint:
-    needs: [format]
+    # only run if python code changed and we're inside a PR
     if: |
-      github.event_name == 'pull_request'
-      && ( needs.format.result == 'skipped' || needs.format.result == 'success' )
+      needs.plan.outputs.python-changed
+      && github.event_name == 'pull_request'
+    needs: [plan]
     uses: ./.github/workflows/check-lint.yaml
 
   run-tests:
-    needs: [format]
-    if: |
-      github.event_name == 'pull_request'
-      && ( needs.format.result == 'skipped' || needs.format.result == 'success' )
+    needs: [plan]
+    if: ${{ needs.plan.outputs.python-changed }}
     strategy:
       fail-fast: false
       matrix:
@@ -38,10 +69,8 @@ jobs:
       python: ${{ matrix.python-version }}
 
   build-wheel:
-    needs: [format]
-    if: |
-      github.event_name == 'pull_request'
-      && ( needs.format.result == 'skipped' || needs.format.result == 'success' )
+    needs: [plan]
+    if: ${{ needs.plan.outputs.python-changed }}
     strategy:
       fail-fast: false
       matrix:
