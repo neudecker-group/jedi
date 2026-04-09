@@ -1,0 +1,72 @@
+name: Render documentation
+
+on:
+  push:
+    paths:
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.0.0
+        with:
+          version: latest
+          enable-cache: false
+
+      - name: Install dependencies
+        run: uv sync --group=docs
+
+      - name: Render
+        run: uv run sphinx-build -b html docs docs/_build/
+
+      - name: Set up Pages
+        # only if actually deploying
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        id: pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs/_build
+
+  deploy:
+    # only if actually deploying
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: render
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write    # needed to deploy to pages
+      id-token: write # to verify the deployment originates from an appropriate source
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

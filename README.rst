@@ -3,31 +3,48 @@ Judgement of Energy DIstribution
 
 JEDI is a quantum chemical strain analysis tool working with the Atomic Simulation Environment (ASE).
 
-
-
 Requirements
 ------------
 
-* Python_ 3.8 or later
+* Python_ 3.12 or later
 * NumPy_ (base N-dimensional array package)
 * ase_ 3.23 (functions to determine atomic structures' geometries and quantum chemical calculators)
-
-
-
 
 Installation
 ------------
 
 JEDI can be installed by running ``pip install strainjedi``. When using the ``git`` version, add ``~/jedi`` to your $PYTHONPATH environment variable. 
 
+Development
+-----------
 
+This project uses uv_ to manage dependencies; ensure it is installed on your system.
+
+.. code-block::
+
+   uv sync  # install dependencies
+   uv build # build the python wheel
+
+To run tests, install the `test` dependency group:
+
+.. code-block::
+
+   uv sync --group=test
+   uv run pytest
+
+To build the documentation, ensure that the ``docs`` dependency group is installed.
+
+.. code-block::
+
+   uv sync --group=docs
+   uv run sphinx-build -b html docs docs/_build/
+
+.. tip:: Run ``uv sync --all-groups`` to install all dependencies for all the above scenarios.
 
 Tutorial
 ------------
 
 A tutorial is available here: https://neudecker-group.github.io/jedi/
-
-
 
 Citation
 --------
@@ -46,8 +63,7 @@ Additional information on the theoretical background of the JEDI analysis can be
 
 * Stauch, T.; Dreuw, A.; Quantum Chemical Strain Analysis For Mechanochemical Processes, Acc. Chem. Res. **2017**, 50, 1041-1048. https://doi.org/10.1021/acs.accounts.7b00038
 
-
-
 .. _Python: http://www.python.org/
 .. _NumPy: http://docs.scipy.org/doc/numpy/reference/
 .. _ase: https://wiki.fysik.dtu.dk/ase/
+.. _uv: https://docs.astral.sh/uv/getting-started/installation/

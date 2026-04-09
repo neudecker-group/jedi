@@ -1,0 +1,78 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which PyPI environment to publish to, if any
+        required: true
+        type: choice
+        default: "none"
+        options: ["none", "pypi"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # for actions/checkout
+
+jobs:
+  wheel:
+    name: build wheel
+    uses: ./.github/workflows/check-build.yaml
+    with:
+      release: true
+
+  pypi-publish:
+    name: Publish release to PyPI
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'pypi'
+    needs: [wheel]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/strainjedi
+    permissions:
+      id-token: write # necessary for trusted publishing
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          path: ./dist
+
+      - name: Display structure
+        run: ls -R ./dist
+
+      - name: publish
+        uses: pypa/gh-action-pypi-publish@v1.14.0
+        with:
+          repository-url: https://pypi.org
+
+  github-release:
+    name: Create GitHub Release
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'pypi'
+    needs: [wheel]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # necessary for trusted publishing
+      contents: write # necessary for creating a github release
+
+    steps:
+      - name: Download
+        uses: actions/download-artifact@v8
+        with:
+          path: ./dist
+
+      - name: Display structure of downloaded files
+        run: ls -R ./dist
+
+      - name: Create the release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: ./dist/*
+          generateReleaseNotes: true
