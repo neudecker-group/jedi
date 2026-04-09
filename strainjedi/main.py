@@ -1,4 +1,5 @@
-""" Script for CL execution of Jedi strain analysis. """
+"""Script for CL execution of Jedi strain analysis."""
+
 from __future__ import annotations
 
 import numpy as np
@@ -12,6 +13,7 @@ from ase.vibrations import Vibrations
 from ase.vibrations.data import VibrationsData
 
 from strainjedi.jedi import Jedi
+
 
 def main() -> None:
 
@@ -30,7 +32,6 @@ def main() -> None:
 
     # Parse init. and final state energy from file
     if args.energies:
-
         # Energies still in Hartree; convert to kcal/mol for JEDI analysis
         e_ = read_energies(args.energies)
         energies_kcal = e_ * Hartree * mol / kcal
@@ -40,9 +41,8 @@ def main() -> None:
     else:
         energies_kcal = None
 
-    # Parse Hessian from ORCA output and initialize ASE VibDat object 
+    # Parse Hessian from ORCA output and initialize ASE VibDat object
     if args.hessi:
-
         print(f"Reading ORCA Hessian from: {args.hessi}")
         h2d = parse_orca_hess(args.hessi)
 
@@ -50,26 +50,30 @@ def main() -> None:
     else:
         h4d = None
 
-    # Handle cases where either H or E was not provided via CL: 
+    # Handle cases where either H or E was not provided via CL:
     # -> Use orca input file to build ASE calc. and follow conventional jedi usage as in docs.
     if (energies_kcal is None) or (h4d is None):
-        print(f"Either Hessian or energies not provided via CL. Using {args.oinp} to generate ASE calculator and determine internally.")
+        print(
+            f"Either Hessian or energies not provided via CL. Using {args.oinp} to generate ASE calculator and determine internally."
+        )
 
-        if not args.oinp: # Requires input file
+        if not args.oinp:  # Requires input file
             raise ValueError("Need a valid input file.")
 
         # Build calculator to get E and/or H
-        calculator = build_calc(inputfile = args.oinp, prog = "ORCA")
+        calculator = build_calc(inputfile=args.oinp, prog="ORCA")
 
-        # Set calc. for i and f 
+        # Set calc. for i and f
         print("Set calculator")
         ati.calc = calculator
         atf.calc = calculator
 
     # Handle Hessian
     if h4d is None:
-        print(f"No Hessian found. Trying to compute this with {args.oinp} input via ASE calc. numerically.")
-        
+        print(
+            f"No Hessian found. Trying to compute this with {args.oinp} input via ASE calc. numerically."
+        )
+
         vib = Vibrations(ati, name="jvibcalc")
         vib.run()
 
@@ -80,7 +84,7 @@ def main() -> None:
     if energies_kcal is None:
         print(f"No energies found. Trying to compute with {args.oinp}")
 
-        e_i = ati.get_potential_energy() # Energy in eV
+        e_i = ati.get_potential_energy()  # Energy in eV
         e_f = atf.get_potential_energy()
 
         de = e_f - e_i
@@ -93,12 +97,14 @@ def main() -> None:
     ati.calc = None
     atf.calc = None
 
-    jedi = Jedi(ati,
-    atf, h4d,
-    epot=energies_kcal,
-
+    jedi = Jedi(
+        ati,
+        atf,
+        h4d,
+        epot=energies_kcal,
     )
     jedi.run()
+
 
 if __name__ == "__main__":
     main()

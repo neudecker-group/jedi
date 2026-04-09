@@ -3,34 +3,81 @@ name: CI
 on:
   push:
   pull_request:
+   
+permissions:
+  contents: read # for checkout
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      python-changed: ${{ steps.plan.outputs.python_changed }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Plan CI
+        id: plan
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # detect changed files
+          while IFS= read -r file; do
+            [[ -z "$file" ]] && continue
+            [[ "$file" =~ \.py$ ]] && python_changed=1
+          done <<< "$(git diff --name-only "$BASE_SHA:-origin/main}...HEAD")"
+
+          # convert 1/empty to true/false respectively for GHA output
+          out() { [[ "$2" ]] && echo "$1=true" || echo "$1=false"; }
+          {
+            out python_changed "$python_changed"
+          } >> "$GITHUB_OUTPUT"
+
+  format:
+    needs: [plan]
+    # only run if python code changed and we're inside a PR
+    if: |
+      needs.plan.outputs.python-changed
+      && github.event_name == 'pull_request'
+    permissions:
+      contents: write # to push the formatting changes
+    uses: ./.github/workflows/check-format.yaml
+
+  lint:
+    # only run if python code changed and we're inside a PR
+    if: |
+      needs.plan.outputs.python-changed
+      && github.event_name == 'pull_request'
+    needs: [plan]
+    uses: ./.github/workflows/check-lint.yaml
+
   run-tests:
+    needs: [plan]
+    if: ${{ needs.plan.outputs.python-changed }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10"]
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
-    name: Test
-    runs-on: ${{ matrix.os }}
+    uses: ./.github/workflows/check-test.yaml
+    with:
+      os: ${{ matrix.os }}
+      python: ${{ matrix.python-version }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  build-wheel:
+    needs: [plan]
+    if: ${{ needs.plan.outputs.python-changed }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
 
-      - name: Set up Python 
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run:  |
-          python -m pip install pytest 
-          python -m pip install ase
-          python -m pip install numpy
-
-
-          
-      - name: Run tests
-        run: python -m pytest -vv --tb=long
+    uses: ./.github/workflows/check-build.yaml
+    with:
+      os: ${{ matrix.os }}
+      python: ${{ matrix.python-version }}

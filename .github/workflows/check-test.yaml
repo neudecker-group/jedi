@@ -1,0 +1,49 @@
+name: Run tests
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: 'the OS to run on'
+        default: 'ubuntu-latest'
+        required: false
+        type: string
+      python:
+        description: 'the Python version to use'
+        default: '3.12'
+        required: false
+        type: string
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.os }}-${{ inputs.python }}-${{ github.head_ref || github.run_id }}-test
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test-${{ inputs.python }}-${{ inputs.os }}
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.python }}
+
+      - name: install uv
+        uses: astral-sh/setup-uv@v8.0.0
+        with:
+          enable-cache: true
+
+      - name: install dependencies
+        run: uv sync --group=test
+
+      - name: run tests
+        run: uv run pytest
