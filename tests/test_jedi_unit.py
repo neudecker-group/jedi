@@ -1,9 +1,11 @@
-import pytest
-
-from strainjedi.jedi import Jedi, jedi_analysis
+from strainjedi.jedi import Jedi
 import numpy as np
 import copy
 
+import matplotlib
+
+# Headless backend for testing
+matplotlib.use("agg")
 
 class TestGetRims:
     """
