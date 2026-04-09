@@ -7,6 +7,7 @@ import matplotlib
 # Headless backend for testing
 matplotlib.use("agg")
 
+
 class TestGetRims:
     """
     Tests for get_rims() and get_common_rims() methods.
