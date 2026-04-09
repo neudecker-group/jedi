@@ -14,8 +14,18 @@ jobs:
       contents: write # to push the formatting changes
     uses: ./.github/workflows/check-format.yaml
 
+  lint:
+    needs: [format]
+    if: |
+      github.event_name == 'pull_request'
+      && ( needs.format.result == 'skipped' || needs.format.result == 'success' )
+    uses: ./.github/workflows/check-lint.yaml
+
   run-tests:
-    needs: [format] # format first
+    needs: [format]
+    if: |
+      github.event_name == 'pull_request'
+      && ( needs.format.result == 'skipped' || needs.format.result == 'success' )
     strategy:
       fail-fast: false
       matrix:
@@ -27,8 +37,11 @@ jobs:
       os: ${{ matrix.os }}
       python: ${{ matrix.python-version }}
 
-  build:
-    needs: [format] # format first
+  build-wheel:
+    needs: [format]
+    if: |
+      github.event_name == 'pull_request'
+      && ( needs.format.result == 'skipped' || needs.format.result == 'success' )
     strategy:
       fail-fast: false
       matrix:
