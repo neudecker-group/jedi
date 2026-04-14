@@ -52,7 +52,9 @@ def parse_orca_hess(filename: str) -> np.ndarray:
         lines = f.readlines()
 
     try:
-        start = next(i for i, line in enumerate(lines) if line.strip().lower() == "$hessian")
+        start = next(
+            i for i, line in enumerate(lines) if line.strip().lower() == "$hessian"
+        )
     except StopIteration:
         raise ValueError("No $hessian block found")
 
@@ -104,7 +106,11 @@ def orca_input_to_ase(inpfile: str) -> Tuple[str, str, int, int]:
     """
 
     with open(inpfile) as f:
-        lines = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+        lines = [
+            line.strip()
+            for line in f
+            if line.strip() and not line.strip().startswith("#")
+        ]
 
     simple_lines = []
     block_lines = []
