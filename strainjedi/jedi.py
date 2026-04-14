@@ -567,7 +567,9 @@ class Jedi:
                 cl = cls(data["atoms0"], data["atomsF"], modes)
                 cl.indices = data["indices"]
             else:
-                modes = ase.vibrations.VibrationsData.from_2d(data["atoms0"], data["hessian"])
+                modes = ase.vibrations.VibrationsData.from_2d(
+                    data["atoms0"], data["hessian"]
+                )
                 cl = cls(data["atoms0"], data["atomsF"], modes)
             cl.H = data["hessian"]
         if data["bmatrix"] is not None:
@@ -707,7 +709,9 @@ class Jedi:
         ba_flag = False
         row_index = 0
         for self_index, self_row in enumerate(bl):  # iterates through rows of bonds
-            for other_index, other_row in enumerate(bl):  # iterates through rows of bonds
+            for other_index, other_row in enumerate(
+                bl
+            ):  # iterates through rows of bonds
                 if other_index > self_index:
                     temp_ba_list = [
                         self_row[0],
@@ -763,7 +767,9 @@ class Jedi:
         for self_index, self_row in enumerate(bl):  # iterates through rows of bonds
             bond_partner1 = False  # if both bond partners are set to True, no terminal bond. Thus, possible torsion around bond.
             bond_partner2 = False
-            for other_index, other_row in enumerate(bl):  # iterates through rows of bonds
+            for other_index, other_row in enumerate(
+                bl
+            ):  # iterates through rows of bonds
                 if other_index != self_index:  # only iterate bonds other than self
                     if (
                         other_row[0] == self_row[0] or other_row[1] == self_row[0]
@@ -775,7 +781,9 @@ class Jedi:
                     ):  # Check second Atom#
                         bond_partner2 = True  # Set to True if neighbouring atom
 
-                    if bond_partner1 and bond_partner2:  # if both bond partners are set to True, no terminal bond. Thus, possible torsion around bond.
+                    if (
+                        bond_partner1 and bond_partner2
+                    ):  # if both bond partners are set to True, no terminal bond. Thus, possible torsion around bond.
                         if row_index == 0:
                             torsionable_bonds = np.array([self_row[0], self_row[1]])
                             tb_flag = True
