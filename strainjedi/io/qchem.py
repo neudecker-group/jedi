@@ -227,9 +227,6 @@ class QChemDynamics:
         kwargs["jobtype"] = "opt"
 
     def run(self, **kwargs):
-        calc_old = self.atoms.calc
-        params_old = copy.deepcopy(self.calc.parameters)
-
         self.delete_keywords(kwargs)
         self.delete_keywords(self.calc.parameters)
         self.set_keywords(kwargs)
@@ -474,5 +471,5 @@ class QChem(qchem.QChem):
                     fileobj.write("   %d \n" % (a))
                 fileobj.write("$end\n\n")
 
-            if self.app != None:
+            if self.app is not None:
                 fileobj.write(self.app)

@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Union
+from typing import Tuple
 
 import argparse
 import numpy as np
 from ase.units import Hartree, kcal, mol
 
 
-def read_energies(filename: str) -> np.array:
+def read_energies(filename: str) -> np.ndarray:
     """Read two energies (initial and final) in Hartree from a plain text file.
 
     Args:
@@ -38,7 +38,7 @@ def read_energies(filename: str) -> np.array:
     return np.array([de, e_i, e_f])
 
 
-def parse_orca_hess(filename: str) -> np.array:
+def parse_orca_hess(filename: str) -> np.ndarray:
     """Parse ORCA .hess file.
 
     Args:
@@ -52,7 +52,7 @@ def parse_orca_hess(filename: str) -> np.array:
         lines = f.readlines()
 
     try:
-        start = next(i for i, l in enumerate(lines) if l.strip().lower() == "$hessian")
+        start = next(i for i, line in enumerate(lines) if line.strip().lower() == "$hessian")
     except StopIteration:
         raise ValueError("No $hessian block found")
 
@@ -88,7 +88,7 @@ def parse_orca_hess(filename: str) -> np.array:
     return H
 
 
-def orca_input_to_ase(inpfile: str) -> Union[str, str, int, int]:
+def orca_input_to_ase(inpfile: str) -> Tuple[str, str, int, int]:
     """Convert orca.inp content to ase orcasimpleinput and orcablocksblcks string.
 
     Args:
@@ -104,7 +104,7 @@ def orca_input_to_ase(inpfile: str) -> Union[str, str, int, int]:
     """
 
     with open(inpfile) as f:
-        lines = [l.strip() for l in f if l.strip() and not l.strip().startswith("#")]
+        lines = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
 
     simple_lines = []
     block_lines = []

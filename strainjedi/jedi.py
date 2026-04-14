@@ -3,21 +3,18 @@
 import collections
 import warnings
 import numpy as np
-import matplotlib.cm as cm
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, Optional, Union, List
 from numpy.typing import NDArray
 import ase.neighborlist
 import ase.geometry
+import ase.vibrations
 from ase.atoms import Atoms
-from ase.vibrations import VibrationsData
-from ase.atoms import Atom
 from ase.utils import jsonable
 from ase.units import Hartree, Bohr, mol, kcal
 from ase.data.vdw import vdw_radii
 
-from strainjedi.visualization.colors import colors
 from strainjedi.visualization import ColorMapper, VMDVisualizer, MatplotlibVisualizer
 from strainjedi.print_config import header, energy_comparison, rims_listing
 from strainjedi.quotes import quotes
@@ -27,9 +24,9 @@ from strainjedi import __version__
 def jedi_analysis(
     atoms: ase.atoms.Atoms,
     rim_list: List,
-    B: np.array,
-    H_cart: np.array,
-    delta_q: np.array,
+    B: np.ndarray,
+    H_cart: np.ndarray,
+    delta_q: np.ndarray,
     E_geometries: float,
     printout: Union[bool, None] = None,
     ase_units: bool = False,
@@ -62,7 +59,6 @@ def jedi_analysis(
     ###########################
     B_transp = np.transpose(B)
     # Calculate the number of RIMs (= number of rows in the B-Matrix), equivalent to number of redundant internal coordinates
-    NRIMs = int(len(rim_list))
 
     # Calculate the pseudoinverse of the B-Matrix and its transposed (take care of diatomic molecules specifically)
     if B.ndim == 1:
@@ -96,11 +92,10 @@ def jedi_analysis(
     else:
         E_RIMs = np.sum(0.5 * (delta_q * H_q).T * delta_q, axis=1)
     # Get the percentage of the energy stored in every RIM
-    proc_E_RIMs = []
 
     proc_E_RIMs = 100 * E_RIMs / E_RIMs_total
 
-    if ase_units == True:
+    if ase_units:
         b = (
             np.shape(rim_list[0])[0] + np.shape(rim_list[1])[0]
         )  # border between lengths and angles
@@ -108,7 +103,7 @@ def jedi_analysis(
         delta_q[b::] = np.degrees(delta_q[b::])
         E_RIMs = np.array(E_RIMs) * Hartree
         E_RIMs_total *= Hartree
-    elif ase_units == False:
+    else:
         E_RIMs = np.array(E_RIMs) / kcal * mol * Hartree
         E_RIMs_total *= mol / kcal * Hartree
 
@@ -133,12 +128,12 @@ def jedi_analysis(
 def jedi_printout(
     atoms: ase.atoms.Atoms,
     rim_list: List,
-    delta_q: np.array,
+    delta_q: np.ndarray,
     E_geometries: float,
     E_RIMs_total: float,
     proc_geom_RIMs: float,
     proc_E_RIMs: List,
-    E_RIMs: np.array,
+    E_RIMs: np.ndarray,
     ase_units: bool = False,
 ):
     """
@@ -287,12 +282,12 @@ def jedi_printout(
 
 def jedi_printout_bonds(
     atoms: ase.atoms.Atoms,
-    rim_list: np.array,
+    rim_list: np.ndarray,
     E_geometries: float,
     E_RIMs_total: float,
     proc_geom_RIMs: float,
-    proc_E_RIMs: np.array,
-    E_RIMs: np.array,
+    proc_E_RIMs: np.ndarray,
+    E_RIMs: np.ndarray,
     ase_units: bool = False,
     file: str = "total",
 ):
@@ -491,7 +486,7 @@ class Jedi:
         atoms0: ase.atoms.Atoms,
         atomsF: ase.atoms.Atoms,
         modes: ase.vibrations.data.VibrationsData,
-        epot: Union[np.array, None] = None,
+        epot: Union[np.ndarray, None] = None,
     ):  # indices=None
         """
 
@@ -554,7 +549,7 @@ class Jedi:
         assert isinstance(data["atoms0"], Atoms)
         assert isinstance(data["atomsF"], Atoms)
         try:
-            assert isinstance(data["modes"], VibrationsData)
+            assert isinstance(data["modes"], ase.vibrations.VibrationsData)
             cl = cls(data["atoms0"], data["atomsF"], data["modes"])
         except:
             pass
@@ -566,13 +561,13 @@ class Jedi:
                 assert isinstance(
                     data["indices"], (collections.abc.Sequence, np.ndarray)
                 )
-                modes = VibrationsData.from_2d(
+                modes = ase.vibrations.VibrationsData.from_2d(
                     data["atoms0"], data["hessian"], data["indices"]
                 )
                 cl = cls(data["atoms0"], data["atomsF"], modes)
                 cl.indices = data["indices"]
             else:
-                modes = VibrationsData.from_2d(data["atoms0"], data["hessian"])
+                modes = ase.vibrations.VibrationsData.from_2d(data["atoms0"], data["hessian"])
                 cl = cls(data["atoms0"], data["atomsF"], modes)
             cl.H = data["hessian"]
         if data["bmatrix"] is not None:
@@ -712,9 +707,7 @@ class Jedi:
         ba_flag = False
         row_index = 0
         for self_index, self_row in enumerate(bl):  # iterates through rows of bonds
-            for other_index, other_row in enumerate(
-                bl
-            ):  # iterates through rows of bonds
+            for other_index, other_row in enumerate(bl):  # iterates through rows of bonds
                 if other_index > self_index:
                     temp_ba_list = [
                         self_row[0],
@@ -751,7 +744,7 @@ class Jedi:
                             )  # add bondlengths to dataframe
                         row_index += 1
 
-        if ba_flag == True:
+        if ba_flag:
             ba = np.atleast_2d(ba)
             ba = ba[ba[:, 1].argsort(kind="stable")]  # sort by atom2
             ba = ba[ba[:, 0].argsort(kind="stable")]  # sort by atom1
@@ -770,9 +763,7 @@ class Jedi:
         for self_index, self_row in enumerate(bl):  # iterates through rows of bonds
             bond_partner1 = False  # if both bond partners are set to True, no terminal bond. Thus, possible torsion around bond.
             bond_partner2 = False
-            for other_index, other_row in enumerate(
-                bl
-            ):  # iterates through rows of bonds
+            for other_index, other_row in enumerate(bl):  # iterates through rows of bonds
                 if other_index != self_index:  # only iterate bonds other than self
                     if (
                         other_row[0] == self_row[0] or other_row[1] == self_row[0]
@@ -784,9 +775,7 @@ class Jedi:
                     ):  # Check second Atom#
                         bond_partner2 = True  # Set to True if neighbouring atom
 
-                    if (
-                        bond_partner1 == True and bond_partner2 == True
-                    ):  # if both bond partners are set to True, no terminal bond. Thus, possible torsion around bond.
+                    if bond_partner1 and bond_partner2:  # if both bond partners are set to True, no terminal bond. Thus, possible torsion around bond.
                         if row_index == 0:
                             torsionable_bonds = np.array([self_row[0], self_row[1]])
                             tb_flag = True
@@ -794,19 +783,15 @@ class Jedi:
                             torsionable_bonds = np.vstack(
                                 (torsionable_bonds, [self_row[0], self_row[1]])
                             )
-                        bond_partner1 = False
-                        bond_partner2 = False
                         row_index += 1
                         break
-        if tb_flag == True:
+        if tb_flag:
             da_flag = False
             torsionable_bonds = np.atleast_2d(torsionable_bonds)
             row_index = 0
             for torsionable_row in torsionable_bonds:
                 TA_Atoms_0 = []
                 TA_Atoms_3 = []
-                TA_Atom_0 = False  # atom connected to TA_Atom_1
-                TA_Atom_3 = False  # atom connected to TA_Atom_2
                 for other_row in bl:  # iterates through rows of bonds
                     if (
                         other_row[0] == torsionable_row[0]
@@ -902,7 +887,7 @@ class Jedi:
                             except:
                                 continue
 
-            if da_flag == True:
+            if da_flag:
                 da = np.atleast_2d(da)
                 rim_list.append(da)
             else:
@@ -970,7 +955,7 @@ class Jedi:
                     .ravel()
                 )  # get a viable input for np.intersect1d()
 
-                rim_l, ind, z = np.intersect1d(
+                rim_l, ind, _ = np.intersect1d(
                     rim_atoms0v, rim_atomsFv, return_indices=True
                 )  # get the rims that exist in both structures
                 rim_l = rim_l[ind.argsort(kind="stable")]
@@ -995,7 +980,7 @@ class Jedi:
     def get_b_matrix(self, indices=None):
         """Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions"""
         mol = self.atoms0
-        if indices == None:
+        if indices is None:
             indices = np.arange(0, len(mol))
         if len(self.rim_list) == 0:
             self.get_common_rims()
@@ -1012,7 +997,6 @@ class Jedi:
 
             ########  Section for stretches  #########
 
-            BL = []
             BL = [int(q[0]), int(q[1])]  # create list of involved atoms
             q_i, q_j = BL
 
@@ -1047,7 +1031,6 @@ class Jedi:
 
             ########  Section for custom stretches  #########
 
-            CL = []
             CL = [int(q[0]), int(q[1])]  # create list of involved atoms
             q_i, q_j = CL
 
@@ -1116,7 +1099,6 @@ class Jedi:
             for NAtom in indices:  # for-loop of Number of Atoms
                 for q in BA:
                     if NAtom == q:
-                        b_j = 0
                         if q == q_j:  # if-Statements for sign-factors
                             b_j = get_B_matrix_angles_derivatives(
                                 np.atleast_2d(u), np.atleast_2d(v)
@@ -1136,7 +1118,6 @@ class Jedi:
             column += 1
 
         for q in self.rim_list[3]:
-            DA = []
             row = 0  # Initilization of rows to specifiy position in B-Matrix
 
             DA = [
@@ -1160,8 +1141,6 @@ class Jedi:
             for NAtom in indices:  # for-loop of Number of Atoms
                 for q in DA:
                     if NAtom == q:
-                        b_k = 0
-
                         if q == q_i:  # if-Statements for sign-factors
                             b_k = (
                                 np.radians(
@@ -1282,7 +1261,7 @@ class Jedi:
         """
         e0 = self.atoms0.calc.get_potential_energy()
         eF = self.atomsF.calc.get_potential_energy()
-        if self.ase_units == False:
+        if not self.ase_units:
             e0 *= mol / kcal
             eF *= mol / kcal
         deltaE = eF - e0
@@ -1303,7 +1282,6 @@ class Jedi:
 
         if len(self.B) == 0:
             self.get_b_matrix()
-        B = self.B
         q0 = []
         qF = []
         dq_da = []
@@ -1585,7 +1563,7 @@ class Jedi:
             ase_units=ase_units,
         )
 
-        if cbonds_flag == True:
+        if cbonds_flag:
             self.custom_bonds = custom_bonds  # restore the user input
 
     def post_process(
@@ -1623,7 +1601,7 @@ class Jedi:
                     rim_list_c.append(np.vstack((rim_list[i], rim_p[i])))
                 else:
                     rim_list_c.append(np.vstack((rim_list[i])))
-            x, z = np.unique(rim_list_c[-1], return_counts=True, axis=0)
+            _, z = np.unique(rim_list_c[-1], return_counts=True, axis=0)
 
             ind.append(np.where(z > 1)[0])  # get indices where ric is in both sets
         for i in range(4):
@@ -1637,7 +1615,7 @@ class Jedi:
         self.delta_q = self.delta_q[ind]
         E_RIMs_total = sum(self.E_RIMs)
         self.proc_E_RIMs = np.array(self.E_RIMs) / E_RIMs_total * 100
-        if cbonds_flag == True:
+        if cbonds_flag:
             self.custom_bonds = custom_bonds  # restore the user input
         pass
 

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from strainjedi.IO.parser import jedi_parser, read_energies, parse_orca_hess
-from strainjedi.IO.calculator import build_calc
+from strainjedi.io.parser import jedi_parser, read_energies, parse_orca_hess
+from strainjedi.io.calculator import build_calc
 
 from ase import io
 from ase.units import Hartree, kcal, mol

@@ -3,10 +3,10 @@
 import shutil
 
 from ase.calculators.orca import ORCA, OrcaProfile
-from strainjedi.IO.parser import orca_input_to_ase
+from strainjedi.io.parser import orca_input_to_ase
 
 
-def build_calc(inputfile: str | None = None, prog: str = "ORCA") -> None:
+def build_calc(inputfile: str | None = None, prog: str = "ORCA") -> ORCA:
     """Generate an ASE calculator from inputfile and program declaration.
 
     Args:
