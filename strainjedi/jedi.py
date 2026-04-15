@@ -247,11 +247,9 @@ class Jedi:
         else:
             rim_list.append(np.array([]))
 
-        ###torsion angles###########
-
-        # degree of each node = how often it appears anywhere in bond list (bl)
-        flat = bl.ravel()  # 1D list of all endpoints
-        deg = np.bincount(flat.astype(np.int64, copy=False))
+        # degree of each node = how often it appears anywhere in bond list.
+        # This is represented as the length of each neighbor[x] = [a, b, ...]
+        deg = np.fromiter((len(n) for n in neighbors), dtype=np.int64)
 
         # A bond is torsionable if both endpoints have degree > 1
         mask = (deg[bl[:, 0]] > 1) & (deg[bl[:, 1]] > 1)
