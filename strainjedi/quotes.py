@@ -1,7 +1,5 @@
 from random import choice
 
-from typing_extensions import deprecated
-
 
 def random_quote():
     """
