@@ -1,7 +1,9 @@
-from strainjedi.visualization.colors import colors
+import warnings
 from pathlib import Path
-import numpy as np
+from typing import Dict, Optional, Union
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import LinearSegmentedColormap, Normalize
 
@@ -37,7 +39,7 @@ class VMDVisualizer:
 
     def write_header(self):
         lines = [
-            f"\n# Load molecule",
+            "\n# Load molecule",
             f"mol new {{{self.output_dir.resolve() / 'xF.xyz'}}} type xyz\n",
             "\n# Change bond radii and various resolution parameters",
             "mol representation cpk 0.8 0.0 30 5",
@@ -137,7 +139,7 @@ class VMDVisualizer:
                 colorID = np.abs(binning_windows - energy).argmin() + 1
 
             rep_id = n_atom_reps + i + 1
-            lines.append(f"mol addrep top")
+            lines.append("mol addrep top")
             lines.append(f"mol modstyle {rep_id} top bonds")
             lines.append(f"mol modcolor {rep_id} top {{colorid {colorID}}}")
             lines.append(

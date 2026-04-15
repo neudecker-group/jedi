@@ -16,7 +16,6 @@ from strainjedi.jedi import Jedi
 
 
 def main() -> None:
-
     # Parse command-line arguments
     args = jedi_parser()
 
