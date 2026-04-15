@@ -1,8 +1,9 @@
-import numpy as np
 from pathlib import Path
+
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+import numpy as np
 from matplotlib.colorbar import ColorbarBase
+from matplotlib.colors import LinearSegmentedColormap, Normalize
 
 
 class MatplotlibVisualizer:

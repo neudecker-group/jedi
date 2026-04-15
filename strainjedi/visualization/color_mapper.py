@@ -1,12 +1,13 @@
-import numpy as np
-from ase.data.vdw import vdw_radii
-import ase.neighborlist
-from ase.atoms import Atom
-from strainjedi.visualization.colors import colors as symbol_colors
-from typing import Dict, Optional, Tuple
-from matplotlib import colormaps, cm
-from matplotlib.colors import Colormap
 import warnings
+
+import ase.neighborlist
+import numpy as np
+from ase.atoms import Atom
+from ase.data.vdw import vdw_radii
+from matplotlib import cm, colormaps
+from matplotlib.colors import Colormap
+
+from strainjedi.visualization.colors import colors as symbol_colors
 
 
 class ColorMapper:

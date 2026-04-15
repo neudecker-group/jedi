@@ -1,6 +1,4 @@
-import warnings
 from pathlib import Path
-from typing import Dict, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
