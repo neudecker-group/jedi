@@ -1,10 +1,10 @@
+import numpy as np
 import pytest
-from tests.resources import path_to_test_resources
-
-from strainjedi.jedi import Jedi, jedi_analysis
 from ase.io import read
 from ase.vibrations.vibrations import VibrationsData
-import numpy as np
+
+from strainjedi.jedi import Jedi, jedi_analysis
+from tests.resources import path_to_test_resources
 
 """Contains fixtures shared for all JEDI tests"""
 
@@ -132,9 +132,7 @@ def hcn_jedi_full_run(hcn_opt, hcn_dist, hcn_vibdata):
 @pytest.fixture(scope="session")
 def hcn_jedi_partial(hcn_opt, hcn_dist, hcn_ref):
     """Jedi instance for HCN after partial_analysis()."""
-    parthess = VibrationsData.from_2d(
-        hcn_opt, hcn_ref["parthess"], indices=[2, 3, 5, 8, 9, 11]
-    )
+    parthess = VibrationsData.from_2d(hcn_opt, hcn_ref["parthess"], indices=[2, 3, 5, 8, 9, 11])
     j = Jedi(hcn_opt, hcn_dist, parthess)
     j.partial_analysis(indices=[2, 3, 5, 8, 9, 11])
     return j
