@@ -16,8 +16,7 @@ QUOTES = [
     '"I felt a great disturbance in the force, as if millions of voices suddenly cried out in terror, '
     'and were suddenly silenced" (Obi-Wan Kenobi)',
     '"Never tell me the odds!" (Han Solo)',
-    '"Well, you said you wanted to be around when I made a mistake." "...I take it back!" (Han Solo and Princess '
-    "Leia)",
+    '"Well, you said you wanted to be around when I made a mistake." "...I take it back!" (Han Solo and Princess Leia)',
     '"You have your moments. Not many of them, but you do have them." (Princess Leia)',
     '"A long time ago in a galaxy far, far away..." (Opening)',
     '"Help me Obi-Wan Kenobi. You\'re my only hope." (Princess Leia)',
@@ -49,8 +48,7 @@ QUOTES = [
     'Then we just... float away." "...With the rest of the garbage." (Han Solo and Princess Leia)',
     '"Laugh it up, fuzzball!" (Han Solo)',
     '"I never doubted you! Wonderful!" (C-3PO)',
-    '"You will never find a more wretched hive of scum and '
-    'villainy. We must be cautious." (Obi-Wan Kenobi)',
+    '"You will never find a more wretched hive of scum and villainy. We must be cautious." (Obi-Wan Kenobi)',
     '"Would somebody get this big walking carpet out of my way?!" (Princess Leia referring to Chewbacca)',
     '"No reward is worth this." (Han Solo)',
     '"I happen to like... nice men." (Princess Leia)',

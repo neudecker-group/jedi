@@ -7,9 +7,7 @@ import os
 mol = ase.io.read("opt.json")
 mol2 = ase.io.read("para-C-H.json")
 modes = VibrationsData.from_2d(mol, np.loadtxt("hessian"))
-partmodes = VibrationsData.from_2d(
-    mol[0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16], np.loadtxt("p-hessian")
-)
+partmodes = VibrationsData.from_2d(mol[0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16], np.loadtxt("p-hessian"))
 j = Jedi(mol, mol2, modes)
 os.chdir("all")
 j.run()

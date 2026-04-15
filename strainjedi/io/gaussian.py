@@ -46,11 +46,7 @@ def read_gaussian_out(label, index=-1):
                 # We've reached the "archive" block at the bottom, stop parsing
                 break
 
-            if (
-                line == "Input orientation:"
-                or line == "Z-Matrix orientation:"
-                or line == "Standard orientation:"
-            ):
+            if line == "Input orientation:" or line == "Z-Matrix orientation:" or line == "Standard orientation:":
                 if atoms is not None:
                     atoms.calc = SinglePointCalculator(
                         atoms,
@@ -174,9 +170,7 @@ def get_vibrations(label, atoms, indices=None):
     """
     if indices is None:
         indices = range(len(atoms))
-    _re_hessblock = re.compile(
-        r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$"
-    )
+    _re_hessblock = re.compile(r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$")
     output = label + ".log"
     with open(output, "r") as fd:
         lines = fd.readlines()
@@ -199,11 +193,7 @@ def get_vibrations(label, atoms, indices=None):
     chunks = NCarts // 5 + 1
     for i in range(chunks):
         for j in range(NCarts - i * 5):
-            rows = lines[
-                round(
-                    hess_line + i * (NCarts + 1) - sum(np.linspace(0, i - 1, i) * 5) + j
-                )
-            ].split()
+            rows = lines[round(hess_line + i * (NCarts + 1) - sum(np.linspace(0, i - 1, i) * 5) + j)].split()
 
             rows = [float(k.replace("D", "e")) for k in rows]
 
@@ -473,9 +463,7 @@ class Gaussian(gaussian.Gaussian):
 
     def write_input(self, atoms, properties=None, system_changes=None):
         FileIOCalculator.write_input(self, atoms, properties, system_changes)
-        write_gaussian_in(
-            self.label + ".com", atoms, properties=properties, **self.parameters
-        )
+        write_gaussian_in(self.label + ".com", atoms, properties=properties, **self.parameters)
 
     def read_results(self):
         output = read_gaussian_out(self.label)

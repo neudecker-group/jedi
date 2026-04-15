@@ -69,9 +69,7 @@ def main() -> None:
 
     # Handle Hessian
     if h4d is None:
-        print(
-            f"No Hessian found. Trying to compute this with {args.oinp} input via ASE calc. numerically."
-        )
+        print(f"No Hessian found. Trying to compute this with {args.oinp} input via ASE calc. numerically.")
 
         vib = Vibrations(ati, name="jvibcalc")
         vib.run()

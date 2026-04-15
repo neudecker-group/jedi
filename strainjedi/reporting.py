@@ -100,9 +100,7 @@ def _render_energy_comparison(
 ) -> None:
     title = "Strain Energy (eV)" if ase_units else "Strain Energy (kcal/mol)"
     output.append(
-        "{0:>{label}}{1:^{energy}}{2:^{deviation}}".format(
-            " ", title, "Deviation (%)", **layout.energy_comparison
-        )
+        "{0:>{label}}{1:^{energy}}{2:^{deviation}}".format(" ", title, "Deviation (%)", **layout.energy_comparison)
     )
     output.append(
         "{0:<{label}}{1:^{energy}.4f}{2:^{deviation}}".format(
@@ -120,11 +118,7 @@ def _format_indices(atoms_obj: atoms.Atoms, rim: str, k: np.ndarray) -> str:
     if rim in ("bond", "custom"):
         return f"{atoms_obj.symbols[k[0]]}{k[0]}  {atoms_obj.symbols[k[1]]}{k[1]}"
     if rim == "angle":
-        return (
-            f"{atoms_obj.symbols[k[0]]}{k[0]} "
-            f"{atoms_obj.symbols[k[1]]}{k[1]} "
-            f"{atoms_obj.symbols[k[2]]}{k[2]}"
-        )
+        return f"{atoms_obj.symbols[k[0]]}{k[0]} {atoms_obj.symbols[k[1]]}{k[1]} {atoms_obj.symbols[k[2]]}{k[2]}"
     return (
         f"{atoms_obj.symbols[k[0]]}{k[0]} "
         f"{atoms_obj.symbols[k[1]]}{k[1]} "
@@ -184,9 +178,7 @@ def jedi_printout(
     output: list[str] = []
     output.append("\n")
     _render_banner(output, layout)
-    _render_energy_comparison(
-        output, layout, ase_units, E_geometries, E_RIMs_total, proc_geom_RIMs
-    )
+    _render_energy_comparison(output, layout, ase_units, E_geometries, E_RIMs_total, proc_geom_RIMs)
 
     output.append(layout.format_header(ase_units))
     _append_ric_rows(
@@ -224,16 +216,12 @@ def jedi_printout_bonds(
     rim_list: list
         A list/array where entry 0 contains bonds and entry 1 contains custom bonds.
     """
-    layout = layout or ReportLayout(
-        columns=("no", "type", "indices", "percentage", "energy")
-    )
+    layout = layout or ReportLayout(columns=("no", "type", "indices", "percentage", "energy"))
 
     output: list[str] = []
     output.append("\n")
     _render_banner(output, layout)
-    _render_energy_comparison(
-        output, layout, ase_units, E_geometries, E_RIMs_total, proc_geom_RIMs
-    )
+    _render_energy_comparison(output, layout, ase_units, E_geometries, E_RIMs_total, proc_geom_RIMs)
 
     output.append(layout.format_header(ase_units))
     _append_ric_rows(

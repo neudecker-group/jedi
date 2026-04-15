@@ -11,12 +11,8 @@ def get_hbonds(mol):
     returns
         2D array of indices
     """
-    cutoff = ase.neighborlist.natural_cutoffs(
-        mol, mult=1.3
-    )  ## cutoff for covalent bonds see Bakken et al.
-    bl = np.vstack(
-        ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)
-    ).T  # determine covalent bonds
+    cutoff = ase.neighborlist.natural_cutoffs(mol, mult=1.3)  ## cutoff for covalent bonds see Bakken et al.
+    bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
     bl = bl[bl[:, 0] < bl[:, 1]]  # remove double mentioned
     bl = np.unique(bl, axis=0)
@@ -39,8 +35,7 @@ def get_hbonds(mol):
             for j in hpartner_ls:
                 if j != i[1]:
                     if (
-                        mol.get_distance(i[0], j, mic=True)
-                        < hcutoff[(mol.symbols[i[0]], mol.symbols[j])]
+                        mol.get_distance(i[0], j, mic=True) < hcutoff[(mol.symbols[i[0]], mol.symbols[j])]
                         and mol.get_angle(i[1], i[0], j, mic=True) > 90
                     ):
                         hbond_ls.append([i[0], j])
@@ -48,8 +43,7 @@ def get_hbonds(mol):
             for j in hpartner_ls:
                 if j != i[0]:
                     if (
-                        mol.get_distance(i[1], j, mic=True)
-                        < hcutoff[(mol.symbols[i[1]], mol.symbols[j])]
+                        mol.get_distance(i[1], j, mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])]
                         and mol.get_angle(i[0], i[1], j, mic=True) > 90
                     ):
                         hbond_ls.append([i[1], j])

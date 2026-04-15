@@ -74,9 +74,7 @@ def read(filename):
                     # next line. Eg. if not lineiter.next().startswith(' ')
                     if " Max gradient component" in next(lineiter):
                         # Minus to convert from gradient to force
-                        forces = np.array(gradient).T * (
-                            -ase.units.Hartree / ase.units.Bohr
-                        )
+                        forces = np.array(gradient).T * (-ase.units.Hartree / ase.units.Bohr)
                         break
             elif "Standard Nuclear Orientation (Angstroms)" in line:
                 positions = [[] for _ in range(len(atoms))]
@@ -149,22 +147,16 @@ def get_vibrations(label, atoms):
                 while any(l.isalpha() for l in fileobj[i]) == False:
                     hess.append(fileobj[i])  # read the lines
                     i += 1
-                hess = [
-                    l for l in hess if l != "\n"
-                ]  # get rid of empty separator lines
+                hess = [l for l in hess if l != "\n"]  # get rid of empty separator lines
 
-                hess = [
-                    hess[l : l + NCarts] for l in range(0, len(hess), NCarts)
-                ]  # identify the chunks
+                hess = [hess[l : l + NCarts] for l in range(0, len(hess), NCarts)]  # identify the chunks
                 hess = [[k.split() for k in l] for l in hess]  #
 
                 hess = [np.array(l, dtype=("float64")) for l in hess]
                 mass_weighted_hessian = hess[0]
                 for l in range(1, len(hess)):
                     if np.size(hess[l], axis=1) > 0:
-                        mass_weighted_hessian = np.hstack(
-                            (mass_weighted_hessian, hess[l])
-                        )
+                        mass_weighted_hessian = np.hstack((mass_weighted_hessian, hess[l]))
                 # atoms.calc.results['hessian'] = mass_weighted_hessian
                 break
     mass_weights = np.repeat(atoms.get_masses() ** 0.5, 3)
@@ -195,11 +187,7 @@ class QChemDynamics:
             self.calc = calc
         else:
             if self.atoms.calc is None:
-                raise ValueError(
-                    "{} requires a valid QChem calculator object!".format(
-                        self.__class__.__name__
-                    )
-                )
+                raise ValueError("{} requires a valid QChem calculator object!".format(self.__class__.__name__))
 
             self.calc = self.atoms.calc
 
@@ -308,9 +296,7 @@ class QChem(qchem.QChem):
             combination with ecp='gen' keyword argument.
         """
 
-        FileIOCalculator.__init__(
-            self, restart, ignore_bad_restart_file, label, atoms, **kwargs
-        )
+        FileIOCalculator.__init__(self, restart, ignore_bad_restart_file, label, atoms, **kwargs)
 
         # Augment the command by various flags
         if pbs:
@@ -356,22 +342,16 @@ class QChem(qchem.QChem):
                     while any(l.isalpha() for l in fileobj[i]) == False:
                         hess.append(fileobj[i])  # read the lines
                         i += 1
-                    hess = [
-                        l for l in hess if l != "\n"
-                    ]  # get rid of empty separator lines
+                    hess = [l for l in hess if l != "\n"]  # get rid of empty separator lines
 
-                    hess = [
-                        hess[l : l + NCarts] for l in range(0, len(hess), NCarts)
-                    ]  # identify the chunks
+                    hess = [hess[l : l + NCarts] for l in range(0, len(hess), NCarts)]  # identify the chunks
                     hess = [[k.split() for k in l] for l in hess]  #
 
                     hess = [np.array(l, dtype=("float64")) for l in hess]
                     mass_weighted_hessian = hess[0]
                     for l in range(1, len(hess)):
                         if np.size(hess[l], axis=1) > 0:
-                            mass_weighted_hessian = np.hstack(
-                                (mass_weighted_hessian, hess[l])
-                            )
+                            mass_weighted_hessian = np.hstack((mass_weighted_hessian, hess[l]))
                     self.results["hessian"] = mass_weighted_hessian
                     break
         mass_weights = np.repeat(atoms.get_masses() ** 0.5, 3)
@@ -417,10 +397,7 @@ class QChem(qchem.QChem):
             for prm in self.parameters:
                 if prm not in ["charge", "multiplicity"]:
                     if self.parameters[prm] is not None:
-                        fileobj.write(
-                            "   %-25s   %s\n"
-                            % (prm.upper(), self.parameters[prm].upper())
-                        )
+                        fileobj.write("   %-25s   %s\n" % (prm.upper(), self.parameters[prm].upper()))
 
             # Not even a parameters as this is an absolute necessity
             fileobj.write("   %-25s   %s\n" % ("SYM_IGNORE", "TRUE"))

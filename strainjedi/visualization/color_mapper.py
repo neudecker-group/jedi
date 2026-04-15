@@ -67,11 +67,7 @@ class ColorMapper:
         custom_bonds_section = E_array[n_regular : n_regular + n_custom]
         pbc_bonds = E_array[n_regular + n_custom :]
 
-        all_regular = (
-            np.vstack([regular_bonds, pbc_bonds])
-            if len(pbc_bonds) > 0
-            else regular_bonds
-        )
+        all_regular = np.vstack([regular_bonds, pbc_bonds]) if len(pbc_bonds) > 0 else regular_bonds
 
         return {
             "bonds": all_regular[:, :2].astype(int),
@@ -79,9 +75,7 @@ class ColorMapper:
             "custom_bonds": custom_bonds_section[:, :2].astype(int)
             if len(custom_bonds_section) > 0
             else np.empty((0, 2), dtype=int),
-            "custom_energies": custom_bonds_section[:, 2]
-            if len(custom_bonds_section) > 0
-            else np.array([]),
+            "custom_energies": custom_bonds_section[:, 2] if len(custom_bonds_section) > 0 else np.array([]),
             "atoms": self.atoms_vis,
             "split_bonds": getattr(self, "split_bonds", False),
             "pbc_split_bonds": getattr(self, "pbc_split_bonds", []),
@@ -137,9 +131,7 @@ class ColorMapper:
 
         self.j.indices = np.arange(0, len(self.atomsF))
         full_rims = self.j.get_rims(self.atomsF)
-        analyzed_bonds = set(
-            tuple(sorted([int(b[0]), int(b[1])])) for b in E_array[:, :2]
-        )
+        analyzed_bonds = set(tuple(sorted([int(b[0]), int(b[1])])) for b in E_array[:, :2])
 
         unanalyzed = []
         for bond in full_rims[0]:
@@ -161,29 +153,17 @@ class ColorMapper:
         rim_list = self.rim_list
         n_orig = len(self.atomsF)
 
-        bondscheck = (
-            rim_list[0][:, (0, 1)] if n_regular > 0 else np.empty((0, 2), dtype=int)
-        )
-        customcheck = (
-            rim_list[1][:, (0, 1)] if n_custom > 0 else np.empty((0, 2), dtype=int)
-        )
+        bondscheck = rim_list[0][:, (0, 1)] if n_regular > 0 else np.empty((0, 2), dtype=int)
+        customcheck = rim_list[1][:, (0, 1)] if n_custom > 0 else np.empty((0, 2), dtype=int)
 
         cutoff = [vdw_radii[atom.number] * self.vdwf for atom in self.atomsF]
 
         # Get all neighbor pairs with shift and displacement vectors
-        ex_bl = np.vstack(
-            ase.neighborlist.neighbor_list("ij", a=self.atomsF, cutoff=cutoff)
-        ).T
-        ex_bl = np.hstack(
-            (ex_bl, ase.neighborlist.neighbor_list("S", a=self.atomsF, cutoff=cutoff))
-        )
-        ex_bl = np.hstack(
-            (ex_bl, ase.neighborlist.neighbor_list("D", a=self.atomsF, cutoff=cutoff))
-        )
+        ex_bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=self.atomsF, cutoff=cutoff)).T
+        ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list("S", a=self.atomsF, cutoff=cutoff)))
+        ex_bl = np.hstack((ex_bl, ase.neighborlist.neighbor_list("D", a=self.atomsF, cutoff=cutoff)))
 
-        atoms_ex_cell = ex_bl[
-            (ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (ex_bl[:, 4] != 0)
-        ]
+        atoms_ex_cell = ex_bl[(ex_bl[:, 2] != 0) | (ex_bl[:, 3] != 0) | (ex_bl[:, 4] != 0)]
 
         # Build energy lookups
         translate = {}
@@ -213,14 +193,8 @@ class ColorMapper:
             original_rim = sorted([atom_i, atom_j])
             original_tuple = tuple(original_rim)
 
-            is_regular = (
-                n_regular > 0
-                and len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0
-            )
-            is_custom = (
-                n_custom > 0
-                and len(np.where(np.all(original_rim == customcheck, axis=1))[0]) > 0
-            )
+            is_regular = n_regular > 0 and len(np.where(np.all(original_rim == bondscheck, axis=1))[0]) > 0
+            is_custom = n_custom > 0 and len(np.where(np.all(original_rim == customcheck, axis=1))[0]) > 0
 
             if not is_regular and not is_custom:
                 continue
@@ -262,11 +236,7 @@ class ColorMapper:
                     ex_ind = existing_aux[0]
                 else:
                     ex_ind = len(mol)
-                    mol.append(
-                        Atom(
-                            symbol=mol.symbols[atom_j], position=pos_ex_atom, tag=atom_j
-                        )
-                    )
+                    mol.append(Atom(symbol=mol.symbols[atom_j], position=pos_ex_atom, tag=atom_j))
 
                 if is_regular:
                     energy = translate.get(original_tuple, np.nan)
@@ -301,9 +271,7 @@ class ColorMapper:
             custom_section = custom_section[keep_mask]
         if not self.split_bonds and custom_pbc:
             custom_section = (
-                np.vstack([custom_section, np.array(custom_pbc)])
-                if len(custom_section) > 0
-                else np.array(custom_pbc)
+                np.vstack([custom_section, np.array(custom_pbc)]) if len(custom_section) > 0 else np.array(custom_pbc)
             )
         n_custom = len(custom_section)
 
@@ -341,11 +309,7 @@ class ColorMapper:
             for i in range(n_colors):
                 R = min(1.0, float(i) / (n_colors / 2))
                 B = min(1.0, 2 - float(i + 1) / (n_colors / 2))
-                G = (
-                    ((n_colors / 2) - i) / (n_colors / 2)
-                    if i <= (n_colors / 2)
-                    else 0.0
-                )
+                G = ((n_colors / 2) - i) / (n_colors / 2) if i <= (n_colors / 2) else 0.0
                 colors.append([R, G, B])
 
         elif colormap == "magma":
@@ -357,16 +321,11 @@ class ColorMapper:
             colors = cm.get_cmap(colormap)(gradient)[:, :3].tolist()
 
         else:
-            raise ValueError(
-                f"Unknown color scheme: {colormap}. "
-                f"Pass a string or a matplotlib Colormap object."
-            )
+            raise ValueError(f"Unknown color scheme: {colormap}. Pass a string or a matplotlib Colormap object.")
 
         return np.array(colors)
 
-    def get_visualization_data(
-        self, modes, colormap="green_red", man_strain=None, split_bonds=True
-    ):
+    def get_visualization_data(self, modes, colormap="green_red", man_strain=None, split_bonds=True):
         visualization_data = {}
         self.split_bonds = split_bonds
 
@@ -374,9 +333,7 @@ class ColorMapper:
             bond_data = self.map_to_bonds(m)
             atom_colors = self.assign_atom_colors()
 
-            all_energies = np.concatenate(
-                [bond_data["energies"], bond_data["custom_energies"]]
-            )
+            all_energies = np.concatenate([bond_data["energies"], bond_data["custom_energies"]])
             max_strain = man_strain if man_strain else np.nanmax(all_energies)
 
             if max_strain == 0 or np.isnan(max_strain) or max_strain is None:
@@ -386,12 +343,8 @@ class ColorMapper:
                 )
                 max_strain = 1.0  # dummy value to avoid division by zero
 
-            bond_data["norm_energies"] = np.clip(
-                bond_data["energies"] / max_strain, 0, 1
-            )
-            bond_data["norm_custom_energies"] = np.clip(
-                bond_data["custom_energies"] / max_strain, 0, 1
-            )
+            bond_data["norm_energies"] = np.clip(bond_data["energies"] / max_strain, 0, 1)
+            bond_data["norm_custom_energies"] = np.clip(bond_data["custom_energies"] / max_strain, 0, 1)
 
             for pbc_bond in bond_data["pbc_split_bonds"]:
                 norm_energy = np.clip(pbc_bond["energy"] / max_strain, 0, 1)

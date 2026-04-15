@@ -68,9 +68,7 @@ class ORCA(FileIOCalculator):
 
         Point Charge IO functionality added by A. Dohn.
         """
-        FileIOCalculator.__init__(
-            self, restart, ignore_bad_restart_file, label, atoms, **kwargs
-        )
+        FileIOCalculator.__init__(self, restart, ignore_bad_restart_file, label, atoms, **kwargs)
 
         self.pcpot = None
 
@@ -182,15 +180,7 @@ def write_orca(atoms, **params):
                 symbol = atom.symbol + " : "
             else:
                 symbol = atom.symbol + "   "
-            fd.write(
-                symbol
-                + str(atom.position[0])
-                + " "
-                + str(atom.position[1])
-                + " "
-                + str(atom.position[2])
-                + "\n"
-            )
+            fd.write(symbol + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]) + "\n")
         fd.write("*\n")
 
 
@@ -296,11 +286,7 @@ class OrcaDynamics:
             self.calc = calc
         else:
             if self.atoms.calc is None:
-                raise ValueError(
-                    "{} requires a valid ORCA calculator object!".format(
-                        self.__class__.__name__
-                    )
-                )
+                raise ValueError("{} requires a valid ORCA calculator object!".format(self.__class__.__name__))
 
             self.calc = self.atoms.calc
 
