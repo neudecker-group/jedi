@@ -54,9 +54,7 @@ class Jedi:
         self.ase_units = False
         self.vdwf = 0.9
         self.covf = 1.3  ## cutoff for covalent bonds see Bakken et al.
-        self.qF = (
-            None  # bond lengths and angles in Bohr and degree in distorted molecule
-        )
+        self.qF = None  # bond lengths and angles in Bohr and degree in distorted molecule
         self.q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
 
     def todict(self) -> Dict[str, Any]:
@@ -93,18 +91,12 @@ class Jedi:
             assert isinstance(data["hessian"], (collections.abc.Sequence, np.ndarray))
 
             if data["indices"] is not None:
-                assert isinstance(
-                    data["indices"], (collections.abc.Sequence, np.ndarray)
-                )
-                modes = ase.vibrations.VibrationsData.from_2d(
-                    data["atoms0"], data["hessian"], data["indices"]
-                )
+                assert isinstance(data["indices"], (collections.abc.Sequence, np.ndarray))
+                modes = ase.vibrations.VibrationsData.from_2d(data["atoms0"], data["hessian"], data["indices"])
                 cl = cls(data["atoms0"], data["atomsF"], modes)
                 cl.indices = data["indices"]
             else:
-                modes = ase.vibrations.VibrationsData.from_2d(
-                    data["atoms0"], data["hessian"]
-                )
+                modes = ase.vibrations.VibrationsData.from_2d(data["atoms0"], data["hessian"])
                 cl = cls(data["atoms0"], data["atomsF"], modes)
             cl.H = data["hessian"]
         if data["bmatrix"] is not None:
@@ -120,14 +112,10 @@ class Jedi:
             assert isinstance(data["energies"], (collections.abc.Sequence, list))
             cl.energies = data["energies"]
         if data["E_RIMS"] is not None:
-            assert isinstance(
-                data["proc_E_RIMS"], (collections.abc.Sequence, np.ndarray)
-            )
+            assert isinstance(data["proc_E_RIMS"], (collections.abc.Sequence, np.ndarray))
             cl.E_RIMs = data["E_RIMS"]
         if data["proc_E_RIMS"] is not None:
-            assert isinstance(
-                data["proc_E_RIMS"], (collections.abc.Sequence, np.ndarray)
-            )
+            assert isinstance(data["proc_E_RIMS"], (collections.abc.Sequence, np.ndarray))
             cl.proc_E_RIMs = data["proc_E_RIMS"]
         if data["custom_bonds"] is not None:
             assert isinstance(data["custom_bonds"], (collections.abc.Sequence, list))
@@ -148,13 +136,11 @@ class Jedi:
         # get necessary data
         self.indices = np.arange(0, len(self.atoms0))
         self.get_common_rims()
-        rim_list = self.rim_list
         self.get_b_matrix()
         self.get_delta_q()
         delta_q = self.delta_q
         self.get_hessian()
-        H_cart = self.H  # Hessian of optimized (ground state) structure
-        if len(self.atoms0) != H_cart.shape[0] / 3:
+        if len(self.atoms0) != self.H.shape[0] / 3:
             raise ValueError(
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
             )
@@ -175,9 +161,9 @@ class Jedi:
             self.delta_q,
         ) = jedi_analysis(
             self.atoms0,
-            rim_list,
+            self.rim_list,
             self.B,
-            H_cart,
+            self.H,
             delta_q,
             E_geometries,
             ase_units=ase_units,
@@ -208,12 +194,8 @@ class Jedi:
         mol = mol
 
         indices = self.indices
-        cutoff = ase.neighborlist.natural_cutoffs(
-            mol, mult=self.covf
-        )  ## cutoff for covalent bonds see Bakken et al.
-        bl = np.vstack(
-            ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)
-        ).T  # determine covalent bonds
+        cutoff = ase.neighborlist.natural_cutoffs(mol, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
+        bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
         bl = bl[bl[:, 0] < bl[:, 1]]  # remove double metioned
         bl, counts = np.unique(bl, return_counts=True, axis=0)
@@ -225,9 +207,7 @@ class Jedi:
         bl = np.atleast_2d(bl)
 
         if len(indices) != len(mol):
-            bl = bl[
-                np.all([np.isin(bl[:, 0], indices), np.isin(bl[:, 1], indices)], axis=0)
-            ]
+            bl = bl[np.all([np.isin(bl[:, 0], indices), np.isin(bl[:, 1], indices)], axis=0)]
 
         rim_list = [bl]
 
@@ -263,9 +243,7 @@ class Jedi:
                             if atom not in connecting_atom:
                                 other_atoms.append(atom)
                         if row_index == 0:
-                            ba = np.array(
-                                [other_atoms[0], connecting_atom[0], other_atoms[1]]
-                            )
+                            ba = np.array([other_atoms[0], connecting_atom[0], other_atoms[1]])
                             ba_flag = True
                         else:
                             ba = np.vstack(
@@ -303,12 +281,8 @@ class Jedi:
                 if other_index == self_index:
                     # only iterate bonds other than self
                     continue
-                bond_partner1 |= (
-                    other_row[0] == self_row[0] or other_row[1] == self_row[0]
-                )
-                bond_partner2 |= (
-                    other_row[0] == self_row[1] or other_row[1] == self_row[1]
-                )
+                bond_partner1 |= other_row[0] == self_row[0] or other_row[1] == self_row[0]
+                bond_partner2 |= other_row[0] == self_row[1] or other_row[1] == self_row[1]
 
                 if not (bond_partner1 and bond_partner2):
                     # This is a terminal bond, so no torsion possible. Skip.
@@ -317,9 +291,7 @@ class Jedi:
                     torsionable_bonds = np.array([self_row[0], self_row[1]])
                     tb_flag = True
                 else:
-                    torsionable_bonds = np.vstack(
-                        (torsionable_bonds, [self_row[0], self_row[1]])
-                    )
+                    torsionable_bonds = np.vstack((torsionable_bonds, [self_row[0], self_row[1]]))
                 row_index += 1
                 break
 
@@ -331,17 +303,11 @@ class Jedi:
                 TA_Atoms_0 = []
                 TA_Atoms_3 = []
                 for other_row in bl:  # iterates through rows of bonds
-                    if (
-                        other_row[0] == torsionable_row[0]
-                        and other_row[1] == torsionable_row[1]
-                    ):
+                    if other_row[0] == torsionable_row[0] and other_row[1] == torsionable_row[1]:
                         continue
 
                     ### FIRST ATOM CONNECTION
-                    elif (
-                        other_row[0] == torsionable_row[0]
-                        or other_row[1] == torsionable_row[0]
-                    ):
+                    elif other_row[0] == torsionable_row[0] or other_row[1] == torsionable_row[0]:
                         if other_row[0] == torsionable_row[0]:
                             TA_Atom_0 = other_row[1]
 
@@ -350,10 +316,7 @@ class Jedi:
                         TA_Atoms_0.append(TA_Atom_0)
 
                     ### SECOND ATOM CONNECTION
-                    if (
-                        other_row[0] == torsionable_row[1]
-                        or other_row[1] == torsionable_row[1]
-                    ):
+                    if other_row[0] == torsionable_row[1] or other_row[1] == torsionable_row[1]:
                         if other_row[0] == torsionable_row[1]:
                             TA_Atom_3 = other_row[1]
 
@@ -433,10 +396,7 @@ class Jedi:
         else:
             rim_list.append(np.array([]))
 
-        rim_list_sorted = [
-            arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort")
-            for arr in rim_list
-        ]
+        rim_list_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
 
         return rim_list_sorted
 
@@ -482,15 +442,9 @@ class Jedi:
             elif rim_atomsF[i].shape[0] == 0:
                 common_rims[i] = np.empty(0)
             else:
-                rim_atoms0v = (
-                    rim_atoms0[i]
-                    .view([("", rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1])
-                    .ravel()
-                )
+                rim_atoms0v = rim_atoms0[i].view([("", rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
                 rim_atomsFv = (
-                    rim_atomsF[i]
-                    .view([("", rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1])
-                    .ravel()
+                    rim_atomsF[i].view([("", rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()
                 )  # get a viable input for np.intersect1d()
 
                 rim_l, ind, _ = np.intersect1d(
@@ -498,13 +452,8 @@ class Jedi:
                 )  # get the rims that exist in both structures
                 rim_l = rim_l[ind.argsort(kind="stable")]
 
-                common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(
-                    -1, rim_atoms0[i].shape[1]
-                )
-        common_rims_sorted = [
-            arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort")
-            for arr in common_rims
-        ]
+                common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
+        common_rims_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in common_rims]
         self.rim_list = common_rims_sorted
 
         return rim_atoms0
@@ -523,10 +472,8 @@ class Jedi:
         if len(self.rim_list) == 0:
             self.get_common_rims()
 
-        rim_size = sum([np.shape(l)[0] for l in self.rim_list])
-        b = np.zeros(
-            [int(len(indices) * 3), int(rim_size)], dtype=float
-        )  # shape of B-matrix (NCarts,NRIMs)
+        rim_size = sum([np.shape(length)[0] for length in self.rim_list])
+        b = np.zeros([int(len(indices) * 3), int(rim_size)], dtype=float)  # shape of B-matrix (NCarts,NRIMs)
 
         # get all derivatives
         column = 0  # Initilization of columns to specifiy position in B-Matrix
@@ -548,19 +495,11 @@ class Jedi:
 
                         # if-/elif-statement for the right sign-factor (see [1])
                         if q == q_i:
-                            b_i = ase.geometry.get_distances_derivatives(
-                                np.atleast_2d(u)
-                            )[0][0]
-                            b[row : row + 3, column] = (
-                                b_i  # change value of zero array at specified position to b_i
-                            )
+                            b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
+                            b[row : row + 3, column] = b_i  # change value of zero array at specified position to b_i
                         elif q == q_j:
-                            b_i = ase.geometry.get_distances_derivatives(
-                                np.atleast_2d(u)
-                            )[0][1]
-                            b[row : row + 3, column] = (
-                                b_i  # change value of zero array at specified position to b_i
-                            )
+                            b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
+                            b[row : row + 3, column] = b_i  # change value of zero array at specified position to b_i
                 row += 3
             column += 1
 
@@ -578,19 +517,11 @@ class Jedi:
                     if NAtom == q:
                         # if-/elif-statement for the right sign-factor
                         if q == q_i:
-                            b_i = ase.geometry.get_distances_derivatives(
-                                np.atleast_2d(u)
-                            )[0][0]
-                            b[row : row + 3, column] = (
-                                b_i  # change value of zero array at specified position to b_i
-                            )
+                            b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
+                            b[row : row + 3, column] = b_i  # change value of zero array at specified position to b_i
                         elif q == q_j:
-                            b_i = ase.geometry.get_distances_derivatives(
-                                np.atleast_2d(u)
-                            )[0][1]
-                            b[row : row + 3, column] = (
-                                b_i  # change value of zero array at specified position to b_i
-                            )
+                            b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
+                            b[row : row + 3, column] = b_i  # change value of zero array at specified position to b_i
 
                 row += 3
             column += 1
@@ -608,12 +539,8 @@ class Jedi:
             def get_B_matrix_angles_derivatives(u, v):
                 angle = ase.geometry.get_angles(u, v)  # angle between v and u
 
-                if (
-                    angle == 180 or angle == 0
-                ):  # an auxilliary vector is used if linear angles are existing
-                    (u, v), (lu, lv) = ase.geometry.conditional_find_mic(
-                        [u, v], cell=None, pbc=None
-                    )
+                if angle == 180 or angle == 0:  # an auxilliary vector is used if linear angles are existing
+                    (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v], cell=None, pbc=None)
                     nu = u / lu
                     nv = v / lv
                     if (np.arccos(np.dot(nu, (np.array([1, -1, 1]))))) == np.pi:
@@ -637,19 +564,13 @@ class Jedi:
                 for q in BA:
                     if NAtom == q:
                         if q == q_j:  # if-Statements for sign-factors
-                            b_j = get_B_matrix_angles_derivatives(
-                                np.atleast_2d(u), np.atleast_2d(v)
-                            )[0][1]
+                            b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][1]
                             b[row : row + 3, column] = -b_j
                         elif q == q_i:
-                            b_j = get_B_matrix_angles_derivatives(
-                                np.atleast_2d(u), np.atleast_2d(v)
-                            )[0][0]
+                            b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][0]
                             b[row : row + 3, column] = -b_j
                         elif q == q_k:
-                            b_j = get_B_matrix_angles_derivatives(
-                                np.atleast_2d(u), np.atleast_2d(v)
-                            )[0][2]
+                            b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][2]
                             b[row : row + 3, column] = -b_j
                 row += 3
             column += 1
@@ -668,126 +589,53 @@ class Jedi:
             u = np.copy(
                 np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
             )  #####copy needed because derivative function rewrites vector variable as normed vector
-            w = np.copy(
-                np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True))
-            )
-            v = np.copy(
-                np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True))
-            )
+            w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
+            v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
 
             for NAtom in indices:  # for-loop of Number of Atoms
                 for q in DA:
                     if NAtom == q:
                         if q == q_i:  # if-Statements for sign-factors
-                            b_k = (
-                                np.radians(
-                                    ase.geometry.get_dihedrals_derivatives(u, v, w)[0][
-                                        0
-                                    ]
-                                )
-                                * Bohr
-                            )
+                            b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][0]) * Bohr
                             b[row : row + 3, column] = b_k
                             u = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_i, q_j, mic=True, vector=True)
-                                )
+                                np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
                             )  #####copy needed because derivative function rewrites vector variable as normed vector
-                            w = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_k, q_l, mic=True, vector=True)
-                                )
-                            )
-                            v = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_j, q_k, mic=True, vector=True)
-                                )
-                            )
+                            w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
+                            v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
 
                         elif q == q_j:
-                            b_k = (
-                                np.radians(
-                                    ase.geometry.get_dihedrals_derivatives(u, v, w)[0][
-                                        1
-                                    ]
-                                )
-                                * Bohr
-                            )
+                            b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][1]) * Bohr
                             b[row : row + 3, column] = b_k
                             u = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_i, q_j, mic=True, vector=True)
-                                )
+                                np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
                             )  #####copy needed because derivative function rewrites vector variable as normed vector
-                            w = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_k, q_l, mic=True, vector=True)
-                                )
-                            )
-                            v = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_j, q_k, mic=True, vector=True)
-                                )
-                            )
+                            w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
+                            v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
 
                         elif q == q_k:
-                            b_k = (
-                                np.radians(
-                                    ase.geometry.get_dihedrals_derivatives(u, v, w)[0][
-                                        2
-                                    ]
-                                )
-                                * Bohr
-                            )
+                            b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][2]) * Bohr
                             b[row : row + 3, column] = b_k
                             u = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_i, q_j, mic=True, vector=True)
-                                )
+                                np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
                             )  #####copy needed because derivative function rewrites vector variable as normed vector
-                            w = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_k, q_l, mic=True, vector=True)
-                                )
-                            )
-                            v = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_j, q_k, mic=True, vector=True)
-                                )
-                            )
+                            w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
+                            v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
 
                         elif q == q_l:
-                            b_k = (
-                                np.radians(
-                                    ase.geometry.get_dihedrals_derivatives(u, v, w)[0][
-                                        3
-                                    ]
-                                )
-                                * Bohr
-                            )
+                            b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][3]) * Bohr
                             b[row : row + 3, column] = b_k
                             u = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_i, q_j, mic=True, vector=True)
-                                )
+                                np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
                             )  #####copy needed because derivative function rewrites vector variable as normed vector
-                            w = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_k, q_l, mic=True, vector=True)
-                                )
-                            )
-                            v = np.copy(
-                                np.atleast_2d(
-                                    mol.get_distance(q_j, q_k, mic=True, vector=True)
-                                )
-                            )
+                            w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
+                            v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
                 row += 3
             column += 1
 
-        B = np.transpose(b)
-        self.B = B
+        self.B = np.transpose(b)
 
-    def get_energies(self) -> Union[float, float, float]:
+    def get_energies(self) -> List[float]:
         """Calls the energies of the Atoms objects.
 
         Returns:
@@ -833,28 +681,12 @@ class Jedi:
             qF.append(self.atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / Bohr)
         # angles
         for q in self.rim_list[2]:
-            q0.append(
-                np.radians(
-                    self.atoms0.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)
-                )
-            )
-            qF.append(
-                np.radians(
-                    self.atomsF.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)
-                )
-            )
+            q0.append(np.radians(self.atoms0.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
+            qF.append(np.radians(self.atomsF.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
         # dihedral angles
         for q in self.rim_list[3]:
-            q0_preliminary = np.radians(
-                self.atoms0.get_dihedral(
-                    int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True
-                )
-            )
-            qF_preliminary = np.radians(
-                self.atomsF.get_dihedral(
-                    int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True
-                )
-            )
+            q0_preliminary = np.radians(self.atoms0.get_dihedral(int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True))
+            qF_preliminary = np.radians(self.atomsF.get_dihedral(int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True))
 
             # get the smallest absolute value of the two possible rotational directions
             dda = qF_preliminary - q0_preliminary
@@ -864,17 +696,12 @@ class Jedi:
 
         delta_q = np.subtract(qF, q0)
 
-        try:
-            delta_q = np.append(delta_q, dq_da)
-        except:
-            pass
+        delta_q = np.append(delta_q, dq_da)
 
-        self.delta_q = delta_q  # TODO make void function setting self.delta_q
+        self.delta_q = delta_q
 
         self.qF = qF
         self.q0 = q0
-
-        return delta_q
 
     def visualize(
         self,
@@ -925,9 +752,7 @@ class Jedi:
         """
 
         if len(self.proc_E_RIMs) == 0:
-            raise ValueError(
-                "Analysis has not been run. Jedi.run() must be called before Jedi.visualize()"
-            )
+            raise ValueError("Analysis has not been run. Jedi.run() must be called before Jedi.visualize()")
 
         if show and not visualizer == "mpl":
             warnings.warn(
@@ -949,25 +774,17 @@ class Jedi:
         elif single_mode in valid_modes:
             mode_list = [single_mode]
         else:
-            raise ValueError(
-                f"Unknown mode '{single_mode}'. single_mode must be in: {valid_modes} or None"
-            )
+            raise ValueError(f"Unknown mode '{single_mode}'. single_mode must be in: {valid_modes} or None")
 
         mapper = ColorMapper(self)
-        self.visualization_data = mapper.get_visualization_data(
-            mode_list, colormap, man_strain, split_bonds
-        )
+        self.visualization_data = mapper.get_visualization_data(mode_list, colormap, man_strain, split_bonds)
 
         if visualizer == "mpl":
-            vis = MatplotlibVisualizer(
-                self.visualization_data, mapper, output_dir, energy_unit
-            )
+            vis = MatplotlibVisualizer(self.visualization_data, mapper, output_dir, energy_unit)
             vis.run(show, show_indices, box)
 
         elif visualizer == "vmd":
-            vis = VMDVisualizer(
-                self.visualization_data, mapper, output_dir, energy_unit
-            )
+            vis = VMDVisualizer(self.visualization_data, mapper, output_dir, energy_unit)
             vis.write_inputs(box)
 
         else:
@@ -1036,9 +853,7 @@ class Jedi:
         if self.custom_bonds is not None:
             custom_bonds = self.custom_bonds.copy()
             cbonds_flag = True
-            self.custom_bonds = self.custom_bonds[
-                np.isin(self.custom_bonds, indices).all(axis=1)
-            ]
+            self.custom_bonds = self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
 
         self.rim_list = self.get_common_rims()
 
@@ -1054,10 +869,8 @@ class Jedi:
         ind = np.array([[i * 3, i * 3 + 1, i * 3 + 2] for i in indices]).ravel()
         self.B = np.take(self.B, ind, axis=1)
 
-        self.delta_q = self.get_delta_q()
-        delta_q = self.delta_q
+        self.get_delta_q()
 
-        H_cart = self.H
         try:
             all_E_geometries = self.get_energies()
         except:
@@ -1074,8 +887,8 @@ class Jedi:
             self.atomsF,
             rim_list,
             self.B,
-            H_cart,
-            delta_q,
+            self.H,
+            self.delta_q,
             E_geometries,
             ase_units=ase_units,
         )
@@ -1117,9 +930,7 @@ class Jedi:
         if self.custom_bonds is not None:
             custom_bonds = self.custom_bonds.copy()
             cbonds_flag = True
-            self.custom_bonds = self.custom_bonds[
-                np.isin(self.custom_bonds, indices).all(axis=1)
-            ]
+            self.custom_bonds = self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
         rim_p = self.get_common_rims()  # get rimlist of substructure
 
         ind = []
@@ -1132,14 +943,12 @@ class Jedi:
                 if rim_p[i].shape[0] > 0:
                     rim_list_c.append(np.vstack((rim_list[i], rim_p[i])))
                 else:
-                    rim_list_c.append(np.vstack((rim_list[i])))
+                    rim_list_c.append(np.vstack(rim_list[i]))
             _, z = np.unique(rim_list_c[-1], return_counts=True, axis=0)
 
             ind.append(np.where(z > 1)[0])  # get indices where ric is in both sets
         for i in range(4):
-            ind[i] = ind[i] + np.sum(
-                [p.shape[0] for p in rim_list[0:i]]
-            )  # get correct indices for the stacked array
+            ind[i] = ind[i] + np.sum([p.shape[0] for p in rim_list[0:i]])  # get correct indices for the stacked array
         ind = np.hstack(ind)
         ind = ind.astype(int)
 
@@ -1159,9 +968,7 @@ class Jedi:
                 1D or 2Darray with atom indices, [[i,j]...]
         """
 
-        self.custom_bonds = np.atleast_2d(
-            bonds
-        )  # additional bonds for analysis of non-covalent interactions
+        self.custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
 
     def set_bond_params(self, covf=1.3, vdwf=0.9):
         """
@@ -1250,9 +1057,7 @@ def jedi_analysis(
     proc_E_RIMs = 100 * E_RIMs / E_RIMs_total
 
     if ase_units:
-        b = (
-            np.shape(rim_list[0])[0] + np.shape(rim_list[1])[0]
-        )  # border between lengths and angles
+        b = np.shape(rim_list[0])[0] + np.shape(rim_list[1])[0]  # border between lengths and angles
         delta_q[0:b] *= Bohr
         delta_q[b::] = np.degrees(delta_q[b::])
         E_RIMs = np.array(E_RIMs) * Hartree
@@ -1289,12 +1094,8 @@ def get_hbonds(mol, covf=1.3, vdwf=0.9):
     Returns:
         2D array of indices.
     """
-    cutoff = ase.neighborlist.natural_cutoffs(
-        mol, mult=covf
-    )  ## cutoff for covalent bonds see Bakken et al.
-    bl = np.vstack(
-        ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)
-    ).T  # determine covalent bonds
+    cutoff = ase.neighborlist.natural_cutoffs(mol, mult=covf)  ## cutoff for covalent bonds see Bakken et al.
+    bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
     bl = bl[bl[:, 0] < bl[:, 1]]  # remove double mentioned
     bl = np.unique(bl, axis=0)
@@ -1315,8 +1116,7 @@ def get_hbonds(mol, covf=1.3, vdwf=0.9):
             for j in hpartner_ls:
                 if j != i[1]:
                     if (
-                        mol.get_distance(i[0], j, mic=True)
-                        < hcutoff[(mol.symbols[i[0]], mol.symbols[j])]
+                        mol.get_distance(i[0], j, mic=True) < hcutoff[(mol.symbols[i[0]], mol.symbols[j])]
                         and mol.get_angle(i[1], i[0], j, mic=True) > 90
                     ):
                         hbond_ls.append([i[0], j])
@@ -1324,8 +1124,7 @@ def get_hbonds(mol, covf=1.3, vdwf=0.9):
             for j in hpartner_ls:
                 if j != i[0]:
                     if (
-                        mol.get_distance(i[1], j, mic=True)
-                        < hcutoff[(mol.symbols[i[1]], mol.symbols[j])]
+                        mol.get_distance(i[1], j, mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])]
                         and mol.get_angle(i[0], i[1], j, mic=True) > 90
                     ):
                         hbond_ls.append([i[1], j])
