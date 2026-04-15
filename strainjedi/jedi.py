@@ -1,7 +1,6 @@
 import collections
+import itertools
 import warnings
-from collections import Counter
-from itertools import combinations
 from pathlib import Path
 
 import ase.geometry
@@ -222,7 +221,7 @@ class Jedi:
         ########find angles
         # create array containing all angles (ba)
         ba_rows = []
-        for (a, b), (c, d) in combinations(bl, 2):
+        for (a, b), (c, d) in itertools.combinations(bl, 2):
             # set intersection of the two bonds a-b and c-d.
             shared = {a, b} & {c, d}
             if len(shared) != 1:
@@ -257,111 +256,47 @@ class Jedi:
 
         # A bond is torsionable if both endpoints have degree > 1
         mask = (deg[bl[:, 0]] > 1) & (deg[bl[:, 1]] > 1)
-        torsionable = bool(np.any(mask))
-
         torsionable_bonds = bl[mask]
 
-        if torsionable:
-            da_flag = False
-            torsionable_bonds = np.atleast_2d(torsionable_bonds)
-            row_index = 0
-            for torsionable_row in torsionable_bonds:
-                TA_Atoms_0 = []
-                TA_Atoms_3 = []
-                for other_row in bl:  # iterates through rows of bonds
-                    if other_row[0] == torsionable_row[0] and other_row[1] == torsionable_row[1]:
+        # compute adjacency
+        neighbors = [[] for _ in range(len(mol))]
+        for a, b in bl:
+            a = int(a)
+            b = int(b)
+            neighbors[a].append(b)
+            neighbors[b].append(a)
+
+        # torsion angles
+        da_rows = []
+        LINEAR = (0.0, 180.0, 360.0)
+        for torsionable_row in torsionable_bonds:
+            j, k = map(int, torsionable_row)
+
+            left_atoms = [i for i in neighbors[j] if i != k]
+            right_atoms = [l for l in neighbors[k] if l != j]
+
+            for i, l in itertools.product(left_atoms, right_atoms):
+                da_pre = np.array([i, j, k, l], dtype=int)
+
+                if len(set(da_pre)) != 4:
+                    print(
+                        "bonds for dihedral angle span over more than one unit cell\n %s will not be taken into account in the further analysis"
+                        % (np.atleast_2d(da_pre))
+                    )
+                    continue
+
+                try:
+                    if round(mol.get_angle(i, j, k, mic=True)) in LINEAR:
                         continue
+                    if round(mol.get_angle(j, k, l, mic=True)) in LINEAR:
+                        continue
+                except Exception:
+                    continue
 
-                    ### FIRST ATOM CONNECTION
-                    elif other_row[0] == torsionable_row[0] or other_row[1] == torsionable_row[0]:
-                        if other_row[0] == torsionable_row[0]:
-                            TA_Atom_0 = other_row[1]
+                da_rows.append(da_pre)
 
-                        else:
-                            TA_Atom_0 = other_row[0]
-                        TA_Atoms_0.append(TA_Atom_0)
-
-                    ### SECOND ATOM CONNECTION
-                    if other_row[0] == torsionable_row[1] or other_row[1] == torsionable_row[1]:
-                        if other_row[0] == torsionable_row[1]:
-                            TA_Atom_3 = other_row[1]
-
-                        else:
-                            TA_Atom_3 = other_row[0]
-                        TA_Atoms_3.append(TA_Atom_3)
-
-                for single_TA_Atom_0 in TA_Atoms_0:
-                    for single_TA_Atom_3 in TA_Atoms_3:
-                        da_pre = np.atleast_2d(
-                            np.array(
-                                [
-                                    single_TA_Atom_0,
-                                    torsionable_row[0],
-                                    torsionable_row[1],
-                                    single_TA_Atom_3,
-                                ]
-                            )
-                        )
-
-                        if len(np.unique(da_pre[0], axis=0)) != len(da_pre[0]):
-                            print(
-                                "bonds for dihedral angle span over more than one unit cell\n %s will not be taken into account in the further analysis"
-                                % (da_pre)
-                            )
-
-                        else:
-                            try:
-                                if round(
-                                    mol.get_angle(
-                                        int(single_TA_Atom_0),
-                                        int(torsionable_row[0]),
-                                        int(torsionable_row[1]),
-                                        mic=True,
-                                    )
-                                ) in [0.0, 180.0, 360.0] or round(
-                                    mol.get_angle(
-                                        int(torsionable_row[0]),
-                                        int(torsionable_row[1]),
-                                        int(single_TA_Atom_3),
-                                        mic=True,
-                                    )
-                                ) in [0.0, 180.0, 360.0]:  # check for linear angles
-                                    continue
-                                if row_index == 0:
-                                    da = np.array(
-                                        [
-                                            single_TA_Atom_0,
-                                            torsionable_row[0],
-                                            torsionable_row[1],
-                                            single_TA_Atom_3,
-                                        ]
-                                    )
-                                    da_flag = True
-                                else:
-                                    da = np.vstack(
-                                        (
-                                            da,
-                                            [
-                                                single_TA_Atom_0,
-                                                torsionable_row[0],
-                                                torsionable_row[1],
-                                                single_TA_Atom_3,
-                                            ],
-                                        )
-                                    )
-
-                                row_index += 1
-                            except:
-                                continue
-
-            if da_flag:
-                da = np.atleast_2d(da)
-                rim_list.append(da)
-            else:
-                rim_list.append(np.array([]))
-        else:
-            rim_list.append(np.array([]))
-
+        da = np.asarray(da_rows, dtype=int)
+        rim_list.append(np.atleast_2d(da) if da.size > 0 else np.array([]))
         rim_list_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
 
         return rim_list_sorted
