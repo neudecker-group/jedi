@@ -251,31 +251,17 @@ class Jedi:
 
         ###torsion angles###########
 
-        tb_flag = False
-        row_index = 0
+        # degree of each node = how often it appears anywhere in bond list (bl)
+        flat = bl.ravel()  # 1D list of all endpoints
+        deg = np.bincount(flat.astype(np.int64, copy=False))
 
-        for self_index, self_row in enumerate(bl):
-            bond_partner1 = False
-            bond_partner2 = False
-            for other_index, other_row in enumerate(bl):
-                if other_index == self_index:
-                    # only iterate bonds other than self
-                    continue
-                bond_partner1 |= other_row[0] == self_row[0] or other_row[1] == self_row[0]
-                bond_partner2 |= other_row[0] == self_row[1] or other_row[1] == self_row[1]
+        # A bond is torsionable if both endpoints have degree > 1
+        mask = (deg[bl[:, 0]] > 1) & (deg[bl[:, 1]] > 1)
+        torsionable = bool(np.any(mask))
 
-                if not (bond_partner1 and bond_partner2):
-                    # This is a terminal bond, so no torsion possible. Skip.
-                    continue
-                if row_index == 0:
-                    torsionable_bonds = np.array([self_row[0], self_row[1]])
-                    tb_flag = True
-                else:
-                    torsionable_bonds = np.vstack((torsionable_bonds, [self_row[0], self_row[1]]))
-                row_index += 1
-                break
+        torsionable_bonds = bl[mask]
 
-        if tb_flag:
+        if torsionable:
             da_flag = False
             torsionable_bonds = np.atleast_2d(torsionable_bonds)
             row_index = 0
