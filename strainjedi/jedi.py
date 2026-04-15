@@ -1,24 +1,22 @@
-"""A class for Jedi analysis"""
-
 import collections
 import warnings
-import numpy as np
 from collections import Counter
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, List
-from numpy.typing import NDArray
-import ase.neighborlist
-import ase.geometry
-import ase.vibrations
-from ase.atoms import Atoms
-from ase.utils import jsonable
-from ase.units import Hartree, Bohr, mol, kcal
-from ase.data.vdw import vdw_radii
 
-from strainjedi.visualization import ColorMapper, VMDVisualizer, MatplotlibVisualizer
-from strainjedi.print_config import header, energy_comparison, rims_listing
-from strainjedi.quotes import quotes
-from strainjedi import __version__
+import ase.geometry
+import ase.neighborlist
+import ase.vibrations
+import numpy as np
+from ase.atoms import Atoms
+from ase.data.vdw import vdw_radii
+from ase.units import Bohr, Hartree, kcal, mol
+from ase.utils import jsonable
+from numpy.typing import NDArray
+from typing_extensions import Any, Dict, List, Optional, Union, deprecated
+
+from strainjedi import reporting
+from strainjedi.visualization import ColorMapper, MatplotlibVisualizer, VMDVisualizer
+
 
 @jsonable("jedi")
 class Jedi:
@@ -30,7 +28,6 @@ class Jedi:
         epot: Union[np.ndarray, None] = None,
     ):  # indices=None
         """
-
         atoms0: class
             Atoms object of relaxed structure with calculated energy.
         atomsF: class
@@ -61,7 +58,6 @@ class Jedi:
             None  # bond lengths and angles in Bohr and degree in distorted molecule
         )
         self.q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
-
 
     def todict(self) -> Dict[str, Any]:
         """make it saveable with .write()"""
@@ -154,7 +150,6 @@ class Jedi:
         self.get_common_rims()
         rim_list = self.rim_list
         self.get_b_matrix()
-        B = self.B
         self.get_delta_q()
         delta_q = self.delta_q
         self.get_hessian()
@@ -166,7 +161,6 @@ class Jedi:
 
         try:  # Get energies from calculator
             all_E_geometries = self.get_energies()
-
         except:  # Fallback to custom energies
             all_E_geometries = self.energies
 
@@ -180,15 +174,22 @@ class Jedi:
             proc_geom_RIMs,
             self.delta_q,
         ) = jedi_analysis(
-            self.atoms0, rim_list, B, H_cart, delta_q, E_geometries, ase_units=ase_units
+            self.atoms0,
+            rim_list,
+            self.B,
+            H_cart,
+            delta_q,
+            E_geometries,
+            ase_units=ase_units,
         )
 
         if indices:  # get only rims of interest
             self.post_process(indices)
             self.E_RIMs_total = sum(self.E_RIMs)
             proc_geom_RIMs = 100 * (sum(self.E_RIMs) - E_geometries) / E_geometries
+
         if printout:
-            jedi_printout(
+            reporting.jedi_printout(
                 self.atoms0,
                 self.rim_list,
                 self.delta_q,
@@ -199,7 +200,6 @@ class Jedi:
                 self.E_RIMs,
                 ase_units=ase_units,
             )
-        pass
 
     def get_rims(self, mol):
         """Gets the redundant internal coordinates"""
@@ -233,12 +233,7 @@ class Jedi:
 
         # possibility of adding custom bonds like hbonds, long range interactions
         if self.custom_bonds is not None:
-            try:
-                bl = np.vstack((bl, self.custom_bonds))
-            except:
-                ValueError(
-                    "custom bonds not in the correct format. 2D array needed with shape (x,2)"
-                )
+            bl = np.vstack((bl, self.custom_bonds))
             rim_list.append(self.custom_bonds)
         if self.custom_bonds is None:
             rim_list.append(np.array([]))
@@ -300,7 +295,7 @@ class Jedi:
 
         tb_flag = False
         row_index = 0
-        # create dataframe containing list of all bonds with torsion angles (df_torsionable_bonds)
+
         for self_index, self_row in enumerate(bl):
             bond_partner1 = False
             bond_partner2 = False
@@ -308,8 +303,12 @@ class Jedi:
                 if other_index == self_index:
                     # only iterate bonds other than self
                     continue
-                bond_partner1 |= other_row[0] == self_row[0] or other_row[1] == self_row[0]
-                bond_partner2 |= other_row[0] == self_row[1] or other_row[1] == self_row[1]
+                bond_partner1 |= (
+                    other_row[0] == self_row[0] or other_row[1] == self_row[0]
+                )
+                bond_partner2 |= (
+                    other_row[0] == self_row[1] or other_row[1] == self_row[1]
+                )
 
                 if not (bond_partner1 and bond_partner2):
                     # This is a terminal bond, so no torsion possible. Skip.
@@ -323,6 +322,7 @@ class Jedi:
                     )
                 row_index += 1
                 break
+
         if tb_flag:
             da_flag = False
             torsionable_bonds = np.atleast_2d(torsionable_bonds)
@@ -449,7 +449,7 @@ class Jedi:
                 warnings.warn_explicit(
                     f"The distorted structure has a different number of bonds ({len(rim_atomsF[0])})\n"
                     f"compared to the relaxed structure ({len(rim_atoms0[0])}). "
-                    f"In this case the Jedi strain analysis can not be applied correctly.",
+                    f"In this case the JEDI strain analysis can not be applied correctly.",
                     UserWarning,
                     "",
                     0,
@@ -598,7 +598,6 @@ class Jedi:
         #################ba###############################
 
         for q in self.rim_list[2]:
-            BA = []
             row = 0  # Initilization of rows to specifiy position in B-Matrix
 
             BA = [int(q[0]), int(q[1]), int(q[2])]  # create list of involved atoms
@@ -788,8 +787,6 @@ class Jedi:
         B = np.transpose(b)
         self.B = B
 
-        return B
-
     def get_energies(self) -> Union[float, float, float]:
         """Calls the energies of the Atoms objects.
 
@@ -976,6 +973,7 @@ class Jedi:
         else:
             raise ValueError("Unknown visualizer. Visualizer must be 'mpl' or 'vmd'.")
 
+    @deprecated("Use Jedi.visualize(visualizer='vmd') instead.")
     def vmd_gen(
         self,
         des_colors: Optional[Dict] = None,
@@ -987,9 +985,6 @@ class Jedi:
         incl_coloring: Optional[str] = None,
     ):
         """
-        DEPRECATED! This method is kept for backwards compatibility.
-        Please Use Jedi.visualize(visualizer='vmd') for visualizations with VMD.
-
         Args:
             des_colors: (dict)
                 key: order number, value: [R,G,B]
@@ -1012,12 +1007,6 @@ class Jedi:
                 "magma": matplotlib magma gradient
                 default: 'None'
         """
-
-        warnings.warn(
-            "vmd_gen() is deprecated. Please use visualize(visualizer='vmd') instead.",
-            DeprecationWarning,
-        )
-
         if not incl_coloring:
             incl_coloring = "green_red"
         self.visualize(
@@ -1057,14 +1046,13 @@ class Jedi:
         if len(rim_list) == 0:
             raise ValueError("Chosen indexlist has no rims")
 
-        self.B = self.get_b_matrix(indices=self.indices)
-        B = self.B
+        self.get_b_matrix(indices=self.indices)
         # set B matrix values of not considered atoms to 0
         for i in range(len(self.H)):
             if i not in indices:
-                B[:, i * 3 : i * 3 + 3] = 0
+                self.B[:, i * 3 : i * 3 + 3] = 0
         ind = np.array([[i * 3, i * 3 + 1, i * 3 + 2] for i in indices]).ravel()
-        B = np.take(self.B, ind, axis=1)
+        self.B = np.take(self.B, ind, axis=1)
 
         self.delta_q = self.get_delta_q()
         delta_q = self.delta_q
@@ -1083,13 +1071,19 @@ class Jedi:
             proc_geom_RIMs,
             self.delta_q,
         ) = jedi_analysis(
-            self.atomsF, rim_list, B, H_cart, delta_q, E_geometries, ase_units=ase_units
+            self.atomsF,
+            rim_list,
+            self.B,
+            H_cart,
+            delta_q,
+            E_geometries,
+            ase_units=ase_units,
         )
         # get values of rims inside the substructure
         self.post_process(indices)
         self.E_RIMs_total = sum(self.E_RIMs)
         proc_geom_RIMs = 100 * (sum(self.E_RIMs) - E_geometries) / E_geometries
-        jedi_printout(
+        reporting.jedi_printout(
             self.atoms0,
             self.rim_list,
             self.delta_q,
@@ -1180,6 +1174,7 @@ class Jedi:
         self.covf = covf
         self.vdwf = vdwf
 
+
 def jedi_analysis(
     atoms: ase.atoms.Atoms,
     rim_list: List,
@@ -1187,7 +1182,7 @@ def jedi_analysis(
     H_cart: np.ndarray,
     delta_q: np.ndarray,
     E_geometries: float,
-    printout: Union[bool, None] = None,
+    printout: bool | None = None,
     ase_units: bool = False,
 ):
     """
@@ -1269,7 +1264,7 @@ def jedi_analysis(
     proc_geom_RIMs = 100 * (E_RIMs_total - E_geometries) / E_geometries
 
     if printout:
-        jedi_printout(
+        reporting.jedi_printout(
             atoms,
             rim_list,
             delta_q,
@@ -1282,303 +1277,6 @@ def jedi_analysis(
         )
 
     return proc_E_RIMs, E_RIMs, E_RIMs_total, proc_geom_RIMs, delta_q
-
-
-def jedi_printout(
-    atoms: ase.atoms.Atoms,
-    rim_list: List,
-    delta_q: np.ndarray,
-    E_geometries: float,
-    E_RIMs_total: float,
-    proc_geom_RIMs: float,
-    proc_E_RIMs: List,
-    E_RIMs: np.ndarray,
-    ase_units: bool = False,
-):
-    """
-    Printout of analysis of stored strain energy in redundant internal coordinates.
-
-    atoms: class
-        An ASE Atoms object to determine the atomic species of the indices.
-    rim_list: list
-        A list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals.
-    delta_q: np array
-        Array of deformations along the RICs.
-    E_geometries: float
-        Energy difference between the geometries.
-    E_RIMs_total: float
-        Calculated total strain energy by jedi.
-    proc_geom_RIMs: float
-        Percentage deviation between calculated total energies.
-    proc_E_RIMs: array
-        Array of energy stored in each RIC.
-    ase_units: bool
-        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians.
-    """
-    output = []
-    # Header
-    output.append("\n \n")
-    output.append(
-        "{:^{header}}".format(
-            "************************************************", **header
-        )
-    )
-    output.append(
-        "{:^{header}}".format(
-            "*                 JEDI ANALYSIS                *", **header
-        )
-    )
-    output.append(
-        "{:^{header}}".format(
-            "*       Judgement of Energy DIstribution       *", **header
-        )
-    )
-    output.append(
-        "{:^{header}}".format(
-            "************************************************", **header
-        )
-    )
-    output.append("{:^{header}}".format(f"version {__version__}\n", **header))
-
-    # Comparison of total energies
-    if not ase_units:
-        output.append(
-            "{0:>{column1}}{1:^{column2}}{2:^{column3}}".format(
-                " ", "Strain Energy (kcal/mol)", "Deviation (%)", **energy_comparison
-            )
-        )
-    elif ase_units:
-        output.append(
-            "{0:>{column1}}{1:^{column2}}{2:^{column3}}".format(
-                " ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison
-            )
-        )
-
-    output.append(
-        "{0:<{column1}}{1:^{column2}.4f}{2:^{column3}}".format(
-            "Ab Initio", E_geometries, "-", **energy_comparison
-        )
-    )
-    # TODO save proc_e_rims as std decimal number and have print command use .2%
-    output.append(
-        "{0:<{column1}}{1:^{column2}.4f}{2:^{column3}.2f}".format(
-            "JEDI", E_RIMs_total, proc_geom_RIMs, **energy_comparison
-        )
-    )
-
-    # JEDI analysis
-    if not ase_units:
-        output.append(
-            "{0:^{column1}}"
-            "{1:^{column2}}"
-            "{2:^{column3}}"
-            "{3:^{column4}}"
-            "{4:^{column5}}"
-            "{5:^{column6}}".format(
-                "RIC No.",
-                "RIC type",
-                "indices",
-                "delta_q (a.u.)",
-                "Percentage",
-                "Energy (kcal/mol)",
-                **rims_listing,
-            )
-        )
-    elif ase_units:
-        output.append(
-            "{0:^{column1}}"
-            "{1:^{column2}}"
-            "{2:^{column3}}"
-            "{3:^{column4}}"
-            "{4:^{column5}}"
-            "{5:^{column6}}".format(
-                "RIC No.",
-                "RIC type",
-                "indices",
-                "delta_q (Å,°)",
-                "Percentage",
-                "Energy (eV)",
-                **rims_listing,
-            )
-        )
-
-    rics_dict = {0: "bond", 1: "custom", 2: "angle", 3: "dihedral"}
-    ric_counter = 0
-    for ric_type, rim in rics_dict.items():
-        for k in rim_list[ric_type]:
-            if rim == "bond" or rim == "custom":
-                ind = f"{atoms.symbols[k[0]]}{k[0]}  {atoms.symbols[k[1]]}{k[1]}"
-            elif rim == "angle":
-                ind = f"{atoms.symbols[k[0]]}{k[0]} {atoms.symbols[k[1]]}{k[1]} {atoms.symbols[k[2]]}{k[2]}"
-            elif rim == "dihedral":
-                ind = (
-                    f"{atoms.symbols[k[0]]}{k[0]} "
-                    f"{atoms.symbols[k[1]]}{k[1]} "
-                    f"{atoms.symbols[k[2]]}{k[2]} "
-                    f"{atoms.symbols[k[3]]}{k[3]}"
-                )
-            # TODO save proc_e_rims as std decimal number and have print command use .2%
-            output.append(
-                "{0:^{column1}}"
-                "{1:^{column2}}"
-                "{2:^{column3}}"
-                "{3:^{column4}.4f}"
-                "{4:^{column5}.2f}"
-                "{5:^{column6}.4f}".format(
-                    ric_counter + 1,
-                    rim,
-                    ind,
-                    delta_q[ric_counter],
-                    proc_E_RIMs[ric_counter],
-                    E_RIMs[ric_counter],
-                    **rims_listing,
-                )
-            )
-            ric_counter += 1
-    print("\n".join(output))
-    print(quotes())
-
-
-def jedi_printout_bonds(
-    atoms: ase.atoms.Atoms,
-    rim_list: np.ndarray,
-    E_geometries: float,
-    E_RIMs_total: float,
-    proc_geom_RIMs: float,
-    proc_E_RIMs: np.ndarray,
-    E_RIMs: np.ndarray,
-    ase_units: bool = False,
-    file: str = "total",
-):
-    # total strain in bonds after adding contributions of stretching angles and dihedral angles
-    """
-    Printout of analysis of stored strain energy in the bonds.
-
-    atoms: class
-        An ASE Atoms object to determine the atomic species of the indices.
-    rim_list: list
-        A list of 4 numpy 2D arrays the first array containing bonds, second custom bonds, third bond angles, fourth dihedrals.
-    delta_q: np array
-        Array of deformations along the RICs.
-    E_geometries: float
-        Energy difference between the geometries.
-    E_RIMs_total: float
-        Calculated total strain energy by jedi.
-    proc_geom_RIMs: float
-        Percentage deviation between calculated total energies.
-    proc_E_RIMs: np array
-        Array of energy stored in each RIC.
-    ase_units: bool
-        Flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians.
-    file: string
-        File to store the output.
-    """
-    output = []
-    # Header
-    output.append("\n")
-    output.append(
-        "{:^{header}}".format(
-            "************************************************", **header
-        )
-    )
-    output.append(
-        "{:^{header}}".format(
-            "*                 JEDI ANALYSIS                *", **header
-        )
-    )
-    output.append(
-        "{:^{header}}".format(
-            "*       Judgement of Energy DIstribution       *", **header
-        )
-    )
-    output.append(
-        "{:^{header}}".format(
-            "************************************************", **header
-        )
-    )
-    output.append("{:^{header}}".format(f"version {__version__}\n", **header))
-
-    # Comparison of total energies
-    if not ase_units:
-        output.append(
-            "{0:>{column1}}{1:^{column2}}{2:^{column3}}".format(
-                " ", "Strain Energy (kcal/mol)", "Deviation (%)", **energy_comparison
-            )
-        )
-    elif ase_units:
-        output.append(
-            "{0:>{column1}}{1:^{column2}}{2:^{column3}}".format(
-                " ", "Strain Energy (eV)", "Deviation (%)", **energy_comparison
-            )
-        )
-
-    output.append(
-        "{0:<{column1}}{1:^{column2}.4f}{2:^{column3}}".format(
-            "Ab Initio", E_geometries, "-", **energy_comparison
-        )
-    )
-    # TODO save proc_e_rims as std decimal number and have print command use .2%
-    output.append(
-        "{0:<{column1}}{1:^{column2}.4f}{2:^{column3}.2f}".format(
-            "JEDI", E_RIMs_total, proc_geom_RIMs, **energy_comparison
-        )
-    )
-
-    # strain in the bonds
-    if not ase_units:
-        output.append(
-            "{0:^{column1}}"
-            "{1:^{column2}}"
-            "{2:^{column3}}"
-            "{3:^{column4}}"
-            "{4:^{column5}}".format(
-                "RIC No.",
-                "RIC type",
-                "indices",
-                "Percentage",
-                "Energy (kcal/mol)",
-                **rims_listing,
-            )
-        )
-    elif ase_units:
-        output.append(
-            "{0:^{column1}}"
-            "{1:^{column2}}"
-            "{2:^{column3}}"
-            "{3:^{column4}}"
-            "{4:^{column5}}".format(
-                "RIC No.",
-                "RIC type",
-                "indices",
-                "Percentage",
-                "Energy (eV)",
-                **rims_listing,
-            )
-        )
-
-    rics_dict = {0: "bond", 1: "custom"}
-    ric_counter = 0
-    for ric_type, rim in rics_dict.items():
-        for k in rim_list[ric_type]:
-            ind = f"{atoms.symbols[k[0]]}{k[0]}  {atoms.symbols[k[1]]}{k[1]}"
-            # TODO save proc_e_rims as std decimal number and have print command use .2%
-            output.append(
-                "{0:^{column1}}"
-                "{1:^{column2}}"
-                "{2:^{column3}}"
-                "{3:^{column4}.2f}"
-                "{4:^{column5}.4f}".format(
-                    ric_counter + 1,
-                    rim,
-                    ind,
-                    proc_E_RIMs[ric_counter],
-                    E_RIMs[ric_counter],
-                    **rims_listing,
-                )
-            )
-            ric_counter += 1
-    with open(file, "w") as f:
-        f.writelines("\n".join(output))
 
 
 def get_hbonds(mol, covf=1.3, vdwf=0.9):
