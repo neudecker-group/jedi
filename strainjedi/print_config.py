@@ -8,8 +8,7 @@ energy_comparison = {'column1': int(total_width / 6),
                      'column3': int(total_width / 5)}
 
 energy_comparison_2 = {'column1': int(total_width / 6),
-                       'column2': int(total_width / 5),
-                       'column3': int(total_width / 5)}
+                       'column2': int(total_width / 5)}
 
 rims_listing = {'column1': int(total_width / 6),
                 'column2': int(total_width / 6),

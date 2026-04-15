@@ -77,16 +77,15 @@ def jedi_analysis(rims_list,B,H_cart,delta_q,Q,C,internal_strain,lattice_B,E_geo
     C_q = np.transpose(lattice_B_plus).dot( C ).dot( lattice_B_plus )
 
     H_full = np.block([[H_q, H_coupling],[H_coupling.T, C_q]])
-
     E_harm_total = 0.5 * np.transpose( Q ).dot( H_full ).dot( Q )
     E_full = 0.5 * (Q * H_full).T * Q
-    E_coords = np.sum(E_full, axis=1)
     m = int(E_full.shape[0] / 2)
-    E_RIMs_total = E_coords[:m].sum(axis=0)
-    E_lattice_total = E_coords[m:].sum(axis=0)
+    E_nonaffine = np.sum(E_full[:m], axis=1) + np.sum(E_full[m:,:m], axis=1)
+    E_lattice = np.sum(E_full[m:,m:], axis=1)
+    E_nonaffine_total = E_nonaffine.sum(axis=0)
+    E_lattice_total = E_lattice.sum(axis=0)
     E_RIMs = np.sum(E_full, axis=1)[:m] + np.sum(E_full, axis=1)[m:]
 
-    proc_E_parts = [E_RIMs_total/E_harm_total*100, E_lattice_total/E_harm_total*100]
     # Get the percentage of the energy stored in every RIM
     proc_E_RIMs = 100 * E_RIMs / E_harm_total
 
@@ -96,18 +95,18 @@ def jedi_analysis(rims_list,B,H_cart,delta_q,Q,C,internal_strain,lattice_B,E_geo
         delta_q[b::] = np.degrees(delta_q[b::])
         E_RIMs=np.array(E_RIMs)*Hartree
         E_harm_total *= Hartree
-        E_RIMs_total *= Hartree
+        E_nonaffine_total *= Hartree
         E_lattice_total *= Hartree
 
     elif ase_units == False:
         E_RIMs=np.array(E_RIMs)/kcal*mol*Hartree
         E_harm_total *= mol/kcal*Hartree
-        E_RIMs_total *= mol/kcal*Hartree
+        E_nonaffine_total *= mol/kcal*Hartree
         E_lattice_total *= mol/kcal*Hartree
 
     proc_geom_RIMs = 100 * ( E_harm_total - E_geometries ) / E_geometries
 
-    return proc_E_RIMs, E_RIMs, E_harm_total, E_RIMs_total, E_lattice_total, proc_E_parts, proc_geom_RIMs, delta_q
+    return proc_E_RIMs, E_RIMs, E_harm_total, E_nonaffine_total, E_lattice_total, proc_geom_RIMs, delta_q
 
 
 def jedi_printout(atoms,
@@ -115,9 +114,8 @@ def jedi_printout(atoms,
                   delta_q: np.array,
                   E_geometries: float,
                   E_harm_total: float,
-                  E_RIMs_total: float,
+                  E_nonaffine_total: float,
                   E_lattice_total: float,
-                  proc_E_parts,
                   proc_geom_RIMs: float,
                   proc_E_RIMs: List,
                   E_RIMs: np.array,
@@ -167,16 +165,16 @@ def jedi_printout(atoms,
 
     # Comparison of lattice and RIC energies
     if not ase_units:
-        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+        output.append('{0:>{column1}}''{1:^{column2}}'
                       .format(" ", "Strain Energy (kcal/mol)", "Proportion (%)", **energy_comparison_2))
     elif ase_units:
-        output.append('{0:>{column1}}''{1:^{column2}}''{2:^{column3}}'
+        output.append('{0:>{column1}}''{1:^{column2}}'
                       .format(" ", "Strain Energy (eV)", "Proportion (%)", **energy_comparison_2))
 
-    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
-                  .format("JEDI RICs", E_RIMs_total, proc_E_parts[0], **energy_comparison_2))
-    output.append('{0:<{column1}}''{1:^{column2}.4f}''{2:^{column3}.2f}'
-                  .format("JEDI lattice", E_lattice_total, proc_E_parts[1], **energy_comparison_2))
+    output.append('{0:<{column1}}''{1:^{column2}.4f}'
+                  .format("JEDI non-affine", E_nonaffine_total, **energy_comparison_2))
+    output.append('{0:<{column1}}''{1:^{column2}.4f}'
+                  .format("JEDI lattice", E_lattice_total, **energy_comparison_2))
 
     # JEDI analysis
     if not ase_units:
@@ -407,7 +405,7 @@ class Jedi:
         self.partial_indices = None  # indices for partial analysis
         self.E_RIMs = None            #list of energies stored in the rims
         self.E_harm_total = None      #sum of E_rims
-        self.E_RIMs_total = None
+        self.E_nonaffine_total = None
         self.E_lattice_total = None
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
@@ -529,14 +527,14 @@ class Jedi:
         E_geometries=all_E_geometries[0]
 
         #run the analysis
-        self.proc_E_RIMs,self.E_RIMs,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_E_parts,proc_geom_RIMs,self.delta_q = jedi_analysis(rim_list,B,H_cart,delta_q,self.Q,self.C,self.internal_strain,self.num_lattice_B,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,self.E_harm_total,self.E_nonaffine_total,self.E_lattice_total,proc_geom_RIMs,self.delta_q = jedi_analysis(rim_list,B,H_cart,delta_q,self.Q,self.C,self.internal_strain,self.num_lattice_B,E_geometries,ase_units=ase_units)
 
         if indices:          #get only rims of interest
             self.post_process(indices)
             self.E_harm_total = sum(self.E_RIMs)
             proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
         if printout:
-            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries,self.E_harm_total,self.E_RIMs_total,self.E_lattice_total,proc_E_parts,proc_geom_RIMs,self.proc_E_RIMs,self.E_RIMs,ase_units=ase_units)
+            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries,self.E_harm_total,self.E_nonaffine_total,self.E_lattice_total,proc_geom_RIMs,self.proc_E_RIMs,self.E_RIMs,ase_units=ase_units)
         pass
 
 
@@ -833,9 +831,10 @@ class Jedi:
 
     def internal_strain_unit_conversion(self):
         '''Converts internal strains from strain (3Nx6) to lattice vector (3Nx9) dependent, from eV/Å to Hartree/Bohr^2'''
+        #ToDo: negative sign?
         Lambda_voigt = self.internal_strain.reshape(-1, 6)
         Lambda_9 = self.internal_strain_voigt_to_9(Lambda_voigt)
-        self.internal_strain =  Lambda_9 @ self.J / (Hartree / Bohr)
+        self.internal_strain =  -Lambda_9 @ self.J / (Hartree / Bohr)
 
     def get_delta_h(self):
         a0_cell = self.atoms0.get_cell()
