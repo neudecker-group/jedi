@@ -218,21 +218,20 @@ class Jedi:
         if self.custom_bonds is None:
             rim_list.append(np.array([]))
 
+        # compute adjacency
+        neighbors = [[] for _ in range(len(mol))]
+        for a, b in bl:
+            a = int(a)
+            b = int(b)
+            neighbors[a].append(b)
+            neighbors[b].append(a)
+
         ########find angles
         # create array containing all angles (ba)
         ba_rows = []
-        for (a, b), (c, d) in itertools.combinations(bl, 2):
-            # set intersection of the two bonds a-b and c-d.
-            shared = {a, b} & {c, d}
-            if len(shared) != 1:
-                # either no shared atom or identical bond/2 shared atoms
-                continue
-
-            x = shared.pop()  # connecting atom
-            o1 = b if a == x else a  # "other" atom from first bond
-            o2 = d if c == x else c  # "other" atom from second bond
-
-            ba_rows.append([o1, x, o2])
+        for x, nbrs in enumerate(neighbors):
+            for o1, o2 in itertools.combinations(nbrs, 2):
+                ba_rows.append([o1, x, o2])
 
         ba = np.asarray(ba_rows)
         ba_flag = ba.size > 0
@@ -257,14 +256,6 @@ class Jedi:
         # A bond is torsionable if both endpoints have degree > 1
         mask = (deg[bl[:, 0]] > 1) & (deg[bl[:, 1]] > 1)
         torsionable_bonds = bl[mask]
-
-        # compute adjacency
-        neighbors = [[] for _ in range(len(mol))]
-        for a, b in bl:
-            a = int(a)
-            b = int(b)
-            neighbors[a].append(b)
-            neighbors[b].append(a)
 
         # torsion angles
         da_rows = []
