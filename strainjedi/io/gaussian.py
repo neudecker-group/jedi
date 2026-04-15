@@ -1,25 +1,26 @@
-from ase.io.gaussian import _compare_merge_configs
-from ase.vibrations.vibrations import VibrationsData
+import copy
 import re
+from copy import deepcopy
+
+import ase.calculators.gaussian as gaussian
 import numpy as np
 from ase.atoms import Atoms
+from ase.calculators.calculator import FileIOCalculator
 from ase.calculators.singlepoint import SinglePointCalculator
-from ase.units import Hartree, Bohr
-from copy import deepcopy
 from ase.io.gaussian import (
-    _format_output_type,
-    _xc_to_method,
     _check_problem_methods,
-    _pop_link0_params,
+    _compare_merge_configs,
     _format_addsec,
     _format_basis_set,
     _format_method_basis,
+    _format_output_type,
     _format_route_params,
     _get_molecule_spec,
+    _pop_link0_params,
+    _xc_to_method,
 )
-import copy
-from ase.calculators.calculator import FileIOCalculator
-import ase.calculators.gaussian as gaussian
+from ase.units import Bohr, Hartree
+from ase.vibrations.vibrations import VibrationsData
 
 _re_l716 = re.compile(r"^\s*\(Enter .+l716.exe\)$")
 _re_forceblock = re.compile(r"^\s*Center\s+Atomic\s+Forces\s+\S+\s*$")
@@ -171,7 +172,7 @@ def get_vibrations(label, atoms, indices=None):
     Returns:
         VibrationsData object.
     """
-    if indices == None:
+    if indices is None:
         indices = range(len(atoms))
     _re_hessblock = re.compile(
         r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$"

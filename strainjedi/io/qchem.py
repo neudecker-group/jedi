@@ -1,14 +1,14 @@
-import numpy as np
-import ase.calculators.qchem as qchem
-from ase.calculators.calculator import SCFError, FileIOCalculator
-import ase.units
-from ase.vibrations.data import VibrationsData
-import ase.io
-from typing import Dict, Optional
 from collections.abc import Iterable
-import copy
+from typing import Dict, Optional
+
+import ase.calculators.qchem as qchem
+import ase.io
+import ase.units
+import numpy as np
 from ase.atoms import Atoms
+from ase.calculators.calculator import FileIOCalculator, SCFError
 from ase.calculators.singlepoint import SinglePointCalculator
+from ase.vibrations.data import VibrationsData
 
 
 def read(filename):
