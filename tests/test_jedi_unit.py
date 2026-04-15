@@ -1,8 +1,9 @@
-from strainjedi.jedi import Jedi
-import numpy as np
 import copy
 
 import matplotlib
+import numpy as np
+
+from strainjedi.jedi import Jedi
 
 # Headless backend for testing
 matplotlib.use("agg")
