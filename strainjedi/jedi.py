@@ -1,6 +1,7 @@
 import collections
 import warnings
 from collections import Counter
+from itertools import combinations
 from pathlib import Path
 
 import ase.geometry
@@ -220,43 +221,22 @@ class Jedi:
 
         ########find angles
         # create array containing all angles (ba)
-        ba_flag = False
-        row_index = 0
-        for self_index, self_row in enumerate(bl):
-            for other_index, other_row in enumerate(bl):
-                if other_index > self_index:
-                    temp_ba_list = [
-                        self_row[0],
-                        self_row[1],
-                        other_row[0],
-                        other_row[1],
-                    ]
-                    temp_ba_counter = Counter(
-                        temp_ba_list
-                    )  # counts all entries in temporary bondangle list, counts duplicates
-                    connecting_atom = list(
-                        [item for item in temp_ba_counter if temp_ba_counter[item] > 1]
-                    )  # checks which atom is duplicate
-                    other_atoms = []  # list collecting other atoms than connecting atom
-                    if connecting_atom:  # duplicate atom is connecting atom
-                        for atom in temp_ba_list:
-                            if atom not in connecting_atom:
-                                other_atoms.append(atom)
-                        if row_index == 0:
-                            ba = np.array([other_atoms[0], connecting_atom[0], other_atoms[1]])
-                            ba_flag = True
-                        else:
-                            ba = np.vstack(
-                                (
-                                    ba,
-                                    [
-                                        other_atoms[0],
-                                        connecting_atom[0],
-                                        other_atoms[1],
-                                    ],
-                                )
-                            )  # add bondlengths to dataframe
-                        row_index += 1
+        ba_rows = []
+        for (a, b), (c, d) in combinations(bl, 2):
+            # set intersection of the two bonds a-b and c-d.
+            shared = {a, b} & {c, d}
+            if len(shared) != 1:
+                # either no shared atom or identical bond/2 shared atoms
+                continue
+
+            x = shared.pop()  # connecting atom
+            o1 = b if a == x else a  # "other" atom from first bond
+            o2 = d if c == x else c  # "other" atom from second bond
+
+            ba_rows.append([o1, x, o2])
+
+        ba = np.asarray(ba_rows)
+        ba_flag = ba.size > 0
 
         if ba_flag:
             ba = np.atleast_2d(ba)
