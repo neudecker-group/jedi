@@ -64,3 +64,6 @@ addopts = ["-v", "--tb=long"]
 testpaths = [
     "tests",
 ]
+
+[tool.ruff]
+line-length = 120
