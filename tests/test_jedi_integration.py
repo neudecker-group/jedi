@@ -1,12 +1,12 @@
-import pytest
-
 import ase.io as io
 import numpy as np
+import pytest
 
 print("NumPy config:", np.show_config())
+from ase.vibrations.vibrations import VibrationsData
+
 from strainjedi.jedi import Jedi
 from tests.resources import path_to_test_resources
-from ase.vibrations.vibrations import VibrationsData
 
 
 class TestJEDIHCN:
@@ -57,6 +57,5 @@ class TestJediWarnings:
         mol = io.read(path_to_test_resources() / "h2o2/h2o2.json")
         mol2 = io.read(path_to_test_resources() / f"h2o2/{warning}.json")
         hessian = VibrationsData.read(path_to_test_resources() / "h2o2/h2o2_hessian.json")
-        analysis = Jedi(mol, mol2, hessian)
         with pytest.warns(UserWarning):
-            analysis.run(printout=False)
+            _analysis = Jedi(mol, mol2, hessian)

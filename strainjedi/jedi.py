@@ -40,20 +40,20 @@ class Jedi:
         self.atoms0 = atoms0  # ref state
         self.atomsF = atomsF  # strained state
         self.modes = modes  # VibrationsData object
-        self.B = None  # Wilson's B
-        self.delta_q = None  # strain in internal coordinates
-        self.rim_list = None  # list of Redundant internal modes
-        self.H = None  # cartesian Hessian of ref state
+        self.vdwf = 0.9
+        self.covf = 1.3  # cutoff for covalent bonds see Bakken et al.
+        self.indices = np.arange(0, len(self.atoms0))
+        self.custom_bonds = None  # list of custom added bonds
+        self.get_common_rims()
+        self.get_b_matrix()
+        self.get_delta_q()
+        self.get_hessian()
         self.energies = epot  # energies of the geometries
         self.proc_E_RIMs = None  # list of procentual energy stored in single RIMs
         self.part_rim_list = None  # rim list for election of atoms
-        self.indices = None  # indices to chose special atoms
         self.E_RIMs = None  # list of energies stored in the rims
         self.E_RIMs_total = None  # sum of E_rims
-        self.custom_bonds = None  # list of custom added bonds
         self.ase_units = False
-        self.vdwf = 0.9
-        self.covf = 1.3  ## cutoff for covalent bonds see Bakken et al.
         self.qF = None  # bond lengths and angles in Bohr and degree in distorted molecule
         self.q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
 
@@ -134,12 +134,6 @@ class Jedi:
         """
         self.ase_units = ase_units
         # get necessary data
-        self.indices = np.arange(0, len(self.atoms0))
-        self.get_common_rims()
-        self.get_b_matrix()
-        self.get_delta_q()
-        delta_q = self.delta_q
-        self.get_hessian()
         if len(self.atoms0) != self.H.shape[0] / 3:
             raise ValueError(
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
@@ -164,7 +158,7 @@ class Jedi:
             self.rim_list,
             self.B,
             self.H,
-            delta_q,
+            self.delta_q,
             E_geometries,
             ase_units=ase_units,
         )
@@ -190,10 +184,6 @@ class Jedi:
     def get_rims(self, mol):
         """Gets the redundant internal coordinates"""
 
-        ###bondlengths####
-        mol = mol
-
-        indices = self.indices
         cutoff = ase.neighborlist.natural_cutoffs(mol, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
         bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
@@ -206,8 +196,8 @@ class Jedi:
             )
         bl = np.atleast_2d(bl)
 
-        if len(indices) != len(mol):
-            bl = bl[np.all([np.isin(bl[:, 0], indices), np.isin(bl[:, 1], indices)], axis=0)]
+        if len(self.indices) != len(mol):
+            bl = bl[np.all([np.isin(bl[:, 0], self.indices), np.isin(bl[:, 1], self.indices)], axis=0)]
 
         rim_list = [bl]
 
@@ -344,6 +334,7 @@ class Jedi:
 
                 common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
         common_rims_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in common_rims]
+        # FIXME: This should not be mutated any further. WTF?
         self.rim_list = common_rims_sorted
 
         return rim_atoms0
@@ -352,7 +343,6 @@ class Jedi:
         """Calls the hessian from the VibrationsData object"""
         hessian = self.modes._hessian2d
         self.H = hessian / (Hartree / Bohr**2)
-        return hessian
 
     def get_b_matrix(self, indices=None):
         """Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions"""
