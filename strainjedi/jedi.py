@@ -84,7 +84,8 @@ class Jedi:
         try:
             assert isinstance(data["modes"], ase.vibrations.VibrationsData)
             cl = cls(data["atoms0"], data["atomsF"], data["modes"])
-        except:
+        # FIXME: what exception might occur here?
+        except Exception:
             pass
 
         if data["hessian"] is not None:
@@ -141,7 +142,8 @@ class Jedi:
 
         try:  # Get energies from calculator
             all_E_geometries = self.get_energies()
-        except:  # Fallback to custom energies
+        # FIXME: which exception might happen here?
+        except Exception:  # Fallback to custom energies
             all_E_geometries = self.energies
 
         E_geometries = all_E_geometries[0]
@@ -539,8 +541,9 @@ class Jedi:
         """
 
         try:
-            len(self.rim_list)  # TODO what happens here?
-        except:
+            len(self.rim_list)
+        # FIXME: what happens here?
+        except Exception:
             self.get_common_rims()
 
         if len(self.B) == 0:
@@ -753,7 +756,7 @@ class Jedi:
 
         try:
             all_E_geometries = self.get_energies()
-        except:
+        except Exception:
             all_E_geometries = self.energies
         E_geometries = all_E_geometries[0]
 
