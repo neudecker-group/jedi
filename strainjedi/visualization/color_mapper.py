@@ -7,6 +7,7 @@ from ase.data.vdw import vdw_radii
 from matplotlib import cm, colormaps
 from matplotlib.colors import Colormap
 
+from strainjedi import bmatrix
 from strainjedi.visualization.colors import colors as symbol_colors
 
 
@@ -130,7 +131,7 @@ class ColorMapper:
     def add_unanalyzed_bonds(self, E_array):
 
         self.j.indices = np.arange(0, len(self.atomsF))
-        full_rims = self.j.get_rims(self.atomsF)
+        full_rims = bmatrix.get_rics(self.atomsF)
         analyzed_bonds = set(tuple(sorted([int(b[0]), int(b[1])])) for b in E_array[:, :2])
 
         unanalyzed = []

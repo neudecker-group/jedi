@@ -1,5 +1,4 @@
 import collections
-import itertools
 import warnings
 from pathlib import Path
 
@@ -14,7 +13,7 @@ from ase.utils import jsonable
 from numpy.typing import NDArray
 from typing_extensions import Any, Dict, List, Optional, Union, deprecated
 
-from strainjedi import bmatrix, reporting
+from strainjedi import bmatrix, constants, reporting
 from strainjedi.visualization import ColorMapper, MatplotlibVisualizer, VMDVisualizer
 
 
@@ -41,7 +40,7 @@ class Jedi:
         self.atomsF = atomsF  # strained state
         self.modes = modes  # VibrationsData object
         self.vdwf = 0.9
-        self.covf = 1.3  # cutoff for covalent bonds see Bakken et al.
+        self.covf = constants.COVALENT_CUTOFF
         self.indices = np.arange(0, len(self.atoms0))
         self.custom_bonds = None  # list of custom added bonds
         self.get_common_rims()
@@ -183,109 +182,10 @@ class Jedi:
                 ase_units=ase_units,
             )
 
-    def get_rims(self, mol):
-        """Gets the redundant internal coordinates"""
-
-        cutoff = ase.neighborlist.natural_cutoffs(mol, mult=self.covf)  ## cutoff for covalent bonds see Bakken et al.
-        bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
-
-        bl = bl[bl[:, 0] < bl[:, 1]]  # remove double metioned
-        bl, counts = np.unique(bl, return_counts=True, axis=0)
-        if ~np.all(counts == 1):
-            print(
-                "unit cell too small hessian not calculated for self interaction \
-                   jedi analysis for a finite system consisting of the cell will be conducted"
-            )
-        bl = np.atleast_2d(bl)
-
-        if len(self.indices) != len(mol):
-            bl = bl[np.all([np.isin(bl[:, 0], self.indices), np.isin(bl[:, 1], self.indices)], axis=0)]
-
-        rim_list = [bl]
-
-        # possibility of adding custom bonds like hbonds, long range interactions
-        if self.custom_bonds is not None:
-            bl = np.vstack((bl, self.custom_bonds))
-            rim_list.append(self.custom_bonds)
-        if self.custom_bonds is None:
-            rim_list.append(np.array([]))
-
-        # compute adjacency
-        neighbors = [[] for _ in range(len(mol))]
-        for a, b in bl:
-            a = int(a)
-            b = int(b)
-            neighbors[a].append(b)
-            neighbors[b].append(a)
-
-        ########find angles
-        # create array containing all angles (ba)
-        ba_rows = []
-        for x, nbrs in enumerate(neighbors):
-            for o1, o2 in itertools.combinations(nbrs, 2):
-                ba_rows.append([o1, x, o2])
-
-        ba = np.asarray(ba_rows)
-        ba_flag = ba.size > 0
-
-        if ba_flag:
-            ba = np.atleast_2d(ba)
-            ba = ba[ba[:, 1].argsort(kind="stable")]  # sort by atom2
-            ba = ba[ba[:, 0].argsort(kind="stable")]  # sort by atom1
-
-            nan = np.full((len(ba), 1), -1)
-            _nan = np.hstack((nan, ba))
-            rim_list.append(ba)
-        else:
-            rim_list.append(np.array([]))
-
-        # degree of each node = how often it appears anywhere in bond list.
-        # This is represented as the length of each neighbor[x] = [a, b, ...]
-        deg = np.fromiter((len(n) for n in neighbors), dtype=np.int64)
-
-        # A bond is torsionable if both endpoints have degree > 1
-        mask = (deg[bl[:, 0]] > 1) & (deg[bl[:, 1]] > 1)
-        torsionable_bonds = bl[mask]
-
-        # torsion angles
-        da_rows = []
-        LINEAR = (0.0, 180.0, 360.0)
-        for torsionable_row in torsionable_bonds:
-            j, k = map(int, torsionable_row)
-
-            left_atoms = [i for i in neighbors[j] if i != k]
-            right_atoms = [l for l in neighbors[k] if l != j]
-
-            for i, l in itertools.product(left_atoms, right_atoms):
-                da_pre = np.array([i, j, k, l], dtype=int)
-
-                if len(set(da_pre)) != 4:
-                    print(
-                        "bonds for dihedral angle span over more than one unit cell\n %s will not be taken into account in the further analysis"
-                        % (np.atleast_2d(da_pre))
-                    )
-                    continue
-
-                try:
-                    if round(mol.get_angle(i, j, k, mic=True)) in LINEAR:
-                        continue
-                    if round(mol.get_angle(j, k, l, mic=True)) in LINEAR:
-                        continue
-                except Exception:
-                    continue
-
-                da_rows.append(da_pre)
-
-        da = np.asarray(da_rows, dtype=int)
-        rim_list.append(np.atleast_2d(da) if da.size > 0 else np.array([]))
-        rim_list_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
-
-        return rim_list_sorted
-
     def get_common_rims(self):
         """Get only the RICs in both structures, bond breaks cannot be analysed logically"""
-        rim_atoms0 = self.get_rims(self.atoms0)
-        rim_atomsF = self.get_rims(self.atomsF)
+        rim_atoms0 = bmatrix.get_rics(self.atoms0, self.indices, self.custom_bonds)
+        rim_atomsF = bmatrix.get_rics(self.atomsF, self.indices, self.custom_bonds)
         if len(rim_atoms0[0]) != len(rim_atomsF[0]):
             (
                 warnings.warn_explicit(
@@ -682,7 +582,7 @@ class Jedi:
 
         self.custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
 
-    def set_bond_params(self, covf=1.3, vdwf=0.9):
+    def set_bond_params(self, covf=constants.COVALENT_CUTOFF, vdwf=0.9):
         """
         Args:
             covf:
@@ -796,10 +696,11 @@ def jedi_analysis(
     return proc_E_RIMs, E_RIMs, E_RIMs_total, proc_geom_RIMs, delta_q
 
 
-def get_hbonds(mol, covf=1.3, vdwf=0.9):
+def get_hbonds(mol, covf=constants.COVALENT_CUTOFF, vdwf=0.9):
     """
     Get all hbonds in a structure.
-    Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90° and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.
+    Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90°
+    and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.
 
     mol: class
         Structure of which the hbonds should be determined.

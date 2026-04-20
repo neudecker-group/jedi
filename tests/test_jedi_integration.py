@@ -1,12 +1,12 @@
 import ase.io as io
 import numpy as np
 import pytest
-
-print("NumPy config:", np.show_config())
 from ase.vibrations.vibrations import VibrationsData
 
 from strainjedi.jedi import Jedi
 from tests.resources import path_to_test_resources
+
+print("NumPy config:", np.show_config())
 
 
 class TestJEDIHCN:
