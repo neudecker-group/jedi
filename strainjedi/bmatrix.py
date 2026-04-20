@@ -12,55 +12,37 @@ def get_b_matrix(atoms0, rim_list, indices=None):
     rim_size = sum([np.shape(length)[0] for length in rim_list])
     b = np.zeros([int(len(indices) * 3), int(rim_size)], dtype=float)  # shape of B-matrix (NCarts,NRIMs)
 
+    # map atom index -> row block start in B (only for selected indices)
+    # (so we can write to the right rows without scanning indices)
+    idx_pos = {int(a): p for p, a in enumerate(indices)}
+
+    # We define this helper here inside this function to avoid having to pass too many things around.
+    def _write_stretch_column(q_i: int, q_j: int, column: int) -> None:
+        u = mol.get_distance(q_i, q_j, mic=True, vector=True)
+
+        du = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0]  # (2,3)
+        d_i, d_j = du[0], du[1]
+
+        pi = idx_pos.get(q_i)
+        if pi is not None:
+            r = 3 * pi
+            b[r : r + 3, column] = d_i
+
+        pj = idx_pos.get(q_j)
+        if pj is not None:
+            r = 3 * pj
+            b[r : r + 3, column] = d_j
+
     # get all derivatives
     column = 0  # Initilization of columns to specifiy position in B-Matrix
     for q in rim_list[0]:
-        row = 0  # Initilization of rows to specifiy position in B-Matrix
-
-        ########  Section for stretches  #########
-
-        BL = [int(q[0]), int(q[1])]  # create list of involved atoms
-        q_i, q_j = BL
-
-        u = mol.get_distance(q_i, q_j, mic=True, vector=True)
-        for NAtom in indices:  # for-loop of Number of Atoms
-            for q in BL:
-                if (
-                    NAtom == q
-                ):  # derivative of redundnat internal coordinate w/ respect to cartesian coordinates is not equal zero
-                    # if redundant internal coordinate (q) contains the Atomnumber (NAtoms) of the cartesian coordinate (x0_coords) from which is derived from.
-
-                    # if-/elif-statement for the right sign-factor (see [1])
-                    if q == q_i:
-                        b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
-                        b[row : row + 3, column] = b_i  # change value of zero array at specified position to b_i
-                    elif q == q_j:
-                        b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
-                        b[row : row + 3, column] = b_i  # change value of zero array at specified position to b_i
-            row += 3
+        q_i, q_j = int(q[0]), int(q[1])
+        _write_stretch_column(q_i, q_j, column)
         column += 1
 
     for q in rim_list[1]:
-        row = 0  # Initilization of rows to specifiy position in B-Matrix
-
-        ########  Section for custom stretches  #########
-
-        CL = [int(q[0]), int(q[1])]  # create list of involved atoms
-        q_i, q_j = CL
-
-        u = mol.get_distance(q_i, q_j, mic=True, vector=True)
-        for NAtom in indices:  # for-loop of Number of Atoms
-            for q in CL:
-                if NAtom == q:
-                    # if-/elif-statement for the right sign-factor
-                    if q == q_i:
-                        b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][0]
-                        b[row : row + 3, column] = b_i  # change value of zero array at specified position to b_i
-                    elif q == q_j:
-                        b_i = ase.geometry.get_distances_derivatives(np.atleast_2d(u))[0][1]
-                        b[row : row + 3, column] = b_i  # change value of zero array at specified position to b_i
-
-            row += 3
+        q_i, q_j = int(q[0]), int(q[1])
+        _write_stretch_column(q_i, q_j, column)
         column += 1
 
     #################ba###############################
@@ -100,50 +82,28 @@ def get_b_matrix(atoms0, rim_list, indices=None):
         ]  # create list of involved atoms
         q_i, q_j, q_k, q_l = DA
 
-        u = np.copy(
-            np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
-        )  #####copy needed because derivative function rewrites vector variable as normed vector
+        # copy needed because derivative function rewrites vector variable as normed vector
+        u = np.copy(np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True)))
         w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
         v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
 
         for NAtom in indices:  # for-loop of Number of Atoms
             for q in DA:
-                if NAtom == q:
-                    if q == q_i:  # if-Statements for sign-factors
-                        b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][0]) * Bohr
-                        b[row : row + 3, column] = b_k
-                        u = np.copy(
-                            np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
-                        )  #####copy needed because derivative function rewrites vector variable as normed vector
-                        w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
-                        v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
+                if NAtom != q:
+                    continue
+                if q == q_i:  # if-Statements for sign-factors
+                    b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][0]) * Bohr
+                    b[row : row + 3, column] = b_k
+                elif q == q_j:
+                    b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][1]) * Bohr
+                    b[row : row + 3, column] = b_k
+                elif q == q_k:
+                    b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][2]) * Bohr
+                    b[row : row + 3, column] = b_k
+                elif q == q_l:
+                    b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][3]) * Bohr
+                    b[row : row + 3, column] = b_k
 
-                    elif q == q_j:
-                        b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][1]) * Bohr
-                        b[row : row + 3, column] = b_k
-                        u = np.copy(
-                            np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
-                        )  #####copy needed because derivative function rewrites vector variable as normed vector
-                        w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
-                        v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
-
-                    elif q == q_k:
-                        b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][2]) * Bohr
-                        b[row : row + 3, column] = b_k
-                        u = np.copy(
-                            np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
-                        )  #####copy needed because derivative function rewrites vector variable as normed vector
-                        w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
-                        v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
-
-                    elif q == q_l:
-                        b_k = np.radians(ase.geometry.get_dihedrals_derivatives(u, v, w)[0][3]) * Bohr
-                        b[row : row + 3, column] = b_k
-                        u = np.copy(
-                            np.atleast_2d(mol.get_distance(q_i, q_j, mic=True, vector=True))
-                        )  #####copy needed because derivative function rewrites vector variable as normed vector
-                        w = np.copy(np.atleast_2d(mol.get_distance(q_k, q_l, mic=True, vector=True)))
-                        v = np.copy(np.atleast_2d(mol.get_distance(q_j, q_k, mic=True, vector=True)))
             row += 3
         column += 1
 
