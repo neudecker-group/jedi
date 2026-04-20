@@ -67,3 +67,8 @@ testpaths = [
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.lint]
+ignore = [
+    "E741", # do not lint ambigious variables names such as l, O, I
+]
