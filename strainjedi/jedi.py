@@ -14,7 +14,7 @@ from ase.utils import jsonable
 from numpy.typing import NDArray
 from typing_extensions import Any, Dict, List, Optional, Union, deprecated
 
-from strainjedi import reporting
+from strainjedi import bmatrix, reporting
 from strainjedi.visualization import ColorMapper, MatplotlibVisualizer, VMDVisualizer
 
 
@@ -45,7 +45,7 @@ class Jedi:
         self.indices = np.arange(0, len(self.atoms0))
         self.custom_bonds = None  # list of custom added bonds
         self.get_common_rims()
-        self.get_b_matrix()
+        self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list)
         self.get_delta_q()
         self.get_hessian()
         self.energies = epot  # energies of the geometries
@@ -444,16 +444,17 @@ class Jedi:
 
             for NAtom in indices:  # for-loop of Number of Atoms
                 for q in BA:
-                    if NAtom == q:
-                        if q == q_j:  # if-Statements for sign-factors
-                            b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][1]
-                            b[row : row + 3, column] = -b_j
-                        elif q == q_i:
-                            b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][0]
-                            b[row : row + 3, column] = -b_j
-                        elif q == q_k:
-                            b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][2]
-                            b[row : row + 3, column] = -b_j
+                    if NAtom != q:
+                        continue
+                    if q == q_j:  # if-Statements for sign-factors
+                        b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][1]
+                        b[row : row + 3, column] = -b_j
+                    elif q == q_i:
+                        b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][0]
+                        b[row : row + 3, column] = -b_j
+                    elif q == q_k:
+                        b_j = get_B_matrix_angles_derivatives(np.atleast_2d(u), np.atleast_2d(v))[0][2]
+                        b[row : row + 3, column] = -b_j
                 row += 3
             column += 1
 
