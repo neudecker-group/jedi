@@ -56,7 +56,6 @@ class TestGetBMatrix:
     def test_B_matrix_reference(self, deds_jedi_fresh, deds_rim_list, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
         j.rim_list = deds_rim_list
-        j.get_b_matrix()
         np.testing.assert_allclose(j.B, deds_ref["bmatrix"], atol=1e-05)
 
 
@@ -69,7 +68,6 @@ class TestGetDeltaQ:
         j = Jedi(deds_opt, deds_opt, deds_vibdata)
         j.indices = np.arange(len(deds_opt))
         j.get_common_rims()
-        j.get_b_matrix()
         j.get_delta_q()
         np.testing.assert_allclose(j.delta_q, 0.0, atol=1e-05)
 
