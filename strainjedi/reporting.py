@@ -131,7 +131,7 @@ def _append_ric_rows(
     output: list[str],
     layout: ReportLayout,
     atoms_obj: atoms.Atoms,
-    rim_list: np.ndarray,
+    rim_list: list,
     rics_dict: Dict[int, str],
     delta_q: np.ndarray | None,
     proc_E_RIMs: np.ndarray,
@@ -155,7 +155,7 @@ def _append_ric_rows(
 
 def jedi_printout(
     atoms_obj: atoms.Atoms,
-    rim_list: np.ndarray,
+    rim_list: list,
     delta_q: np.ndarray,
     E_geometries: float,
     E_RIMs_total: float,
@@ -198,7 +198,7 @@ def jedi_printout(
 
 def jedi_printout_bonds(
     atoms_obj: atoms.Atoms,
-    rim_list: np.ndarray,
+    rim_list: list,
     E_geometries: float,
     E_RIMs_total: float,
     proc_geom_RIMs: float,
