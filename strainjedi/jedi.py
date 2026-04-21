@@ -39,8 +39,8 @@ class Jedi:
         self.atoms0 = atoms0  # ref state
         self.atomsF = atomsF  # strained state
         self.modes = modes  # VibrationsData object
-        self.vdwf = 0.9
-        self.covf = constants.COVALENT_CUTOFF
+        self.covf = constants.COVALENCY_FACTOR
+        self.vdwf = constants.VAN_DER_WAALS_FACTOR
         self.indices = np.arange(0, len(self.atoms0))
         self.custom_bonds = None  # list of custom added bonds
         self.get_common_rims()
@@ -582,7 +582,7 @@ class Jedi:
 
         self.custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
 
-    def set_bond_params(self, covf=constants.COVALENT_CUTOFF, vdwf=0.9):
+    def set_bond_params(self, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
         """
         Args:
             covf:
@@ -696,7 +696,7 @@ def jedi_analysis(
     return proc_E_RIMs, E_RIMs, E_RIMs_total, proc_geom_RIMs, delta_q
 
 
-def get_hbonds(mol, covf=constants.COVALENT_CUTOFF, vdwf=0.9):
+def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
     """
     Get all hbonds in a structure.
     Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90°

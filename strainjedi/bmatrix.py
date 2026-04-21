@@ -143,7 +143,7 @@ def get_B_matrix_angles_derivatives(u, v):
 def get_rics(mol, indices, custom_bonds):
     """Gets the redundant internal coordinates"""
 
-    cutoff = ase.neighborlist.natural_cutoffs(mol, mult=constants.COVALENT_CUTOFF)
+    cutoff = ase.neighborlist.natural_cutoffs(mol, mult=constants.COVALENCY_FACTOR)
     bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
     bl = bl[bl[:, 0] < bl[:, 1]]  # remove double metioned
