@@ -139,13 +139,7 @@ class Jedi:
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
             )
 
-        try:  # Get energies from calculator
-            all_E_geometries = self.get_energies()
-        # FIXME: which exception might happen here?
-        except Exception:  # Fallback to custom energies
-            all_E_geometries = self.energies
-
-        E_geometries = all_E_geometries[0]
+        E_geometries = self.get_energies()[0]
 
         # run the analysis
         (
@@ -250,8 +244,7 @@ class Jedi:
         """Calls the energies of the Atoms objects.
 
         Returns:
-            [energy difference, energy of atoms0, energy of atomsF]
-
+            [energy difference, energy of atomsF, energy of atoms0]
         """
         e0 = self.atoms0.calc.get_potential_energy()
         eF = self.atomsF.calc.get_potential_energy()
@@ -260,7 +253,7 @@ class Jedi:
             eF *= mol / kcal
         deltaE = eF - e0
         self.energies = [deltaE, eF, e0]
-        return [deltaE, eF, e0]
+        return [deltaE, eF, e0]  # WHY??
 
     def get_delta_q(self):
         """get the strain in RICs substracts the values of the relaxed structure from the strained structure
@@ -363,7 +356,7 @@ class Jedi:
                 default: False
         """
 
-        if len(self.proc_E_RIMs) == 0:
+        if self.proc_E_RIMs is None or len(self.proc_E_RIMs) == 0:
             raise ValueError("Analysis has not been run. Jedi.run() must be called before Jedi.visualize()")
 
         if show and not visualizer == "mpl":
@@ -483,11 +476,7 @@ class Jedi:
 
         self.get_delta_q()
 
-        try:
-            all_E_geometries = self.get_energies()
-        except Exception:
-            all_E_geometries = self.energies
-        E_geometries = all_E_geometries[0]
+        E_geometries = self.get_energies()[0]
 
         (
             self.proc_E_RIMs,
@@ -555,7 +544,7 @@ class Jedi:
                 if rim_p[i].shape[0] > 0:
                     rim_list_c.append(np.vstack((rim_list[i], rim_p[i])))
                 else:
-                    rim_list_c.append(np.vstack(rim_list[i]))
+                    rim_list_c.append(rim_list[i])
             _, z = np.unique(rim_list_c[-1], return_counts=True, axis=0)
 
             ind.append(np.where(z > 1)[0])  # get indices where ric is in both sets
