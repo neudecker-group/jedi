@@ -804,9 +804,7 @@ class Jedi:
 
         V_0 = self.atoms0.get_volume()
         C = self.C * GPa / eV * Angstrom**3 * V_0     #unit conversion from GPa to eV
-        vasp_to_voigt = [0, 1, 2, 4, 5, 3]      #different order in VASP than expected for voigt notation
-        C_voigt = C[np.ix_(vasp_to_voigt, vasp_to_voigt)]
-        C_99 = Voigt_6x6_to_full_3x3x3x3(C_voigt).reshape(9,9)
+        C_99 = Voigt_6x6_to_full_3x3x3x3(C).reshape(9,9)
         C_h = self.J.T @ C_99 @ self.J      #unit conversion from eV to eV/Bohr^2
         self.C = C_h / Hartree
 
@@ -831,7 +829,6 @@ class Jedi:
 
     def internal_strain_unit_conversion(self):
         '''Converts internal strains from strain (3Nx6) to lattice vector (3Nx9) dependent, from eV/Å to Hartree/Bohr^2'''
-        #ToDo: negative sign?
         Lambda_voigt = self.internal_strain.reshape(-1, 6)
         Lambda_9 = self.internal_strain_voigt_to_9(Lambda_voigt)
         self.internal_strain =  -Lambda_9 @ self.J / (Hartree / Bohr)
