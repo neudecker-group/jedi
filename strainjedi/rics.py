@@ -17,7 +17,8 @@ class RICS:
     dihedrals: Optional[NDArray]
 
 
-def get_rics(mol, indices, custom_bonds):
+# TODO: Set return type to RICS, but beware of subtle breakages everywhere. Not fun.
+def calculate(mol, indices, custom_bonds):
     """Gets the redundant internal coordinates"""
 
     cutoff = ase.neighborlist.natural_cutoffs(mol, mult=constants.COVALENCY_FACTOR)

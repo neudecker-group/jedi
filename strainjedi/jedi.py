@@ -178,8 +178,8 @@ class Jedi:
 
     def get_common_rics(self):
         """Get only the RICs in both structures, bond breaks cannot be analysed logically"""
-        rim_atoms0 = rics.get_rics(self.atoms0, self.indices, self.custom_bonds)
-        rim_atomsF = rics.get_rics(self.atomsF, self.indices, self.custom_bonds)
+        rim_atoms0 = rics.calculate(self.atoms0, self.indices, self.custom_bonds)
+        rim_atomsF = rics.calculate(self.atomsF, self.indices, self.custom_bonds)
         if len(rim_atoms0[0]) != len(rim_atomsF[0]):
             (
                 warnings.warn_explicit(
