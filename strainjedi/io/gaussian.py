@@ -1,4 +1,3 @@
-import copy
 import re
 from copy import deepcopy
 
@@ -55,8 +54,6 @@ def read_gaussian_out(label, index=-1):
                         forces=forces,
                     )
                     _compare_merge_configs(configs, atoms)
-                atoms = None
-                # energy = None
                 dipole = None
                 forces = None
 
@@ -408,9 +405,6 @@ def write_gaussian_in(
 
 class GaussianDynamics(gaussian.GaussianDynamics):
     def run(self, **kwargs):
-        calc_old = self.atoms.calc
-        params_old = copy.deepcopy(self.calc.parameters)
-
         self.delete_keywords(kwargs)
         self.delete_keywords(self.calc.parameters)
         self.set_keywords(kwargs)
@@ -428,11 +422,6 @@ class GaussianDynamics(gaussian.GaussianDynamics):
         atoms = read_gaussian_out(self.calc.label)
         self.atoms.cell = atoms.cell
         self.atoms.positions = atoms.positions
-
-        # self.calc.parameters = params_old
-        # self.calc.reset()
-        # if calc_old is not None:
-        #   self.atoms.calc = calc_old
 
         return converged
 

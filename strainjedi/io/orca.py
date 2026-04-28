@@ -1,14 +1,15 @@
-from ase.vibrations.vibrations import VibrationsData
-import numpy as np
-from ase.units import Bohr, Hartree
-from ase.calculators.orca import PointChargePotential
-import re
 import os
-from ase.calculators.calculator import FileIOCalculator, Parameters, ReadError
-from typing import Dict, Optional
+import re
 from collections.abc import Iterable
+from typing import Dict, Optional
+
+import numpy as np
 from ase.atoms import Atoms
+from ase.calculators.calculator import FileIOCalculator, Parameters, ReadError
+from ase.calculators.orca import PointChargePotential
 from ase.calculators.singlepoint import SinglePointCalculator
+from ase.units import Bohr, Hartree
+from ase.vibrations.vibrations import VibrationsData
 
 
 class ORCA(FileIOCalculator):
@@ -189,8 +190,6 @@ def read(filename):
 
     filename: str"""
     energy = None
-    forces = None
-    dipole = None
     with open(filename, "r") as fileobj:
         lineiter = iter(fileobj)
         for line in lineiter:
@@ -231,7 +230,7 @@ def get_vibrations(label, atoms, indices=None):
     Returns:
         VibrationsData object.
     """
-    if indices == None:
+    if indices is None:
         indices = range(len(atoms))
     if not os.path.isfile(label + ".hess"):
         raise ReadError("hess file missing.")

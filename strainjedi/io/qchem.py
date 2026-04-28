@@ -144,7 +144,7 @@ def get_vibrations(label, atoms):
                             NCarts = 3 * len(alist)
 
                 i = hess_line + 2
-                while any(l.isalpha() for l in fileobj[i]) == False:
+                while not any(l.isalpha() for l in fileobj[i]):
                     hess.append(fileobj[i])  # read the lines
                     i += 1
                 hess = [l for l in hess if l != "\n"]  # get rid of empty separator lines
@@ -323,7 +323,6 @@ class QChem(qchem.QChem):
 
         with open(filename, "r") as fileobj:
             fileobj = fileobj.readlines()
-            hess_line = 0
             for num, line in enumerate(fileobj, 1):
                 if "Mass-Weighted Hessian Matrix" in line:
                     hess_line = num
@@ -339,7 +338,7 @@ class QChem(qchem.QChem):
                                 NCarts = 3 * len(alist)
 
                     i = hess_line + 2
-                    while any(l.isalpha() for l in fileobj[i]) == False:
+                    while not any(l.isalpha() for l in fileobj[i]):
                         hess.append(fileobj[i])  # read the lines
                         i += 1
                     hess = [l for l in hess if l != "\n"]  # get rid of empty separator lines
