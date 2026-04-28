@@ -44,7 +44,6 @@ class TestGetHessian:
 
     def test_hessian_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        j.get_hessian()
         np.testing.assert_allclose(j.H, deds_ref["jediInternalHessian"], atol=1e-05)
 
 

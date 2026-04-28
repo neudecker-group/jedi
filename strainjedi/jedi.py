@@ -43,10 +43,10 @@ class Jedi:
         self.vdwf = constants.VAN_DER_WAALS_FACTOR
         self.indices = np.arange(0, len(self.atoms0))
         self.custom_bonds = None  # list of custom added bonds
-        self.get_common_rics()
+        self.get_common_rics()  # TODO: This also sets self.rim_list (it shouldn't!)
         self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list)
         self.get_delta_q()
-        self.get_hessian()
+        self.H = self.modes._hessian2d / (ase.units.Hartree / ase.units.Bohr**2)
         self.energies = epot  # energies of the geometries
         self.proc_E_RIMs = None  # list of procentual energy stored in single RIMs
         self.part_rim_list = None  # rim list for election of atoms
@@ -234,11 +234,6 @@ class Jedi:
         self.rim_list = common_rims_sorted
 
         return rim_atoms0
-
-    def get_hessian(self):
-        """Calls the hessian from the VibrationsData object"""
-        hessian = self.modes._hessian2d
-        self.H = hessian / (ase.units.Hartree / ase.units.Bohr**2)
 
     def get_energies(self) -> List[float]:
         """Calls the energies of the Atoms objects.
@@ -450,7 +445,6 @@ class Jedi:
         # for calculation with partial hessian
         self.ase_units = ase_units
         self.indices = np.arange(0, len(self.atoms0)).tolist()
-        self.get_hessian()
         if 3 * len(indices) < len(self.H):
             raise ValueError("to little indices for the given hessian")
 
