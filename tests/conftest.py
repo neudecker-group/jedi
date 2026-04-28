@@ -106,10 +106,10 @@ def deds_jedi_fresh(deds_opt, deds_dist, deds_vibdata):
 
 @pytest.fixture(scope="session")
 def deds_jedi_with_rims(deds_opt, deds_dist, deds_vibdata):
-    """Jedi instance with get_common_rims() executed"""
+    """Jedi instance with get_common_rics() executed"""
     j = Jedi(deds_opt, deds_dist, deds_vibdata)
     j.indices = np.arange(0, len(j.atoms0))
-    j.get_common_rims()
+    j.get_common_rics()
     return j
 
 

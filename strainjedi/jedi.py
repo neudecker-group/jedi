@@ -4,16 +4,16 @@ from pathlib import Path
 
 import ase.geometry
 import ase.neighborlist
+import ase.units
 import ase.vibrations
 import numpy as np
 from ase.atoms import Atoms
 from ase.data.vdw import vdw_radii
-from ase.units import Bohr, Hartree, kcal, mol
 from ase.utils import jsonable
 from numpy.typing import NDArray
 from typing_extensions import Any, Dict, List, Optional, Union, deprecated
 
-from strainjedi import bmatrix, constants, reporting
+from strainjedi import bmatrix, constants, reporting, rics
 from strainjedi.visualization import ColorMapper, MatplotlibVisualizer, VMDVisualizer
 
 
@@ -43,7 +43,7 @@ class Jedi:
         self.vdwf = constants.VAN_DER_WAALS_FACTOR
         self.indices = np.arange(0, len(self.atoms0))
         self.custom_bonds = None  # list of custom added bonds
-        self.get_common_rims()
+        self.get_common_rics()
         self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list)
         self.get_delta_q()
         self.get_hessian()
@@ -176,10 +176,10 @@ class Jedi:
                 ase_units=ase_units,
             )
 
-    def get_common_rims(self):
+    def get_common_rics(self):
         """Get only the RICs in both structures, bond breaks cannot be analysed logically"""
-        rim_atoms0 = bmatrix.get_rics(self.atoms0, self.indices, self.custom_bonds)
-        rim_atomsF = bmatrix.get_rics(self.atomsF, self.indices, self.custom_bonds)
+        rim_atoms0 = rics.get_rics(self.atoms0, self.indices, self.custom_bonds)
+        rim_atomsF = rics.get_rics(self.atomsF, self.indices, self.custom_bonds)
         if len(rim_atoms0[0]) != len(rim_atomsF[0]):
             (
                 warnings.warn_explicit(
@@ -238,7 +238,7 @@ class Jedi:
     def get_hessian(self):
         """Calls the hessian from the VibrationsData object"""
         hessian = self.modes._hessian2d
-        self.H = hessian / (Hartree / Bohr**2)
+        self.H = hessian / (ase.units.Hartree / ase.units.Bohr**2)
 
     def get_energies(self) -> List[float]:
         """Calls the energies of the Atoms objects.
@@ -249,8 +249,8 @@ class Jedi:
         e0 = self.atoms0.calc.get_potential_energy()
         eF = self.atomsF.calc.get_potential_energy()
         if not self.ase_units:
-            e0 *= mol / kcal
-            eF *= mol / kcal
+            e0 *= ase.units.mol / ase.units.kcal
+            eF *= ase.units.mol / ase.units.kcal
         deltaE = eF - e0
         self.energies = [deltaE, eF, e0]
         return [deltaE, eF, e0]  # WHY??
@@ -266,7 +266,7 @@ class Jedi:
             len(self.rim_list)
         # FIXME: what happens here?
         except Exception:
-            self.get_common_rims()
+            self.get_common_rics()
 
         if len(self.B) == 0:
             self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list)
@@ -278,12 +278,12 @@ class Jedi:
 
         # bonds
         for q in self.rim_list[0]:
-            q0.append(self.atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / Bohr)
-            qF.append(self.atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / Bohr)
+            q0.append(self.atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
+            qF.append(self.atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
         # custom bonds
         for q in self.rim_list[1]:
-            q0.append(self.atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / Bohr)
-            qF.append(self.atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / Bohr)
+            q0.append(self.atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
+            qF.append(self.atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
         # angles
         for q in self.rim_list[2]:
             q0.append(np.radians(self.atoms0.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
@@ -460,7 +460,7 @@ class Jedi:
             cbonds_flag = True
             self.custom_bonds = self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
 
-        self.rim_list = self.get_common_rims()
+        self.rim_list = self.get_common_rics()
 
         rim_list = self.rim_list
         if len(rim_list) == 0:
@@ -532,7 +532,7 @@ class Jedi:
             custom_bonds = self.custom_bonds.copy()
             cbonds_flag = True
             self.custom_bonds = self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
-        rim_p = self.get_common_rims()  # get rimlist of substructure
+        rim_p = self.get_common_rics()  # get rimlist of substructure
 
         ind = []
         rim_list_c = []  # preparing for stacking rim_list to be able to use np.unique
@@ -659,13 +659,13 @@ def jedi_analysis(
 
     if ase_units:
         b = np.shape(rim_list[0])[0] + np.shape(rim_list[1])[0]  # border between lengths and angles
-        delta_q[0:b] *= Bohr
+        delta_q[0:b] *= ase.units.Bohr
         delta_q[b::] = np.degrees(delta_q[b::])
-        E_RIMs = np.array(E_RIMs) * Hartree
-        E_RIMs_total *= Hartree
+        E_RIMs = np.array(E_RIMs) * ase.units.Hartree
+        E_RIMs_total *= ase.units.Hartree
     else:
-        E_RIMs = np.array(E_RIMs) / kcal * mol * Hartree
-        E_RIMs_total *= mol / kcal * Hartree
+        E_RIMs = np.array(E_RIMs) / ase.units.kcal * ase.units.mol * ase.units.Hartree
+        E_RIMs_total *= ase.units.mol / ase.units.kcal * ase.units.Hartree
 
     proc_geom_RIMs = 100 * (E_RIMs_total - E_geometries) / E_geometries
 

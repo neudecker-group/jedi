@@ -11,7 +11,7 @@ matplotlib.use("agg")
 
 class TestGetRims:
     """
-    Tests for get_rims() and get_common_rims() methods.
+    Tests for get_rims() and get_common_rics() methods.
     """
 
     def test_rim_list_shape(self, deds_jedi_with_rims):
@@ -32,7 +32,7 @@ class TestGetRims:
         j = copy.deepcopy(deds_jedi_fresh)
         j.add_custom_bonds([[0, 5], [2, 10]])
         j.indices = np.arange(0, len(j.atoms0))
-        j.get_common_rims()
+        j.get_common_rics()
         assert j.rim_list[1].shape == (2, 2)
         assert list(j.rim_list[1][0]) == [0, 5]
 
@@ -67,8 +67,7 @@ class TestGetDeltaQ:
     def test_delta_q_identical_structure(self, deds_opt, deds_vibdata):
         j = Jedi(deds_opt, deds_opt, deds_vibdata)
         j.indices = np.arange(len(deds_opt))
-        j.get_common_rims()
-        j.get_delta_q()
+        j.get_common_rics()
         np.testing.assert_allclose(j.delta_q, 0.0, atol=1e-05)
 
     def test_delta_q_deds_reference(self, deds_jedi_fresh, deds_rim_list, deds_ref):
