@@ -22,32 +22,32 @@ def calculate(mol, indices, custom_bonds):
     """Gets the redundant internal coordinates"""
 
     cutoff = ase.neighborlist.natural_cutoffs(mol, mult=constants.COVALENCY_FACTOR)
-    bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
+    bonds = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
-    bl = bl[bl[:, 0] < bl[:, 1]]  # remove double metioned
-    bl, counts = np.unique(bl, return_counts=True, axis=0)
-    if ~np.all(counts == 1):
+    bonds = bonds[bonds[:, 0] < bonds[:, 1]]  # remove double metioned
+    bonds, counts = np.unique(bonds, return_counts=True, axis=0)
+    if not np.all(counts == 1):
         print(
             "unit cell too small hessian not calculated for interaction \
                jedi analysis for a finite system consisting of the cell will be conducted"
         )
-    bl = np.atleast_2d(bl)
+    bonds = np.atleast_2d(bonds)
 
     if len(indices) != len(mol):
-        bl = bl[np.all([np.isin(bl[:, 0], indices), np.isin(bl[:, 1], indices)], axis=0)]
+        bonds = bonds[np.all([np.isin(bonds[:, 0], indices), np.isin(bonds[:, 1], indices)], axis=0)]
 
-    rim_list = [bl]
+    rim_list = [bonds]
 
     # possibility of adding custom bonds like hbonds, long range interactions
     if custom_bonds is not None:
-        bl = np.vstack((bl, custom_bonds))
+        bonds = np.vstack((bonds, custom_bonds))
         rim_list.append(custom_bonds)
     if custom_bonds is None:
         rim_list.append(np.array([]))
 
     # compute adjacency
     neighbors = [[] for _ in range(len(mol))]
-    for a, b in bl:
+    for a, b in bonds:
         a = int(a)
         b = int(b)
         neighbors[a].append(b)
@@ -79,8 +79,8 @@ def calculate(mol, indices, custom_bonds):
     deg = np.fromiter((len(n) for n in neighbors), dtype=np.int64)
 
     # A bond is torsionable if both endpoints have degree > 1
-    mask = (deg[bl[:, 0]] > 1) & (deg[bl[:, 1]] > 1)
-    torsionable_bonds = bl[mask]
+    mask = (deg[bonds[:, 0]] > 1) & (deg[bonds[:, 1]] > 1)
+    torsionable_bonds = bonds[mask]
 
     # torsion angles
     da_rows = []
