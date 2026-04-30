@@ -407,6 +407,7 @@ class Jedi:
         self.E_harm_total = None      #sum of E_rims
         self.E_nonaffine_total = None
         self.E_lattice_total = None
+        self.proc_geom_RIMs = None
         self.custom_bonds = None        #list of custom added bonds
         self.ase_units = False
         self.vdwf=0.9
@@ -527,14 +528,14 @@ class Jedi:
         E_geometries=all_E_geometries[0]
 
         #run the analysis
-        self.proc_E_RIMs,self.E_RIMs,self.E_harm_total,self.E_nonaffine_total,self.E_lattice_total,proc_geom_RIMs,self.delta_q = jedi_analysis(rim_list,B,H_cart,delta_q,self.Q,self.C,self.internal_strain,self.num_lattice_B,E_geometries,ase_units=ase_units)
+        self.proc_E_RIMs,self.E_RIMs,self.E_harm_total,self.E_nonaffine_total,self.E_lattice_total,self.proc_geom_RIMs,self.delta_q = jedi_analysis(rim_list,B,H_cart,delta_q,self.Q,self.C,self.internal_strain,self.num_lattice_B,E_geometries,ase_units=ase_units)
 
         if indices:          #get only rims of interest
             self.post_process(indices)
             self.E_harm_total = sum(self.E_RIMs)
-            proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
+            self.proc_geom_RIMs = 100*(sum(self.E_RIMs)-E_geometries)/E_geometries
         if printout:
-            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries,self.E_harm_total,self.E_nonaffine_total,self.E_lattice_total,proc_geom_RIMs,self.proc_E_RIMs,self.E_RIMs,ase_units=ase_units)
+            jedi_printout(self.atoms0,self.rim_list,self.delta_q,E_geometries,self.E_harm_total,self.E_nonaffine_total,self.E_lattice_total,self.proc_geom_RIMs,self.proc_E_RIMs,self.E_RIMs,ase_units=ase_units)
         pass
 
 
