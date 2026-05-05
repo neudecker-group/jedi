@@ -262,12 +262,6 @@ class Jedi:
             2D array of the values.
         """
 
-        try:
-            len(self.rim_list)
-        # FIXME: what happens here?
-        except Exception:
-            self.get_common_rics()
-
         if len(self.B) == 0:
             self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list)
         q0 = []
@@ -449,24 +443,21 @@ class Jedi:
         """
         # for calculation with partial hessian
         self.ase_units = ase_units
-        self.indices = np.arange(0, len(self.atoms0)).tolist()
         if 3 * len(indices) < len(self.H):
             raise ValueError("to little indices for the given hessian")
 
-        cbonds_flag = False
+        has_custom_bonds = False
         if self.custom_bonds is not None:
-            custom_bonds = self.custom_bonds.copy()
-            cbonds_flag = True
+            old_custom_bonds = self.custom_bonds.copy()
+            has_custom_bonds = True
             self.custom_bonds = self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
 
-        self.rim_list = self.get_common_rics()
-
-        rim_list = self.rim_list
+        rim_list = rics.calculate(self.atoms0, self.indices, self.custom_bonds)
 
         if len(rim_list) == 0:
             raise ValueError("Chosen indexlist has no rims")
 
-        self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list, indices=self.indices)
+        self.B = bmatrix.get_b_matrix(self.atoms0, rim_list, indices=self.indices)
         # set B matrix values of not considered atoms to 0
         for i in range(len(self.H)):
             if i not in indices:
@@ -509,8 +500,8 @@ class Jedi:
             ase_units=ase_units,
         )
 
-        if cbonds_flag:
-            self.custom_bonds = custom_bonds  # restore the user input
+        if has_custom_bonds:
+            self.custom_bonds = old_custom_bonds  # restore the user input
 
     def post_process(
         self, indices
@@ -532,7 +523,10 @@ class Jedi:
             custom_bonds = self.custom_bonds.copy()
             cbonds_flag = True
             self.custom_bonds = self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
-        rim_p = self.get_common_rics()  # get rimlist of substructure
+        rim_p = rics.intersect(
+            rics.calculate(self.atoms0, indices, self.custom_bonds),
+            rics.calculate(self.atomsF, indices, self.custom_bonds),
+        )
 
         ind = []
         rim_list_c = []  # preparing for stacking rim_list to be able to use np.unique
@@ -552,6 +546,23 @@ class Jedi:
             ind[i] = ind[i] + np.sum([p.shape[0] for p in rim_list[0:i]])  # get correct indices for the stacked array
         ind = np.hstack(ind)
         ind = ind.astype(int)
+
+        # Keep rim_list aligned with filtered E_RIMs/delta_q.
+        # ind is a "flat" index over the concatenation of rim_list[0], rim_list[1], rim_list[2], rim_list[3]
+        counts = [0 if getattr(rim_list[i], "size", 0) == 0 else rim_list[i].shape[0] for i in range(4)]
+        offsets = np.cumsum([0] + counts)  # length 5
+
+        new_rim_list = []
+        for i in range(4):
+            if counts[i] == 0:
+                new_rim_list.append(np.array([]))
+                continue
+
+            mask = (ind >= offsets[i]) & (ind < offsets[i + 1])
+            local_ind = ind[mask] - offsets[i]
+            new_rim_list.append(rim_list[i][local_ind])
+
+        self.rim_list = new_rim_list
 
         self.E_RIMs = np.array(self.E_RIMs)[ind]
         self.delta_q = self.delta_q[ind]
