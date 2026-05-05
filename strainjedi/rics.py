@@ -1,5 +1,6 @@
 import dataclasses
 import itertools
+import warnings
 from typing import Optional
 
 import ase.neighborlist
@@ -116,3 +117,53 @@ def calculate(mol, indices, custom_bonds):
     rim_list_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
 
     return rim_list_sorted
+
+
+def intersect(rics0, ricsF):
+    """Returns the intersection of rics0 and ricsF, i.e. those RICs that are only present in both."""
+
+    if len(rics0[0]) != len(ricsF[0]):
+        warnings.warn_explicit(
+            f"The distorted structure has a different number of bonds ({len(ricsF[0])})\n"
+            f"compared to the relaxed structure ({len(rics0[0])}). "
+            f"In this case the JEDI strain analysis can not be applied correctly.",
+            UserWarning,
+            "",
+            0,
+        )
+    if len(rics0[2]) != len(ricsF[2]):
+        warnings.warn_explicit(
+            f"The distorted structure has a different number of angles ({len(ricsF[2])})"
+            f" compared to the relaxed structure ({len(rics0[2])}). ",
+            UserWarning,
+            "",
+            0,
+        )
+    if len(rics0[3]) != len(ricsF[3]):
+        warnings.warn_explicit(
+            f"The distorted structure has a different number of dihedral angles ({len(ricsF[3])})"
+            f" compared to the relaxed structure ({len(rics0[3])}).",
+            UserWarning,
+            "",
+            0,
+        )
+
+    common_rims = [np.empty(0) for _ in range(4)]
+    for i in range(len(rics0)):
+        if rics0[i].shape[0] == 0:
+            continue
+        elif ricsF[i].shape[0] == 0:
+            common_rims[i] = np.empty(0)
+        else:
+            rics0v = rics0[i].view([("", rics0[i].dtype)] * rics0[i].shape[1]).ravel()
+            ricsFv = (
+                ricsF[i].view([("", ricsF[i].dtype)] * ricsF[i].shape[1]).ravel()
+            )  # get a viable input for np.intersect1d()
+            rim_l, ind, _ = np.intersect1d(
+                rics0v, ricsFv, return_indices=True
+            )  # get the rims that exist in both structures
+            rim_l = rim_l[ind.argsort(kind="stable")]
+            common_rims[i] = rim_l.view(rics0[i].dtype).reshape(-1, rics0[i].shape[1])
+    common_rims_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in common_rims]
+
+    return common_rims_sorted

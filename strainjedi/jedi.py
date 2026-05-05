@@ -43,7 +43,10 @@ class Jedi:
         self.vdwf = constants.VAN_DER_WAALS_FACTOR
         self.indices = np.arange(0, len(self.atoms0))
         self.custom_bonds = None  # list of custom added bonds
-        self.get_common_rics()  # TODO: This also sets self.rim_list (it shouldn't!)
+        self.rim_list = rics.intersect(
+            rics.calculate(self.atoms0, self.indices, self.custom_bonds),
+            rics.calculate(self.atomsF, self.indices, self.custom_bonds),
+        )
         self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list)
         self.get_delta_q()
         self.H = self.modes._hessian2d / (ase.units.Hartree / ase.units.Bohr**2)
@@ -141,6 +144,8 @@ class Jedi:
 
         E_geometries = self.get_energies()[0]
 
+        rics = self.rim_list
+
         # run the analysis
         (
             self.proc_E_RIMs,
@@ -150,7 +155,7 @@ class Jedi:
             self.delta_q,
         ) = jedi_analysis(
             self.atoms0,
-            self.rim_list,
+            rics,
             self.B,
             self.H,
             self.delta_q,
@@ -166,7 +171,7 @@ class Jedi:
         if printout:
             reporting.jedi_printout(
                 self.atoms0,
-                self.rim_list,
+                rics,
                 self.delta_q,
                 E_geometries,
                 self.E_RIMs_total,
@@ -457,6 +462,7 @@ class Jedi:
         self.rim_list = self.get_common_rics()
 
         rim_list = self.rim_list
+
         if len(rim_list) == 0:
             raise ValueError("Chosen indexlist has no rims")
 
