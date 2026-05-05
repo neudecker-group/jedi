@@ -3,6 +3,7 @@ import pytest
 from ase.io import read
 from ase.vibrations.vibrations import VibrationsData
 
+from strainjedi import rics
 from strainjedi.jedi import Jedi, jedi_analysis
 from tests.resources import path_to_test_resources
 
@@ -106,10 +107,12 @@ def deds_jedi_fresh(deds_opt, deds_dist, deds_vibdata):
 
 @pytest.fixture(scope="session")
 def deds_jedi_with_rims(deds_opt, deds_dist, deds_vibdata):
-    """Jedi instance with get_common_rics() executed"""
+    """Jedi instance with common RICs computed."""
     j = Jedi(deds_opt, deds_dist, deds_vibdata)
     j.indices = np.arange(0, len(j.atoms0))
-    j.get_common_rics()
+    j.rim_list = rics.intersect(
+        rics.calculate(j.atoms0, j.indices, j.custom_bonds), rics.calculate(j.atomsF, j.indices, j.custom_bonds)
+    )
     return j
 
 
