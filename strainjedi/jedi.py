@@ -181,65 +181,6 @@ class Jedi:
                 ase_units=ase_units,
             )
 
-    def get_common_rics(self):
-        """Get only the RICs in both structures, bond breaks cannot be analysed logically"""
-        rim_atoms0 = rics.calculate(self.atoms0, self.indices, self.custom_bonds)
-        rim_atomsF = rics.calculate(self.atomsF, self.indices, self.custom_bonds)
-        if len(rim_atoms0[0]) != len(rim_atomsF[0]):
-            (
-                warnings.warn_explicit(
-                    f"The distorted structure has a different number of bonds ({len(rim_atomsF[0])})\n"
-                    f"compared to the relaxed structure ({len(rim_atoms0[0])}). "
-                    f"In this case the JEDI strain analysis can not be applied correctly.",
-                    UserWarning,
-                    "",
-                    0,
-                )
-            )
-        if len(rim_atoms0[2]) != len(rim_atomsF[2]):
-            (
-                warnings.warn_explicit(
-                    f"The distorted structure has a different number of angles ({len(rim_atomsF[2])})"
-                    f" compared to the relaxed structure ({len(rim_atoms0[2])}). ",
-                    UserWarning,
-                    "",
-                    0,
-                )
-            )
-        if len(rim_atoms0[3]) != len(rim_atomsF[3]):
-            (
-                warnings.warn_explicit(
-                    f"The distorted structure has a different number of dihedral angles ({len(rim_atomsF[3])})"
-                    f" compared to the relaxed structure ({len(rim_atoms0[3])}).",
-                    UserWarning,
-                    "",
-                    0,
-                )
-            )
-        common_rims = [np.empty(0) for _ in range(4)]
-        for i in range(len(rim_atoms0)):
-            if rim_atoms0[i].shape[0] == 0:
-                continue
-            elif rim_atomsF[i].shape[0] == 0:
-                common_rims[i] = np.empty(0)
-            else:
-                rim_atoms0v = rim_atoms0[i].view([("", rim_atoms0[i].dtype)] * rim_atoms0[i].shape[1]).ravel()
-                rim_atomsFv = (
-                    rim_atomsF[i].view([("", rim_atomsF[i].dtype)] * rim_atomsF[i].shape[1]).ravel()
-                )  # get a viable input for np.intersect1d()
-
-                rim_l, ind, _ = np.intersect1d(
-                    rim_atoms0v, rim_atomsFv, return_indices=True
-                )  # get the rims that exist in both structures
-                rim_l = rim_l[ind.argsort(kind="stable")]
-
-                common_rims[i] = rim_l.view(rim_atoms0[i].dtype).reshape(-1, rim_atoms0[i].shape[1])
-        common_rims_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in common_rims]
-        # FIXME: This should not be mutated any further. WTF?
-        self.rim_list = common_rims_sorted
-
-        return rim_atoms0
-
     def get_energies(self) -> List[float]:
         """Calls the energies of the Atoms objects.
 

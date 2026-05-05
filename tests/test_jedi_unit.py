@@ -3,6 +3,7 @@ import copy
 import matplotlib
 import numpy as np
 
+from strainjedi import rics
 from strainjedi.jedi import Jedi
 
 # Headless backend for testing
@@ -32,7 +33,11 @@ class TestGetRims:
         j = copy.deepcopy(deds_jedi_fresh)
         j.add_custom_bonds([[0, 5], [2, 10]])
         j.indices = np.arange(0, len(j.atoms0))
-        j.get_common_rics()
+
+        j.rim_list = rics.intersect(
+            rics.calculate(j.atoms0, j.indices, j.custom_bonds), rics.calculate(j.atomsF, j.indices, j.custom_bonds)
+        )
+
         assert j.rim_list[1].shape == (2, 2)
         assert list(j.rim_list[1][0]) == [0, 5]
 
@@ -66,7 +71,9 @@ class TestGetDeltaQ:
     def test_delta_q_identical_structure(self, deds_opt, deds_vibdata):
         j = Jedi(deds_opt, deds_opt, deds_vibdata)
         j.indices = np.arange(len(deds_opt))
-        j.get_common_rics()
+        j.rim_list = rics.intersect(
+            rics.calculate(j.atoms0, j.indices, j.custom_bonds), rics.calculate(j.atomsF, j.indices, j.custom_bonds)
+        )
         np.testing.assert_allclose(j.delta_q, 0.0, atol=1e-05)
 
     def test_delta_q_deds_reference(self, deds_jedi_fresh, deds_rim_list, deds_ref):
