@@ -36,44 +36,42 @@ class Jedi:
         epot: np.array or None
             Vector containing (f - i) endiff., final, initial energy or None. Default: None.
         """
-        self.atoms0 = atoms0  # ref state
-        self.atomsF = atomsF  # strained state
-        self.modes = modes  # VibrationsData object
-        self.covf = constants.COVALENCY_FACTOR
-        self.vdwf = constants.VAN_DER_WAALS_FACTOR
-        self.indices = np.arange(0, len(self.atoms0))
-        self.custom_bonds = None  # list of custom added bonds
-        self.rim_list = rics.intersect(
-            rics.calculate(self.atoms0, self.indices, self.custom_bonds),
-            rics.calculate(self.atomsF, self.indices, self.custom_bonds),
+        self._atoms0 = atoms0  # ref state
+        self._atomsF = atomsF  # strained state
+        self._covf = constants.COVALENCY_FACTOR
+        self._vdwf = constants.VAN_DER_WAALS_FACTOR
+        self._indices = np.arange(0, len(self._atoms0))
+        self._custom_bonds = None  # list of custom added bonds
+        self._rim_list = rics.intersect(
+            rics.calculate(self._atoms0, self._indices, self._custom_bonds),
+            rics.calculate(self._atomsF, self._indices, self._custom_bonds),
         )
-        self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list)
+        self._B = bmatrix.get_b_matrix(self._atoms0, self._rim_list)
         self.get_delta_q()
-        self.H = self.modes._hessian2d / (ase.units.Hartree / ase.units.Bohr**2)
-        self.energies = epot  # energies of the geometries
-        self.proc_E_RIMs = None  # list of procentual energy stored in single RIMs
-        self.part_rim_list = None  # rim list for election of atoms
-        self.E_RIMs = None  # list of energies stored in the rims
-        self.E_RIMs_total = None  # sum of E_rims
-        self.ase_units = False
-        self.qF = None  # bond lengths and angles in Bohr and degree in distorted molecule
-        self.q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
+        self._H = modes._hessian2d / (ase.units.Hartree / ase.units.Bohr**2)
+        self._energies = epot  # energies of the geometries
+        self._proc_E_RIMs = None  # list of procentual energy stored in single RIMs
+        self._part_rim_list = None  # rim list for election of atoms
+        self._E_RIMs = None  # list of energies stored in the rims
+        self._E_RIMs_total = None  # sum of E_rims
+        self._ase_units = False
+        self._qF = None  # bond lengths and angles in Bohr and degree in distorted molecule
+        self._q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
 
     def todict(self) -> Dict[str, Any]:
         """make it saveable with .write()"""
         return {
-            "atoms0": self.atoms0,
-            "atomsF": self.atomsF,
-            #'modes': self.modes,
-            "hessian": self.H,
-            "bmatrix": self.B,
-            "delta_q": self.delta_q,
-            "rim_list": self.rim_list,
-            "energies": self.energies,
-            "indices": self.indices,
-            "E_RIMS": self.E_RIMs,
-            "proc_E_RIMS": self.proc_E_RIMs,
-            "custom_bonds": self.custom_bonds,
+            "atoms0": self._atoms0,
+            "atomsF": self._atomsF,
+            "hessian": self._H,
+            "bmatrix": self._B,
+            "delta_q": self._delta_q,
+            "rim_list": self._rim_list,
+            "energies": self._energies,
+            "indices": self._indices,
+            "E_RIMS": self._E_RIMs,
+            "proc_E_RIMS": self._proc_E_RIMs,
+            "custom_bonds": self._custom_bonds,
         }
 
     @classmethod
@@ -97,29 +95,29 @@ class Jedi:
                 assert isinstance(data["indices"], (collections.abc.Sequence, np.ndarray))
                 modes = ase.vibrations.VibrationsData.from_2d(data["atoms0"], data["hessian"], data["indices"])
                 cl = cls(data["atoms0"], data["atomsF"], modes)
-                cl.indices = data["indices"]
+                cl._indices = data["indices"]
             else:
                 modes = ase.vibrations.VibrationsData.from_2d(data["atoms0"], data["hessian"])
                 cl = cls(data["atoms0"], data["atomsF"], modes)
-            cl.H = data["hessian"]
+            cl._H = data["hessian"]
         if data["bmatrix"] is not None:
             assert isinstance(data["bmatrix"], (collections.abc.Sequence, np.ndarray))
-            cl.B = data["bmatrix"]
+            cl._B = data["bmatrix"]
         if data["delta_q"] is not None:
             assert isinstance(data["delta_q"], (collections.abc.Sequence, np.ndarray))
-            cl.delta_q = data["delta_q"]
+            cl._delta_q = data["delta_q"]
         if data["rim_list"] is not None:
             assert isinstance(data["rim_list"], (collections.abc.Sequence, np.ndarray))
-            cl.rim_list = data["rim_list"]
+            cl._rim_list = data["rim_list"]
         if data["energies"] is not None:
             assert isinstance(data["energies"], (collections.abc.Sequence, list))
-            cl.energies = data["energies"]
+            cl._energies = data["energies"]
         if data["E_RIMS"] is not None:
             assert isinstance(data["proc_E_RIMS"], (collections.abc.Sequence, np.ndarray))
-            cl.E_RIMs = data["E_RIMS"]
+            cl._E_RIMs = data["E_RIMS"]
         if data["proc_E_RIMS"] is not None:
             assert isinstance(data["proc_E_RIMS"], (collections.abc.Sequence, np.ndarray))
-            cl.proc_E_RIMs = data["proc_E_RIMS"]
+            cl._proc_E_RIMs = data["proc_E_RIMS"]
         if data["custom_bonds"] is not None:
             assert isinstance(data["custom_bonds"], (collections.abc.Sequence, list))
         return cl
@@ -137,47 +135,45 @@ class Jedi:
         """
         self.ase_units = ase_units
         # get necessary data
-        if len(self.atoms0) != self.H.shape[0] / 3:
+        if len(self._atoms0) != self._H.shape[0] / 3:
             raise ValueError(
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
             )
 
         E_geometries = self.get_energies()[0]
 
-        rics = self.rim_list
-
         # run the analysis
         (
-            self.proc_E_RIMs,
-            self.E_RIMs,
-            self.E_RIMs_total,
+            self._proc_E_RIMs,
+            self._E_RIMs,
+            self._E_RIMs_total,
             proc_geom_RIMs,
-            self.delta_q,
+            self._delta_q,
         ) = jedi_analysis(
-            self.atoms0,
-            rics,
-            self.B,
-            self.H,
-            self.delta_q,
+            self._atoms0,
+            self._rim_list,
+            self._B,
+            self._H,
+            self._delta_q,
             E_geometries,
             ase_units=ase_units,
         )
 
         if indices:  # get only rims of interest
             self.post_process(indices)
-            self.E_RIMs_total = sum(self.E_RIMs)
-            proc_geom_RIMs = 100 * (sum(self.E_RIMs) - E_geometries) / E_geometries
+            self._E_RIMs_total = sum(self._E_RIMs)
+            proc_geom_RIMs = 100 * (sum(self._E_RIMs) - E_geometries) / E_geometries
 
         if printout:
             reporting.jedi_printout(
-                self.atoms0,
-                rics,
-                self.delta_q,
+                self._atoms0,
+                self._rim_list,
+                self._delta_q,
                 E_geometries,
-                self.E_RIMs_total,
+                self._E_RIMs_total,
                 proc_geom_RIMs,
-                self.proc_E_RIMs,
-                self.E_RIMs,
+                self._proc_E_RIMs,
+                self._E_RIMs,
                 ase_units=ase_units,
             )
 
@@ -187,13 +183,13 @@ class Jedi:
         Returns:
             [energy difference, energy of atomsF, energy of atoms0]
         """
-        e0 = self.atoms0.calc.get_potential_energy()
-        eF = self.atomsF.calc.get_potential_energy()
-        if not self.ase_units:
+        e0 = self._atoms0.calc.get_potential_energy()
+        eF = self._atomsF.calc.get_potential_energy()
+        if not self._ase_units:
             e0 *= ase.units.mol / ase.units.kcal
             eF *= ase.units.mol / ase.units.kcal
         deltaE = eF - e0
-        self.energies = [deltaE, eF, e0]
+        self._energies = [deltaE, eF, e0]
         return [deltaE, eF, e0]  # WHY??
 
     def get_delta_q(self):
@@ -203,8 +199,8 @@ class Jedi:
             2D array of the values.
         """
 
-        if len(self.B) == 0:
-            self.B = bmatrix.get_b_matrix(self.atoms0, self.rim_list)
+        if len(self._B) == 0:
+            self._B = bmatrix.get_b_matrix(self._atoms0, self._rim_list)
         q0 = []
         qF = []
         dq_da = []
@@ -212,21 +208,21 @@ class Jedi:
         # for loops for all redunant internal coordinates
 
         # bonds
-        for q in self.rim_list[0]:
-            q0.append(self.atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
-            qF.append(self.atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
+        for q in self._rim_list[0]:
+            q0.append(self._atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
+            qF.append(self._atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
         # custom bonds
-        for q in self.rim_list[1]:
-            q0.append(self.atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
-            qF.append(self.atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
+        for q in self._rim_list[1]:
+            q0.append(self._atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
+            qF.append(self._atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
         # angles
-        for q in self.rim_list[2]:
-            q0.append(np.radians(self.atoms0.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
-            qF.append(np.radians(self.atomsF.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
+        for q in self._rim_list[2]:
+            q0.append(np.radians(self._atoms0.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
+            qF.append(np.radians(self._atomsF.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
         # dihedral angles
-        for q in self.rim_list[3]:
-            q0_preliminary = np.radians(self.atoms0.get_dihedral(int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True))
-            qF_preliminary = np.radians(self.atomsF.get_dihedral(int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True))
+        for q in self._rim_list[3]:
+            q0_preliminary = np.radians(self._atoms0.get_dihedral(int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True))
+            qF_preliminary = np.radians(self._atomsF.get_dihedral(int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True))
 
             # get the smallest absolute value of the two possible rotational directions
             dda = qF_preliminary - q0_preliminary
@@ -238,10 +234,9 @@ class Jedi:
 
         delta_q = np.append(delta_q, dq_da)
 
-        self.delta_q = delta_q
-
-        self.qF = qF
-        self.q0 = q0
+        self._delta_q = delta_q
+        self._qF = qF
+        self._q0 = q0
 
     def visualize(
         self,
@@ -291,7 +286,7 @@ class Jedi:
                 default: False
         """
 
-        if self.proc_E_RIMs is None or len(self.proc_E_RIMs) == 0:
+        if self._proc_E_RIMs is None or len(self._proc_E_RIMs) == 0:
             raise ValueError("Analysis has not been run. Jedi.run() must be called before Jedi.visualize()")
 
         if show and not visualizer == "mpl":
@@ -384,65 +379,65 @@ class Jedi:
         """
         # for calculation with partial hessian
         self.ase_units = ase_units
-        if 3 * len(indices) < len(self.H):
+        if 3 * len(indices) < len(self._H):
             raise ValueError("to little indices for the given hessian")
 
         has_custom_bonds = False
-        if self.custom_bonds is not None:
-            old_custom_bonds = self.custom_bonds.copy()
+        if self._custom_bonds is not None:
+            old_custom_bonds = self._custom_bonds.copy()
             has_custom_bonds = True
-            self.custom_bonds = self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
+            self._custom_bonds = self._custom_bonds[np.isin(self._custom_bonds, indices).all(axis=1)]
 
-        rim_list = rics.calculate(self.atoms0, self.indices, self.custom_bonds)
+        rim_list = rics.calculate(self._atoms0, self._indices, self._custom_bonds)
 
         if len(rim_list) == 0:
             raise ValueError("Chosen indexlist has no rims")
 
-        self.B = bmatrix.get_b_matrix(self.atoms0, rim_list, indices=self.indices)
+        self._B = bmatrix.get_b_matrix(self._atoms0, rim_list, indices=self._indices)
         # set B matrix values of not considered atoms to 0
-        for i in range(len(self.H)):
+        for i in range(len(self._H)):
             if i not in indices:
-                self.B[:, i * 3 : i * 3 + 3] = 0
+                self._B[:, i * 3 : i * 3 + 3] = 0
         ind = np.array([[i * 3, i * 3 + 1, i * 3 + 2] for i in indices]).ravel()
-        self.B = np.take(self.B, ind, axis=1)
+        self._B = np.take(self._B, ind, axis=1)
 
         self.get_delta_q()
 
         E_geometries = self.get_energies()[0]
 
         (
-            self.proc_E_RIMs,
-            self.E_RIMs,
-            self.E_RIMs_total,
+            self._proc_E_RIMs,
+            self._E_RIMs,
+            self._E_RIMs_total,
             _proc_geom_RIMs,
-            self.delta_q,
+            self._delta_q,
         ) = jedi_analysis(
-            self.atomsF,
+            self._atomsF,
             rim_list,
-            self.B,
-            self.H,
-            self.delta_q,
+            self._B,
+            self._H,
+            self._delta_q,
             E_geometries,
             ase_units=ase_units,
         )
         # get values of rims inside the substructure
         self.post_process(indices)
-        self.E_RIMs_total = sum(self.E_RIMs)
-        proc_geom_RIMs = 100 * (sum(self.E_RIMs) - E_geometries) / E_geometries
+        self._E_RIMs_total = sum(self._E_RIMs)
+        proc_geom_RIMs = 100 * (sum(self._E_RIMs) - E_geometries) / E_geometries
         reporting.jedi_printout(
-            self.atoms0,
-            self.rim_list,
-            self.delta_q,
+            self._atoms0,
+            self._rim_list,
+            self._delta_q,
             E_geometries,
-            self.E_RIMs_total,
+            self._E_RIMs_total,
             proc_geom_RIMs,
-            self.proc_E_RIMs,
-            self.E_RIMs,
+            self._proc_E_RIMs,
+            self._E_RIMs,
             ase_units=ase_units,
         )
 
         if has_custom_bonds:
-            self.custom_bonds = old_custom_bonds  # restore the user input
+            self._custom_bonds = old_custom_bonds  # restore the user input
 
     def post_process(
         self, indices
@@ -457,16 +452,16 @@ class Jedi:
             Values for analyzed RIMs in the defined substructure
         """
         # get rims with only the considered atoms
-        self.indices = indices
-        rim_list = self.rim_list
+        self._indices = indices
+        rim_list = self._rim_list
         cbonds_flag = False
-        if self.custom_bonds is not None:
-            custom_bonds = self.custom_bonds.copy()
+        if self._custom_bonds is not None:
+            custom_bonds = self._custom_bonds.copy()
             cbonds_flag = True
-            self.custom_bonds = self.custom_bonds[np.isin(self.custom_bonds, indices).all(axis=1)]
+            self._custom_bonds = self._custom_bonds[np.isin(self._custom_bonds, indices).all(axis=1)]
         rim_p = rics.intersect(
-            rics.calculate(self.atoms0, indices, self.custom_bonds),
-            rics.calculate(self.atomsF, indices, self.custom_bonds),
+            rics.calculate(self._atoms0, indices, self._custom_bonds),
+            rics.calculate(self._atomsF, indices, self._custom_bonds),
         )
 
         ind = []
@@ -503,14 +498,15 @@ class Jedi:
             local_ind = ind[mask] - offsets[i]
             new_rim_list.append(rim_list[i][local_ind])
 
-        self.rim_list = new_rim_list
+        # FIXME: This is a side-effect that should be avoided.
+        self._rim_list = new_rim_list
 
-        self.E_RIMs = np.array(self.E_RIMs)[ind]
-        self.delta_q = self.delta_q[ind]
-        E_RIMs_total = sum(self.E_RIMs)
-        self.proc_E_RIMs = np.array(self.E_RIMs) / E_RIMs_total * 100
+        self._E_RIMs = np.array(self._E_RIMs)[ind]
+        self._delta_q = self._delta_q[ind]
+        E_RIMs_total = sum(self._E_RIMs)
+        self._proc_E_RIMs = np.array(self._E_RIMs) / E_RIMs_total * 100
         if cbonds_flag:
-            self.custom_bonds = custom_bonds  # restore the user input
+            self._custom_bonds = custom_bonds  # restore the user input
         pass
 
     def add_custom_bonds(self, bonds: NDArray) -> None:
@@ -521,7 +517,7 @@ class Jedi:
                 1D or 2Darray with atom indices, [[i,j]...]
         """
 
-        self.custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
+        self._custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
 
     def set_bond_params(self, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
         """
@@ -531,8 +527,8 @@ class Jedi:
             vdwf:
                 float factor for vdw radii to get the upper limit of the custom bond lengths
         """
-        self.covf = covf
-        self.vdwf = vdwf
+        self._covf = covf
+        self._vdwf = vdwf
 
 
 def jedi_analysis(

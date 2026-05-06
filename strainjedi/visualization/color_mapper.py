@@ -14,16 +14,16 @@ from strainjedi.visualization.colors import colors as symbol_colors
 class ColorMapper:
     def __init__(self, jedi_instance):
         self.j = jedi_instance
-        self.atoms0 = jedi_instance.atoms0
-        self.atomsF = jedi_instance.atomsF
-        self.rim_list = jedi_instance.rim_list
-        self.E_RIMs = jedi_instance.E_RIMs
-        self.proc_E_RIMs = jedi_instance.proc_E_RIMs
-        self.custom_bonds = jedi_instance.custom_bonds
-        self.ase_units = jedi_instance.ase_units
-        self.indices = jedi_instance.indices
-        self.vdwf = jedi_instance.vdwf
-        self.atoms_vis = jedi_instance.atomsF
+        self.atoms0 = jedi_instance._atoms0
+        self.atomsF = jedi_instance._atomsF
+        self.rim_list = jedi_instance._rim_list
+        self.E_RIMs = jedi_instance._E_RIMs
+        self.proc_E_RIMs = jedi_instance._proc_E_RIMs
+        self.custom_bonds = jedi_instance._custom_bonds
+        self.ase_units = jedi_instance._ase_units
+        self.indices = jedi_instance._indices
+        self.vdwf = jedi_instance._vdwf
+        self.atoms_vis = jedi_instance._atomsF
 
     def assign_atom_colors(self):
         atom_colors = []
