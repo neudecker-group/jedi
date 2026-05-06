@@ -1,7 +1,6 @@
 import dataclasses
 import itertools
 import warnings
-from typing import Optional
 
 import ase.neighborlist
 import numpy as np
@@ -12,10 +11,31 @@ from strainjedi import constants
 
 @dataclasses.dataclass
 class RICS:
-    bonds: Optional[NDArray]
-    custom_bonds: Optional[NDArray]
-    angles: Optional[NDArray]
-    dihedrals: Optional[NDArray]
+    """Representation of redundant internal coordinates (RICs)."""
+
+    bonds: NDArray
+    custom_bonds: NDArray
+    angles: NDArray
+    dihedrals: NDArray
+
+    def __getitem__(self, index):
+        # Support RICS[n] for compat with old code.
+        """Kept for backwards compatibility with old code using a list of four lists as RICs representation."""
+        fields = dataclasses.fields(self)
+        values = tuple(getattr(self, f.name) for f in fields)
+
+        if isinstance(index, slice):
+            return values[index]
+
+        if not isinstance(index, int):
+            raise TypeError(f"RICS indices must be integers, not {type(index).__name__}")
+
+        return values[index]
+
+    def __len__(self):
+        # Support len(RICS) for compat with old code.
+        """Kept for backwards compatibility with old code using a list of four lists as RICs representation."""
+        return len(dataclasses.fields(self))
 
 
 # TODO: Set return type to RICS, but beware of subtle breakages everywhere. Not fun.
@@ -117,6 +137,7 @@ def calculate(mol, indices, custom_bonds):
     rim_list_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
 
     return rim_list_sorted
+    # TODO: return RICS(...) instead.
 
 
 def intersect(rics0, ricsF):
@@ -167,3 +188,4 @@ def intersect(rics0, ricsF):
     common_rims_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in common_rims]
 
     return common_rims_sorted
+    # TODO: return RICS(..) instead.
