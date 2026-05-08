@@ -153,9 +153,7 @@ class ColorMapper:
 
     def handle_pbc(self, E_array, n_regular, n_custom):
 
-        mol = self.atomsF.copy()
-        for atom in mol:
-            atom.tag = -1
+        mol = self.atoms_vis.copy()
 
         rim_list = self.rim_list
         n_orig = len(self.atomsF)
@@ -368,6 +366,9 @@ class ColorMapper:
     ):
         visualization_data = {}
         self.split_bonds = split_bonds
+
+        for atom in self.atoms_vis:     # preparation for correct displaying of atoms indices in matplotlib_visualizer
+            atom.tag = -1
 
         for m in modes:
             bond_data = self.map_to_bonds(m)
