@@ -420,18 +420,26 @@ class Jedi:
         '''make it saveable with .write()
 
         '''
-        return {'atoms0': self.atoms0,
-                'atomsF': self.atomsF,
-                #'modes': self.modes,
-                'hessian': self.H,
-                'bmatrix': self.B,
-                'delta_q': self.delta_q,
-                'rim_list': self.rim_list,
+        #ToDo: what means savable with .write()?
+        return {
+                # 'atoms0': self.atoms0.todict(),
+                # 'atomsF': self.atomsF.todict(),
+                'hessian': self.H.tolist(),
+                # 'bmatrix': self.B,
+                'delta_q': self.delta_q.tolist(),
+                # 'rim_list': self.rim_list,
+                'custom_bonds': self.custom_bonds,
+                'indices': self.indices.tolist(),
                 'energies': self.energies,
-                'indices': self.indices,
-                'E_RIMS': self.E_RIMs,
-                'proc_E_RIMS': self.proc_E_RIMs,
-                'custom_bonds': self.custom_bonds}
+                'E_RIMs': self.E_RIMs.tolist(),
+                'proc_E_RIMs': self.proc_E_RIMs.tolist(),
+                'E_harm_total': self.E_harm_total,
+                'E_nonaffine_total': self.E_nonaffine_total,
+                'E_lattice_total': self.E_lattice_total,
+                'proc_geom_RIMs': self.proc_geom_RIMs
+                }
+
+
     @classmethod
     def fromdict(cls, data: Dict[str, Any]) -> 'Jedi':
         '''make it readable with .read()
@@ -489,6 +497,7 @@ class Jedi:
         if data['custom_bonds'] is not None:
             assert isinstance(data['custom_bonds'], (collections.abc.Sequence,
                                                 list))
+
         return cl
 
     def run(self, indices=None, ase_units=False, printout: bool = True):
