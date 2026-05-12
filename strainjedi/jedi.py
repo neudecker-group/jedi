@@ -515,56 +515,26 @@ def jedi_analysis(
     Returns:
         Analysis of RIMs.
     """
-    # jedi analysis function
-    ###########################
-    ##  Matrix Calculations  ##
-    ###########################
-    B_transp = np.transpose(B)
-    # Calculate the number of RIMs (= number of rows in the B-Matrix), equivalent to number of redundant internal coordinates
+    # Matrix Calculations via bmatrix module
+    H_q = bmatrix.hessian_to_ric(B, H_cart)
 
-    # Calculate the pseudoinverse of the B-Matrix and its transposed (take care of diatomic molecules specifically)
-    if B.ndim == 1:
-        B_plus = B_transp / 2
-        B_transp_plus = B / 2
-    else:
-        B_plus = np.linalg.pinv(B, 0.0001)
-        B_transp_plus = np.linalg.pinv(np.transpose(B), 0.0001)
-
-    # Calculate the P-Matrix (eq. 4 in Helgaker's paper)
-    P = np.dot(B, B_plus)
-
-    #############################################
-    # JEDI analysis	        	#
-    #############################################
-
-    # Calculate the Hessian in RIMs (take care to get the correct multiplication for a diatomic molecule
-    if B.ndim == 1:
-        H_q = B_transp_plus.dot(H_cart).dot(B_plus)
-    else:
-        H_q = P.dot(B_transp_plus).dot(H_cart).dot(B_plus).dot(P)
-
-    # Calculate the total energies in RIMs and its deviation from E_geometries
-    E_RIMs_total = 0.5 * np.transpose(delta_q).dot(H_q).dot(delta_q)
-
-    # Get the energy stored in every RIM (take care to get the right multiplication for a diatomic molecule)
-
+    # Energy calculations
+    E_RIMs_total = 0.5 * delta_q.T.dot(H_q).dot(delta_q)
     if B.ndim == 1:
         E_RIMs = np.array([0.5 * delta_q[0] * H_q * delta_q[0]])
-
     else:
         E_RIMs = np.sum(0.5 * (delta_q * H_q).T * delta_q, axis=1)
-    # Get the percentage of the energy stored in every RIM
-
     proc_E_RIMs = 100 * E_RIMs / E_RIMs_total
 
+    # Unit handling
     if ase_units:
-        b = np.shape(rim_list[0])[0] + np.shape(rim_list[1])[0]  # border between lengths and angles
+        b = rim_list[0].shape[0] + rim_list[1].shape[0]
         delta_q[0:b] *= ase.units.Bohr
-        delta_q[b::] = np.degrees(delta_q[b::])
-        E_RIMs = np.array(E_RIMs) * ase.units.Hartree
+        delta_q[b:] = np.degrees(delta_q[b:])
+        E_RIMs = E_RIMs * ase.units.Hartree
         E_RIMs_total *= ase.units.Hartree
     else:
-        E_RIMs = np.array(E_RIMs) / ase.units.kcal * ase.units.mol * ase.units.Hartree
+        E_RIMs = E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
         E_RIMs_total *= ase.units.mol / ase.units.kcal * ase.units.Hartree
 
     proc_geom_RIMs = 100 * (E_RIMs_total - E_geometries) / E_geometries

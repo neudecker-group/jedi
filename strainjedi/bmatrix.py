@@ -134,3 +134,28 @@ def get_B_matrix_angles_derivatives(u, v):
     else:
         d_ba = np.radians(ase.geometry.get_angles_derivatives(u, v))
     return d_ba * ase.units.Bohr
+
+
+def pinv(B, rcond=1e-4):
+    """Calculates the pseudoinverse of `B`."""
+    if B.ndim == 1:
+        return B / 2
+
+    return np.linalg.pinv(B, rcond)
+
+
+def p_matrix(B, B_plus):
+    """Computes the P-matrix (projection operator in RIC space)."""
+    return np.dot(B, B_plus)
+
+
+def hessian_to_ric(B, H_cart):
+    """Projects the cartesian Hessian `H_cart` into RIC space using the B-matrix `B`."""
+    B_plus = pinv(B)
+    B_transp_plus = pinv(B.T)
+
+    if B.ndim == 1:
+        return B_transp_plus.dot(H_cart).dot(B_plus)
+
+    P = p_matrix(B, B_plus)
+    return P.dot(B_transp_plus).dot(H_cart).dot(B_plus).dot(P)
