@@ -4,7 +4,7 @@ import ase.units
 import numpy as np
 
 
-def get_b_matrix(atoms0, rim_list, indices=None):
+def calculate(atoms0, rim_list, indices=None):
     """Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions"""
     mol = atoms0
     if indices is None:

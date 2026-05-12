@@ -24,7 +24,7 @@ class Jedi:
         atoms0: ase.atoms.Atoms,
         atomsF: ase.atoms.Atoms,
         modes: ase.vibrations.data.VibrationsData,
-        epot: Union[np.ndarray, None] = None,
+        epot: Optional[np.ndarray] = None,
     ):  # indices=None
         """
         atoms0: class
@@ -46,7 +46,7 @@ class Jedi:
             rics.calculate(self._atoms0, self._indices, self._custom_bonds),
             rics.calculate(self._atomsF, self._indices, self._custom_bonds),
         )
-        self._B = bmatrix.get_b_matrix(self._atoms0, self._rim_list)
+        self._B = bmatrix.calculate(self._atoms0, self._rim_list)
         self.get_delta_q()
         self._H = modes._hessian2d / (ase.units.Hartree / ase.units.Bohr**2)
         self._energies = epot  # energies of the geometries
@@ -351,7 +351,7 @@ class Jedi:
         if len(rim_list) == 0:
             raise ValueError("Chosen indexlist has no rims")
 
-        self._B = bmatrix.get_b_matrix(self._atoms0, rim_list, indices=self._indices)
+        self._B = bmatrix.calculate(self._atoms0, rim_list, indices=self._indices)
         # set B matrix values of not considered atoms to 0
         for i in range(len(self._H)):
             if i not in indices:
