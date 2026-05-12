@@ -3,6 +3,7 @@ import itertools
 import warnings
 
 import ase.neighborlist
+import ase.units
 import numpy as np
 from numpy.typing import NDArray
 
@@ -189,3 +190,72 @@ def intersect(rics0, ricsF):
 
     return common_rims_sorted
     # TODO: return RICS(..) instead.
+
+
+def subtract(atoms0, atomsF, rim_list):
+    """
+    Computes q0, qF, and delta_q (qF - q0) for a set of redundant internal coordinates
+    (bonds, custom bonds, angles, dihedrals) defined by rim_list, for two geometries.
+
+    Parameters
+    ----------
+    atoms0 : ase.Atoms
+        The initial (relaxed/reference) structure.
+    atomsF : ase.Atoms
+        The final (strained) structure.
+    rim_list : sequence of np.ndarray
+        Each element of rim_list contains indices defining bonds, custom bonds, angles, dihedrals.
+
+    Returns
+    -------
+    q0 : np.ndarray
+        The values of all RICs in atoms0, concatenated.
+    qF : np.ndarray
+        The values of all RICs in atomsF, concatenated.
+    delta_q : np.ndarray
+        qF - q0, with minimal signed difference for dihedrals.
+    """
+
+    def bonds_q(atoms, rim):
+        if rim is None or len(rim) == 0:
+            return np.array([])
+        return np.array([atoms.get_distance(int(i), int(j), mic=True) / ase.units.Bohr for i, j in rim])
+
+    def angles_q(atoms, rim):
+        if rim is None or len(rim) == 0:
+            return np.array([])
+        return np.array([np.radians(atoms.get_angle(int(i), int(j), int(k), mic=True)) for i, j, k in rim])
+
+    def dihedrals_q(atoms, rim):
+        if rim is None or len(rim) == 0:
+            return np.array([])
+        return np.array(
+            [np.radians(atoms.get_dihedral(int(i), int(j), int(k), int(l), mic=True)) for i, j, k, l in rim]
+        )
+
+    rim_list = list(rim_list)  # Ensure sequence
+
+    q0_bonds = bonds_q(atoms0, rim_list[0])
+    qF_bonds = bonds_q(atomsF, rim_list[0])
+
+    q0_cbonds = bonds_q(atoms0, rim_list[1])
+    qF_cbonds = bonds_q(atomsF, rim_list[1])
+
+    q0_angles = angles_q(atoms0, rim_list[2])
+    qF_angles = angles_q(atomsF, rim_list[2])
+
+    q0_dihedrals = dihedrals_q(atoms0, rim_list[3])
+    qF_dihedrals = dihedrals_q(atomsF, rim_list[3])
+
+    # For dihedrals: ensure signed minimal difference (-pi, pi]
+    dq_dihedrals = qF_dihedrals - q0_dihedrals
+    dq_dihedrals = (dq_dihedrals + np.pi) % (2 * np.pi) - np.pi  # minimal signed diff
+
+    q0 = np.concatenate([q0_bonds, q0_cbonds, q0_angles, q0_dihedrals])
+    qF = np.concatenate([qF_bonds, qF_cbonds, qF_angles, qF_dihedrals])
+
+    delta_q = np.copy(qF) - q0
+    if len(dq_dihedrals) > 0:
+        delta_q[-len(dq_dihedrals) :] = dq_dihedrals
+
+    return q0, qF, delta_q

@@ -193,50 +193,8 @@ class Jedi:
         return [deltaE, eF, e0]  # WHY??
 
     def get_delta_q(self):
-        """get the strain in RICs substracts the values of the relaxed structure from the strained structure
-
-        Returns:
-            2D array of the values.
-        """
-
-        if len(self._B) == 0:
-            self._B = bmatrix.get_b_matrix(self._atoms0, self._rim_list)
-        q0 = []
-        qF = []
-        dq_da = []
-
-        # for loops for all redunant internal coordinates
-
-        # bonds
-        for q in self._rim_list[0]:
-            q0.append(self._atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
-            qF.append(self._atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
-        # custom bonds
-        for q in self._rim_list[1]:
-            q0.append(self._atoms0.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
-            qF.append(self._atomsF.get_distance(int(q[0]), int(q[1]), mic=True) / ase.units.Bohr)
-        # angles
-        for q in self._rim_list[2]:
-            q0.append(np.radians(self._atoms0.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
-            qF.append(np.radians(self._atomsF.get_angle(int(q[0]), int(q[1]), int(q[2]), mic=True)))
-        # dihedral angles
-        for q in self._rim_list[3]:
-            q0_preliminary = np.radians(self._atoms0.get_dihedral(int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True))
-            qF_preliminary = np.radians(self._atomsF.get_dihedral(int(q[0]), int(q[1]), int(q[2]), int(q[3]), mic=True))
-
-            # get the smallest absolute value of the two possible rotational directions
-            dda = qF_preliminary - q0_preliminary
-            if 2 * np.pi - abs(dda) < abs(dda):
-                dda = (2 * np.pi - abs(dda)) * -np.sign(dda)
-            dq_da.append(dda)
-
-        delta_q = np.subtract(qF, q0)
-
-        delta_q = np.append(delta_q, dq_da)
-
-        self._delta_q = delta_q
-        self._qF = qF
-        self._q0 = q0
+        """Compute and store q0, qF, delta_q for the molecule RICs."""
+        self._q0, self._qF, self._delta_q = rics.subtract(self._atoms0, self._atomsF, self._rim_list)
 
     def visualize(
         self,
