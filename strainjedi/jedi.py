@@ -347,11 +347,7 @@ class Jedi:
 
         self._B = bmatrix.calculate(self._atoms0, rim_list, indices=self._indices)
         # set B matrix values of not considered atoms to 0
-        for i in range(len(self._H)):
-            if i not in indices:
-                self._B[:, i * 3 : i * 3 + 3] = 0
-        ind = np.array([[i * 3, i * 3 + 1, i * 3 + 2] for i in indices]).ravel()
-        self._B = np.take(self._B, ind, axis=1)
+        self._B = bmatrix.restrict(self._B, indices)
 
         self.get_delta_q()
 
