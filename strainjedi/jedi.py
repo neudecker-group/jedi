@@ -1,4 +1,3 @@
-import collections
 import warnings
 from pathlib import Path
 
@@ -7,7 +6,6 @@ import ase.neighborlist
 import ase.units
 import ase.vibrations
 import numpy as np
-from ase.atoms import Atoms
 from ase.data.vdw import vdw_radii
 from ase.utils import jsonable
 from numpy.typing import NDArray
@@ -76,50 +74,46 @@ class Jedi:
 
     @classmethod
     def fromdict(cls, data: Dict[str, Any]) -> "Jedi":
-        """make it readable with .read()"""
-        # mypy is understandably suspicious of data coming from a dict that
-        # holds mixed types, but it can see if we sanity-check with 'assert'
-        assert isinstance(data["atoms0"], Atoms)
-        assert isinstance(data["atomsF"], Atoms)
-        try:
-            assert isinstance(data["modes"], ase.vibrations.VibrationsData)
-            cl = cls(data["atoms0"], data["atomsF"], data["modes"])
-        # FIXME: what exception might occur here?
-        except Exception:
-            pass
+        """
+        Reconstruct a Jedi object from a dictionary.
+        Raises ValueError if required fields are missing or have incorrect types.
+        """
 
-        if data["hessian"] is not None:
-            assert isinstance(data["hessian"], (collections.abc.Sequence, np.ndarray))
+        # Required fields; This will implicitly raise a KeyError if either is not found.
+        # However, as these are absolutely necessary, this is okay to do.
+        atoms0 = data["atoms0"]
+        atomsF = data["atomsF"]
 
-            if data["indices"] is not None:
-                assert isinstance(data["indices"], (collections.abc.Sequence, np.ndarray))
-                modes = ase.vibrations.VibrationsData.from_2d(data["atoms0"], data["hessian"], data["indices"])
-                cl = cls(data["atoms0"], data["atomsF"], modes)
-                cl._indices = data["indices"]
+        # Try to reconstruct VibrationsData if possible
+        if "modes" in data and isinstance(data["modes"], ase.vibrations.VibrationsData):
+            modes = data["modes"]
+        elif "hessian" in data:
+            # Support legacy dicts with hessian/indices
+            indices = data.get("indices", None)
+            if indices is not None:
+                modes = ase.vibrations.VibrationsData.from_2d(atoms0, data["hessian"], indices)
             else:
-                modes = ase.vibrations.VibrationsData.from_2d(data["atoms0"], data["hessian"])
-                cl = cls(data["atoms0"], data["atomsF"], modes)
-            cl._H = data["hessian"]
-        if data["bmatrix"] is not None:
-            assert isinstance(data["bmatrix"], (collections.abc.Sequence, np.ndarray))
-            cl._B = data["bmatrix"]
-        if data["delta_q"] is not None:
-            assert isinstance(data["delta_q"], (collections.abc.Sequence, np.ndarray))
-            cl._delta_q = data["delta_q"]
-        if data["rim_list"] is not None:
-            assert isinstance(data["rim_list"], (collections.abc.Sequence, np.ndarray))
-            cl._rim_list = data["rim_list"]
-        if data["energies"] is not None:
-            assert isinstance(data["energies"], (collections.abc.Sequence, list))
-            cl._energies = data["energies"]
-        if data["E_RIMS"] is not None:
-            assert isinstance(data["proc_E_RIMS"], (collections.abc.Sequence, np.ndarray))
-            cl._E_RIMs = data["E_RIMS"]
-        if data["proc_E_RIMS"] is not None:
-            assert isinstance(data["proc_E_RIMS"], (collections.abc.Sequence, np.ndarray))
-            cl._proc_E_RIMs = data["proc_E_RIMS"]
-        if data["custom_bonds"] is not None:
-            assert isinstance(data["custom_bonds"], (collections.abc.Sequence, list))
+                modes = ase.vibrations.VibrationsData.from_2d(atoms0, data["hessian"])
+        else:
+            raise ValueError("No valid vibration data ('modes' or 'hessian') found in the dictionary!")
+
+        epot = data.get("energies", None)
+        cl = cls(atoms0, atomsF, modes, epot=epot)
+
+        # Fill additional attributes if present
+        for attr, key in [
+            ("_H", "hessian"),
+            ("_B", "bmatrix"),
+            ("_delta_q", "delta_q"),
+            ("_rim_list", "rim_list"),
+            ("_indices", "indices"),
+            ("_E_RIMs", "E_RIMS"),
+            ("_proc_E_RIMs", "proc_E_RIMS"),
+            ("_custom_bonds", "custom_bonds"),
+        ]:
+            if key in data and data[key] is not None:
+                setattr(cl, attr, data[key])
+
         return cl
 
     def run(self, indices=None, ase_units=False, printout: bool = True):
