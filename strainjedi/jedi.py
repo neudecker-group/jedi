@@ -34,6 +34,30 @@ class Jedi:
         epot: np.array or None
             Vector containing (f - i) endiff., final, initial energy or None. Default: None.
         """
+        # validate the Hessian's atom order (must match atoms0); if not, permute Hessian to match.
+        perm = []
+        for atom in atoms0:
+            match = None
+            for i, vib_atom in enumerate(modes._atoms):
+                if atom.symbol != vib_atom.symbol:
+                    continue
+                if np.allclose(atom.position, vib_atom.position, atol=1e-5):
+                    match = i
+                    break
+            perm.append(match)
+        perm = np.asarray(perm, dtype=int)
+
+        if not np.array_equal(perm, np.arange(len(atoms0))):
+            dof = np.repeat(perm, 3) * 3 + np.tile(np.arange(3), len(perm))
+            hessian = modes._hessian2d[np.ix_(dof, dof)]
+            warnings.warn(
+                "Atoms in VibrationsData object were not fitting atoms0. I have reordered your Hessian to match, but you may want to check it."
+            )
+        else:
+            hessian = modes._hessian2d
+
+        self._H = hessian / (ase.units.Hartree / ase.units.Bohr**2)
+
         self._atoms0 = atoms0  # ref state
         self._atomsF = atomsF  # strained state
         self._covf = constants.COVALENCY_FACTOR
@@ -46,7 +70,6 @@ class Jedi:
         )
         self._B = bmatrix.calculate(self._atoms0, self._rim_list)
         self._q0, self._qF, self._delta_q = rics.subtract(self._atoms0, self._atomsF, self._rim_list)
-        self._H = modes._hessian2d / (ase.units.Hartree / ase.units.Bohr**2)
         self._energies = epot  # energies of the geometries
         self._proc_E_RIMs = None  # list of procentual energy stored in single RIMs
         self._part_rim_list = None  # rim list for election of atoms
