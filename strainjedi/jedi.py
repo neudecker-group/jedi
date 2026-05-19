@@ -45,7 +45,7 @@ class Jedi:
             rics.calculate(self._atomsF, self._indices, self._custom_bonds),
         )
         self._B = bmatrix.calculate(self._atoms0, self._rim_list)
-        self.get_delta_q()
+        self._q0, self._qF, self._delta_q = rics.subtract(self._atoms0, self._atomsF, self._rim_list)
         self._H = modes._hessian2d / (ase.units.Hartree / ase.units.Bohr**2)
         self._energies = epot  # energies of the geometries
         self._proc_E_RIMs = None  # list of procentual energy stored in single RIMs
@@ -349,7 +349,7 @@ class Jedi:
         # set B matrix values of not considered atoms to 0
         self._B = bmatrix.restrict(self._B, indices)
 
-        self.get_delta_q()
+        self._q0, self._qF, self._delta_q = rics.subtract(self._atoms0, self._atomsF, self._rim_list)
 
         E_geometries = self.get_energies()[0]
 

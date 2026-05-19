@@ -82,7 +82,7 @@ class TestGetDeltaQ:
         j = copy.deepcopy(deds_jedi_fresh)
         j._rim_list = deds_rim_list
         j._B = deds_ref["bmatrix"]
-        j.get_delta_q()
+        j._q0, j._qF, j._delta_q = rics.subtract(j._atoms0, j._atomsF, j._rim_list)
         np.testing.assert_allclose(j._delta_q, deds_ref["delta_q"], atol=1e-05)
 
 
