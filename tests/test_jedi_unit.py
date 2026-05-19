@@ -91,15 +91,10 @@ class TestGetEnergy:
     Tests for get_energies() method.
     """
 
-    def test_energy_difference(self, deds_jedi_fresh):
-        j = copy.deepcopy(deds_jedi_fresh)
-        j.get_energies()
-        assert abs(j._energies[0] - (j._energies[1] - j._energies[2])) < 1e-6
-
     def test_energies_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
         j.get_energies()
-        np.testing.assert_allclose(np.array(j._energies), deds_ref["energies"], atol=1e-05)
+        np.testing.assert_allclose(np.array(j._deltaE), deds_ref["energies"][0], atol=1e-05)
 
 
 class TestJediAnalysis:

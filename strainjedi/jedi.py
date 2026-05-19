@@ -134,7 +134,7 @@ class Jedi:
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
             )
 
-        E_geometries = self.get_energies()[0]
+        self.get_energies()
 
         # run the analysis
         (
@@ -149,21 +149,21 @@ class Jedi:
             self._B,
             self._H,
             self._delta_q,
-            E_geometries,
+            self._deltaE,
             ase_units=ase_units,
         )
 
         if indices:  # get only rims of interest
             self.post_process(indices)
             self._E_RIMs_total = sum(self._E_RIMs)
-            proc_geom_RIMs = 100 * (sum(self._E_RIMs) - E_geometries) / E_geometries
+            proc_geom_RIMs = 100 * (sum(self._E_RIMs) - self._deltaE) / self._deltaE
 
         if printout:
             reporting.jedi_printout(
                 self._atoms0,
                 self._rim_list,
                 self._delta_q,
-                E_geometries,
+                self._deltaE,
                 self._E_RIMs_total,
                 proc_geom_RIMs,
                 self._proc_E_RIMs,
@@ -171,24 +171,17 @@ class Jedi:
                 ase_units=ase_units,
             )
 
-    def get_energies(self) -> List[float]:
+    def get_energies(self) -> None:
         """Calls the energies of the Atoms objects.
 
-        Returns:
-            [energy difference, energy of atomsF, energy of atoms0]
+        Sets self._deltaE = eF - e0
         """
-        e0 = self._atoms0.calc.get_potential_energy()
-        eF = self._atomsF.calc.get_potential_energy()
+        e0 = self._atoms0.get_potential_energy()
+        eF = self._atomsF.get_potential_energy()
         if not self._ase_units:
             e0 *= ase.units.mol / ase.units.kcal
             eF *= ase.units.mol / ase.units.kcal
-        deltaE = eF - e0
-        self._energies = [deltaE, eF, e0]
-        return [deltaE, eF, e0]  # WHY??
-
-    def get_delta_q(self):
-        """Compute and store q0, qF, delta_q for the molecule RICs."""
-        self._q0, self._qF, self._delta_q = rics.subtract(self._atoms0, self._atomsF, self._rim_list)
+        self._deltaE = eF - e0
 
     def visualize(
         self,
@@ -351,7 +344,8 @@ class Jedi:
 
         self._q0, self._qF, self._delta_q = rics.subtract(self._atoms0, self._atomsF, self._rim_list)
 
-        E_geometries = self.get_energies()[0]
+        # self._deltaE
+        self.get_energies()
 
         (
             self._proc_E_RIMs,
@@ -365,18 +359,18 @@ class Jedi:
             self._B,
             self._H,
             self._delta_q,
-            E_geometries,
+            self._deltaE,
             ase_units=ase_units,
         )
         # get values of rims inside the substructure
         self.post_process(indices)
         self._E_RIMs_total = sum(self._E_RIMs)
-        proc_geom_RIMs = 100 * (sum(self._E_RIMs) - E_geometries) / E_geometries
+        proc_geom_RIMs = 100 * (sum(self._E_RIMs) - self._deltaE) / self._deltaE
         reporting.jedi_printout(
             self._atoms0,
             self._rim_list,
             self._delta_q,
-            E_geometries,
+            self._deltaE,
             self._E_RIMs_total,
             proc_geom_RIMs,
             self._proc_E_RIMs,
@@ -485,7 +479,7 @@ def jedi_analysis(
     B: np.ndarray,
     H_cart: np.ndarray,
     delta_q: np.ndarray,
-    E_geometries: float,
+    deltaE: float,
     printout: bool | None = None,
     ase_units: bool = False,
 ):
@@ -502,7 +496,7 @@ def jedi_analysis(
         Hessian in cartesian coordinates.
     delta_q: np array
         Array of deformations along the RICs.
-    E_geometries: float
+    self._deltaE: float
         Energy difference between the geometries.
     printout: bool
         Flag to print the output.
@@ -533,14 +527,14 @@ def jedi_analysis(
         E_RIMs = E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
         E_RIMs_total *= ase.units.mol / ase.units.kcal * ase.units.Hartree
 
-    proc_geom_RIMs = 100 * (E_RIMs_total - E_geometries) / E_geometries
+    proc_geom_RIMs = 100 * (E_RIMs_total - deltaE) / deltaE
 
     if printout:
         reporting.jedi_printout(
             atoms,
             rim_list,
             delta_q,
-            E_geometries,
+            deltaE,
             E_RIMs_total,
             proc_geom_RIMs,
             proc_E_RIMs,

@@ -40,11 +40,11 @@ class TestJEDIdiethyldisulfid:
 
     def test_energies(self, deds_jedi_full_run, deds_ref):
         """Test if energies are correct"""
-        np.testing.assert_allclose(np.array(deds_jedi_full_run._energies), deds_ref["energies"], atol=1e-05)
+        np.testing.assert_allclose(np.array(deds_jedi_full_run._deltaE), deds_ref["energies"][0], atol=1e-05)
 
     def test_hessian(self, deds_jedi_full_run, deds_ref):
         """Test if hessian inside of JEDI is correct (JEDI-hessian has transformed units)"""
-        np.testing.assert_allclose(np.array(deds_jedi_full_run._energies), deds_ref["energies"], atol=1e-05)
+        np.testing.assert_allclose(np.array(deds_jedi_full_run._deltaE), deds_ref["energies"][0], atol=1e-05)
 
     def test_b_matrix(self, deds_jedi_full_run, deds_ref):
         """Test if bmatrix are correct"""
