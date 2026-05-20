@@ -10,13 +10,23 @@ from strainjedi.jedi import Jedi
 matplotlib.use("agg")
 
 
+def _set_private(j: Jedi, name: str, value) -> None:
+    """
+    Set a name-mangled Jedi attribute in tests.
+
+    Example:
+        _set_private(j, "rim_list", rim_list)  -> sets j._Jedi__rim_list
+    """
+    setattr(j, f"_Jedi__{name}", value)
+
+
 class TestGetRims:
     """
     Tests for get_rims() and get_common_rics() methods.
     """
 
     def test_rim_list_shape(self, deds_jedi_with_rims):
-        rim_list = deds_jedi_with_rims._rim_list
+        rim_list = deds_jedi_with_rims.rim_list
         assert len(rim_list) == 4
         assert rim_list[0].shape[1] == 2  # bonds
         assert rim_list[2].shape[1] == 3  # angles
@@ -24,23 +34,28 @@ class TestGetRims:
 
     def test_custom_bonds_none_by_default(self, deds_jedi_fresh):
         j = copy.deepcopy(deds_jedi_fresh)
-        assert j._custom_bonds is None
+        assert j.custom_bonds is None
 
     def test_rim_list_no_custombonds(self, deds_jedi_with_rims):
-        assert deds_jedi_with_rims._rim_list[1].shape[0] == 0
+        rim_list = deds_jedi_with_rims.rim_list
+        assert rim_list[1].shape[0] == 0
 
     def test_rim_list_custombonds(self, deds_jedi_fresh):
         j = copy.deepcopy(deds_jedi_fresh)
         j.add_custom_bonds([[0, 5], [2, 10]])
-        j._indices = np.arange(0, len(j._atoms0))
 
-        j._rim_list = rics.intersect(
-            rics.calculate(j._atoms0, j._indices, j._custom_bonds),
-            rics.calculate(j._atomsF, j._indices, j._custom_bonds),
+        # tests used to directly mutate internals; now we must set the mangled ones
+        _set_private(j, "indices", np.arange(0, len(j.atoms0)))
+
+        rim_list = rics.intersect(
+            rics.calculate(j.atoms0, j.indices, j.custom_bonds),
+            rics.calculate(j.atomsF, j.indices, j.custom_bonds),
         )
+        _set_private(j, "rim_list", rim_list)
 
-        assert j._rim_list[1].shape == (2, 2)
-        assert list(j._rim_list[1][0]) == [0, 5]
+        rim_list = j.rim_list
+        assert rim_list[1].shape == (2, 2)
+        assert list(rim_list[1][0]) == [0, 5]
 
 
 class TestGetHessian:
@@ -50,7 +65,7 @@ class TestGetHessian:
 
     def test_hessian_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        np.testing.assert_allclose(j._H, deds_ref["jediInternalHessian"], atol=1e-05)
+        np.testing.assert_allclose(j.H, deds_ref["jediInternalHessian"], atol=1e-05)
 
 
 class TestGetBMatrix:
@@ -60,8 +75,8 @@ class TestGetBMatrix:
 
     def test_B_matrix_reference(self, deds_jedi_fresh, deds_rim_list, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        j._rim_list = deds_rim_list
-        np.testing.assert_allclose(j._B, deds_ref["bmatrix"], atol=1e-05)
+        _set_private(j, "rim_list", deds_rim_list)
+        np.testing.assert_allclose(j.B, deds_ref["bmatrix"], atol=1e-05)
 
 
 class TestGetDeltaQ:
@@ -71,19 +86,29 @@ class TestGetDeltaQ:
 
     def test_delta_q_identical_structure(self, deds_opt, deds_vibdata):
         j = Jedi(deds_opt, deds_opt, deds_vibdata)
-        j._indices = np.arange(len(deds_opt))
-        j._rim_list = rics.intersect(
-            rics.calculate(j._atoms0, j._indices, j._custom_bonds),
-            rics.calculate(j._atomsF, j._indices, j._custom_bonds),
+
+        # properties are read-only; update mangled storage
+        _set_private(j, "indices", np.arange(len(deds_opt)))
+
+        rim_list = rics.intersect(
+            rics.calculate(j.atoms0, j.indices, j.custom_bonds),
+            rics.calculate(j.atomsF, j.indices, j.custom_bonds),
         )
-        np.testing.assert_allclose(j._delta_q, 0.0, atol=1e-05)
+        _set_private(j, "rim_list", rim_list)
+
+        np.testing.assert_allclose(j.delta_q, 0.0, atol=1e-05)
 
     def test_delta_q_deds_reference(self, deds_jedi_fresh, deds_rim_list, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        j._rim_list = deds_rim_list
-        j._B = deds_ref["bmatrix"]
-        j._q0, j._qF, j._delta_q = rics.subtract(j._atoms0, j._atomsF, j._rim_list)
-        np.testing.assert_allclose(j._delta_q, deds_ref["delta_q"], atol=1e-05)
+        _set_private(j, "rim_list", deds_rim_list)
+        _set_private(j, "B", deds_ref["bmatrix"])
+
+        q0, qF, delta_q = rics.subtract(j.atoms0, j.atomsF, j.rim_list)
+        _set_private(j, "q0", q0)
+        _set_private(j, "qF", qF)
+        _set_private(j, "delta_q", delta_q)
+
+        np.testing.assert_allclose(j.delta_q, deds_ref["delta_q"], atol=1e-05)
 
 
 class TestGetEnergy:
@@ -94,7 +119,7 @@ class TestGetEnergy:
     def test_energies_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
         j.get_energies()
-        np.testing.assert_allclose(np.array(j._deltaE), deds_ref["energies"][0], atol=1e-05)
+        np.testing.assert_allclose(np.array(j.deltaE), deds_ref["energies"][0], atol=1e-05)
 
 
 class TestJediAnalysis:
@@ -124,14 +149,14 @@ class TestSetBondParams:
 
     def test_default_bond_params(self, deds_jedi_fresh):
         j = copy.deepcopy(deds_jedi_fresh)
-        assert j._covf == 1.3
-        assert j._vdwf == 0.9
+        assert j.covf == 1.3
+        assert j.vdwf == 0.9
 
     def test_set_bond_params(self, deds_jedi_fresh):
         j = copy.deepcopy(deds_jedi_fresh)
         j.set_bond_params(covf=1.6, vdwf=0.75)
-        assert j._covf == 1.6
-        assert j._vdwf == 0.75
+        assert j.covf == 1.6
+        assert j.vdwf == 0.75
 
 
 class TestVisualize:

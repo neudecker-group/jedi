@@ -109,9 +109,9 @@ def deds_jedi_fresh(deds_opt, deds_dist, deds_vibdata):
 def deds_jedi_with_rims(deds_opt, deds_dist, deds_vibdata):
     """Jedi instance with common RICs computed."""
     j = Jedi(deds_opt, deds_dist, deds_vibdata)
-    j._indices = np.arange(0, len(j._atoms0))
-    j._rim_list = rics.intersect(
-        rics.calculate(j._atoms0, j._indices, j._custom_bonds), rics.calculate(j._atomsF, j._indices, j._custom_bonds)
+    j._Jedi__indices = np.arange(0, len(j.atoms0))
+    j._Jedi__rim_list = rics.intersect(
+        rics.calculate(j.atoms0, j.indices, j.custom_bonds), rics.calculate(j.atomsF, j.indices, j.custom_bonds)
     )
     return j
 
