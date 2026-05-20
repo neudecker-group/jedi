@@ -9,7 +9,7 @@ import numpy as np
 from ase.data.vdw import vdw_radii
 from ase.utils import jsonable
 from numpy.typing import NDArray
-from typing_extensions import Any, Dict, List, Optional, Union, deprecated
+from typing_extensions import Any, deprecated
 
 from strainjedi import bmatrix, constants, reporting, rics
 from strainjedi.visualization import ColorMapper, MatplotlibVisualizer, VMDVisualizer
@@ -22,7 +22,7 @@ class Jedi:
         atoms0: ase.atoms.Atoms,
         atomsF: ase.atoms.Atoms,
         modes: ase.vibrations.data.VibrationsData,
-        epot: Optional[np.ndarray] = None,
+        epot: NDArray | None = None,
     ):  # indices=None
         """
         atoms0: class
@@ -45,65 +45,71 @@ class Jedi:
                     match = i
                     break
             perm.append(match)
+
         perm = np.asarray(perm, dtype=int)
 
         if not np.array_equal(perm, np.arange(len(atoms0))):
             dof = np.repeat(perm, 3) * 3 + np.tile(np.arange(3), len(perm))
             hessian = modes._hessian2d[np.ix_(dof, dof)]
             warnings.warn(
-                "Atoms in VibrationsData object were not fitting atoms0. I have reordered your Hessian to match, but you may want to check it."
+                "Atoms in VibrationsData object were not fitting atoms0. "
+                "I have reordered your Hessian to match, but you may wish to check it."
             )
         else:
             hessian = modes._hessian2d
 
-        self._H = hessian / (ase.units.Hartree / ase.units.Bohr**2)
+        # Internal state (name-mangled attributes only)
+        self.__H = hessian / (ase.units.Hartree / ase.units.Bohr**2)
 
-        self._atoms0 = atoms0  # ref state
-        self._atomsF = atomsF  # strained state
-        self._covf = constants.COVALENCY_FACTOR
-        self._vdwf = constants.VAN_DER_WAALS_FACTOR
-        self._indices = np.arange(0, len(self._atoms0))
-        self._custom_bonds = None  # list of custom added bonds
-        self._rim_list = rics.intersect(
-            rics.calculate(self._atoms0, self._indices, self._custom_bonds),
-            rics.calculate(self._atomsF, self._indices, self._custom_bonds),
+        self.__atoms0 = atoms0  # ref state
+        self.__atomsF = atomsF  # strained state
+        self.__covf = constants.COVALENCY_FACTOR
+        self.__vdwf = constants.VAN_DER_WAALS_FACTOR
+
+        self.__indices = np.arange(0, len(self.__atoms0))
+        self.__custom_bonds = None  # list of custom added bonds
+
+        self.__rim_list = rics.intersect(
+            rics.calculate(self.__atoms0, self.__indices, self.__custom_bonds),
+            rics.calculate(self.__atomsF, self.__indices, self.__custom_bonds),
         )
-        self._B = bmatrix.calculate(self._atoms0, self._rim_list)
-        self._q0, self._qF, self._delta_q = rics.subtract(self._atoms0, self._atomsF, self._rim_list)
-        self._energies = epot  # energies of the geometries
-        self._proc_E_RIMs = None  # list of procentual energy stored in single RIMs
-        self._part_rim_list = None  # rim list for election of atoms
-        self._E_RIMs = None  # list of energies stored in the rims
-        self._E_RIMs_total = None  # sum of E_rims
-        self._ase_units = False
-        self._qF = None  # bond lengths and angles in Bohr and degree in distorted molecule
-        self._q0 = None  # bond lengths and angles in Bohr and degree in relaxed molecule
 
-    def todict(self) -> Dict[str, Any]:
+        self.__B = bmatrix.calculate(self.__atoms0, self.__rim_list)
+        self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
+
+        self.__energies = epot  # optional energies of the geometries (legacy)
+        self.__deltaE: float = 0.0  # energy difference between geometries
+
+        self.__proc_E_RIMs = None  # list of procentual energy stored in single RIMs
+        self.__part_rim_list = None  # rim list for election of atoms (legacy/unused)
+        self.__E_RIMs = None  # list of energies stored in the rims
+        self.__E_RIMs_total = None  # sum of E_rims
+
+        self.__ase_units = False  # last-used unit mode for reporting/visualization
+        self.__visualization_data = None  # last visualization dataset
+
+    def todict(self) -> dict[str, Any]:
         """make it saveable with .write()"""
         return {
-            "atoms0": self._atoms0,
-            "atomsF": self._atomsF,
-            "hessian": self._H,
-            "bmatrix": self._B,
-            "delta_q": self._delta_q,
-            "rim_list": self._rim_list,
-            "energies": self._energies,
-            "indices": self._indices,
-            "E_RIMS": self._E_RIMs,
-            "proc_E_RIMS": self._proc_E_RIMs,
-            "custom_bonds": self._custom_bonds,
+            "atoms0": self.__atoms0,
+            "atomsF": self.__atomsF,
+            "hessian": self.__H,
+            "bmatrix": self.__B,
+            "delta_q": self.__delta_q,
+            "rim_list": self.__rim_list,
+            "energies": self.__energies,
+            "indices": self.__indices,
+            "E_RIMS": self.__E_RIMs,
+            "proc_E_RIMS": self.__proc_E_RIMs,
+            "custom_bonds": self.__custom_bonds,
         }
 
     @classmethod
-    def fromdict(cls, data: Dict[str, Any]) -> "Jedi":
+    def fromdict(cls, data: dict[str, Any]) -> "Jedi":
         """
         Reconstruct a Jedi object from a dictionary.
         Raises ValueError if required fields are missing or have incorrect types.
         """
-
-        # Required fields; This will implicitly raise a KeyError if either is not found.
-        # However, as these are absolutely necessary, this is okay to do.
         atoms0 = data["atoms0"]
         atomsF = data["atomsF"]
 
@@ -111,7 +117,6 @@ class Jedi:
         if "modes" in data and isinstance(data["modes"], ase.vibrations.VibrationsData):
             modes = data["modes"]
         elif "hessian" in data:
-            # Support legacy dicts with hessian/indices
             indices = data.get("indices", None)
             if indices is not None:
                 modes = ase.vibrations.VibrationsData.from_2d(atoms0, data["hessian"], indices)
@@ -125,14 +130,15 @@ class Jedi:
 
         # Fill additional attributes if present
         for attr, key in [
-            ("_H", "hessian"),
-            ("_B", "bmatrix"),
-            ("_delta_q", "delta_q"),
-            ("_rim_list", "rim_list"),
-            ("_indices", "indices"),
-            ("_E_RIMs", "E_RIMS"),
-            ("_proc_E_RIMs", "proc_E_RIMS"),
-            ("_custom_bonds", "custom_bonds"),
+            ("_Jedi__H", "hessian"),
+            ("_Jedi__B", "bmatrix"),
+            ("_Jedi__delta_q", "delta_q"),
+            ("_Jedi__rim_list", "rim_list"),
+            ("_Jedi__indices", "indices"),
+            ("_Jedi__E_RIMs", "E_RIMS"),
+            ("_Jedi__proc_E_RIMs", "proc_E_RIMS"),
+            ("_Jedi__custom_bonds", "custom_bonds"),
+            ("_Jedi__energies", "energies"),
         ]:
             if key in data and data[key] is not None:
                 setattr(cl, attr, data[key])
@@ -150,73 +156,70 @@ class Jedi:
         Returns:
             Indices, strain, energy in every RIM
         """
-        self.ase_units = ase_units
+        self.__ase_units = bool(ase_units)
+
         # get necessary data
-        if len(self._atoms0) != self._H.shape[0] / 3:
+        if len(self.__atoms0) != self.__H.shape[0] / 3:
             raise ValueError(
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
             )
 
         self.get_energies()
 
-        # run the analysis
         (
-            self._proc_E_RIMs,
-            self._E_RIMs,
-            self._E_RIMs_total,
+            self.__proc_E_RIMs,
+            self.__E_RIMs,
+            self.__E_RIMs_total,
             proc_geom_RIMs,
-            self._delta_q,
+            self.__delta_q,
         ) = jedi_analysis(
-            self._atoms0,
-            self._rim_list,
-            self._B,
-            self._H,
-            self._delta_q,
-            self._deltaE,
-            ase_units=ase_units,
+            self.__atoms0,
+            self.__rim_list,
+            self.__B,
+            self.__H,
+            self.__delta_q,
+            self.__deltaE,
+            ase_units=self.__ase_units,
         )
 
         if indices:  # get only rims of interest
             self.post_process(indices)
-            self._E_RIMs_total = sum(self._E_RIMs)
-            proc_geom_RIMs = 100 * (sum(self._E_RIMs) - self._deltaE) / self._deltaE
+            self.__E_RIMs_total = float(np.sum(self.__E_RIMs))
+            proc_geom_RIMs = 100 * (float(np.sum(self.__E_RIMs)) - self.__deltaE) / self.__deltaE
 
         if printout:
             reporting.jedi_printout(
-                self._atoms0,
-                self._rim_list,
-                self._delta_q,
-                self._deltaE,
-                self._E_RIMs_total,
+                self.__atoms0,
+                self.__rim_list,
+                self.__delta_q,
+                self.__deltaE,
+                self.__E_RIMs_total,
                 proc_geom_RIMs,
-                self._proc_E_RIMs,
-                self._E_RIMs,
-                ase_units=ase_units,
+                self.__proc_E_RIMs,
+                self.__E_RIMs,
+                ase_units=self.__ase_units,
             )
 
     def get_energies(self) -> None:
         """Calls the energies of the Atoms objects.
 
-        Sets self._deltaE = eF - e0
+        Sets self.__deltaE = eF - e0
         """
-        e0 = self._atoms0.get_potential_energy()
-        eF = self._atomsF.get_potential_energy()
-        if not self._ase_units:
-            e0 *= ase.units.mol / ase.units.kcal
-            eF *= ase.units.mol / ase.units.kcal
-        self._deltaE = eF - e0
+        e0 = self.__atoms0.get_potential_energy()
+        eF = self.__atomsF.get_potential_energy()
+        self.__deltaE = eF - e0
 
     def visualize(
         self,
         visualizer="mpl",
         colormap="green_red",
-        output_dir: Union[Path, str] = "visualization",
-        single_mode: Optional[str] = None,
-        man_strain: Optional[float] = None,
-        show: Optional[bool] = False,
-        show_indices: Optional[bool] = False,
-        box: Optional[bool] = False,
-        split_bonds: Optional[bool] = True,
+        output_dir: Path | str = "visualization",
+        single_mode: str | None = None,
+        man_strain: float | None = None,
+        show: bool | None = False,
+        show_indices: bool | None = False,
+        box: bool | None = False,
+        split_bonds: bool | None = True,
     ):
         """
         Args:
@@ -253,23 +256,19 @@ class Jedi:
                 Draw the unit cell box. Only applies to periodic structures.
                 default: False
         """
-
-        if self._proc_E_RIMs is None or len(self._proc_E_RIMs) == 0:
+        if self.__proc_E_RIMs is None or len(self.__proc_E_RIMs) == 0:
             raise ValueError("Analysis has not been run. Jedi.run() must be called before Jedi.visualize()")
 
-        if show and not visualizer == "mpl":
-            warnings.warn(
-                "'show=True' only works for the Matplotlib Visualizer and will be ignored.",
-                UserWarning,
-            )
+        if show and visualizer != "mpl":
+            warnings.warn("'show=True' only works for the Matplotlib Visualizer and will be ignored.", UserWarning)
 
-        if show_indices and not visualizer == "mpl":
+        if show_indices and visualizer != "mpl":
             warnings.warn(
                 "'show_indices=True' only works for the Matplotlib Visualizer and will be ignored.",
                 UserWarning,
             )
 
-        energy_unit = "eV" if self.ase_units else "kcal/mol"
+        energy_unit = "eV" if self.__ase_units else "kcal/mol"
 
         valid_modes = ["bl", "ba", "da", "all"]
         if not single_mode:
@@ -280,29 +279,27 @@ class Jedi:
             raise ValueError(f"Unknown mode '{single_mode}'. single_mode must be in: {valid_modes} or None")
 
         mapper = ColorMapper(self)
-        self.visualization_data = mapper.get_visualization_data(mode_list, colormap, man_strain, split_bonds)
+        self.__visualization_data = mapper.get_visualization_data(mode_list, colormap, man_strain, split_bonds)
 
         if visualizer == "mpl":
-            vis = MatplotlibVisualizer(self.visualization_data, mapper, output_dir, energy_unit)
+            vis = MatplotlibVisualizer(self.__visualization_data, mapper, output_dir, energy_unit)
             vis.run(show, show_indices, box)
-
         elif visualizer == "vmd":
-            vis = VMDVisualizer(self.visualization_data, mapper, output_dir, energy_unit)
+            vis = VMDVisualizer(self.__visualization_data, mapper, output_dir, energy_unit)
             vis.write_inputs(box)
-
         else:
             raise ValueError("Unknown visualizer. Visualizer must be 'mpl' or 'vmd'.")
 
     @deprecated("Use Jedi.visualize(visualizer='vmd') instead.")
     def vmd_gen(
         self,
-        _des_colors: Optional[Dict] = None,
+        _des_colors: dict | None = None,
         _box: bool = False,
-        man_strain: Optional[float] = None,
-        modus: Optional[str] = None,
+        man_strain: float | None = None,
+        modus: str | None = None,
         _colorbar: bool = True,
-        label: Union[Path, str] = "vmd",
-        incl_coloring: Optional[str] = None,
+        label: Path | str = "vmd",
+        incl_coloring: str | None = None,
     ):
         """
         Args:
@@ -346,69 +343,67 @@ class Jedi:
                 list of indices of atoms in desired substructure
         """
         # for calculation with partial hessian
-        self.ase_units = ase_units
-        if 3 * len(indices) < len(self._H):
+        self.__ase_units = bool(ase_units)
+        if 3 * len(indices) < len(self.__H):
             raise ValueError("to little indices for the given hessian")
 
         has_custom_bonds = False
-        if self._custom_bonds is not None:
-            old_custom_bonds = self._custom_bonds.copy()
+        if self.__custom_bonds is not None:
+            old_custom_bonds = self.__custom_bonds.copy()
             has_custom_bonds = True
-            self._custom_bonds = self._custom_bonds[np.isin(self._custom_bonds, indices).all(axis=1)]
+            self.__custom_bonds = self.__custom_bonds[np.isin(self.__custom_bonds, indices).all(axis=1)]
 
-        rim_list = rics.calculate(self._atoms0, self._indices, self._custom_bonds)
-
+        rim_list = rics.calculate(self.__atoms0, self.__indices, self.__custom_bonds)
         if len(rim_list) == 0:
             raise ValueError("Chosen indexlist has no rims")
 
-        self._B = bmatrix.calculate(self._atoms0, rim_list, indices=self._indices)
+        self.__B = bmatrix.calculate(self.__atoms0, rim_list, indices=self.__indices)
         # set B matrix values of not considered atoms to 0
-        self._B = bmatrix.restrict(self._B, indices)
+        self.__B = bmatrix.restrict(self.__B, indices)
 
-        self._q0, self._qF, self._delta_q = rics.subtract(self._atoms0, self._atomsF, self._rim_list)
+        self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
 
-        # self._deltaE
         self.get_energies()
 
         (
-            self._proc_E_RIMs,
-            self._E_RIMs,
-            self._E_RIMs_total,
+            self.__proc_E_RIMs,
+            self.__E_RIMs,
+            self.__E_RIMs_total,
             _proc_geom_RIMs,
-            self._delta_q,
+            self.__delta_q,
         ) = jedi_analysis(
-            self._atomsF,
+            self.__atomsF,
             rim_list,
-            self._B,
-            self._H,
-            self._delta_q,
-            self._deltaE,
-            ase_units=ase_units,
+            self.__B,
+            self.__H,
+            self.__delta_q,
+            self.__deltaE,
+            ase_units=self.__ase_units,
         )
+
         # get values of rims inside the substructure
         self.post_process(indices)
-        self._E_RIMs_total = sum(self._E_RIMs)
-        proc_geom_RIMs = 100 * (sum(self._E_RIMs) - self._deltaE) / self._deltaE
+        self.__E_RIMs_total = float(np.sum(self.__E_RIMs))
+        proc_geom_RIMs = 100 * (float(np.sum(self.__E_RIMs)) - self.__deltaE) / self.__deltaE
+
         reporting.jedi_printout(
-            self._atoms0,
-            self._rim_list,
-            self._delta_q,
-            self._deltaE,
-            self._E_RIMs_total,
+            self.__atoms0,
+            self.__rim_list,
+            self.__delta_q,
+            self.__deltaE,
+            self.__E_RIMs_total,
             proc_geom_RIMs,
-            self._proc_E_RIMs,
-            self._E_RIMs,
-            ase_units=ase_units,
+            self.__proc_E_RIMs,
+            self.__E_RIMs,
+            ase_units=self.__ase_units,
         )
 
         if has_custom_bonds:
-            self._custom_bonds = old_custom_bonds  # restore the user input
+            self.__custom_bonds = old_custom_bonds  # restore the user input
 
-    def post_process(
-        self, indices
-    ):  # a function to get segments of all full analysis for better understanding of local strain
+    def post_process(self, indices):
         """
-        get only the values of RICs inside a defined substructure
+        Get only the values of RICs inside a defined substructure.
 
         Args:
             indices:
@@ -417,16 +412,18 @@ class Jedi:
             Values for analyzed RIMs in the defined substructure
         """
         # get rims with only the considered atoms
-        self._indices = indices
-        rim_list = self._rim_list
+        self.__indices = indices
+        rim_list = self.__rim_list
+
         cbonds_flag = False
-        if self._custom_bonds is not None:
-            custom_bonds = self._custom_bonds.copy()
+        if self.__custom_bonds is not None:
+            custom_bonds = self.__custom_bonds.copy()
             cbonds_flag = True
-            self._custom_bonds = self._custom_bonds[np.isin(self._custom_bonds, indices).all(axis=1)]
+            self.__custom_bonds = self.__custom_bonds[np.isin(self.__custom_bonds, indices).all(axis=1)]
+
         rim_p = rics.intersect(
-            rics.calculate(self._atoms0, indices, self._custom_bonds),
-            rics.calculate(self._atomsF, indices, self._custom_bonds),
+            rics.calculate(self.__atoms0, indices, self.__custom_bonds),
+            rics.calculate(self.__atomsF, indices, self.__custom_bonds),
         )
 
         ind = []
@@ -440,13 +437,13 @@ class Jedi:
                     rim_list_c.append(np.vstack((rim_list[i], rim_p[i])))
                 else:
                     rim_list_c.append(rim_list[i])
-            _, z = np.unique(rim_list_c[-1], return_counts=True, axis=0)
 
+            _, z = np.unique(rim_list_c[-1], return_counts=True, axis=0)
             ind.append(np.where(z > 1)[0])  # get indices where ric is in both sets
+
         for i in range(4):
             ind[i] = ind[i] + np.sum([p.shape[0] for p in rim_list[0:i]])  # get correct indices for the stacked array
-        ind = np.hstack(ind)
-        ind = ind.astype(int)
+        ind = np.hstack(ind).astype(int)
 
         # Keep rim_list aligned with filtered E_RIMs/delta_q.
         # ind is a "flat" index over the concatenation of rim_list[0], rim_list[1], rim_list[2], rim_list[3]
@@ -463,16 +460,17 @@ class Jedi:
             local_ind = ind[mask] - offsets[i]
             new_rim_list.append(rim_list[i][local_ind])
 
-        # FIXME: This is a side-effect that should be avoided.
-        self._rim_list = new_rim_list
+        # Side-effect: keep internal rim_list aligned to filtered arrays
+        self.__rim_list = new_rim_list
 
-        self._E_RIMs = np.array(self._E_RIMs)[ind]
-        self._delta_q = self._delta_q[ind]
-        E_RIMs_total = sum(self._E_RIMs)
-        self._proc_E_RIMs = np.array(self._E_RIMs) / E_RIMs_total * 100
+        self.__E_RIMs = np.array(self.__E_RIMs)[ind]
+        self.__delta_q = self.__delta_q[ind]
+
+        E_RIMs_total = float(np.sum(self.__E_RIMs))
+        self.__proc_E_RIMs = np.array(self.__E_RIMs) / E_RIMs_total * 100
+
         if cbonds_flag:
-            self._custom_bonds = custom_bonds  # restore the user input
-        pass
+            self.__custom_bonds = custom_bonds  # restore the user input
 
     def add_custom_bonds(self, bonds: NDArray) -> None:
         """Add custom bonds after creating the object.
@@ -481,24 +479,23 @@ class Jedi:
             bonds:
                 1D or 2Darray with atom indices, [[i,j]...]
         """
-
-        self._custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
+        self.__custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
 
     def set_bond_params(self, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
         """
         Args:
             covf:
-                float factor for  covalent radii to determine covalent bonds
+                float factor for covalent radii to determine covalent bonds
             vdwf:
                 float factor for vdw radii to get the upper limit of the custom bond lengths
         """
-        self._covf = covf
-        self._vdwf = vdwf
+        self.__covf = covf
+        self.__vdwf = vdwf
 
 
 def jedi_analysis(
     atoms: ase.atoms.Atoms,
-    rim_list: List,
+    rim_list: list,
     B: np.ndarray,
     H_cart: np.ndarray,
     delta_q: np.ndarray,
@@ -599,20 +596,18 @@ def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAAL
     for i in bl:
         if mol.symbols[i[0]] == "H" and mol.symbols[i[1]] in hpartner:
             for j in hpartner_ls:
-                if j != i[1]:
-                    if (
-                        mol.get_distance(i[0], j, mic=True) < hcutoff[(mol.symbols[i[0]], mol.symbols[j])]
-                        and mol.get_angle(i[1], i[0], j, mic=True) > 90
-                    ):
-                        hbond_ls.append([i[0], j])
+                if j != i[1] and (
+                    mol.get_distance(i[0], j, mic=True) < hcutoff[(mol.symbols[i[0]], mol.symbols[j])]
+                    and mol.get_angle(i[1], i[0], j, mic=True) > 90
+                ):
+                    hbond_ls.append([i[0], j])
         elif mol.symbols[i[0]] in hpartner and mol.symbols[i[1]] == "H":
             for j in hpartner_ls:
-                if j != i[0]:
-                    if (
-                        mol.get_distance(i[1], j, mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])]
-                        and mol.get_angle(i[0], i[1], j, mic=True) > 90
-                    ):
-                        hbond_ls.append([i[1], j])
+                if j != i[0] and (
+                    mol.get_distance(i[1], j, mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])]
+                    and mol.get_angle(i[0], i[1], j, mic=True) > 90
+                ):
+                    hbond_ls.append([i[1], j])
     if len(hbond_ls) > 0:
         hbond_ls = np.array(hbond_ls)
         hbond_ls = np.sort(hbond_ls, axis=1)
