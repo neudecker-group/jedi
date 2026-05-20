@@ -287,6 +287,9 @@ class Jedi:
         """
         e0 = self.__atoms0.get_potential_energy()
         eF = self.__atomsF.get_potential_energy()
+        if not self.__ase_units:
+            e0 *= ase.units.mol / ase.units.kcal
+            eF *= ase.units.mol / ase.units.kcal
         self.__deltaE = eF - e0
 
     def visualize(
