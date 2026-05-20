@@ -88,6 +88,86 @@ class Jedi:
         self.__ase_units = False  # last-used unit mode for reporting/visualization
         self.__visualization_data = None  # last visualization dataset
 
+    @property
+    def H(self):
+        return self.__H
+
+    @property
+    def atoms0(self):
+        return self.__atoms0
+
+    @property
+    def atomsF(self):
+        return self.__atomsF
+
+    @property
+    def covf(self):
+        return self.__covf
+
+    @property
+    def vdwf(self):
+        return self.__vdwf
+
+    @property
+    def indices(self):
+        return self.__indices
+
+    @property
+    def custom_bonds(self):
+        return self.__custom_bonds
+
+    @property
+    def rim_list(self):
+        return self.__rim_list
+
+    @property
+    def B(self):
+        return self.__B
+
+    @property
+    def q0(self):
+        return self.__q0
+
+    @property
+    def qF(self):
+        return self.__qF
+
+    @property
+    def delta_q(self):
+        return self.__delta_q
+
+    @property
+    def energies(self):
+        return self.__energies
+
+    @property
+    def deltaE(self):
+        return self.__deltaE
+
+    @property
+    def proc_E_RIMs(self):
+        return self.__proc_E_RIMs
+
+    @property
+    def part_rim_list(self):
+        return self.__part_rim_list
+
+    @property
+    def E_RIMs(self):
+        return self.__E_RIMs
+
+    @property
+    def E_RIMs_total(self):
+        return self.__E_RIMs_total
+
+    @property
+    def ase_units(self):
+        return self.__ase_units
+
+    @property
+    def visualization_data(self):
+        return self.__visualization_data
+
     def todict(self) -> dict[str, Any]:
         """make it saveable with .write()"""
         return {
