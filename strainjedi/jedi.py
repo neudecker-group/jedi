@@ -696,7 +696,7 @@ def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
     and reorderes the Hessian to match if that is not the case.
 
     Returns a tuple of the (reordered) Hessian and a boolean indicating whether the
-    Hessian was reordered.
+    Hessian's order matched.
 
     Parameters
     ----------
