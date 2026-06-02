@@ -1,5 +1,4 @@
 import ase.geometry
-import ase.neighborlist
 import ase.units
 import numpy as np
 
@@ -10,7 +9,7 @@ def calculate(atoms0, rim_list, indices=None):
     if indices is None:
         indices = np.arange(0, len(mol))
 
-    rim_size = sum([np.shape(length)[0] for length in rim_list])
+    rim_size = sum(np.shape(length)[0] for length in rim_list)
     b = np.zeros([int(len(indices) * 3), int(rim_size)], dtype=float)  # shape of B-matrix (NCarts,NRIMs)
 
     # map atom index -> row block start in B (only for selected indices)
