@@ -35,7 +35,7 @@ class Jedi:
             Vector containing (f - i) endiff., final, initial energy or None. Default: None.
         """
         # validate the Hessian's atom order (must match atoms0); if not, permute Hessian to match.
-        hessian, ok = validate_hessian(atoms0, modes)
+        hessian, ok = validate_hessian(modes, atoms0)
         if not ok:
             warnings.warn(
                 "Atoms in VibrationsData object were not fitting atoms0. "
@@ -721,9 +721,8 @@ def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
 
     if np.array_equal(perm, np.arange(len(atoms0))):
         hessian = modes._hessian2d
-        ok = True
-    else:
-        dof = np.repeat(perm, 3) * 3 + np.tile(np.arange(3), len(perm))
-        hessian = modes._hessian2d[np.ix_(dof, dof)]
-        ok = False
-    return hessian, ok
+        return hessian, True
+
+    dof = np.repeat(perm, 3) * 3 + np.tile(np.arange(3), len(perm))
+    hessian = modes._hessian2d[np.ix_(dof, dof)]
+    return hessian, False
