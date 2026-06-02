@@ -85,6 +85,14 @@ class Jedi:
         return self.__atomsF
 
     @property
+    def rics0(self):
+        return rics.calculate(self.__atoms0, self.__indices, self.__custom_bonds)
+
+    @property
+    def ricsF(self):
+        return (rics.calculate(self.__atomsF, self.__indices, self.__custom_bonds),)
+
+    @property
     def covf(self):
         return self.__covf
 
