@@ -73,7 +73,7 @@ class ReportLayout:
         "percentage",
         "energy",
     )
-    use_ase_units = True
+    use_ase_units: bool = True
 
     @property
     def header(self) -> dict[str, int]:
@@ -262,7 +262,7 @@ def jedi_printout(
     rim_list: list
         A list of 4 numpy 2D arrays: bonds, custom bonds, angles, dihedrals.
     """
-    layout = layout or ReportLayout()
+    layout = layout or ReportLayout(use_ase_units=ase_units)
 
     types, indices = _flatten_rics(rim_list, {0: "bond", 1: "custom", 2: "angle", 3: "dihedral"})
     report = _build_report(
