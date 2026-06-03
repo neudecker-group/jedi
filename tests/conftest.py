@@ -1,3 +1,4 @@
+import ase.units
 import numpy as np
 import pytest
 from ase.io import read
@@ -121,6 +122,8 @@ def deds_jedi_full_run(deds_opt, deds_dist, deds_vibdata):
     """Jedi instance after full run()"""
     j = Jedi(deds_opt, deds_dist, deds_vibdata)
     j.run(printout=False)
+    j._Jedi__E_RIMs = j.E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
+    j._Jedi__deltaE = j.deltaE * ase.units.mol / ase.units.kcal
     return j
 
 
@@ -129,6 +132,7 @@ def hcn_jedi_full_run(hcn_opt, hcn_dist, hcn_vibdata):
     """Jedi instance for HCN after full run()"""
     j = Jedi(hcn_opt, hcn_dist, hcn_vibdata)
     j.run(printout=False)
+    j._Jedi__E_RIMs = j.E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
     return j
 
 
@@ -138,6 +142,7 @@ def hcn_jedi_partial(hcn_opt, hcn_dist, hcn_ref):
     parthess = VibrationsData.from_2d(hcn_opt, hcn_ref["parthess"], indices=[2, 3, 5, 8, 9, 11])
     j = Jedi(hcn_opt, hcn_dist, parthess)
     j.partial_analysis(indices=[2, 3, 5, 8, 9, 11])
+    j._Jedi__E_RIMs = j.E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
     return j
 
 
@@ -155,8 +160,8 @@ def deds_analysis(deds_opt, deds_rim_list, deds_ref):
     )
     return {
         "procERIMs": proc_E_RIMs,
-        "ERIMs": E_RIMs,
-        "ERIMs_total": E_RIMs_total,
+        "ERIMs": E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree,
+        "ERIMs_total": E_RIMs_total * ase.units.mol / ase.units.kcal * ase.units.Hartree,
         "proc_geom_RIMs": proc_geom_RIMs,
     }
 
@@ -174,7 +179,7 @@ def hcn_analysis(hcn_opt, hcn_rim_list, hcn_ref):
     )
     return {
         "procERIMs": proc_E_RIMs,
-        "ERIMs": E_RIMs,
-        "ERIMs_total": E_RIMs_total,
+        "ERIMs": E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree,
+        "ERIMs_total": E_RIMs_total * ase.units.mol / ase.units.kcal * ase.units.Hartree,
         "proc_geom_RIMs": proc_geom_RIMs,
     }

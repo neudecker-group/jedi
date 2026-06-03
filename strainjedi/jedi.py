@@ -69,7 +69,6 @@ class Jedi:
         self.__E_RIMs = None  # list of energies stored in the rims
         self.__E_RIMs_total = None  # sum of E_rims
 
-        self.__ase_units = False  # last-used unit mode for reporting/visualization
         self.__visualization_data = None  # last visualization dataset
 
     @property
@@ -153,10 +152,6 @@ class Jedi:
         return self.__E_RIMs_total
 
     @property
-    def ase_units(self):
-        return self.__ase_units
-
-    @property
     def visualization_data(self):
         return self.__visualization_data
 
@@ -228,7 +223,6 @@ class Jedi:
         Returns:
             Indices, strain, energy in every RIM
         """
-        self.__ase_units = bool(ase_units)
 
         # get necessary data
         if len(self.__atoms0) != self.__H.shape[0] / 3:
@@ -236,7 +230,7 @@ class Jedi:
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
             )
 
-        self.get_energies()
+        self.__deltaE = self.get_energies()
 
         (
             self.__proc_E_RIMs,
@@ -251,7 +245,7 @@ class Jedi:
             self.__H,
             self.__delta_q,
             self.__deltaE,
-            ase_units=self.__ase_units,
+            use_ase_units=ase_units,
         )
 
         if indices:  # get only rims of interest
@@ -269,20 +263,16 @@ class Jedi:
                 proc_geom_RIMs,
                 self.__proc_E_RIMs,
                 self.__E_RIMs,
-                ase_units=self.__ase_units,
+                ase_units=ase_units,
             )
 
-    def get_energies(self) -> None:
-        """Calls the energies of the Atoms objects.
-
-        Sets self.__deltaE = eF - e0
+    def get_energies(self) -> float:
         """
-        e0 = self.__atoms0.get_potential_energy()
-        eF = self.__atomsF.get_potential_energy()
-        if not self.__ase_units:
-            e0 *= ase.units.mol / ase.units.kcal
-            eF *= ase.units.mol / ase.units.kcal
-        self.__deltaE = eF - e0
+        Returns the difference in potential energies of self.atoms0 and self.atomsF in kcal/mol.
+        """
+        e0 = self.__atoms0.get_potential_energy()  # [eV]
+        eF = self.__atomsF.get_potential_energy()  # [eV]
+        return eF - e0
 
     def visualize(
         self,
@@ -291,10 +281,11 @@ class Jedi:
         output_dir: Path | str = "visualization",
         single_mode: str | None = None,
         man_strain: float | None = None,
-        show: bool | None = False,
-        show_indices: bool | None = False,
-        box: bool | None = False,
-        split_bonds: bool | None = True,
+        show: bool = False,
+        show_indices: bool = False,
+        box: bool = False,
+        split_bonds: bool = True,
+        ase_units: bool = False,
     ):
         """
         Args:
@@ -330,6 +321,9 @@ class Jedi:
             box: (bool)
                 Draw the unit cell box. Only applies to periodic structures.
                 default: False
+            ase_units: (bool)
+                Whether to use Angstrom and eV instead of kcal/mol and Bohr.
+                default: False
         """
         if self.__proc_E_RIMs is None or len(self.__proc_E_RIMs) == 0:
             raise ValueError("Analysis has not been run. Jedi.run() must be called before Jedi.visualize()")
@@ -343,7 +337,7 @@ class Jedi:
                 UserWarning,
             )
 
-        energy_unit = "eV" if self.__ase_units else "kcal/mol"
+        energy_unit = "eV" if ase_units else "kcal/mol"
 
         valid_modes = ["bl", "ba", "da", "all"]
         if not single_mode:
@@ -353,7 +347,7 @@ class Jedi:
         else:
             raise ValueError(f"Unknown mode '{single_mode}'. single_mode must be in: {valid_modes} or None")
 
-        mapper = ColorMapper(self)
+        mapper = ColorMapper(self, ase_units)
         self.__visualization_data = mapper.get_visualization_data(mode_list, colormap, man_strain, split_bonds)
 
         if visualizer == "mpl":
@@ -418,7 +412,6 @@ class Jedi:
                 list of indices of atoms in desired substructure
         """
         # for calculation with partial hessian
-        self.__ase_units = bool(ase_units)
         if 3 * len(indices) < len(self.__H):
             raise ValueError("to little indices for the given hessian")
 
@@ -438,7 +431,7 @@ class Jedi:
 
         self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
 
-        self.get_energies()
+        self.__deltaE = self.get_energies()
 
         (
             self.__proc_E_RIMs,
@@ -453,7 +446,7 @@ class Jedi:
             self.__H,
             self.__delta_q,
             self.__deltaE,
-            ase_units=self.__ase_units,
+            use_ase_units=ase_units,
         )
 
         # get values of rims inside the substructure
@@ -470,7 +463,7 @@ class Jedi:
             proc_geom_RIMs,
             self.__proc_E_RIMs,
             self.__E_RIMs,
-            ase_units=self.__ase_units,
+            ase_units=ase_units,
         )
 
         if has_custom_bonds:
@@ -576,7 +569,7 @@ def jedi_analysis(
     delta_q: np.ndarray,
     deltaE: float,
     printout: bool | None = None,
-    ase_units: bool = False,
+    use_ase_units: bool = False,
 ):
     """
     Analysis of strain energy stored in redundant internal coordinates.
@@ -611,17 +604,6 @@ def jedi_analysis(
         E_RIMs = np.sum(0.5 * (delta_q * H_q).T * delta_q, axis=1)
     proc_E_RIMs = 100 * E_RIMs / E_RIMs_total
 
-    # Unit handling
-    if ase_units:
-        b = rim_list[0].shape[0] + rim_list[1].shape[0]
-        delta_q[0:b] *= ase.units.Bohr
-        delta_q[b:] = np.degrees(delta_q[b:])
-        E_RIMs = E_RIMs * ase.units.Hartree
-        E_RIMs_total *= ase.units.Hartree
-    else:
-        E_RIMs = E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
-        E_RIMs_total *= ase.units.mol / ase.units.kcal * ase.units.Hartree
-
     proc_geom_RIMs = 100 * (E_RIMs_total - deltaE) / deltaE
 
     if printout:
@@ -634,7 +616,7 @@ def jedi_analysis(
             proc_geom_RIMs,
             proc_E_RIMs,
             E_RIMs,
-            ase_units=ase_units,
+            ase_units=use_ase_units,
         )
 
     return proc_E_RIMs, E_RIMs, E_RIMs_total, proc_geom_RIMs, delta_q

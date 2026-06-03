@@ -1,5 +1,6 @@
 import copy
 
+import ase.units
 import matplotlib
 import numpy as np
 
@@ -118,8 +119,9 @@ class TestGetEnergy:
 
     def test_energies_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        j.get_energies()
-        np.testing.assert_allclose(np.array(j.deltaE), deds_ref["energies"][0], atol=1e-05)
+        np.testing.assert_allclose(
+            np.array(j.get_energies() * ase.units.mol / ase.units.kcal), deds_ref["energies"][0], atol=1e-05
+        )
 
 
 class TestJediAnalysis:

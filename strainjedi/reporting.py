@@ -5,6 +5,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+import ase.units
+
 if TYPE_CHECKING:
     # imported only by type checkers, never at runtime to avoid cyclic imports
     from strainjedi.jedi import Jedi
@@ -263,6 +265,18 @@ def jedi_printout(
         A list of 4 numpy 2D arrays: bonds, custom bonds, angles, dihedrals.
     """
     layout = layout or ReportLayout(use_ase_units=ase_units)
+
+    if ase_units:
+        # Convert units to Angstrom and degrees if necessary (ASE units)
+        b = rim_list[0].shape[0] + rim_list[1].shape[0]
+        delta_q[0:b] *= ase.units.Bohr
+        delta_q[b:] = np.degrees(delta_q[b:])
+        E_RIMs = E_RIMs * ase.units.Hartree
+        E_RIMs_total *= ase.units.Hartree
+    else:
+        E_RIMs = E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
+        E_RIMs_total *= ase.units.mol / ase.units.kcal * ase.units.Hartree
+        E_geometries *= ase.units.mol / ase.units.kcal
 
     types, indices = _flatten_rics(rim_list, {0: "bond", 1: "custom", 2: "angle", 3: "dihedral"})
     report = _build_report(

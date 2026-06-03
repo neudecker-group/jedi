@@ -12,7 +12,7 @@ from strainjedi.visualization.colors import colors as symbol_colors
 
 
 class ColorMapper:
-    def __init__(self, jedi_instance):
+    def __init__(self, jedi_instance, ase_units):
         self.j = jedi_instance
         self.atoms0 = jedi_instance.atoms0
         self.atomsF = jedi_instance.atomsF
@@ -20,7 +20,7 @@ class ColorMapper:
         self.E_RIMs = jedi_instance.E_RIMs
         self.proc_E_RIMs = jedi_instance.proc_E_RIMs
         self.custom_bonds = jedi_instance.custom_bonds
-        self.ase_units = jedi_instance.ase_units
+        self.ase_units = ase_units
         self.indices = jedi_instance.indices
         self.vdwf = jedi_instance.vdwf
         self.atoms_vis = jedi_instance.atomsF
