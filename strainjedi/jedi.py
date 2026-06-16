@@ -89,7 +89,7 @@ class Jedi:
 
     @property
     def ricsF(self):
-        return (rics.calculate(self.__atomsF, self.__indices, self.__custom_bonds),)
+        return rics.calculate(self.__atomsF, self.__indices, self.__custom_bonds)
 
     @property
     def covf(self):
