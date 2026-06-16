@@ -7,7 +7,7 @@ from ase.data.vdw import vdw_radii
 from matplotlib import cm, colormaps
 from matplotlib.colors import Colormap
 
-from strainjedi import rics
+from strainjedi import rics, utils
 from strainjedi.visualization.colors import colors as symbol_colors
 
 
@@ -24,6 +24,8 @@ class ColorMapper:
         self.indices = jedi_instance.indices
         self.vdwf = jedi_instance.vdwf
         self.atoms_vis = jedi_instance.atomsF
+
+        self.E_RIMs, _, _, _ = utils._convert_units(ase_units, self.rim_list, self.E_RIMs)
 
     def assign_atom_colors(self):
         atom_colors = []

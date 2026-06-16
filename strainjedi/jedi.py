@@ -11,7 +11,7 @@ from ase.utils import jsonable
 from numpy.typing import NDArray
 from typing_extensions import Any, deprecated
 
-from strainjedi import bmatrix, constants, reporting, rics
+from strainjedi import bmatrix, constants, reporting, rics, utils
 from strainjedi.visualization import ColorMapper, MatplotlibVisualizer, VMDVisualizer
 
 
@@ -35,7 +35,7 @@ class Jedi:
             Vector containing (f - i) endiff., final, initial energy or None. Default: None.
         """
         # validate the Hessian's atom order (must match atoms0); if not, permute Hessian to match.
-        hessian, ok = validate_hessian(modes, atoms0)
+        hessian, ok = utils.validate_hessian(modes, atoms0)
         if not ok:
             warnings.warn(
                 "Atoms in VibrationsData object were not fitting atoms0. "
@@ -670,41 +670,3 @@ def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAAL
         hbond_ls = np.sort(hbond_ls, axis=1)
         hbond_ls = np.atleast_2d(hbond_ls)
     return hbond_ls
-
-
-def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
-    """
-    Validates that the order of atoms0 matches the order of the Hessian's elements,
-    and reorderes the Hessian to match if that is not the case.
-
-    Returns a tuple of the (reordered) Hessian and a boolean indicating whether the
-    Hessian's order matched.
-
-    Parameters
-    ----------
-    modes:
-        The Hessian to validate against atoms0.
-
-    atoms0:
-        The Atoms object to validate against.
-    """
-    perm = []
-    for atom in atoms0:
-        match = None
-        for i, vib_atom in enumerate(modes._atoms):
-            if atom.symbol != vib_atom.symbol:
-                continue
-            if np.allclose(atom.position, vib_atom.position, atol=1e-5):
-                match = i
-                break
-        perm.append(match)
-
-    perm = np.asarray(perm, dtype=int)
-
-    if np.array_equal(perm, np.arange(len(atoms0))):
-        hessian = modes._hessian2d
-        return hessian, True
-
-    dof = np.repeat(perm, 3) * 3 + np.tile(np.arange(3), len(perm))
-    hessian = modes._hessian2d[np.ix_(dof, dof)]
-    return hessian, False
