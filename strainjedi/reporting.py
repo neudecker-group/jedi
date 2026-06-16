@@ -320,15 +320,3 @@ def jedi_printout_bonds(
 
     with open(file, "w") as f:
         f.write(report)
-
-
-def report(jedi: Jedi, *, layout: ReportLayout | None = None, file: str = "jedi_analysis.txt"):
-    """
-    Create a report and save it to `file`.
-    """
-    from ase.io.jsonio import encode
-
-    layout = layout or ReportLayout()
-    with open(file, "w") as f:
-        f.write("WIP. Meanwhile, here's a JSON dump of Jedi:\n")
-        f.write(json.dumps(encode(jedi), indent=2))
