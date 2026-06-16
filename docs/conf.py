@@ -6,9 +6,11 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import datetime
+
 project = "JEDI"
-copyright = "2026, Neudecker Group"
 author = "Neudecker Group"
+copyright = f"{datetime.datetime.now(tz=datetime.timezone.utc).date().year}, {author}"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
