@@ -429,7 +429,7 @@ class Jedi:
         # set B matrix values of not considered atoms to 0
         self.__B = bmatrix.restrict(self.__B, indices)
 
-        self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
+        self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, rim_list)
 
         self.__deltaE = self.get_energies()
 
