@@ -11,3 +11,4 @@ Modules
    bmatrix
    rics
    constants
+   utils

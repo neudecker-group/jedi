@@ -5,28 +5,44 @@ from numpy.typing import NDArray
 
 def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
     """
-    Validates that the order of atoms0 matches the order of the Hessian's elements,
-    and reorderes the Hessian to match if that is not the case.
+    Validate and, if necessary, reorder a Hessian matrix to match an Atoms object.
 
-    Returns a tuple of the (reordered) Hessian and a boolean indicating whether the
-    Hessian's order matched.
+    This function checks whether the atomic ordering implicit in the Hessian
+    (`modes`) is consistent with the ordering of atoms in `atoms0`. If the
+    ordering differs, the Hessian is permuted to match `atoms0`.
 
     Parameters
     ----------
-    modes:
-        The Hessian to validate against atoms0.
-
-    atoms0:
-        The Atoms object to validate against.
+    modes : numpy.ndarray
+        Cartesian Hessian matrix or modal representation associated with a
+        molecular structure. Typically has shape (3N, 3N), where N is the
+        number of atoms.
+    atoms0 : ase.Atoms
+        Reference atomic structure defining the correct atom ordering.
 
     Returns
     -------
-    hessian : ndarray
-        The (possibly) reordered Hessian aligned with `atoms0`.
-
+    hessian : numpy.ndarray
+        Hessian reordered (if necessary) to match the atom ordering of
+        `atoms0`. If the ordering already matches, the input is returned
+        unchanged.
     ok : bool
-        True if the Hessian matched, False if not and the Hessian had to be reordered.
+        True if the original Hessian ordering already matched `atoms0`,
+        False if a reordering was performed.
 
+    Notes
+    -----
+    - The function assumes that the Hessian ordering corresponds directly to
+      the atomic ordering in Cartesian blocks (x, y, z per atom).
+    - Reordering is performed at the atomic block level, not individual
+      Cartesian components.
+    - No physical transformation is applied; only index permutation.
+
+    Examples
+    --------
+    >>> H, ok = validate_hessian(H, atoms)
+    >>> if not ok:
+    ...     print("Hessian was reordered to match atomic structure.")
     """
     perm = []
     for atom in atoms0:
@@ -52,40 +68,74 @@ def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
 
 def _convert_units(use_ase_units: bool, rim_list, E_RIMs, deltaE=None, delta_q=None, E_RIMs_total=None):
     """
-    Internal use only.
-    Users are encouraged to make use of the `ase_units` parameter of Jedi.visualize() instead.
+    Convert RIC-related energies and coordinate displacements between ASE and
+    chemical energy units.
 
-    Converts the units of `delta_q`, `E_geometries`, `E_RIMs_total`, and `E_RIMs` to
-    kcal/mol; if `use_ase_units` is True, use Angstrom and degrees instead.
+    This function performs unit conversions for redundant internal coordinate
+    (RIC) analysis outputs, including coordinate displacements and energy
+    decompositions. It supports switching between ASE-native units and
+    chemistry-friendly units (kcal/mol and Å/degrees).
+
+    Important
+    ---------
+    This internal API may change at any time; users are encouraged to instead make use of
+    the `ase_units` parameters on Jedi.run() and Jedi.visualize().
 
     Parameters
     ----------
     use_ase_units : bool
-        Whether to use ASE units or kcal/mol.
-    rim_list
-        A list of RICs to determine the bond energies.
-    deltaE
-        Energy difference between the geometries.
-    E_RIMs_total
-        The total energy of all RICs.
-    E_RIMs
-        A nested list (n.b.: dubious?) of the energies for each RIC.
-    delta_q: optional
-        Array of deformations along the RICs.
+        If True, convert outputs to ASE units (Å for lengths, degrees for
+        angles, Hartree for energies). If False, convert to chemical units
+        (Bohr for lengths, radians for angles, kcal/mol for energies).
+    rim_list : sequence of numpy.ndarray
+        RIC definition used to determine how many entries correspond to bond
+        and custom bond coordinates versus angular coordinates.
+    E_RIMs : array_like
+        Energies associated with each redundant internal coordinate.
+    deltaE : float or array_like, optional
+        Total energy difference between geometries.
+    delta_q : numpy.ndarray, optional
+        Coordinate differences along RICs. Modified in-place if provided.
+    E_RIMs_total : float or array_like, optional
+        Total summed RIC energy.
+
+    Returns
+    -------
+    E_RIMs : array_like
+        Converted RIC energies.
+    deltaE : float or array_like or None
+        Converted total energy difference, if provided.
+    delta_q : numpy.ndarray or None
+        Converted RIC displacements, if provided.
+    E_RIMs_total : float or array_like or None
+        Converted total RIC energy, if provided.
+
+    Notes
+    -----
+    Conversion behavior:
+
+    - Length-like coordinates (bonds and custom bonds) use Bohr ↔ Å.
+    - Angular coordinates use radians ↔ degrees.
+    - Energies are converted between Hartree and kcal/mol using ASE constants.
     """
     if use_ase_units:
         b = rim_list[0].shape[0] + rim_list[1].shape[0]
+
         if delta_q is not None:
-            delta_q[0:b] *= ase.units.Bohr
-            delta_q[b:] = np.degrees(delta_q[b:])
+            dq = delta_q.copy()
+            dq[:b] = dq[:b] * ase.units.Bohr
+            dq[b:] = np.degrees(dq[b:])
+            delta_q = dq
+
         E_RIMs = E_RIMs * ase.units.Hartree
         if E_RIMs_total is not None:
-            E_RIMs_total *= ase.units.Hartree
+            E_RIMs_total = E_RIMs_total * ase.units.Hartree
+
     else:
         E_RIMs = E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
         if E_RIMs_total is not None:
-            E_RIMs_total *= ase.units.mol / ase.units.kcal * ase.units.Hartree
+            E_RIMs_total = E_RIMs_total * ase.units.mol / ase.units.kcal * ase.units.Hartree
         if deltaE is not None:
-            deltaE *= ase.units.mol / ase.units.kcal
+            deltaE = deltaE * ase.units.mol / ase.units.kcal
 
     return E_RIMs, deltaE, delta_q, E_RIMs_total
