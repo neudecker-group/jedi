@@ -51,9 +51,12 @@ For more details, see the :ref:`full tutorial <tutorial>`.
 .. _Python: https://www.python.org/
 .. _MIT License: https://github.com/neudecker-group/jedi/blob/main/LICENSE
 
+
+Contents
+========
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    install
    strainjedi/strainjedi
