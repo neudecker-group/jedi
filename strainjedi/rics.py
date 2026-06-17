@@ -12,7 +12,51 @@ from strainjedi import constants
 
 @dataclasses.dataclass
 class RICS:
-    """Representation of redundant internal coordinates (RICs)."""
+    """
+    Container for redundant internal coordinates (RICs).
+
+    This dataclass stores the different classes of redundant internal
+    coordinates (bonds, custom bonds, angles, and dihedrals) in a structured
+    form. It is intended as a future replacement for the current list-of-lists
+    representation used throughout the codebase, while maintaining backward
+    compatibility with indexing and length semantics. At the moment, it is unused.
+
+    Attributes
+    ----------
+    bonds : numpy.ndarray
+        Covalent bond definitions, shape (n_bonds, 2).
+    custom_bonds : numpy.ndarray
+        Additional user-defined bonds (e.g., hydrogen bonds or long-range
+        interactions), shape (n_custom_bonds, 2).
+    angles : numpy.ndarray
+        Bond angle definitions, shape (n_angles, 3).
+    dihedrals : numpy.ndarray
+        Dihedral angle definitions, shape (n_dihedrals, 4).
+
+    Methods
+    -------
+    __getitem__(index)
+        Access RIC components using integer indexing or slicing, following the
+        legacy list-based API.
+
+    __len__()
+        Return the number of RIC categories (always 4).
+
+    Notes
+    -----
+    This class preserves compatibility with legacy code that treats RICs as a
+    list of four arrays ordered as:
+
+        [bonds, custom_bonds, angles, dihedrals]
+
+    Indexing behavior:
+
+    - ``rics[0]`` → bonds
+    - ``rics[1]`` → custom_bonds
+    - ``rics[2]`` → angles
+    - ``rics[3]`` → dihedrals
+    - slicing returns a tuple of selected fields
+    """
 
     bonds: NDArray
     custom_bonds: NDArray
@@ -41,8 +85,63 @@ class RICS:
 
 # TODO: Set return type to RICS, but beware of subtle breakages everywhere. Not fun.
 def calculate(mol, indices, custom_bonds):
-    """Gets the redundant internal coordinates"""
+    """
+    Construct a redundant internal coordinate (RIC) definition from a molecular
+    structure.
 
+    The function identifies covalent bonds using ASE's neighbor list machinery,
+    optionally augments the bond network with user-defined bonds, and generates
+    all corresponding bond, angle, and dihedral internal coordinates. Dihedral
+    angles involving linear bond angles are excluded.
+
+    Parameters
+    ----------
+    mol : ase.Atoms
+        Molecular structure for which the redundant internal coordinates are
+        generated.
+    indices : array_like of int
+        Atom indices defining the subsystem of interest. If a subset of atoms
+        is specified, only bonds whose endpoints are both contained in
+        ``indices`` are retained.
+    custom_bonds : array_like of int, shape (n_custom, 2) or None
+        Additional bonds to include in the connectivity graph, such as
+        hydrogen bonds or long-range interactions. If ``None``, no additional
+        bonds are added.
+
+    Returns
+    -------
+    list of numpy.ndarray
+        List containing the generated redundant internal coordinates in the
+        following order:
+
+        - ``rim_list[0]``: covalent bonds, shape ``(n_bonds, 2)``
+        - ``rim_list[1]``: custom bonds, shape ``(n_custom, 2)``, or an empty
+          array if no custom bonds were supplied
+        - ``rim_list[2]``: bond angles, shape ``(n_angles, 3)``
+        - ``rim_list[3]``: dihedral angles, shape ``(n_dihedrals, 4)``
+
+        Empty coordinate classes are represented by empty arrays.
+
+    Notes
+    -----
+    Covalent bonds are determined using
+    ``ase.neighborlist.natural_cutoffs`` with a multiplicative factor given by
+    ``constants.COVALENCY_FACTOR``.
+
+    Angles are generated for every pair of neighbors sharing a common central
+    atom.
+
+    Dihedral angles are generated for all torsionable bonds, defined as bonds
+    whose two endpoint atoms each have at least two bonded neighbors.
+
+    Dihedrals are excluded when either adjacent bond angle is approximately
+    linear (0°, 180°, or 360°), since such geometries lead to ill-defined
+    torsional coordinates.
+
+    The returned coordinate definitions are sorted row-wise before being
+    returned. This canonicalization removes ordering information from the
+    original atom sequences.
+    """
     cutoff = ase.neighborlist.natural_cutoffs(mol, mult=constants.COVALENCY_FACTOR)
     bonds = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
@@ -142,8 +241,59 @@ def calculate(mol, indices, custom_bonds):
 
 
 def intersect(rics0, ricsF):
-    """Returns the intersection of rics0 and ricsF, i.e. those RICs that are only present in both."""
+    """
+    Compute the intersection of two redundant internal coordinate (RIC) sets.
 
+    The function identifies RICs (bonds, angles, and dihedrals) that are
+    present in both input coordinate sets and returns them in a consistent
+    ordering. RICs are compared independently within each coordinate class.
+
+    Parameters
+    ----------
+    rics0 : list of numpy.ndarray
+        Reference set of redundant internal coordinates, typically from a
+        relaxed structure. Expected format:
+
+        - rics0[0]: bonds, shape (n_bonds, 2)
+        - rics0[1]: additional bonds (or empty array)
+        - rics0[2]: angles, shape (n_angles, 3)
+        - rics0[3]: dihedrals, shape (n_dihedrals, 4)
+
+    ricsF : list of numpy.ndarray
+        Second set of redundant internal coordinates, typically from a
+        distorted structure. Must follow the same structure as `rics0`.
+
+    Returns
+    -------
+    list of numpy.ndarray
+        List of RICs common to both inputs, in the same structure:
+
+        - index 0: intersected bonds
+        - index 1: intersected additional bonds
+        - index 2: intersected angles
+        - index 3: intersected dihedrals
+
+        Each entry is an array of shape (n_common, k), where k is 2, 3, or 4
+        depending on the coordinate type. Empty sets are returned as empty
+        arrays.
+
+    Warns
+    -----
+    UserWarning
+        If the number of bonds, angles, or dihedrals differs between the two
+        inputs. In such cases, the RIC intersection may be incomplete or
+        inconsistent, and downstream strain analysis (e.g., JEDI analysis) may
+        be unreliable.
+
+    Notes
+    -----
+    - RIC rows are treated as unordered sets for comparison by converting them
+      to structured NumPy views before applying `np.intersect1d`.
+    - The returned coordinates are sorted row-wise using a stable mergesort
+      to ensure deterministic ordering.
+    - Coordinate identity is based strictly on atom index tuples; geometric
+      similarity is not considered.
+    """
     if len(rics0[0]) != len(ricsF[0]):
         warnings.warn_explicit(
             f"The distorted structure has a different number of bonds ({len(ricsF[0])})\n"
@@ -194,26 +344,54 @@ def intersect(rics0, ricsF):
 
 def subtract(atoms0, atomsF, rim_list):
     """
-    Computes q0, qF, and delta_q (qF - q0) for a set of redundant internal coordinates
-    (bonds, custom bonds, angles, dihedrals) defined by rim_list, for two geometries.
+    Evaluate redundant internal coordinates (RICs) and their differences
+    between two molecular geometries.
+
+    The function computes the values of all redundant internal coordinates
+    defined in `rim_list` for an initial structure (`atoms0`) and a final
+    structure (`atomsF`). It returns the coordinate vectors and their
+    differences, with special handling for periodic angular wrapping in
+    dihedral coordinates.
 
     Parameters
     ----------
     atoms0 : ase.Atoms
-        The initial (relaxed/reference) structure.
+        Reference (initial or relaxed) structure.
     atomsF : ase.Atoms
-        The final (strained) structure.
-    rim_list : sequence of np.ndarray
-        Each element of rim_list contains indices defining bonds, custom bonds, angles, dihedrals.
+        Target (final or distorted) structure.
+    rim_list : sequence of numpy.ndarray
+        Sequence of RIC definitions in the following order:
+
+        - rim_list[0]: bond definitions, shape (n_bonds, 2)
+        - rim_list[1]: additional/custom bonds, shape (n_cbonds, 2)
+        - rim_list[2]: bond angles, shape (n_angles, 3)
+        - rim_list[3]: dihedral angles, shape (n_dihedrals, 4)
+
+        Each entry contains atom index tuples defining the corresponding
+        internal coordinates.
 
     Returns
     -------
-    q0 : np.ndarray
-        The values of all RICs in atoms0, concatenated.
-    qF : np.ndarray
-        The values of all RICs in atomsF, concatenated.
-    delta_q : np.ndarray
-        qF - q0, with minimal signed difference for dihedrals.
+    q0 : numpy.ndarray
+        Values of all redundant internal coordinates evaluated at `atoms0`,
+        concatenated in the order: bonds, custom bonds, angles, dihedrals.
+
+    qF : numpy.ndarray
+        Values of all redundant internal coordinates evaluated at `atomsF`,
+        concatenated in the same order as `q0`.
+
+    delta_q : numpy.ndarray
+        Difference `qF - q0`, with dihedral contributions wrapped into the
+        interval (-π, π] to ensure a minimal signed angular displacement.
+
+    Notes
+    -----
+    - Bond lengths are returned in Bohr.
+    - Angles and dihedrals are returned in radians.
+    - Dihedral differences are wrapped to avoid artificial discontinuities
+      due to periodicity (e.g., jumps near ±π).
+    - Empty coordinate blocks are safely handled and contribute empty arrays
+      without affecting concatenation order.
     """
 
     def bonds_q(atoms, rim):
