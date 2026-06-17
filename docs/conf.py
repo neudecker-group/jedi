@@ -17,6 +17,7 @@ copyright = f"{datetime.datetime.now(tz=datetime.timezone.utc).date().year}, {au
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
@@ -26,9 +27,17 @@ extensions = [
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
+html_theme_options = {
+    "collapse_navigation": False,
+    "style_external_links": True,
+}

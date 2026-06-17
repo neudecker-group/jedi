@@ -9,4 +9,4 @@ documentation for details.
    :maxdepth: 2
    :caption: Contents:
 
-   strainjedi/jedi
+   strainjedi/strainjedi
