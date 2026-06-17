@@ -574,6 +574,8 @@ def jedi_analysis(
     """
     Analysis of strain energy stored in redundant internal coordinates.
 
+    Parameters
+    ----------
     atoms: class
         An ASE Atoms object to determine the atomic species of the indices.
     rim_list: list
@@ -628,10 +630,13 @@ def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAAL
     Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90°
     and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.
 
+    Parameters
+    ----------
     mol: class
         Structure of which the hbonds should be determined.
     Returns:
         2D array of indices.
+
     """
     cutoff = ase.neighborlist.natural_cutoffs(mol, mult=covf)  ## cutoff for covalent bonds see Bakken et al.
     bl = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds

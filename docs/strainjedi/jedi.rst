@@ -1,7 +1,10 @@
-.. _jedi:
+.. module:: strainjedi.jedi
+.. module:: strainjedi
 
-=======
-Modules
-=======
+Jedi
+====
 
-It's alive!
+This is the main module you want to use.
+For an in-depth guide, please see our tutorial.
+
+.. automodule:: strainjedi.jedi
