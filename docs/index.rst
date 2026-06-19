@@ -56,7 +56,9 @@ Contents
 
    about
    install
+   tutorials/tutorials
    strainjedi/strainjedi
+   development
 
 .. _Python: https://www.python.org/
 .. _MIT License: :git:`LICENSE`

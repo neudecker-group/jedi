@@ -11,6 +11,8 @@ System Requirements
 .. _pip: https://pip.pypa.io/en/stable/
 .. _PyPI: https://pypi.org/project/strainjedi/
 
+.. _install:
+
 Installation from PyPI
 ======================
 
