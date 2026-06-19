@@ -4,7 +4,7 @@ JEDI --- Judgement of Energy Distribution
 
 The JEDI analysis is a quantum chemical analysis tool for the distribution of strain in mechanically deformed systems.
 It is implemented in the Python_ programming language, with support for Python 3.10 and upwards.
-The code is made available under the Open Source `MIT License`_.
+The code is made available under the Open Source :git:`MIT License <LICENSE>`.
 
 It is a goal to make this module useful for older Python versions as well, namely 3.8 and 3.9.
 Contributions welcome!
@@ -46,11 +46,7 @@ JEDI provides a simple interface through the ``Jedi`` class. Here's a minimal ex
 
 The analysis compares the relaxed structure with a mechanically deformed structure and distributes the strain energy across redundant internal coordinates (bonds, angles, dihedrals).
 
-For more details, see the :ref:`full tutorial <tutorial>`.
-
-.. _Python: https://www.python.org/
-.. _MIT License: https://github.com/neudecker-group/jedi/blob/main/LICENSE
-
+For more details, please see the full tutorial.
 
 Contents
 ========
@@ -58,5 +54,9 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   about
    install
    strainjedi/strainjedi
+
+.. _Python: https://www.python.org/
+.. _MIT License: :git:`LICENSE`
