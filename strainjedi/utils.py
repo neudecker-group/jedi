@@ -18,6 +18,15 @@ def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
 
     atoms0:
         The Atoms object to validate against.
+
+    Returns
+    -------
+    hessian : ndarray
+        The (possibly) reordered Hessian aligned with `atoms0`.
+
+    ok : bool
+        True if the Hessian matched, False if not and the Hessian had to be reordered.
+
     """
     perm = []
     for atom in atoms0:
@@ -25,7 +34,7 @@ def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
         for i, vib_atom in enumerate(modes._atoms):
             if atom.symbol != vib_atom.symbol:
                 continue
-            if np.allclose(atom.position, vib_atom.position, atol=1e-5):
+            if np.allclose(atom.position, vib_atom.position, rtol=1e-5, atol=1e-5):
                 match = i
                 break
         perm.append(match)
