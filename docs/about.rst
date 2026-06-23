@@ -23,7 +23,7 @@ Using the JEDI analysis the mechanochemical properties of the system can be inve
 Adsorbed Molecules
 ------------------
 When a molecule adsorbs onto a surface, the geometry of the adsorbate changes as compared to the relaxed molecule in the gas phase.
-As JEDI allows strain analysis for only a subset of atoms, it is possible to quantify the strain due to adsorbtion. 
+As JEDI allows strain analysis for only a subset of atoms, it is possible to quantify the strain due to adsorption. 
 
 
 Dynamical Strain Analyses
