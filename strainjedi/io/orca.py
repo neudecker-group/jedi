@@ -6,7 +6,6 @@ from typing import Dict, Optional
 import numpy as np
 from ase.atoms import Atoms
 from ase.calculators.calculator import FileIOCalculator, Parameters, ReadError
-from ase.calculators.orca import PointChargePotential
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.units import Bohr, Hartree
 from ase.vibrations.vibrations import VibrationsData
@@ -21,20 +20,11 @@ class ORCA(FileIOCalculator):
         command = "orca PREFIX.inp > PREFIX.out"
 
     default_parameters = dict(
-        charge=0,
-        mult=1,
-        task="gradient",
-        orcasimpleinput="tightscf PBE def2-SVP",
-        orcablocks="%scf maxiter 200 end",
+        charge=0, mult=1, task="gradient", orcasimpleinput="tightscf PBE def2-SVP", orcablocks="%scf maxiter 200 end"
     )
 
     def __init__(
-        self,
-        restart=None,
-        ignore_bad_restart_file=FileIOCalculator._deprecated,
-        label="orca",
-        atoms=None,
-        **kwargs,
+        self, restart=None, ignore_bad_restart_file=FileIOCalculator._deprecated, label="orca", atoms=None, **kwargs
     ):
         """Modified ASE interface to ORCA 4
         by Ragnar Bjornsson, Based on NWchem interface but simplified.
@@ -152,6 +142,8 @@ class ORCA(FileIOCalculator):
         self.results["forces"] = -np.array(gradients) * Hartree / Bohr
 
     def embed(self, mmcharges=None, **parameters):
+        from ase.calculators.orca import PointChargePotential
+
         """Embed atoms in point-charges (mmcharges)"""
         self.pcpot = PointChargePotential(mmcharges, label=self.label)
         return self.pcpot

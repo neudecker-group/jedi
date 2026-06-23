@@ -1,4 +1,5 @@
 import re
+import sys
 from copy import deepcopy
 
 import ase.calculators.gaussian as gaussian
@@ -158,7 +159,7 @@ def get_vibrations(label, atoms, indices=None):
     Read hessian.
 
     label: str
-        filename w/o .log.
+        file w/o .log.
     atoms: class
         Structure of which the frequency analysis was performed.
 
@@ -167,11 +168,23 @@ def get_vibrations(label, atoms, indices=None):
     """
     if indices is None:
         indices = range(len(atoms))
-    _re_hessblock = re.compile(r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$")
-    output = label + ".log"
-    with open(output, "r") as fd:
-        lines = fd.readlines()
-
+    imaginary_freq_pattern = r"\**\s+(\d+)\s+imaginary frequencies \(negative Signs\)\s*\**"
+    hessian_pattern = r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*"
+    file = label + ".log"
+    with open(file, "r") as f:
+        content = f.read()
+        match = re.search(imaginary_freq_pattern, content)
+        if match:
+            print(f"Found {match.group(1)} imaginary frequencies in {file}. Jedi Analysis can not be performed.")
+            sys.exit(1)
+        match = re.search(hessian_pattern, content)
+        if match is None:
+            print(
+                f"Couldn't find force constants in Cartesian Coordinates in {file}. "
+                f"Specify iop=7/33=1 in your input file."
+            )
+            sys.exit(1)
+        lines = content.splitlines()
     hess_line = 0
     NCarts = 3 * len(atoms)
     if len(atoms.constraints) > 0:
@@ -180,7 +193,6 @@ def get_vibrations(label, atoms, indices=None):
                 a = l.todict()
                 clist = np.array(a["kwargs"]["indices"])
                 alist = np.delete(np.arange(0, len(atoms)), clist)
-
                 NCarts = 3 * len(alist)
     hess = np.zeros((NCarts, NCarts))
     for num, line in enumerate(lines, 1):
@@ -190,10 +202,9 @@ def get_vibrations(label, atoms, indices=None):
     chunks = NCarts // 5 + 1
     for i in range(chunks):
         for j in range(NCarts - i * 5):
+            # TODO is there any occasion where it actually needs round()? isn't int() also possible
             rows = lines[round(hess_line + i * (NCarts + 1) - sum(np.linspace(0, i - 1, i) * 5) + j)].split()
-
             rows = [float(k.replace("D", "e")) for k in rows]
-
             hess[j + i * 5][i * 5 : i * 5 + len(rows) - 1] = rows[1::]
     hess = hess + hess.T - np.diag(np.diag(hess))
     hess *= Hartree / Bohr**2
@@ -370,12 +381,7 @@ def write_gaussian_in(
         out.append("force")
 
     # header, charge, and mult
-    out += [
-        "",
-        "Gaussian input prepared by ASE",
-        "",
-        "{:.0f} {:.0f}".format(charge, mult),
-    ]
+    out += ["", "Gaussian input prepared by ASE", "", "{:.0f} {:.0f}".format(charge, mult)]
 
     # make dict of nuclear properties:
     nuclear_props = {
@@ -422,6 +428,11 @@ class GaussianDynamics(gaussian.GaussianDynamics):
         atoms = read_gaussian_out(self.calc.label)
         self.atoms.cell = atoms.cell
         self.atoms.positions = atoms.positions
+
+        # self.calc.parameters = params_old
+        # self.calc.reset()
+        # if calc_old is not None:
+        #   self.atoms.calc = calc_old
 
         return converged
 
