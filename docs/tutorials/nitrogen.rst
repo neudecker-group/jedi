@@ -1,8 +1,8 @@
 =========================
-Introductionary: Nitrogen
+Introductory: Nitrogen
 =========================
 
-In this introductionary tutorial, we will explore how to
+In this introductory tutorial, we will explore how to
 
 #. create a molecular structure,
 #. perform a geometry optimization,
