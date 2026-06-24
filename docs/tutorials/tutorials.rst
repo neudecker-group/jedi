@@ -40,3 +40,4 @@ We will explore how to obtain a valid ``Atoms`` and ``VibrationsData`` object fr
    :maxdepth: 1
 
    nitrogen
+   calculators
