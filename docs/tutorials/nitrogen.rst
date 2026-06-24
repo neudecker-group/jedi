@@ -113,41 +113,6 @@ From these, it performs the coordinate transformation of the Hessian, evaluates 
 Results
 =======
 
-Putting it all together, we obtain the following code (after applying some code formatting):
-
-.. code-block:: python
-
-   from ase import Atoms
-   from ase.calculators.emt import EMT
-   from ase.optimize import BFGS
-   from ase.vibrations import Vibrations
-   from strainjedi.jedi import Jedi
-   
-   # Create a structure
-   atoms = Atoms('N2', [(0, 0, 0), (0, 0, 1.1)])
-   
-   # Set up calculator
-   atoms.calc = EMT()
-   
-   # Optimize geometry
-   BFGS(atoms).run(fmax=0.01)
-   
-   # Calculate vibrational modes (Hessian)
-   vib = Vibrations(atoms)
-   vib.run()
-   modes = vib.get_vibrations()
-   
-   # Create a distorted structure based on the optimised geometry
-   atoms_distorted = atoms.copy()
-   atoms_distorted.positions[1][2] += 0.1
-
-   atoms_distorted.calc = EMT()
-   atoms_distorted.get_potential_energy()
-   
-   # Run JEDI analysis
-   jedi = Jedi(atoms, atoms_distorted, modes)
-   jedi.run()
-
 Running the discussed code should yield a printout to your console similar to the one below.
 
 .. code-block:: text
@@ -189,3 +154,44 @@ This will launch a Matplotlib window visualising the strain distribution in the 
 
 .. image:: vis_nitrogen.png
    :alt: Terminal showing JEDI strain-energy analysis alongside a visualization window. The terminal displays ASE BFGS optimization output, followed by strain energy comparison results indicating a single N–N bond carrying 100% of the strain energy. The plot shows a diatomic molecule with the bond highlighted in red and a kcal/mol color bar indicating strain energy distribution.
+
+Complete Example
+================
+
+For easy copy-pasting, below is the code as discussed on this page, after some formatting.
+
+.. code-block:: python
+
+   from ase import Atoms
+   from ase.calculators.emt import EMT
+   from ase.optimize import BFGS
+   from ase.vibrations import Vibrations
+   from strainjedi.jedi import Jedi
+   
+   # Create a structure
+   atoms = Atoms('N2', [(0, 0, 0), (0, 0, 1.1)])
+   
+   # Set up calculator
+   atoms.calc = EMT()
+   
+   # Optimize geometry
+   BFGS(atoms).run(fmax=0.01)
+   
+   # Calculate vibrational modes (Hessian)
+   vib = Vibrations(atoms)
+   vib.run()
+   modes = vib.get_vibrations()
+   
+   # Create a distorted structure based on the optimised geometry
+   atoms_distorted = atoms.copy()
+   atoms_distorted.positions[1][2] += 0.1
+
+   atoms_distorted.calc = EMT()
+   atoms_distorted.get_potential_energy()
+   
+   # Run JEDI analysis
+   jedi = Jedi(atoms, atoms_distorted, modes)
+   jedi.run()
+
+   # Open visualisation window
+   jedi.visualize(show=True)
