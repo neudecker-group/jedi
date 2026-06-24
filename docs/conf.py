@@ -30,6 +30,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
+    "sphinx_tabs.tabs",
     "sphinxcontrib.lightbox2",
     #    "sphinx_rtd_theme",
 ]
