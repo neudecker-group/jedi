@@ -91,3 +91,19 @@ def git_role(role, rawtext, text, lineno, inliner, options=None, content=None):
 
 def setup(app):
     app.add_role("git", git_role)
+
+
+def zip_dirs(dirs: list[str], out: str):
+    import os
+    import zipfile
+
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zipf:
+        for dir in dirs:
+            for root, _, files in os.walk(dir):
+                for file in files:
+                    full_path = os.path.join(root, file)
+                    arcname = os.path.relpath(full_path, start=os.path.dirname(dir))
+                    zipf.write(full_path, arcname)
+
+
+zip_dirs(["tutorials/gaussian", "tutorials/orca", "tutorials/qchem"], "_static/downloads/calculators.zip")
