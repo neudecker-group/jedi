@@ -39,15 +39,15 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 autodoc_default_options = {
-    "members": True,
-    "undoc-members": True,
+    "members": True,  # all public members
+    "undoc-members": True,  # also render undocumented members
 }
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_logo = "_static/images/Logo_JEDI.png"
 html_static_path = ["_static"]
+html_logo = f"{html_static_path[0]}/images/Logo_JEDI.png"
 # html_theme = "sphinx_rtd_theme"
 html_theme = "sphinx_book_theme"
 html_theme_options = {
