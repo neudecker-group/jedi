@@ -106,4 +106,4 @@ def zip_dirs(dirs: list[str], out: str):
                     zipf.write(full_path, arcname)
 
 
-zip_dirs(["tutorials/gaussian", "tutorials/orca", "tutorials/qchem"], "_static/downloads/calculators.zip")
+zip_dirs(["tutorials/calculators"], "_static/downloads/calculators.zip")
