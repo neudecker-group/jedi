@@ -26,6 +26,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
@@ -41,6 +42,10 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 autodoc_default_options = {
     "members": True,  # all public members
     "undoc-members": True,  # also render undocumented members
+}
+
+intersphinx_mapping = {
+    "ase": ("https://docs.ase-lib.org", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
