@@ -2,6 +2,64 @@ import ase.units
 import numpy as np
 from numpy.typing import NDArray
 
+from strainjedi import constants
+
+
+def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
+    """
+    Get all hbonds in a structure.
+    Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90°
+    and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.
+
+    Parameters
+    ----------
+    mol: class
+        Structure of which the hbonds should be determined.
+    Returns:
+        2D array of indices.
+
+    """
+    from ase.data.vdw import vdw_radii
+    from ase.neighborlist import natural_cutoffs, neighbor_list
+
+    cutoff = natural_cutoffs(mol, mult=covf)  ## cutoff for covalent bonds see Bakken et al.
+    bl = np.vstack(neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
+
+    bl = bl[bl[:, 0] < bl[:, 1]]  # remove double mentioned
+    bl = np.unique(bl, axis=0)
+
+    hpartner = ["N", "O", "F"]
+    hpartner_ls = []
+    hcutoff = {
+        ("H", "N"): vdwf * (vdw_radii[1] + vdw_radii[7]),
+        ("H", "O"): vdwf * (vdw_radii[1] + vdw_radii[8]),
+        ("H", "F"): vdwf * (vdw_radii[1] + vdw_radii[9]),
+    }  # save the maximum distances for given pairs to be taken account as interactions
+    hbond_ls = []  # create a list to store all the bonds
+    for i in range(len(mol)):
+        if mol.symbols[i] in hpartner:  # check atoms indices of N F O elements
+            hpartner_ls.append(i)
+    for i in bl:
+        if mol.symbols[i[0]] == "H" and mol.symbols[i[1]] in hpartner:
+            for j in hpartner_ls:
+                if j != i[1] and (
+                    mol.get_distance(i[0], j, mic=True) < hcutoff[(mol.symbols[i[0]], mol.symbols[j])]
+                    and mol.get_angle(i[1], i[0], j, mic=True) > 90
+                ):
+                    hbond_ls.append([i[0], j])
+        elif mol.symbols[i[0]] in hpartner and mol.symbols[i[1]] == "H":
+            for j in hpartner_ls:
+                if j != i[0] and (
+                    mol.get_distance(i[1], j, mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])]
+                    and mol.get_angle(i[0], i[1], j, mic=True) > 90
+                ):
+                    hbond_ls.append([i[1], j])
+    if len(hbond_ls) > 0:
+        hbond_ls = np.array(hbond_ls)
+        hbond_ls = np.sort(hbond_ls, axis=1)
+        hbond_ls = np.atleast_2d(hbond_ls)
+    return hbond_ls
+
 
 def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
     """
