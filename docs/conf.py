@@ -47,6 +47,7 @@ autodoc_default_options = {
 copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
 copybutton_prompt_is_regexp = True
 
+tls_verify = False  # to speed up intersphinx fetching
 intersphinx_mapping = {
     "ase": ("https://docs.ase-lib.org", None),
 }
@@ -115,3 +116,4 @@ def zip_dirs(dirs: list[str], out: str):
 
 
 zip_dirs(["tutorials/calculators"], "_static/downloads/calculators.zip")
+zip_dirs(["tutorials/substructures"], "_static/downloads/substructures.zip")

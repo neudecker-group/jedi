@@ -69,6 +69,9 @@ Finally, you can start the analysis with your additional bonds set.
    Strictly speaking, ``add_custom_bonds()`` expects a numpy array.
    To satisfy your type-checker, you can call ``np.asarray()`` with your nested list of atom indices.
 
+Conclusion
+==========
+
 This concludes this tutorial on adding custom interactions like hydrogen bonds.
 At this stage we want to reiterate that JEDI itself does not perform geometry optimisations.
 This mechanism serves to add connectivity which cannot be determined from the geometry (e.g. as a ``xyz`` file) alone.
