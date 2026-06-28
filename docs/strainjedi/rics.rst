@@ -1,6 +1,4 @@
-.. module:: strainjedi.rics
-.. module:: strainjedi
-
+====
 RICs
 ====
 

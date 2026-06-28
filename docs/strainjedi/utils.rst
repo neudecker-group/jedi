@@ -1,6 +1,4 @@
-.. module:: strainjedi.utils
-.. module:: strainjedi
-
+=================
 Utility Functions
 =================
 

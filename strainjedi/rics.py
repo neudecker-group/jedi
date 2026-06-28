@@ -21,7 +21,7 @@ class RICS:
     representation used throughout the codebase, while maintaining backward
     compatibility with indexing and length semantics. At the moment, it is unused.
 
-    Attributes
+    Parameters
     ----------
     bonds : numpy.ndarray
         Covalent bond definitions, shape (n_bonds, 2).

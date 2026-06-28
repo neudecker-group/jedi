@@ -1,7 +1,4 @@
-.. module:: strainjedi.bmatrix
-.. module:: strainjedi
-
-
+===================
 B-Matrix Operations
 ===================
 

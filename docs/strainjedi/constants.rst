@@ -1,6 +1,4 @@
-.. module:: strainjedi.constants
-.. module:: strainjedi
-
+=========
 Constants
 =========
 
