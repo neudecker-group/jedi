@@ -41,3 +41,4 @@ We will explore how to obtain a valid ``Atoms`` and ``VibrationsData`` object fr
 
    nitrogen
    calculators
+   custom-bonds
