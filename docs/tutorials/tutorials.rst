@@ -43,3 +43,4 @@ We will explore how to obtain a valid ``Atoms`` and ``VibrationsData`` object fr
    calculators
    custom-bonds
    substructures
+   periodic-boundary-conditions

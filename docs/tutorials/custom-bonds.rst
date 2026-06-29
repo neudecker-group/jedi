@@ -1,3 +1,5 @@
+.. _custom-bonds:
+
 =================
 Customising Bonds
 =================

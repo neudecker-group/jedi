@@ -74,7 +74,7 @@ Partial Hessian
 
 JEDI also supports the result of a partial frequency analysis, though such an analysis may not be started by calling ``run()`` on your Jedi object.
 Instead, we must explicitly call ``partial_analysis()``, with indices similar to how we performed an analysis with the full Hessian.
-Enter the ``partial_hessian`` directory of the :ref:`archive provided below <download>` and review the script provided there:
+Enter the ``partial_hessian`` directory of the :ref:`archive provided below <substr_download>` and review the script provided there:
 
 .. code-block:: python
 
@@ -117,7 +117,7 @@ We had to modify our ASE Atoms object in order to be able to work with partial d
 
 .. _setting constraints: https://docs.ase-lib.org/ase/constraints.html
 
-.. _download:
+.. _substr_download:
 
 Downloads
 =========
