@@ -5,20 +5,44 @@ from numpy.typing import NDArray
 from strainjedi import constants
 
 
-def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
+def get_hbonds(mol, *, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR, extra_hpartners=()):
     """
-    Get all hbonds in a structure.
-    Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90°
-    and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.
+    Identify hydrogen bonds in an atomic structure.
+
+    A hydrogen bond is defined as an X–H···Y interaction where X and Y are typically
+    N, O, or F (extendable via `extra_hpartners`). The H···Y distance must be smaller
+    than `vdwf` times the sum of van der Waals radii, and the X–H···Y angle must exceed 90°.
+
+    The donor X-H bond is identified from ASE covalent neighbor detection (:func:`ase.neighborlist.natural_cutoffs`),
+    scaled by `covf`.
 
     Parameters
     ----------
-    mol: class
-        Structure of which the hbonds should be determined.
-    Returns:
-        2D array of indices.
+    mol : ase.Atoms or similar
+        Atomic structure containing positions and symbols.
+    covf : float, optional
+        Scaling factor for covalent bond detection cutoffs (default from constants).
+    vdwf : float, optional
+        Scaling factor for van der Waals distance criterion (default from constants).
+    extra_hpartners : iterable of str, optional
+        Additional elements to treat as hydrogen-bond partners.
 
+    Returns
+    -------
+    ndarray of shape (n, 2), dtype int
+        Array of hydrogen bonds as [H_index, acceptor_index] pairs.
+
+    Raises
+    ------
+    ValueError
+        If an element in `extra_hpartners` is not recognized by ASE atomic data.
+
+    Notes
+    -----
+    - Covalent bonds are reduced to a single representation per bond (i–j instead of both i–j and j–i)
+      to avoid double-counting during hydrogen bond donor identification.
     """
+    from ase.data import atomic_numbers
     from ase.data.vdw import vdw_radii
     from ase.neighborlist import natural_cutoffs, neighbor_list
 
@@ -28,37 +52,41 @@ def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAAL
     bl = bl[bl[:, 0] < bl[:, 1]]  # remove double mentioned
     bl = np.unique(bl, axis=0)
 
-    hpartner = ["N", "O", "F"]
-    hpartner_ls = []
-    hcutoff = {
-        ("H", "N"): vdwf * (vdw_radii[1] + vdw_radii[7]),
-        ("H", "O"): vdwf * (vdw_radii[1] + vdw_radii[8]),
-        ("H", "F"): vdwf * (vdw_radii[1] + vdw_radii[9]),
-    }  # save the maximum distances for given pairs to be taken account as interactions
-    hbond_ls = []  # create a list to store all the bonds
-    for i in range(len(mol)):
-        if mol.symbols[i] in hpartner:  # check atoms indices of N F O elements
-            hpartner_ls.append(i)
-    for i in bl:
-        if mol.symbols[i[0]] == "H" and mol.symbols[i[1]] in hpartner:
-            for j in hpartner_ls:
-                if j != i[1] and (
-                    mol.get_distance(i[0], j, mic=True) < hcutoff[(mol.symbols[i[0]], mol.symbols[j])]
-                    and mol.get_angle(i[1], i[0], j, mic=True) > 90
-                ):
-                    hbond_ls.append([i[0], j])
-        elif mol.symbols[i[0]] in hpartner and mol.symbols[i[1]] == "H":
-            for j in hpartner_ls:
-                if j != i[0] and (
-                    mol.get_distance(i[1], j, mic=True) < hcutoff[(mol.symbols[i[1]], mol.symbols[j])]
-                    and mol.get_angle(i[0], i[1], j, mic=True) > 90
-                ):
-                    hbond_ls.append([i[1], j])
-    if len(hbond_ls) > 0:
-        hbond_ls = np.array(hbond_ls)
-        hbond_ls = np.sort(hbond_ls, axis=1)
-        hbond_ls = np.atleast_2d(hbond_ls)
-    return hbond_ls
+    hpartners = {"N", "O", "F", *extra_hpartners}
+    try:
+        hcutoff = {
+            ("H", elem): vdwf * (vdw_radii[atomic_numbers["H"]] + vdw_radii[atomic_numbers[elem]]) for elem in hpartners
+        }  # save the maximum distances for given pairs to be taken account as interactions
+    except KeyError as e:
+        raise ValueError(f"Unknown element symbol: {e.args[0]!r}") from None
+
+    acceptors = [i for i, symbol in enumerate(mol.symbols) if symbol in hpartners]
+    hbonds = []
+
+    for a, b in bl:
+        if mol.symbols[a] == "H" and mol.symbols[b] in hpartners:
+            h, donor = a, b
+        elif mol.symbols[b] == "H" and mol.symbols[a] in hpartners:
+            h, donor = b, a
+        else:
+            continue
+
+        for acceptor in acceptors:
+            if acceptor == donor:
+                continue
+
+            if (
+                mol.get_distance(h, acceptor, mic=True) < hcutoff[("H", mol.symbols[acceptor])]
+                and mol.get_angle(donor, h, acceptor, mic=True) > 90
+            ):
+                hbonds.append([h, acceptor])
+
+    hbonds = np.asarray(hbonds, dtype=int)
+    if hbonds.size == 0:
+        return np.empty((0, 2), dtype=int)
+
+    hbonds = np.unique(hbonds, axis=0)
+    return hbonds
 
 
 def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:

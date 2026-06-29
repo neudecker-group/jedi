@@ -638,4 +638,4 @@ def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAAL
     """
     from strainjedi.utils import get_hbonds
 
-    return get_hbonds(mol, covf, vdwf)
+    return get_hbonds(mol, covf=covf, vdwf=vdwf)
