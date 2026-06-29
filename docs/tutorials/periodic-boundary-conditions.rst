@@ -49,7 +49,8 @@ Finally, we see in our visualisation window the following unit cell (atom indice
    :alt: JEDI analysis visualisation of a HCN unit cell under PBC. One hydrogen bond is stretched, indicated by its red colouring.
 
 Of course, partial analyses are also possible.
-However, at this stage, we want to leave that as an exercise to the reader --- in case you wish for a refresher, refer to :ref:`Customising Bonds <custom-bonds>`.
+However, at this stage, we want to leave that as an exercise to the reader --- in case you wish for a refresher, refer to the section on :ref:`Partial Hessians <partial-hessian>`.
+We have provided a partial hessian in the ``partial_hessian`` file; you'll need to load this via :func:`np.loadtxt()`.
 
 .. _pbc_download:
 

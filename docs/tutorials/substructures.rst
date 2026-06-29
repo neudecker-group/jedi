@@ -69,6 +69,8 @@ And execute the script again.
    :align: center
    :alt: JEDI visualisation of the analysis of a biphenyl molecule. One benzene ring is coloured black, indicating that those bonds were not considered during analysis.
 
+.. _partial-hessian:
+
 Partial Hessian
 ===============
 
