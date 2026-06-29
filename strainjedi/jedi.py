@@ -368,6 +368,9 @@ class Jedi:
         incl_coloring: str | None = None,
     ):
         """
+        .. deprecated:: 1.1.0
+           Use :meth:`Jedi.visualize` with ``visualizer="vmd"`` instead.
+
         Args:
             des_colors: (dict)
                 key: order number, value: [R,G,B]
@@ -624,6 +627,8 @@ def jedi_analysis(
 @deprecated("Use strainjedi.utils.get_hbonds instead.")
 def get_hbonds(mol, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
     """
+    .. deprecated 1.1.0
+       Use :func:`strainjedi.utils.get_hbonds` instead.
     Get all hbonds in a structure.
     Hbonds are defined as the HY bond inside X-H···Y where X and Y can be O, N, F and the angle XHY is larger than 90°
     and the distance between HY is shorter than 0.9 times the sum of the vdw radii of H and Y.
