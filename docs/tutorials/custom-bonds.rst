@@ -74,7 +74,7 @@ Conclusion
 
 This concludes this tutorial on adding custom interactions like hydrogen bonds.
 At this stage we want to reiterate that JEDI itself does not perform geometry optimisations.
-This mechanism serves to add connectivity which cannot be determined from the geometry (e.g. as a ``xyz`` file) alone.
+This mechanism serves to add connectivity which cannot be determined from the geometry (e.g. as an ``xyz`` file) alone.
 
 Put briefly, if the distance between two atoms is more than the sum of their covalent radii, JEDI considers them not bonded.
 These are the atoms you may have to connect via a custom bond, potentially in your calculator of choice as well.
