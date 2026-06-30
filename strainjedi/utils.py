@@ -141,7 +141,10 @@ def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
                 break
         perm.append(match)
 
-    perm = np.asarray(perm, dtype=int)
+    try:
+        perm = np.asarray(perm, dtype=int)
+    except TypeError:
+        raise ValueError("hessian does not appear to match atoms") from None
 
     if np.array_equal(perm, np.arange(len(atoms0))):
         hessian = modes._hessian2d
