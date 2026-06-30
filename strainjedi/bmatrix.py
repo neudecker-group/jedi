@@ -1,10 +1,60 @@
 import ase.geometry
 import ase.units
 import numpy as np
+from numpy.typing import NDArray
 
 
-def calculate(atoms0, rim_list, indices=None):
-    """Calculates the derivatives of the RICs with respect to all cartesian coordinates using ase functions"""
+def calculate(atoms0, rim_list, indices=None) -> NDArray:
+    """
+    Compute the Wilson B-matrix for a set of redundant internal coordinates (RICs).
+
+    The function evaluates the derivatives of bond lengths, angles, and
+    dihedral angles with respect to Cartesian coordinates and assembles them
+    into the Wilson B-matrix. Periodic boundary conditions are handled through
+    ASE's minimum-image convention (`mic=True`).
+
+    Parameters
+    ----------
+    atoms0 : ase.Atoms
+        Atomic structure for which the B-matrix is evaluated.
+    rim_list : sequence of array_like
+        Collection of redundant internal coordinates. The expected order is:
+
+        - ``rim_list[0]``: bond-length coordinates
+        - ``rim_list[1]``: additional bond-length coordinates
+        - ``rim_list[2]``: bond-angle coordinates, shape ``(n_angles, 3)``
+        - ``rim_list[3]``: dihedral coordinates, shape ``(n_dihedrals, 4)``
+
+        Bond coordinates are defined by atom pairs ``(i, j)``, angles by
+        triplets ``(i, j, k)``, and dihedrals by quadruplets
+        ``(i, j, k, l)``.
+    indices : array_like of int, optional
+        Indices of atoms whose Cartesian coordinates are included in the
+        B-matrix. If ``None`` (default), all atoms are included.
+
+    Returns
+    -------
+    numpy.ndarray
+        Wilson B-matrix of shape ``(n_rics, 3 * n_atoms_selected)``, where
+        ``n_rics`` is the total number of internal coordinates and
+        ``n_atoms_selected`` is ``len(indices)``. Each row contains the
+        derivatives of a single internal coordinate with respect to the
+        selected Cartesian coordinates.
+
+    Notes
+    -----
+    The returned matrix is assembled from:
+
+    - Bond-length derivatives computed with
+      ``ase.geometry.get_distances_derivatives``.
+    - Bond-angle derivatives computed with
+      ``_bond_angle_derivatives``.
+    - Dihedral-angle derivatives computed with
+      ``ase.geometry.get_dihedrals_derivatives``.
+
+    Dihedral derivatives are converted from degrees to radians and scaled by
+    ``ase.units.Bohr`` before insertion into the matrix.
+    """
     mol = atoms0
     if indices is None:
         indices = np.arange(0, len(mol))
@@ -77,7 +127,51 @@ def calculate(atoms0, rim_list, indices=None):
 
 
 def hessian_to_ric(B, H_cart):
-    """Projects the cartesian Hessian `H_cart` into RIC space using the B-matrix `B`."""
+    """
+    Transform a Cartesian Hessian into redundant internal coordinate (RIC) space.
+
+    The transformation is performed using the Moore–Penrose pseudoinverse of
+    the Wilson B-matrix. For redundant coordinate sets, the projected Hessian
+    is additionally constrained to the physically valid RIC subspace using the
+    projection matrix returned by ``p_matrix``.
+
+    Parameters
+    ----------
+    B : numpy.ndarray
+        Wilson B-matrix relating Cartesian displacements to internal
+        coordinate displacements. For a system with ``n_rics`` redundant
+        internal coordinates and ``n_cart`` Cartesian coordinates, the matrix
+        typically has shape ``(n_rics, n_cart)``.
+    H_cart : numpy.ndarray
+        Cartesian Hessian matrix of shape ``(n_cart, n_cart)``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Hessian matrix expressed in redundant internal coordinate space. The
+        returned array has shape ``(n_rics, n_rics)`` for a two-dimensional
+        B-matrix.
+
+    Notes
+    -----
+    The transformation is given by
+
+    .. math::
+
+        H_\\mathrm{RIC} = B^{+T} H_\\mathrm{cart} B^+,
+
+    where :math:`B^+` denotes the Moore–Penrose pseudoinverse of the
+    B-matrix.
+
+    For redundant internal coordinates, the result is projected into the
+    valid RIC subspace using
+
+    .. math::
+
+        H_\\mathrm{RIC} = P B^{+T} H_\\mathrm{cart} B^+ P,
+
+    where :math:`P` is the projector obtained from ``p_matrix(B, B_plus)``.
+    """
     B_plus = pinv(B)
     B_transp_plus = pinv(B.T)
 
@@ -89,12 +183,79 @@ def hessian_to_ric(B, H_cart):
 
 
 def p_matrix(B, B_plus):
-    """Computes the P-matrix (projection operator in RIC space)."""
+    """
+    Compute the projection matrix in redundant internal coordinate (RIC) space.
+
+    The projection matrix maps vectors in redundant internal coordinate space
+    onto the subspace spanned by the Wilson B-matrix. It is commonly used to
+    remove components that do not correspond to physically valid internal
+    coordinate displacements.
+
+    Parameters
+    ----------
+    B : numpy.ndarray
+        Wilson B-matrix of shape ``(n_rics, n_cart)``, relating Cartesian
+        coordinate displacements to redundant internal coordinate
+        displacements.
+    B_plus : numpy.ndarray
+        Moore–Penrose pseudoinverse of ``B``, typically of shape
+        ``(n_cart, n_rics)``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Projection matrix of shape ``(n_rics, n_rics)`` defined as
+
+        .. math::
+
+            P = B B^+.
+
+    Notes
+    -----
+    For a non-redundant coordinate set, the projection matrix is the identity
+    matrix (up to numerical precision). For redundant coordinate sets, it
+    projects vectors onto the physically valid RIC subspace.
+    """
     return np.dot(B, B_plus)
 
 
 def pinv(B, rcond=1e-4):
-    """Calculates the pseudoinverse of `B`."""
+    """
+    Compute the pseudoinverse of a Wilson B-matrix.
+
+    For two-dimensional matrices, the Moore–Penrose pseudoinverse is computed
+    using :func:`numpy.linalg.pinv`. One-dimensional inputs are treated as a
+    special case and scaled by a factor of one-half.
+
+    Parameters
+    ----------
+    B : numpy.ndarray
+        Wilson B-matrix or vector to invert. Typical matrix dimensions are
+        ``(n_rics, n_cart)``.
+    rcond : float, optional
+        Relative cutoff for small singular values passed to
+        :func:`numpy.linalg.pinv`. Singular values smaller than
+        ``rcond * largest_singular_value`` are treated as zero. The default is
+        ``1e-4``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Pseudoinverse of ``B``. For a matrix input with shape
+        ``(n_rics, n_cart)``, the returned array has shape
+        ``(n_cart, n_rics)``.
+
+    Notes
+    -----
+    The one-dimensional special case
+
+    .. math::
+
+        B^+ = \\frac{B}{2}
+
+    is included for compatibility with code paths that represent a single
+    internal coordinate as a vector rather than a matrix.
+    """
     if B.ndim == 1:
         return B / 2
 
@@ -103,7 +264,46 @@ def pinv(B, rcond=1e-4):
 
 def restrict(B, indices):
     """
-    Returns the B-matrix `B` reduced to cartesian coordinates belonging to `indices`.
+    Restrict a Wilson B-matrix to a subset of Cartesian coordinates.
+
+    The function constructs a reduced B-matrix containing only the Cartesian
+    coordinates associated with the specified atoms. Contributions from all
+    other atoms are first removed by setting their Cartesian columns to zero,
+    after which the matrix is sliced to retain only the selected coordinate
+    columns.
+
+    Parameters
+    ----------
+    B : numpy.ndarray
+        Wilson B-matrix of shape ``(n_rics, 3 * n_atoms)``, where rows
+        correspond to internal coordinates and columns correspond to
+        Cartesian coordinates ordered as
+        ``(x_0, y_0, z_0, x_1, y_1, z_1, ...)``.
+    indices : array_like of int
+        Indices of atoms whose Cartesian coordinates should be retained in the
+        reduced matrix.
+
+    Returns
+    -------
+    numpy.ndarray
+        Restricted B-matrix of shape
+        ``(n_rics, 3 * len(indices))`` containing only the Cartesian
+        coordinates of the selected atoms.
+
+    Raises
+    ------
+    ValueError
+        If the number of columns in ``B`` is not divisible by three, indicating
+        that the matrix does not represent a valid set of Cartesian
+        coordinates.
+
+    Notes
+    -----
+    A copy of ``B`` is created internally, so the input matrix is never
+    modified in place.
+
+    The ordering of Cartesian coordinates in the returned matrix follows the
+    order of atoms given in ``indices``.
     """
     if B.shape[1] % 3 != 0:
         raise ValueError("B matrix does not have 3N cartesian columns")

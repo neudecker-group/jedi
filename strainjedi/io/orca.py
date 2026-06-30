@@ -141,13 +141,6 @@ class ORCA(FileIOCalculator):
                 getgrad = False
         self.results["forces"] = -np.array(gradients) * Hartree / Bohr
 
-    def embed(self, mmcharges=None, **parameters):
-        from ase.calculators.orca import PointChargePotential
-
-        """Embed atoms in point-charges (mmcharges)"""
-        self.pcpot = PointChargePotential(mmcharges, label=self.label)
-        return self.pcpot
-
 
 def write_orca(atoms, **params):
     """Modified function to write ORCA input file, making optimizations possible"""

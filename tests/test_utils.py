@@ -39,24 +39,28 @@ def test_validate_hessian_permutation(symbols, permutation, expected_ok):
 
 
 @pytest.mark.parametrize(
-    "offset,expected_ok",
+    "offset,expected_ok,expected_raise",
     [
-        pytest.param(0.0, True, id="exact_match"),
-        pytest.param(1e-6, True, id="within_tolerance"),
-        pytest.param(5e-6, True, id="near_tolerance_limit"),
-        pytest.param(3e-5, False, id="outside_tolerance"),
-        pytest.param(1e-4, False, id="well_outside_tolerance"),
+        pytest.param(0.0, True, False, id="exact_match"),
+        pytest.param(1e-6, True, False, id="within_tolerance"),
+        pytest.param(5e-6, True, False, id="near_tolerance_limit"),
+        pytest.param(3e-5, False, True, id="outside_tolerance"),
+        pytest.param(1e-4, False, True, id="well_outside_tolerance"),
     ],
 )
-def test_position_tolerance(offset, expected_ok):
+def test_position_tolerance(offset, expected_ok, expected_raise):
     atoms0, _, modes, _ = build_scenario(
         ["N", "N"],
         permutation=None,
         offset=offset,
     )
 
-    _, ok = validate_hessian(modes, atoms0)
-    assert ok is expected_ok
+    if expected_raise:
+        with pytest.raises(ValueError):
+            _, _ = validate_hessian(modes, atoms0)
+    else:
+        _, ok = validate_hessian(modes, atoms0)
+        assert ok is expected_ok
 
 
 @pytest.mark.parametrize(

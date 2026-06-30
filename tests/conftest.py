@@ -4,7 +4,6 @@ import pytest
 from ase.io import read
 from ase.vibrations.vibrations import VibrationsData
 
-from strainjedi import rics
 from strainjedi.jedi import Jedi, jedi_analysis
 from tests.resources import path_to_test_resources
 

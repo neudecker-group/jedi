@@ -37,9 +37,15 @@ To build the documentation, ensure that the ``docs`` dependency group is install
 .. code-block::
 
    uv sync --group=docs
-   uv run sphinx-build -b html docs docs/_build/
+   uv run sphinx-build -a -b html docs docs/_build/
 
-.. tip:: Run ``uv sync --all-groups`` to install all dependencies for all the above scenarios.
+this will rebuild all documentation files and generate HTML output to ``docs/_build``.
+
+    [!TIP]
+
+    Run ``uv sync --all-groups`` to install all dependencies for all the above scenarios.
+
+See also our `contributing guidelines <https://neudecker-group.github.io/jedi/development.html>`_ in our documentation for more detail.
 
 Tutorial
 ------------
