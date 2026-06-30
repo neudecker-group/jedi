@@ -1,14 +1,14 @@
-from ase.vibrations.vibrations import VibrationsData
-import numpy as np
-from ase.units import Bohr, Hartree
-from ase.calculators.orca import PointChargePotential
-import re
 import os
-from ase.calculators.calculator import FileIOCalculator, Parameters, ReadError
-from typing import Dict, Optional
+import re
 from collections.abc import Iterable
+from typing import Dict, Optional
+
+import numpy as np
 from ase.atoms import Atoms
+from ase.calculators.calculator import FileIOCalculator, Parameters, ReadError
 from ase.calculators.singlepoint import SinglePointCalculator
+from ase.units import Bohr, Hartree
+from ase.vibrations.vibrations import VibrationsData
 
 
 class ORCA(FileIOCalculator):
@@ -20,20 +20,11 @@ class ORCA(FileIOCalculator):
         command = "orca PREFIX.inp > PREFIX.out"
 
     default_parameters = dict(
-        charge=0,
-        mult=1,
-        task="gradient",
-        orcasimpleinput="tightscf PBE def2-SVP",
-        orcablocks="%scf maxiter 200 end",
+        charge=0, mult=1, task="gradient", orcasimpleinput="tightscf PBE def2-SVP", orcablocks="%scf maxiter 200 end"
     )
 
     def __init__(
-        self,
-        restart=None,
-        ignore_bad_restart_file=FileIOCalculator._deprecated,
-        label="orca",
-        atoms=None,
-        **kwargs,
+        self, restart=None, ignore_bad_restart_file=FileIOCalculator._deprecated, label="orca", atoms=None, **kwargs
     ):
         """Modified ASE interface to ORCA 4
         by Ragnar Bjornsson, Based on NWchem interface but simplified.
@@ -68,9 +59,7 @@ class ORCA(FileIOCalculator):
 
         Point Charge IO functionality added by A. Dohn.
         """
-        FileIOCalculator.__init__(
-            self, restart, ignore_bad_restart_file, label, atoms, **kwargs
-        )
+        FileIOCalculator.__init__(self, restart, ignore_bad_restart_file, label, atoms, **kwargs)
 
         self.pcpot = None
 
@@ -153,6 +142,8 @@ class ORCA(FileIOCalculator):
         self.results["forces"] = -np.array(gradients) * Hartree / Bohr
 
     def embed(self, mmcharges=None, **parameters):
+        from ase.calculators.orca import PointChargePotential
+
         """Embed atoms in point-charges (mmcharges)"""
         self.pcpot = PointChargePotential(mmcharges, label=self.label)
         return self.pcpot
@@ -182,15 +173,7 @@ def write_orca(atoms, **params):
                 symbol = atom.symbol + " : "
             else:
                 symbol = atom.symbol + "   "
-            fd.write(
-                symbol
-                + str(atom.position[0])
-                + " "
-                + str(atom.position[1])
-                + " "
-                + str(atom.position[2])
-                + "\n"
-            )
+            fd.write(symbol + str(atom.position[0]) + " " + str(atom.position[1]) + " " + str(atom.position[2]) + "\n")
         fd.write("*\n")
 
 
@@ -199,8 +182,6 @@ def read(filename):
 
     filename: str"""
     energy = None
-    forces = None
-    dipole = None
     with open(filename, "r") as fileobj:
         lineiter = iter(fileobj)
         for line in lineiter:
@@ -241,7 +222,7 @@ def get_vibrations(label, atoms, indices=None):
     Returns:
         VibrationsData object.
     """
-    if indices == None:
+    if indices is None:
         indices = range(len(atoms))
     if not os.path.isfile(label + ".hess"):
         raise ReadError("hess file missing.")
@@ -296,11 +277,7 @@ class OrcaDynamics:
             self.calc = calc
         else:
             if self.atoms.calc is None:
-                raise ValueError(
-                    "{} requires a valid ORCA calculator object!".format(
-                        self.__class__.__name__
-                    )
-                )
+                raise ValueError("{} requires a valid ORCA calculator object!".format(self.__class__.__name__))
 
             self.calc = self.atoms.calc
 

@@ -1,7 +1,7 @@
-from strainjedi.visualization.colors import colors
 from pathlib import Path
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import LinearSegmentedColormap, Normalize
 
@@ -37,7 +37,7 @@ class VMDVisualizer:
 
     def write_header(self):
         lines = [
-            f"\n# Load molecule",
+            "\n# Load molecule",
             f"mol new {{{self.output_dir.resolve() / 'xF.xyz'}}} type xyz\n",
             "\n# Change bond radii and various resolution parameters",
             "mol representation cpk 0.8 0.0 30 5",
@@ -63,9 +63,7 @@ class VMDVisualizer:
         self.colorlist = self.mapper.generate_colors(self.cmap, self.n_colors)
 
         for i, rgb in enumerate(self.colorlist):
-            lines.append(
-                f"color change rgb {i + 1:5d} {rgb[0]:10.6f} {rgb[1]:10.6f} {rgb[2]:10.6f}"
-            )
+            lines.append(f"color change rgb {i + 1:5d} {rgb[0]:10.6f} {rgb[1]:10.6f} {rgb[2]:10.6f}")
 
         atom_colors = self.visualization_data[self.mode]["color_data"]["atom_colors"]
         unique_atom_colors = {}
@@ -75,25 +73,13 @@ class VMDVisualizer:
 
         for i, symbol in enumerate(self.symbols):
             rgb = unique_atom_colors[symbol]
-            lines.append(
-                f"\ncolor change rgb {self.n_colors + i + 1:5d} {rgb[0]:10.6f} {rgb[1]:10.6f} {rgb[2]:10.6f}"
-            )
+            lines.append(f"\ncolor change rgb {self.n_colors + i + 1:5d} {rgb[0]:10.6f} {rgb[1]:10.6f} {rgb[2]:10.6f}")
 
-        lines.append(
-            "\ncolor change rgb 32 0.000000 0.000000 0.000000"
-        )  # Black for NaN
-        lines.append(
-            "\ncolor change rgb 1039 1.000000 0.000000 0.000000"
-        )  # Red for X-axis
-        lines.append(
-            "\ncolor change rgb 1038 0.000000 1.000000 0.000000"
-        )  # Green for Y-axis
-        lines.append(
-            "\ncolor change rgb 1037 0.000000 0.000000 1.000000"
-        )  # Blue for Z-axis
-        lines.append(
-            "\ncolor change rgb 1036 0.250000 0.750000 0.750000"
-        )  # Cyan for origin
+        lines.append("\ncolor change rgb 32 0.000000 0.000000 0.000000")  # Black for NaN
+        lines.append("\ncolor change rgb 1039 1.000000 0.000000 0.000000")  # Red for X-axis
+        lines.append("\ncolor change rgb 1038 0.000000 1.000000 0.000000")  # Green for Y-axis
+        lines.append("\ncolor change rgb 1037 0.000000 0.000000 1.000000")  # Blue for Z-axis
+        lines.append("\ncolor change rgb 1036 0.250000 0.750000 0.750000")  # Cyan for origin
         lines.append("\ncolor Axes X 1039")
         lines.append("color Axes Y 1038")
         lines.append("color Axes Z 1037")
@@ -118,9 +104,7 @@ class VMDVisualizer:
         bonds = self.visualization_data[self.mode]["bond_data"]["bonds"]
         norm_energies = self.visualization_data[self.mode]["bond_data"]["norm_energies"]
         custom_bonds = self.visualization_data[self.mode]["bond_data"]["custom_bonds"]
-        norm_custom_energies = self.visualization_data[self.mode]["bond_data"][
-            "norm_custom_energies"
-        ]
+        norm_custom_energies = self.visualization_data[self.mode]["bond_data"]["norm_custom_energies"]
         self.max_strain = self.visualization_data[self.mode]["color_data"]["max_strain"]
 
         binning_windows = np.linspace(0, 1, num=self.n_colors)
@@ -137,12 +121,10 @@ class VMDVisualizer:
                 colorID = np.abs(binning_windows - energy).argmin() + 1
 
             rep_id = n_atom_reps + i + 1
-            lines.append(f"mol addrep top")
+            lines.append("mol addrep top")
             lines.append(f"mol modstyle {rep_id} top bonds")
             lines.append(f"mol modcolor {rep_id} top {{colorid {colorID}}}")
-            lines.append(
-                f"mol modselect {rep_id} top {{index {int(bond[0])} {int(bond[1])}}}\n"
-            )
+            lines.append(f"mol modselect {rep_id} top {{index {int(bond[0])} {int(bond[1])}}}\n")
 
         # Custom bonds
         if len(custom_bonds) > 0:
@@ -158,9 +140,7 @@ class VMDVisualizer:
                 else:
                     colorID = np.abs(binning_windows - energy).argmin() + 1
 
-                lines.append(
-                    f'\nset x [[atomselect top "index {int(bond[0])} {int(bond[1])}"] get {{x y z}}]'
-                )
+                lines.append(f'\nset x [[atomselect top "index {int(bond[0])} {int(bond[1])}"] get {{x y z}}]')
                 lines.append("set a [lindex $x 0]")
                 lines.append("set b [lindex $x 1]")
                 lines.append(f"draw color {colorID}")
@@ -183,9 +163,7 @@ class VMDVisualizer:
             )
         )
         lines.append("\npbc box -color 32")
-        lines.append(
-            "\n\n# Adding a representation with the appropriate colorID for each bond"
-        )
+        lines.append("\n\n# Adding a representation with the appropriate colorID for each bond")
 
         return lines
 
@@ -194,9 +172,7 @@ class VMDVisualizer:
         fig = plt.figure()
         ax = fig.add_axes([0.05, 0.08, 0.1, 0.9])
         cmap_name = "my_list"
-        cmap = LinearSegmentedColormap.from_list(
-            cmap_name, self.colorlist, N=self.n_colors
-        )
+        cmap = LinearSegmentedColormap.from_list(cmap_name, self.colorlist, N=self.n_colors)
         ColorbarBase(
             ax,
             orientation="vertical",

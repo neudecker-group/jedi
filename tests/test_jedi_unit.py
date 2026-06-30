@@ -1,16 +1,29 @@
-from strainjedi.jedi import Jedi
-import numpy as np
 import copy
 
+import ase.units
 import matplotlib
+import numpy as np
+
+from strainjedi import rics
+from strainjedi.jedi import Jedi
 
 # Headless backend for testing
 matplotlib.use("agg")
 
 
+def _set_private(j: Jedi, name: str, value) -> None:
+    """
+    Set a name-mangled Jedi attribute in tests.
+
+    Example:
+        _set_private(j, "rim_list", rim_list)  -> sets j._Jedi__rim_list
+    """
+    setattr(j, f"_Jedi__{name}", value)
+
+
 class TestGetRims:
     """
-    Tests for get_rims() and get_common_rims() methods.
+    Tests for get_rims() and get_common_rics() methods.
     """
 
     def test_rim_list_shape(self, deds_jedi_with_rims):
@@ -25,15 +38,25 @@ class TestGetRims:
         assert j.custom_bonds is None
 
     def test_rim_list_no_custombonds(self, deds_jedi_with_rims):
-        assert deds_jedi_with_rims.rim_list[1].shape[0] == 0
+        rim_list = deds_jedi_with_rims.rim_list
+        assert rim_list[1].shape[0] == 0
 
     def test_rim_list_custombonds(self, deds_jedi_fresh):
         j = copy.deepcopy(deds_jedi_fresh)
         j.add_custom_bonds([[0, 5], [2, 10]])
-        j.indices = np.arange(0, len(j.atoms0))
-        j.get_common_rims()
-        assert j.rim_list[1].shape == (2, 2)
-        assert list(j.rim_list[1][0]) == [0, 5]
+
+        # tests used to directly mutate internals; now we must set the mangled ones
+        _set_private(j, "indices", np.arange(0, len(j.atoms0)))
+
+        rim_list = rics.intersect(
+            rics.calculate(j.atoms0, j.indices, j.custom_bonds),
+            rics.calculate(j.atomsF, j.indices, j.custom_bonds),
+        )
+        _set_private(j, "rim_list", rim_list)
+
+        rim_list = j.rim_list
+        assert rim_list[1].shape == (2, 2)
+        assert list(rim_list[1][0]) == [0, 5]
 
 
 class TestGetHessian:
@@ -43,7 +66,6 @@ class TestGetHessian:
 
     def test_hessian_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        j.get_hessian()
         np.testing.assert_allclose(j.H, deds_ref["jediInternalHessian"], atol=1e-05)
 
 
@@ -54,8 +76,7 @@ class TestGetBMatrix:
 
     def test_B_matrix_reference(self, deds_jedi_fresh, deds_rim_list, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        j.rim_list = deds_rim_list
-        j.get_b_matrix()
+        _set_private(j, "rim_list", deds_rim_list)
         np.testing.assert_allclose(j.B, deds_ref["bmatrix"], atol=1e-05)
 
 
@@ -66,17 +87,28 @@ class TestGetDeltaQ:
 
     def test_delta_q_identical_structure(self, deds_opt, deds_vibdata):
         j = Jedi(deds_opt, deds_opt, deds_vibdata)
-        j.indices = np.arange(len(deds_opt))
-        j.get_common_rims()
-        j.get_b_matrix()
-        j.get_delta_q()
+
+        # properties are read-only; update mangled storage
+        _set_private(j, "indices", np.arange(len(deds_opt)))
+
+        rim_list = rics.intersect(
+            rics.calculate(j.atoms0, j.indices, j.custom_bonds),
+            rics.calculate(j.atomsF, j.indices, j.custom_bonds),
+        )
+        _set_private(j, "rim_list", rim_list)
+
         np.testing.assert_allclose(j.delta_q, 0.0, atol=1e-05)
 
     def test_delta_q_deds_reference(self, deds_jedi_fresh, deds_rim_list, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        j.rim_list = deds_rim_list
-        j.B = deds_ref["bmatrix"]
-        j.get_delta_q()
+        _set_private(j, "rim_list", deds_rim_list)
+        _set_private(j, "B", deds_ref["bmatrix"])
+
+        q0, qF, delta_q = rics.subtract(j.atoms0, j.atomsF, j.rim_list)
+        _set_private(j, "q0", q0)
+        _set_private(j, "qF", qF)
+        _set_private(j, "delta_q", delta_q)
+
         np.testing.assert_allclose(j.delta_q, deds_ref["delta_q"], atol=1e-05)
 
 
@@ -85,16 +117,10 @@ class TestGetEnergy:
     Tests for get_energies() method.
     """
 
-    def test_energy_difference(self, deds_jedi_fresh):
-        j = copy.deepcopy(deds_jedi_fresh)
-        j.get_energies()
-        assert abs(j.energies[0] - (j.energies[1] - j.energies[2])) < 1e-6
-
     def test_energies_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
-        j.get_energies()
         np.testing.assert_allclose(
-            np.array(j.energies), deds_ref["energies"], atol=1e-05
+            np.array(j.get_energies() * ase.units.mol / ase.units.kcal), deds_ref["energies"][0], atol=1e-05
         )
 
 
@@ -108,14 +134,10 @@ class TestJediAnalysis:
         assert abs(deds_analysis["ERIMs_total"] - sum(deds_analysis["ERIMs"])) < 1e-05
 
     def test_e_rims_reference(self, deds_analysis, deds_ref):
-        np.testing.assert_allclose(
-            deds_analysis["ERIMs"], deds_ref["ERIMs"], atol=1e-05
-        )
+        np.testing.assert_allclose(deds_analysis["ERIMs"], deds_ref["ERIMs"], atol=1e-05)
 
     def test_proc_e_rims_reference(self, deds_analysis, deds_ref):
-        np.testing.assert_allclose(
-            deds_analysis["procERIMs"], deds_ref["procERIMs"], atol=1e-05
-        )
+        np.testing.assert_allclose(deds_analysis["procERIMs"], deds_ref["procERIMs"], atol=1e-05)
 
     def test_e_rims_linear_molecule(self, hcn_analysis, hcn_ref):
         """Tests B.ndim==1 edge case in jedi_analysis()"""

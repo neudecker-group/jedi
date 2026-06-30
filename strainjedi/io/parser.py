@@ -31,9 +31,7 @@ def read_energies(filename: str) -> np.ndarray:
 
     # Print a warning if initial and final state energy are interchanged.
     if e_i > e_f:
-        print(
-            f"Warning: E_i > E_f by {de * Hartree * mol / kcal:.2f} kcal/mol. You may want to change this..."
-        )
+        print(f"Warning: E_i > E_f by {de * Hartree * mol / kcal:.2f} kcal/mol. You may want to change this...")
 
     return np.array([de, e_i, e_f])
 
@@ -52,9 +50,7 @@ def parse_orca_hess(filename: str) -> np.ndarray:
         lines = f.readlines()
 
     try:
-        start = next(
-            i for i, line in enumerate(lines) if line.strip().lower() == "$hessian"
-        )
+        start = next(i for i, line in enumerate(lines) if line.strip().lower() == "$hessian")
     except StopIteration:
         raise ValueError("No $hessian block found")
 
@@ -106,11 +102,7 @@ def orca_input_to_ase(inpfile: str) -> Tuple[str, str, int, int]:
     """
 
     with open(inpfile) as f:
-        lines = [
-            line.strip()
-            for line in f
-            if line.strip() and not line.strip().startswith("#")
-        ]
+        lines = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
 
     simple_lines = []
     block_lines = []
@@ -125,9 +117,7 @@ def orca_input_to_ase(inpfile: str) -> Tuple[str, str, int, int]:
             try:
                 charge, multiplicity = map(int, parts[-2:])
             except ValueError:
-                raise ValueError(
-                    f"Could not parse charge/multiplicity from line: {line}"
-                )
+                raise ValueError(f"Could not parse charge/multiplicity from line: {line}")
 
         # Handle blocks
         if line.startswith("%"):
@@ -145,9 +135,7 @@ def orca_input_to_ase(inpfile: str) -> Tuple[str, str, int, int]:
 
     # Safety check
     if charge is None or multiplicity is None:
-        raise ValueError(
-            "Charge and multiplicity not found in the file (expected '*xyz charge mult')."
-        )
+        raise ValueError("Charge and multiplicity not found in the file (expected '*xyz charge mult').")
 
     return " ".join(simple_lines), "\n".join(block_lines), charge, multiplicity
 

@@ -1,8 +1,9 @@
-import numpy as np
 from pathlib import Path
+
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+import numpy as np
 from matplotlib.colorbar import ColorbarBase
+from matplotlib.colors import LinearSegmentedColormap, Normalize
 
 
 class MatplotlibVisualizer:
@@ -49,22 +50,16 @@ class MatplotlibVisualizer:
                 plt.show()
             else:
                 self.output_dir.mkdir(parents=True, exist_ok=True)
-                plt.savefig(
-                    self.output_dir / f"{self.mode}_matplotlib.pdf", bbox_inches="tight"
-                )
+                plt.savefig(self.output_dir / f"{self.mode}_matplotlib.pdf", bbox_inches="tight")
             plt.close()
 
     def plot_bonds(self, ax, pos):
         bonds = self.visualization_data[self.mode]["bond_data"]["bonds"]
         custom_bonds = self.visualization_data[self.mode]["bond_data"]["custom_bonds"]
         norm_energies = self.visualization_data[self.mode]["bond_data"]["norm_energies"]
-        norm_custom_energies = self.visualization_data[self.mode]["bond_data"][
-            "norm_custom_energies"
-        ]
+        norm_custom_energies = self.visualization_data[self.mode]["bond_data"]["norm_custom_energies"]
         split_bonds = self.visualization_data[self.mode]["bond_data"]["split_bonds"]
-        pbc_split_bonds = self.visualization_data[self.mode]["bond_data"][
-            "pbc_split_bonds"
-        ]
+        pbc_split_bonds = self.visualization_data[self.mode]["bond_data"]["pbc_split_bonds"]
 
         self.max_strain = self.visualization_data[self.mode]["color_data"]["max_strain"]
         colormap = self.visualization_data[self.mode]["color_data"]["colormap"]
@@ -79,9 +74,7 @@ class MatplotlibVisualizer:
                 color = "black"
             else:
                 color = self.cmap(energy)
-            ax.plot(
-                [p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], color=color, linewidth=5
-            )
+            ax.plot([p1[0], p2[0]], [p1[1], p2[1]], [p1[2], p2[2]], color=color, linewidth=5)
 
         for bond, energy in zip(custom_bonds, norm_custom_energies):
             p1, p2 = pos[int(bond[0])], pos[int(bond[1])]
@@ -139,9 +132,7 @@ class MatplotlibVisualizer:
 
         for idx, (p, (sym, col)) in enumerate(zip(pos, zip(symbols, atom_colors))):
             size = 100 if sym == "H" else 150
-            ax.scatter(
-                p[0], p[1], p[2], color=col, s=size, linewidths=0.5, edgecolor="0.3"
-            )
+            ax.scatter(p[0], p[1], p[2], color=col, s=size, linewidths=0.5, edgecolor="0.3")
             if show_indices:
                 if self.atomsF[idx].tag == -1:
                     atom_txt = self.atomsF[idx].index

@@ -1,25 +1,26 @@
-from ase.io.gaussian import _compare_merge_configs
-from ase.vibrations.vibrations import VibrationsData
 import re
+import sys
+from copy import deepcopy
+
+import ase.calculators.gaussian as gaussian
 import numpy as np
 from ase.atoms import Atoms
+from ase.calculators.calculator import FileIOCalculator
 from ase.calculators.singlepoint import SinglePointCalculator
-from ase.units import Hartree, Bohr
-from copy import deepcopy
 from ase.io.gaussian import (
-    _format_output_type,
-    _xc_to_method,
     _check_problem_methods,
-    _pop_link0_params,
+    _compare_merge_configs,
     _format_addsec,
     _format_basis_set,
     _format_method_basis,
+    _format_output_type,
     _format_route_params,
     _get_molecule_spec,
+    _pop_link0_params,
+    _xc_to_method,
 )
-import copy
-from ase.calculators.calculator import FileIOCalculator
-import ase.calculators.gaussian as gaussian
+from ase.units import Bohr, Hartree
+from ase.vibrations.vibrations import VibrationsData
 
 _re_l716 = re.compile(r"^\s*\(Enter .+l716.exe\)$")
 _re_forceblock = re.compile(r"^\s*Center\s+Atomic\s+Forces\s+\S+\s*$")
@@ -45,11 +46,7 @@ def read_gaussian_out(label, index=-1):
                 # We've reached the "archive" block at the bottom, stop parsing
                 break
 
-            if (
-                line == "Input orientation:"
-                or line == "Z-Matrix orientation:"
-                or line == "Standard orientation:"
-            ):
+            if line == "Input orientation:" or line == "Z-Matrix orientation:" or line == "Standard orientation:":
                 if atoms is not None:
                     atoms.calc = SinglePointCalculator(
                         atoms,
@@ -58,8 +55,6 @@ def read_gaussian_out(label, index=-1):
                         forces=forces,
                     )
                     _compare_merge_configs(configs, atoms)
-                atoms = None
-                # energy = None
                 dipole = None
                 forces = None
 
@@ -164,22 +159,32 @@ def get_vibrations(label, atoms, indices=None):
     Read hessian.
 
     label: str
-        filename w/o .log.
+        file w/o .log.
     atoms: class
         Structure of which the frequency analysis was performed.
 
     Returns:
         VibrationsData object.
     """
-    if indices == None:
+    if indices is None:
         indices = range(len(atoms))
-    _re_hessblock = re.compile(
-        r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$"
-    )
-    output = label + ".log"
-    with open(output, "r") as fd:
-        lines = fd.readlines()
-
+    imaginary_freq_pattern = r"\**\s+(\d+)\s+imaginary frequencies \(negative Signs\)\s*\**"
+    hessian_pattern = r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*"
+    file = label + ".log"
+    with open(file, "r") as f:
+        content = f.read()
+        match = re.search(imaginary_freq_pattern, content)
+        if match:
+            print(f"Found {match.group(1)} imaginary frequencies in {file}. Jedi Analysis can not be performed.")
+            sys.exit(1)
+        match = re.search(hessian_pattern, content)
+        if match is None:
+            print(
+                f"Couldn't find force constants in Cartesian Coordinates in {file}. "
+                f"Specify iop=7/33=1 in your input file."
+            )
+            sys.exit(1)
+        lines = content.splitlines()
     hess_line = 0
     NCarts = 3 * len(atoms)
     if len(atoms.constraints) > 0:
@@ -188,7 +193,6 @@ def get_vibrations(label, atoms, indices=None):
                 a = l.todict()
                 clist = np.array(a["kwargs"]["indices"])
                 alist = np.delete(np.arange(0, len(atoms)), clist)
-
                 NCarts = 3 * len(alist)
     hess = np.zeros((NCarts, NCarts))
     for num, line in enumerate(lines, 1):
@@ -198,14 +202,9 @@ def get_vibrations(label, atoms, indices=None):
     chunks = NCarts // 5 + 1
     for i in range(chunks):
         for j in range(NCarts - i * 5):
-            rows = lines[
-                round(
-                    hess_line + i * (NCarts + 1) - sum(np.linspace(0, i - 1, i) * 5) + j
-                )
-            ].split()
-
+            # TODO is there any occasion where it actually needs round()? isn't int() also possible
+            rows = lines[round(hess_line + i * (NCarts + 1) - sum(np.linspace(0, i - 1, i) * 5) + j)].split()
             rows = [float(k.replace("D", "e")) for k in rows]
-
             hess[j + i * 5][i * 5 : i * 5 + len(rows) - 1] = rows[1::]
     hess = hess + hess.T - np.diag(np.diag(hess))
     hess *= Hartree / Bohr**2
@@ -382,12 +381,7 @@ def write_gaussian_in(
         out.append("force")
 
     # header, charge, and mult
-    out += [
-        "",
-        "Gaussian input prepared by ASE",
-        "",
-        "{:.0f} {:.0f}".format(charge, mult),
-    ]
+    out += ["", "Gaussian input prepared by ASE", "", "{:.0f} {:.0f}".format(charge, mult)]
 
     # make dict of nuclear properties:
     nuclear_props = {
@@ -417,9 +411,6 @@ def write_gaussian_in(
 
 class GaussianDynamics(gaussian.GaussianDynamics):
     def run(self, **kwargs):
-        calc_old = self.atoms.calc
-        params_old = copy.deepcopy(self.calc.parameters)
-
         self.delete_keywords(kwargs)
         self.delete_keywords(self.calc.parameters)
         self.set_keywords(kwargs)
@@ -472,9 +463,7 @@ class Gaussian(gaussian.Gaussian):
 
     def write_input(self, atoms, properties=None, system_changes=None):
         FileIOCalculator.write_input(self, atoms, properties, system_changes)
-        write_gaussian_in(
-            self.label + ".com", atoms, properties=properties, **self.parameters
-        )
+        write_gaussian_in(self.label + ".com", atoms, properties=properties, **self.parameters)
 
     def read_results(self):
         output = read_gaussian_out(self.label)

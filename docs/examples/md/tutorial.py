@@ -1,7 +1,11 @@
-from ase import Atoms
+from ase import Atoms, units
 from ase.calculators.emt import EMT
+from ase.io.trajectory import Trajectory
+from ase.md.langevin import Langevin
 from ase.optimize import BFGS
 from ase.vibrations import Vibrations
+
+from strainjedi.jedi import Jedi
 
 n2 = Atoms("N2", [(0, 0, 0), (0, 0, 1.1)], calculator=EMT())
 BFGS(n2).run(fmax=0.01)
@@ -10,15 +14,7 @@ vib = Vibrations(n2)
 vib.run()
 modes = vib.get_vibrations()
 
-
-from ase import units
-from ase.io.trajectory import Trajectory
-
-from ase.md.langevin import Langevin
-
-
 T = 400  # Kelvin
-
 
 atoms = n2.copy()
 
@@ -50,8 +46,6 @@ dyn.attach(traj.write, interval=4)
 # Now run the dynamics
 printenergy()
 dyn.run(200)
-
-from strainjedi.jedi import Jedi
 
 for i in range(1, 51):
     j = Jedi(n2, Trajectory("moldyn3.traj")[i], modes)

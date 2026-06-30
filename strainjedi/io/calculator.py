@@ -22,9 +22,7 @@ def build_calc(inputfile: str | None = None, prog: str = "ORCA") -> ORCA:
         orca_path = shutil.which("orca")
 
         if orca_path is None:
-            raise RuntimeError(
-                "ORCA executable not found in PATH. Please load orca module or update PATH."
-            )
+            raise RuntimeError("ORCA executable not found in PATH. Please load orca module or update PATH.")
 
         orca_profile = OrcaProfile(command=orca_path)
 

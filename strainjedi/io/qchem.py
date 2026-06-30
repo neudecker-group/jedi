@@ -1,14 +1,16 @@
-import numpy as np
-import ase.calculators.qchem as qchem
-from ase.calculators.calculator import SCFError, FileIOCalculator
-import ase.units
-from ase.vibrations.data import VibrationsData
-import ase.io
-from typing import Dict, Optional
+import re
+import sys
 from collections.abc import Iterable
-import copy
+from typing import Dict, Optional
+
+import ase.calculators.qchem as qchem
+import ase.io
+import ase.units
+import numpy as np
 from ase.atoms import Atoms
+from ase.calculators.calculator import FileIOCalculator, SCFError
 from ase.calculators.singlepoint import SinglePointCalculator
+from ase.vibrations.data import VibrationsData
 
 
 def read(filename):
@@ -40,9 +42,6 @@ def read(filename):
             elif " Total energy in the final basis set =" in line:
                 convert = ase.units.Hartree
                 energy = float(line.split()[8]) * convert
-            elif " Final energy is " in line:
-                convert = ase.units.Hartree
-                energy = float(line.split()[3]) * convert
             elif " Gradient of SCF Energy" in line:
                 # Read gradient as 3 by N array and transpose at the end
                 gradient = [[] for _ in range(3)]
@@ -57,14 +56,7 @@ def read(filename):
                         # Cut in chunks of 12 symbols and convert into
                         # strings. This is preferred over string.split() as
                         # the fields may overlap for large gradients
-                        gradient[i].extend(
-                            list(
-                                map(
-                                    float,
-                                    [line[i : i + 12] for i in range(0, len(line), 12)],
-                                )
-                            )
-                        )
+                        gradient[i].extend(list(map(float, [line[i : i + 12] for i in range(0, len(line), 12)])))
 
                     # After three force components we expect either a
                     # separator line, which we want to skip, or the end of
@@ -74,9 +66,7 @@ def read(filename):
                     # next line. Eg. if not lineiter.next().startswith(' ')
                     if " Max gradient component" in next(lineiter):
                         # Minus to convert from gradient to force
-                        forces = np.array(gradient).T * (
-                            -ase.units.Hartree / ase.units.Bohr
-                        )
+                        forces = np.array(gradient).T * (-ase.units.Hartree / ase.units.Bohr)
                         break
             elif "Standard Nuclear Orientation (Angstroms)" in line:
                 positions = [[] for _ in range(len(atoms))]
@@ -92,14 +82,7 @@ def read(filename):
                         # strings. This is preferred over string.split() as
                         # the fields may overlap for large gradients
 
-                        positions[i].extend(
-                            list(
-                                map(
-                                    float,
-                                    [line[i : i + 17] for i in range(0, len(line), 17)],
-                                )
-                            )
-                        )
+                        positions[i].extend(list(map(float, [line[i : i + 17] for i in range(0, len(line), 17)])))
 
                     a = False
 
@@ -117,7 +100,8 @@ def read(filename):
 
 
 def get_vibrations(label, atoms):
-    """Read hessian.
+    """
+    Read hessian.
 
     label: str
         Filename w/o .out.
@@ -126,47 +110,49 @@ def get_vibrations(label, atoms):
     Returns:
         VibrationsData object.
     """
-    filename = label + ".out"
+    imaginary_freq_pattern = r"\s*This Molecule has\s+(\d+)\s+Imaginary Frequencies\s"
+    hessian_pattern = r"^\s+Mass-Weighted Hessian Matrix:\s"
+    file = label + ".out"
+    with open(file, "r") as f:
+        content = f.read()
+        match = re.search(imaginary_freq_pattern, content)
+        if match is not None and int(match.group(1)) > 0:
+            print(f"Found {match.group(1)} imaginary frequencies in {file}. Jedi Analysis can not be performed.")
+            sys.exit(1)
+        match = re.search(hessian_pattern, content)
+        if match is None:
+            print(f"Couldn't find mass-weighted Hessian in {file}. Specify vibman_print 7 in the $rem section.")
+            sys.exit(1)
+        fileobj = content.splitlines()
+    for num, line in enumerate(fileobj, 1):
+        if "Mass-Weighted Hessian Matrix" in line:
+            hess_line = num
+            hess = []
+            NCarts = 3 * len(atoms)
+            if len(atoms.constraints) > 0:
+                for l in atoms.constraints:
+                    if l.__class__.__name__ == "FixAtoms":
+                        a = l.todict()
+                        clist = np.array(a["kwargs"]["indices"])
+                        alist = np.delete(np.arange(0, len(atoms)), clist)
 
-    with open(filename, "r") as fileobj:
-        fileobj = fileobj.readlines()
-        hess_line = 0
-        for num, line in enumerate(fileobj, 1):
-            if "Mass-Weighted Hessian Matrix" in line:
-                hess_line = num
-                hess = []
-                NCarts = 3 * len(atoms)
-                if len(atoms.constraints) > 0:
-                    for l in atoms.constraints:
-                        if l.__class__.__name__ == "FixAtoms":
-                            a = l.todict()
-                            clist = np.array(a["kwargs"]["indices"])
-                            alist = np.delete(np.arange(0, len(atoms)), clist)
+                        NCarts = 3 * len(alist)
 
-                            NCarts = 3 * len(alist)
+            i = hess_line + 2
+            while not any(l.isalpha() for l in fileobj[i]):
+                hess.append(fileobj[i])  # read the lines
+                i += 1
+            hess = [l for l in hess if l != "\n"]  # get rid of empty separator lines
 
-                i = hess_line + 2
-                while any(l.isalpha() for l in fileobj[i]) == False:
-                    hess.append(fileobj[i])  # read the lines
-                    i += 1
-                hess = [
-                    l for l in hess if l != "\n"
-                ]  # get rid of empty separator lines
-
-                hess = [
-                    hess[l : l + NCarts] for l in range(0, len(hess), NCarts)
-                ]  # identify the chunks
-                hess = [[k.split() for k in l] for l in hess]  #
-
-                hess = [np.array(l, dtype=("float64")) for l in hess]
-                mass_weighted_hessian = hess[0]
-                for l in range(1, len(hess)):
-                    if np.size(hess[l], axis=1) > 0:
-                        mass_weighted_hessian = np.hstack(
-                            (mass_weighted_hessian, hess[l])
-                        )
-                # atoms.calc.results['hessian'] = mass_weighted_hessian
-                break
+            hess = [hess[l : l + NCarts] for l in range(0, len(hess), NCarts)]  # identify the chunks
+            hess = [[k.split() for k in l] for l in hess]  #
+            hess = [np.array(l, dtype=("float64")) for l in hess]
+            mass_weighted_hessian = hess[0]
+            for l in range(1, len(hess)):
+                if np.size(hess[l], axis=1) > 0:
+                    mass_weighted_hessian = np.hstack((mass_weighted_hessian, hess[l]))
+            # atoms.calc.results['hessian'] = mass_weighted_hessian
+            break
     mass_weights = np.repeat(atoms.get_masses() ** 0.5, 3)
     if "alist" in locals():
         mass_weights = np.repeat(atoms.get_masses()[alist] ** 0.5, 3)
@@ -195,11 +181,7 @@ class QChemDynamics:
             self.calc = calc
         else:
             if self.atoms.calc is None:
-                raise ValueError(
-                    "{} requires a valid QChem calculator object!".format(
-                        self.__class__.__name__
-                    )
-                )
+                raise ValueError("{} requires a valid QChem calculator object!".format(self.__class__.__name__))
 
             self.calc = self.atoms.calc
 
@@ -227,6 +209,9 @@ class QChemDynamics:
         kwargs["jobtype"] = "opt"
 
     def run(self, **kwargs):
+        # calc_old = self.atoms.calc
+        # params_old = copy.deepcopy(self.calc.parameters)
+
         self.delete_keywords(kwargs)
         self.delete_keywords(self.calc.parameters)
         self.set_keywords(kwargs)
@@ -280,7 +265,6 @@ class QChem(qchem.QChem):
         ecpfile=None,
         atoms=None,
         distort={},
-        opt={},
         app=None,
         command=None,
         **kwargs,
@@ -308,9 +292,7 @@ class QChem(qchem.QChem):
             combination with ecp='gen' keyword argument.
         """
 
-        FileIOCalculator.__init__(
-            self, restart, ignore_bad_restart_file, label, atoms, **kwargs
-        )
+        FileIOCalculator.__init__(self, restart, ignore_bad_restart_file, label, atoms, **kwargs)
 
         # Augment the command by various flags
         if pbs:
@@ -329,63 +311,10 @@ class QChem(qchem.QChem):
         self.basisfile = basisfile
         self.ecpfile = ecpfile
         self.distort = distort
-        self.opt = opt
         self.app = app
 
     def get_vibrations(self, atoms):
-        filename = self.label + ".out"
-
-        with open(filename, "r") as fileobj:
-            fileobj = fileobj.readlines()
-            hess_line = 0
-            for num, line in enumerate(fileobj, 1):
-                if "Mass-Weighted Hessian Matrix" in line:
-                    hess_line = num
-                    hess = []
-                    NCarts = 3 * len(atoms)
-                    if len(atoms.constraints) > 0:
-                        for l in atoms.constraints:
-                            if l.__class__.__name__ == "FixAtoms":
-                                a = l.todict()
-                                clist = np.array(a["kwargs"]["indices"])
-                                alist = np.delete(np.arange(0, len(atoms)), clist)
-
-                                NCarts = 3 * len(alist)
-
-                    i = hess_line + 2
-                    while any(l.isalpha() for l in fileobj[i]) == False:
-                        hess.append(fileobj[i])  # read the lines
-                        i += 1
-                    hess = [
-                        l for l in hess if l != "\n"
-                    ]  # get rid of empty separator lines
-
-                    hess = [
-                        hess[l : l + NCarts] for l in range(0, len(hess), NCarts)
-                    ]  # identify the chunks
-                    hess = [[k.split() for k in l] for l in hess]  #
-
-                    hess = [np.array(l, dtype=("float64")) for l in hess]
-                    mass_weighted_hessian = hess[0]
-                    for l in range(1, len(hess)):
-                        if np.size(hess[l], axis=1) > 0:
-                            mass_weighted_hessian = np.hstack(
-                                (mass_weighted_hessian, hess[l])
-                            )
-                    self.results["hessian"] = mass_weighted_hessian
-                    break
-        mass_weights = np.repeat(atoms.get_masses() ** 0.5, 3)
-        if "alist" in locals():
-            mass_weights = np.repeat(atoms.get_masses()[alist] ** 0.5, 3)
-        mass_weights_matrix = np.outer(mass_weights, mass_weights[:, np.newaxis])
-        np.savetxt("Hessmass", mass_weighted_hessian)
-        hessian = np.multiply(mass_weighted_hessian, mass_weights_matrix) * (
-            ase.units.Hartree / ase.units.Bohr**2
-        )  # qchem uses atomic units
-        indices = np.arange(0, len(atoms))
-        if "alist" in locals():
-            indices = alist
-        return VibrationsData.from_2d(atoms, hessian, indices=indices)
+        return get_vibrations(self.label, atoms)
 
     def write_input(self, atoms, properties=None, system_changes=None):
         FileIOCalculator.write_input(self, atoms, properties, system_changes)
@@ -417,10 +346,7 @@ class QChem(qchem.QChem):
             for prm in self.parameters:
                 if prm not in ["charge", "multiplicity"]:
                     if self.parameters[prm] is not None:
-                        fileobj.write(
-                            "   %-25s   %s\n"
-                            % (prm.upper(), self.parameters[prm].upper())
-                        )
+                        fileobj.write("   %-25s   %s\n" % (prm.upper(), self.parameters[prm].upper()))
 
             # Not even a parameters as this is an absolute necessity
             fileobj.write("   %-25s   %s\n" % ("SYM_IGNORE", "TRUE"))
@@ -456,12 +382,6 @@ class QChem(qchem.QChem):
             if len(self.distort) > 0:
                 fileobj.write("$distort\n")
                 for key, prm in self.distort.items():
-                    fileobj.write("   %-25s   %s\n" % (key, prm))
-                fileobj.write("$end\n\n")
-
-            if len(self.opt) > 0:
-                fileobj.write("$opt\n")
-                for key, prm in self.opt.items():
                     fileobj.write("   %-25s   %s\n" % (key, prm))
                 fileobj.write("$end\n\n")
 
