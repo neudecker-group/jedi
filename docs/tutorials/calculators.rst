@@ -1,3 +1,5 @@
+.. _existing-calculators:
+
 ============================
 Reading Existing Calculators
 ============================
