@@ -330,7 +330,7 @@ class ColorMapper:
         visualization_data = {}
         self.split_bonds = split_bonds
 
-        for atom in self.atoms_vis:     # preparation for correct displaying of atoms indices in matplotlib_visualizer
+        for atom in self.atoms_vis:  # preparation for correct displaying of atoms indices in matplotlib_visualizer
             atom.tag = -1
 
         for m in modes:
