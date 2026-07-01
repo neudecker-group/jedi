@@ -1,9 +1,6 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - '*'
   workflow_dispatch:
     inputs:
       environment:
@@ -11,7 +8,7 @@ on:
         required: true
         type: choice
         default: "test"
-        options: ["test", "pypi"]
+        options: ["test", "github", "pypi"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -65,7 +62,7 @@ jobs:
 
   github-release:
     name: Create GitHub Release
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'pypi'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'github'
     needs: [wheel]
     runs-on: ubuntu-latest
     permissions:
@@ -74,7 +71,7 @@ jobs:
 
     steps:
       - name: Download
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.1
         with:
           path: ./dist
 
@@ -82,7 +79,9 @@ jobs:
         run: ls -R ./dist
 
       - name: Create the release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.21.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: ./dist/*
+          allowUpdates: true
+          draft: true
