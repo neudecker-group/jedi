@@ -1,38 +1,72 @@
-name: Sphinx Build
+name: Render documentation
 
 on:
   push:
-    branches:
-      - main  # Change this to your main branch name
-      - docs-workflow-file
+    paths:
+      - 'docs/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
 jobs:
-  docs:
+  render:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.8
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r docsrc/requirements.txt  # Assuming your Sphinx dependencies are listed in requirements.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.0.0
+        with:
+          version: latest
+          enable-cache: false
 
-    - name: Build docs
-      run: |
-        sphinx-build -b html docsrc docs
+      - name: Install dependencies
+        run: uv sync --group=docs
 
-    - name: Deploy Docs
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs
+      - name: Render
+        run: uv run sphinx-build -b html docs docs/_build/
 
+      - name: Set up Pages
+        # only if actually deploying
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        id: pages
+        uses: actions/configure-pages@v4
 
+      - name: Upload artifact
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs/_build
+
+  deploy:
+    # only if actually deploying
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: render
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write    # needed to deploy to pages
+      id-token: write # to verify the deployment originates from an appropriate source
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

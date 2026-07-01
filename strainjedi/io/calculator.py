@@ -1,13 +1,14 @@
-""" Helper functions to construct ASE calculators for supported programs. """
+"""Helper functions to construct ASE calculators for supported programs."""
 
 import shutil
 
 from ase.calculators.orca import ORCA, OrcaProfile
-from strainjedi.IO.parser import orca_input_to_ase
+from strainjedi.io.parser import orca_input_to_ase
 
-def build_calc(inputfile : str | None = None, prog : str = "ORCA") -> None:
-    """ Generate an ASE calculator from inputfile and program declaration.
-    
+
+def build_calc(inputfile: str | None = None, prog: str = "ORCA") -> ORCA:
+    """Generate an ASE calculator from inputfile and program declaration.
+
     Args:
         inputfile (str | None, opt): Inputfile of QC program. None if not needed. Default: None.
         prog (str, opt): Program to initialize ASE calculator for. Default: ORCA.
@@ -16,9 +17,8 @@ def build_calc(inputfile : str | None = None, prog : str = "ORCA") -> None:
         ...
     """
 
-    if prog.lower() == "orca": # ORCA calculator
-        
-        ## Get ORCA executable. If None found, raise error 
+    if prog.lower() == "orca":  # ORCA calculator
+        ## Get ORCA executable. If None found, raise error
         orca_path = shutil.which("orca")
 
         if orca_path is None:
@@ -33,14 +33,15 @@ def build_calc(inputfile : str | None = None, prog : str = "ORCA") -> None:
         print(sinp)
         print(blcks)
 
-        calc = ORCA(profile=orca_profile,
-        charge = chrg, mult = mul,
-        orcasimpleinput=sinp,
-        orcablocks=blcks,
+        calc = ORCA(
+            profile=orca_profile,
+            charge=chrg,
+            mult=mul,
+            orcasimpleinput=sinp,
+            orcablocks=blcks,
         )
 
     else:
         raise NotImplementedError(f"Cannot build calculator for {prog}.")
 
     return calc
-

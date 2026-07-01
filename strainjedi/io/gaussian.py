@@ -1,32 +1,40 @@
-from ase.io.gaussian import _compare_merge_configs
-from ase.vibrations.vibrations import VibrationsData
 import re
+import sys
+from copy import deepcopy
+
+import ase.calculators.gaussian as gaussian
 import numpy as np
 from ase.atoms import Atoms
-from ase.calculators.singlepoint import SinglePointCalculator
-from ase.units import Hartree, Bohr
-from copy import deepcopy
-from ase.io.gaussian import _format_output_type, _xc_to_method, _check_problem_methods,_pop_link0_params,_format_addsec,_format_basis_set,_format_method_basis,_format_route_params,_get_molecule_spec
-import copy
 from ase.calculators.calculator import FileIOCalculator
-import ase.calculators.gaussian as gaussian
-
-_re_l716 = re.compile(r'^\s*\(Enter .+l716.exe\)$')
-_re_forceblock = re.compile(r'^\s*Center\s+Atomic\s+Forces\s+\S+\s*$')
-_re_atom = re.compile(
-    r'^\s*\S+\s+(\S+)\s+(?:\S+\s+)?(\S+)\s+(\S+)\s+(\S+)\s*$'
+from ase.calculators.singlepoint import SinglePointCalculator
+from ase.io.gaussian import (
+    _check_problem_methods,
+    _compare_merge_configs,
+    _format_addsec,
+    _format_basis_set,
+    _format_method_basis,
+    _format_output_type,
+    _format_route_params,
+    _get_molecule_spec,
+    _pop_link0_params,
+    _xc_to_method,
 )
-        
+from ase.units import Bohr, Hartree
+from ase.vibrations.vibrations import VibrationsData
+
+_re_l716 = re.compile(r"^\s*\(Enter .+l716.exe\)$")
+_re_forceblock = re.compile(r"^\s*Center\s+Atomic\s+Forces\s+\S+\s*$")
+_re_atom = re.compile(r"^\s*\S+\s+(\S+)\s+(?:\S+\s+)?(\S+)\s+(\S+)\s+(\S+)\s*$")
+
 
 def read_gaussian_out(label, index=-1):
-    '''
-    modified for reading gaussian geometry optimizations
-   label: str
-        filename w/o .log.
-    '''
+    """
+     modified for reading gaussian geometry optimizations
+    label: str
+         filename w/o .log.
+    """
 
-    with open(label+'.log','r') as fd:
-        
+    with open(label + ".log", "r") as fd:
         configs = []
         atoms = None
         energy = None
@@ -34,20 +42,19 @@ def read_gaussian_out(label, index=-1):
         forces = None
         for line in fd:
             line = line.strip()
-            if line.startswith(r'1\1\GINC'):
+            if line.startswith(r"1\1\GINC"):
                 # We've reached the "archive" block at the bottom, stop parsing
                 break
 
-            if (line == 'Input orientation:'
-                    or line == 'Z-Matrix orientation:'
-                    or line == "Standard orientation:"):
+            if line == "Input orientation:" or line == "Z-Matrix orientation:" or line == "Standard orientation:":
                 if atoms is not None:
                     atoms.calc = SinglePointCalculator(
-                        atoms, energy=energy, dipole=dipole, forces=forces,
+                        atoms,
+                        energy=energy,
+                        dipole=dipole,
+                        forces=forces,
                     )
                     _compare_merge_configs(configs, atoms)
-                atoms = None
-                #energy = None
                 dipole = None
                 forces = None
 
@@ -73,22 +80,25 @@ def read_gaussian_out(label, index=-1):
                         numbers.append(max(number, 0))
                         positions.append(pos)
                 atoms = Atoms(numbers, positions, pbc=pbc, cell=cell)
-            elif (line.startswith('Energy=')
-                    or line.startswith('SCF Done:')):
+            elif line.startswith("Energy=") or line.startswith("SCF Done:"):
                 # Some semi-empirical methods (Huckel, MINDO3, etc.),
                 # or SCF methods (HF, DFT, etc.)
-                energy = float(line.split('=')[1].split()[0].replace('D', 'e'))
+                energy = float(line.split("=")[1].split()[0].replace("D", "e"))
                 energy *= Hartree
-            elif (line.startswith('E2 =') or line.startswith('E3 =')
-                    or line.startswith('E4(') or line.startswith('DEMP5 =')
-                    or line.startswith('E2(')):
+            elif (
+                line.startswith("E2 =")
+                or line.startswith("E3 =")
+                or line.startswith("E4(")
+                or line.startswith("DEMP5 =")
+                or line.startswith("E2(")
+            ):
                 # MP{2,3,4,5} energy
                 # also some double hybrid calculations, like B2PLYP
-                energy = float(line.split('=')[-1].strip().replace('D', 'e'))
+                energy = float(line.split("=")[-1].strip().replace("D", "e"))
                 energy *= Hartree
-            elif line.startswith('Wavefunction amplitudes converged. E(Corr)'):
+            elif line.startswith("Wavefunction amplitudes converged. E(Corr)"):
                 # "correlated method" energy, e.g. CCSD
-                energy = float(line.split('=')[-1].strip().replace('D', 'e'))
+                energy = float(line.split("=")[-1].strip().replace("D", "e"))
                 energy *= Hartree
             elif _re_l716.match(line):
                 # Sometimes Gaussian will print "Rotating derivatives to
@@ -99,9 +109,9 @@ def read_gaussian_out(label, index=-1):
                 # orientation (and also it is numerically different even if the
                 # standard orientation is the same as the input orientation).
                 line = fd.readline().strip()
-                if not line.startswith('Dipole'):
+                if not line.startswith("Dipole"):
                     continue
-                dip = line.split('=')[1].replace('D', 'e')
+                dip = line.split("=")[1].replace("D", "e")
                 tokens = dip.split()
                 dipole = []
                 # dipole elements can run together, depending on what method was
@@ -113,7 +123,7 @@ def read_gaussian_out(label, index=-1):
                     # next, check if the number of tokens is divisible by 3
                     nchars = len(dip) // 3
                     for i in range(3):
-                        dipole.append(float(dip[nchars * i:nchars * (i + 1)]))
+                        dipole.append(float(dip[nchars * i : nchars * (i + 1)]))
                 else:
                     # otherwise, just give up on trying to parse it.
                     dipole = None
@@ -134,70 +144,98 @@ def read_gaussian_out(label, index=-1):
                 forces = np.array(forces) * Hartree / Bohr
         if atoms is not None:
             atoms.calc = SinglePointCalculator(
-                atoms, energy=energy, dipole=dipole, forces=forces,
+                atoms,
+                energy=energy,
+                dipole=dipole,
+                forces=forces,
             )
             _compare_merge_configs(configs, atoms)
-        
+
         return configs[index]
 
-def get_vibrations(label,atoms,indices=None):
-    '''
+
+def get_vibrations(label, atoms, indices=None):
+    """
     Read hessian.
 
     label: str
-        filename w/o .log.
+        file w/o .log.
     atoms: class
         Structure of which the frequency analysis was performed.
 
     Returns:
         VibrationsData object.
-            '''
-    if indices==None:
+    """
+    if indices is None:
         indices = range(len(atoms))
-    _re_hessblock = re.compile(r'^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$')
-    output = label+'.log'
-    with open(output,'r') as fd:
-        lines=fd.readlines()
-    
+    imaginary_freq_pattern = r"\**\s+(\d+)\s+imaginary frequencies \(negative Signs\)\s*\**"
+    hessian_pattern = r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$"
+    file = label + ".log"
+    with open(file, "r") as f:
+        content = f.read()
+        match = re.search(imaginary_freq_pattern, content, flags=re.MULTILINE)
+        if match:
+            print(f"Found {match.group(1)} imaginary frequencies in {file}. Jedi Analysis can not be performed.")
+            sys.exit(1)
+        match = re.search(hessian_pattern, content, flags=re.MULTILINE)
+        if match is None:
+            print(
+                f"Couldn't find force constants in Cartesian Coordinates in {file}. "
+                f"Specify iop=7/33=1 in your input file."
+            )
+            sys.exit(1)
+        lines = content.splitlines()
     hess_line = 0
     NCarts = 3 * len(atoms)
-    if len(atoms.constraints)>0:
+    if len(atoms.constraints) > 0:
         for l in atoms.constraints:
-            if l.__class__.__name__=='FixAtoms':
-                a=l.todict()
-                clist=np.array(a['kwargs']['indices'])
-                alist=np.delete(np.arange(0,len(atoms)),clist)
-                
+            if l.__class__.__name__ == "FixAtoms":
+                a = l.todict()
+                clist = np.array(a["kwargs"]["indices"])
+                alist = np.delete(np.arange(0, len(atoms)), clist)
                 NCarts = 3 * len(alist)
-    hess=np.zeros((NCarts,NCarts))
+    hess = np.zeros((NCarts, NCarts))
     for num, line in enumerate(lines, 1):
-        if 'Force constants in Cartesian coordinates:' in line:
-            hess_line=num+1
-    
-    chunks=NCarts//5+1
+        if "Force constants in Cartesian coordinates:" in line:
+            hess_line = num + 1
+
+    chunks = NCarts // 5 + 1
     for i in range(chunks):
-        for j in range(NCarts-i*5):
-
-            rows=lines[round(hess_line+i*(NCarts+1)-sum(np.linspace(0,i-1,i)*5)+j)].split()
-    
-            rows=[float(k.replace('D', 'e')) for k in rows]
-      
-            hess[j+i*5][i*5:i*5+len(rows)-1]=rows[1::]
-    hess=hess+hess.T-np.diag(np.diag(hess))
-    hess*=(Hartree / Bohr**2) 
-    return VibrationsData.from_2d(atoms,hess,indices)
+        for j in range(NCarts - i * 5):
+            # TODO is there any occasion where it actually needs round()? isn't int() also possible
+            rows = lines[round(hess_line + i * (NCarts + 1) - sum(np.linspace(0, i - 1, i) * 5) + j)].split()
+            rows = [float(k.replace("D", "e")) for k in rows]
+            hess[j + i * 5][i * 5 : i * 5 + len(rows) - 1] = rows[1::]
+    hess = hess + hess.T - np.diag(np.diag(hess))
+    hess *= Hartree / Bohr**2
+    return VibrationsData.from_2d(atoms, hess, indices)
 
 
-
-def write_gaussian_in(fd, atoms, properties=['energy'],
-                      method=None, basis=None, fitting_basis=None,
-                      output_type='P', basisfile=None, basis_set=None,
-                      xc=None, charge=None, mult=None, extra=None,
-                      ioplist=None, addsec=None, spinlist=None,
-                      zefflist=None, qmomlist=None, nmagmlist=None,
-                      znuclist=None, radnuclearlist=None,
-                      **params):
-    '''
+def write_gaussian_in(
+    fd,
+    atoms,
+    properties=["energy"],
+    method=None,
+    basis=None,
+    fitting_basis=None,
+    output_type="P",
+    basisfile=None,
+    basis_set=None,
+    xc=None,
+    charge=None,
+    mult=None,
+    extra=None,
+    ioplist=None,
+    addsec=None,
+    spinlist=None,
+    zefflist=None,
+    qmomlist=None,
+    nmagmlist=None,
+    znuclist=None,
+    radnuclearlist=None,
+    **params,
+):
+    """
     Generates a Gaussian input file, function modified from ASE
 
     Parameters
@@ -278,19 +316,19 @@ def write_gaussian_in(fd, atoms, properties=['energy'],
         ``lindaworkers``, ``usessh``, ``ssh``, ``debuglinda``.
         Any other keywords will be placed (along with their values) in the
         route section.
-    '''
+    """
 
     params = deepcopy(params)
 
     if properties is None:
-        properties = ['energy']
+        properties = ["energy"]
 
     output_type = _format_output_type(output_type)
 
     # basis can be omitted if basisfile is provided
     if basis is None:
         if basisfile is not None or basis_set is not None:
-            basis = 'gen'
+            basis = "gen"
 
     # determine method from xc if it is provided
     if method is None:
@@ -325,13 +363,13 @@ def write_gaussian_in(fd, atoms, properties=['energy'],
     # If the calculator's parameter dictionary contains an isolist, we ignore
     # this - it is up to the user to attach this info as the atoms' masses
     # if they wish for it to be used:
-    params.pop('isolist', None)
+    params.pop("isolist", None)
 
     # Any params left will belong in the route section of the file:
     out.extend(_format_route_params(params))
 
     if ioplist is not None:
-        out.append('IOP(' + ', '.join(ioplist) + ')')
+        out.append("IOP(" + ", ".join(ioplist) + ")")
 
     # raw list of explicit keywords for backwards compatibility
     if extra is not None:
@@ -339,17 +377,21 @@ def write_gaussian_in(fd, atoms, properties=['energy'],
 
     # Add 'force' iff the user requested forces, since Gaussian crashes when
     # 'force' is combined with certain other keywords such as opt and irc.
-    if 'forces' in properties and 'force' not in params:
-        out.append('force')
+    if "forces" in properties and "force" not in params:
+        out.append("force")
 
     # header, charge, and mult
-    out += ['', 'Gaussian input prepared by ASE', '',
-            '{:.0f} {:.0f}'.format(charge, mult)]
+    out += ["", "Gaussian input prepared by ASE", "", "{:.0f} {:.0f}".format(charge, mult)]
 
     # make dict of nuclear properties:
-    nuclear_props = {'spin': spinlist, 'zeff': zefflist, 'qmom': qmomlist,
-                     'nmagm': nmagmlist, 'znuc': znuclist,
-                     'radnuclear': radnuclearlist}
+    nuclear_props = {
+        "spin": spinlist,
+        "zeff": zefflist,
+        "qmom": qmomlist,
+        "nmagm": nmagmlist,
+        "znuc": znuclist,
+        "radnuclear": radnuclearlist,
+    }
     nuclear_props = {k: v for k, v in nuclear_props.items() if v is not None}
 
     # atomic positions and nuclear properties:
@@ -358,24 +400,17 @@ def write_gaussian_in(fd, atoms, properties=['energy'],
         out.append(line)
 
     out.extend(_format_basis_set(basis, basisfile, basis_set))
-    out.pop()       # modified here so there is one linebreak less, otherwise the addsec is ignored
+    out.pop()  # modified here so there is one linebreak less, otherwise the addsec is ignored
     out.extend(_format_addsec(addsec))
 
-    out += ['', '']
-    with open(fd, 'w') as f:
-        f.write('\n'.join(out))
+    out += ["", ""]
+    with open(fd, "w") as f:
+        f.write("\n".join(out))
     f.close()
 
 
-
-
 class GaussianDynamics(gaussian.GaussianDynamics):
-
-
     def run(self, **kwargs):
-        calc_old = self.atoms.calc
-        params_old = copy.deepcopy(self.calc.parameters)
-
         self.delete_keywords(kwargs)
         self.delete_keywords(self.calc.parameters)
         self.set_keywords(kwargs)
@@ -394,44 +429,44 @@ class GaussianDynamics(gaussian.GaussianDynamics):
         self.atoms.cell = atoms.cell
         self.atoms.positions = atoms.positions
 
-        #self.calc.parameters = params_old
-        #self.calc.reset()
-        #if calc_old is not None:
-         #   self.atoms.calc = calc_old
+        # self.calc.parameters = params_old
+        # self.calc.reset()
+        # if calc_old is not None:
+        #   self.atoms.calc = calc_old
 
         return converged
 
 
 class GaussianOptimizer(GaussianDynamics):
-    '''
+    """
     Allowing ase to use Gaussian geometry optimizations
-    
-    '''
-    keyword = 'opt'
+
+    """
+
+    keyword = "opt"
     special_keywords = {
-        'fmax': '{}',
-        'steps': 'maxcycle={}',
+        "fmax": "{}",
+        "steps": "maxcycle={}",
     }
 
 
 class GaussianIRC(GaussianDynamics):
-    keyword = 'irc'
+    keyword = "irc"
     special_keywords = {
-        'direction': '{}',
-        'steps': 'maxpoints={}',
+        "direction": "{}",
+        "steps": "maxpoints={}",
     }
 
 
 class Gaussian(gaussian.Gaussian):
-    '''Modified Gaussian calculator using modified parsers'''
+    """Modified Gaussian calculator using modified parsers"""
 
     def write_input(self, atoms, properties=None, system_changes=None):
         FileIOCalculator.write_input(self, atoms, properties, system_changes)
-        write_gaussian_in(self.label + '.com', atoms, properties=properties,
-               **self.parameters)
+        write_gaussian_in(self.label + ".com", atoms, properties=properties, **self.parameters)
 
     def read_results(self):
         output = read_gaussian_out(self.label)
-        self.atoms=output
+        self.atoms = output
         self.calc = output.calc
         self.results = output.calc.results
