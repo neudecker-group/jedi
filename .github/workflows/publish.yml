@@ -10,8 +10,8 @@ on:
         description: Which PyPI environment to publish to, if any
         required: true
         type: choice
-        default: "none"
-        options: ["none", "pypi"]
+        default: "test"
+        options: ["test", "pypi"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -51,6 +51,17 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.14.0
         with:
           repository-url: https://pypi.org
+  
+  test-pypi-publish:
+    name: Publish release to Test-PyPI
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'test'
+    needs: [wheel]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://test.pypi.org/p/strainjedi
+    permissions:
+      id-token: write # necessary for trusted publishing
 
   github-release:
     name: Create GitHub Release
@@ -75,4 +86,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: ./dist/*
-          generateReleaseNotes: true
