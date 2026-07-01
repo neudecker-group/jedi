@@ -46,8 +46,6 @@ jobs:
 
       - name: publish
         uses: pypa/gh-action-pypi-publish@v1.14.0
-        with:
-          repository-url: https://pypi.org
   
   test-pypi-publish:
     name: Publish release to Test-PyPI
@@ -55,10 +53,25 @@ jobs:
     needs: [wheel]
     runs-on: ubuntu-latest
     environment:
-      name: pypi
+      name: testpypi
       url: https://test.pypi.org/p/strainjedi
     permissions:
       id-token: write # necessary for trusted publishing
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v8
+        with:
+          path: ./dist
+
+      - name: Display structure
+        run: ls -R ./dist
+
+      - name: publish
+        uses: pypa/gh-action-pypi-publish@v1.14.0
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
 
   github-release:
     name: Create GitHub Release
