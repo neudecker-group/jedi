@@ -169,15 +169,15 @@ def get_vibrations(label, atoms, indices=None):
     if indices is None:
         indices = range(len(atoms))
     imaginary_freq_pattern = r"\**\s+(\d+)\s+imaginary frequencies \(negative Signs\)\s*\**"
-    hessian_pattern = r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*"
+    hessian_pattern = r"^\s*Force\s+constants\s+in\s+Cartesian\s+coordinates:\s*$"
     file = label + ".log"
     with open(file, "r") as f:
         content = f.read()
-        match = re.search(imaginary_freq_pattern, content)
+        match = re.search(imaginary_freq_pattern, content, flags=re.MULTILINE)
         if match:
             print(f"Found {match.group(1)} imaginary frequencies in {file}. Jedi Analysis can not be performed.")
             sys.exit(1)
-        match = re.search(hessian_pattern, content)
+        match = re.search(hessian_pattern, content, flags=re.MULTILINE)
         if match is None:
             print(
                 f"Couldn't find force constants in Cartesian Coordinates in {file}. "
