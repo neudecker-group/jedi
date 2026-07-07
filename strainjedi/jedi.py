@@ -549,6 +549,14 @@ class Jedi:
         """
         self.__custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
 
+        # recalculate rim_list, B and delta_q
+        self.__rim_list = rics.intersect(
+            rics.calculate(self.__atoms0, self.__indices, self.__custom_bonds),
+            rics.calculate(self.__atomsF, self.__indices, self.__custom_bonds),
+        )
+        self.__B = bmatrix.calculate(self.__atoms0, self.__rim_list)
+        self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
+
     def set_bond_params(self, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
         """
         Args:
