@@ -216,7 +216,7 @@ class Jedi:
             indices:
                 list of indices of a substructure if desired
             ase_units: boolean
-                flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians
+                flag to get eV for energies, Å for lengths and degree for angles, otherwise it is kcal/mol, Bohr and radians
         Returns:
             Indices, strain, energy in every RIM
         """
@@ -265,11 +265,11 @@ class Jedi:
 
     def get_energies(self) -> float:
         """
-        Returns the difference in potential energies of self.atoms0 and self.atomsF in kcal/mol.
+        Returns the difference in potential energies of self.atoms0 and self.atomsF in Hartree.
         """
         e0 = self.__atoms0.get_potential_energy()  # [eV]
         eF = self.__atomsF.get_potential_energy()  # [eV]
-        return eF - e0
+        return (eF - e0) / ase.units.Hartree
 
     def visualize(
         self,
