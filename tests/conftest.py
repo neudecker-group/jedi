@@ -118,7 +118,7 @@ def deds_jedi_full_run(deds_opt, deds_dist, deds_vibdata):
     j.run(printout=False)
     # necessary here for correct units when assert_allclose within tolerance.
     j._Jedi__E_RIMs = j.E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
-    j._Jedi__deltaE = j.deltaE * ase.units.mol / ase.units.kcal
+    j._Jedi__deltaE = j.deltaE / ase.units.kcal * ase.units.mol * ase.units.Hartree
     return j
 
 
