@@ -65,6 +65,7 @@ class Jedi:
         self.__part_rim_list = None  # rim list for election of atoms (legacy/unused)
         self.__E_RIMs = None  # list of energies stored in the rims
         self.__E_RIMs_total = None  # sum of E_rims
+        self.__proc_geom_RIMs = None
 
         self.__visualization_data = None  # last visualization dataset
 
@@ -149,6 +150,10 @@ class Jedi:
         return self.__E_RIMs_total
 
     @property
+    def proc_geom_RIMs(self):
+        return self.__proc_geom_RIMs
+
+    @property
     def visualization_data(self):
         return self.__visualization_data
 
@@ -167,7 +172,8 @@ class Jedi:
             "E_RIMs": self.__E_RIMs,
             "proc_E_RIMs": self.__proc_E_RIMs,
             "E_RIMs_total": self.__E_RIMs_total,
-            "deltaE": self.__deltaE
+            "deltaE": self.__deltaE,
+            "proc_geom_RIMs": self.__proc_geom_RIMs
         }
 
     @classmethod
@@ -208,6 +214,7 @@ class Jedi:
             ("_Jedi__proc_E_RIMs", "proc_E_RIMs"),
             ("_Jedi__E_RIMs_total", "E_RIMs_total"),
             ("_Jedi__deltaE", "deltaE"),
+            ("_Jedi__proc_geom_RIMs", "proc_geom_RIMs")
         ]:
             if key in data and data[key] is not None:
                 setattr(cl, attr, data[key])
@@ -238,7 +245,7 @@ class Jedi:
             self.__proc_E_RIMs,
             self.__E_RIMs,
             self.__E_RIMs_total,
-            proc_geom_RIMs,
+            self.__proc_geom_RIMs,
             self.__delta_q,
         ) = jedi_analysis(
             self.__atoms0,
@@ -253,7 +260,7 @@ class Jedi:
         if indices:  # get only rims of interest
             self.post_process(indices)
             self.__E_RIMs_total = float(np.sum(self.__E_RIMs))
-            proc_geom_RIMs = 100 * (float(np.sum(self.__E_RIMs)) - self.__deltaE) / self.__deltaE
+            self.__proc_geom_RIMs = 100 * (float(np.sum(self.__E_RIMs)) - self.__deltaE) / self.__deltaE
 
         if printout:
             reporting.jedi_printout(
@@ -262,7 +269,7 @@ class Jedi:
                 self.__delta_q,
                 self.__deltaE,
                 self.__E_RIMs_total,
-                proc_geom_RIMs,
+                self.__proc_geom_RIMs,
                 self.__proc_E_RIMs,
                 self.__E_RIMs,
                 ase_units=ase_units,
@@ -442,7 +449,7 @@ class Jedi:
             self.__proc_E_RIMs,
             self.__E_RIMs,
             self.__E_RIMs_total,
-            _proc_geom_RIMs,
+            self.__proc_geom_RIMs,
             self.__delta_q,
         ) = jedi_analysis(
             self.__atomsF,
@@ -457,7 +464,7 @@ class Jedi:
         # get values of rims inside the substructure
         self.post_process(indices)
         self.__E_RIMs_total = float(np.sum(self.__E_RIMs))
-        proc_geom_RIMs = 100 * (float(np.sum(self.__E_RIMs)) - self.__deltaE) / self.__deltaE
+        self.__proc_geom_RIMs = 100 * (float(np.sum(self.__E_RIMs)) - self.__deltaE) / self.__deltaE
 
         reporting.jedi_printout(
             self.__atoms0,
@@ -465,7 +472,7 @@ class Jedi:
             self.__delta_q,
             self.__deltaE,
             self.__E_RIMs_total,
-            proc_geom_RIMs,
+            self.__proc_geom_RIMs,
             self.__proc_E_RIMs,
             self.__E_RIMs,
             ase_units=ase_units,
