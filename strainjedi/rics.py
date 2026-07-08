@@ -145,7 +145,7 @@ def calculate(mol, indices, custom_bonds):
     cutoff = ase.neighborlist.natural_cutoffs(mol, mult=constants.COVALENCY_FACTOR)
     bonds = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
-    bonds = bonds[bonds[:, 0] < bonds[:, 1]]  # remove double metioned
+    bonds = bonds[bonds[:, 0] < bonds[:, 1]]  # remove double mentioned
     bonds, counts = np.unique(bonds, return_counts=True, axis=0)
     if not np.all(counts == 1):
         print(

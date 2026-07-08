@@ -61,7 +61,7 @@ class Jedi:
         self.__energies = epot  # optional energies of the geometries (legacy)
         self.__deltaE: float = 0.0  # energy difference between geometries
 
-        self.__proc_E_RIMs = None  # list of procentual energy stored in single RIMs
+        self.__proc_E_RIMs = None  # list of percentual energy stored in single RIMs
         self.__part_rim_list = None  # rim list for election of atoms (legacy/unused)
         self.__E_RIMs = None  # list of energies stored in the rims
         self.__E_RIMs_total = None  # sum of E_rims
@@ -153,7 +153,7 @@ class Jedi:
         return self.__visualization_data
 
     def todict(self) -> dict[str, Any]:
-        """make it saveable with .write()"""
+        """make it savable with .write()"""
         return {
             "atoms0": self.__atoms0,
             "atomsF": self.__atomsF,

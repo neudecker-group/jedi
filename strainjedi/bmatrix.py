@@ -67,7 +67,7 @@ def calculate(atoms0, rim_list, indices=None) -> NDArray:
     idx_pos = {int(a): p for p, a in enumerate(indices)}
 
     # get all derivatives
-    column = 0  # Initilization of columns to specifiy position in B-Matrix
+    column = 0  # Initialization of columns to specify position in B-Matrix
     for q in rim_list[0].tolist() + rim_list[1].tolist():
         q_i, q_j = map(int, q[:2])
         u = mol.get_distance(q_i, q_j, mic=True, vector=True)
