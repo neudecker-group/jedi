@@ -1,4 +1,5 @@
 import ase.units
+import ase.vibrations
 import numpy as np
 from numpy.typing import NDArray
 
@@ -89,7 +90,7 @@ def get_hbonds(mol, *, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_W
     return hbonds
 
 
-def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
+def validate_hessian(modes: ase.vibrations.VibrationsData, atoms0) -> tuple[NDArray, bool]:
     """
     Validate and, if necessary, reorder a Hessian matrix to match an Atoms object.
 
