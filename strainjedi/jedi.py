@@ -4,10 +4,10 @@ from pathlib import Path
 import ase.units
 import ase.vibrations
 import numpy as np
-from ase.utils import jsonable
 from numpy.typing import NDArray
 from typing_extensions import Any, deprecated
 
+from strainjedi.io.json_jedi import jsonable
 from strainjedi import bmatrix, constants, reporting, rics, utils
 from strainjedi.visualization import ColorMapper, MatplotlibVisualizer, VMDVisualizer
 
@@ -153,19 +153,21 @@ class Jedi:
         return self.__visualization_data
 
     def todict(self) -> dict[str, Any]:
-        """make it saveable with .write()"""
+        """Make Jedi state savable as JSON with .write()"""
         return {
             "atoms0": self.__atoms0,
             "atomsF": self.__atomsF,
+            "energies": self.__energies,
             "hessian": self.__H,
             "bmatrix": self.__B,
             "delta_q": self.__delta_q,
             "rim_list": self.__rim_list,
-            "energies": self.__energies,
-            "indices": self.__indices,
-            "E_RIMS": self.__E_RIMs,
-            "proc_E_RIMS": self.__proc_E_RIMs,
             "custom_bonds": self.__custom_bonds,
+            "indices": self.__indices,
+            "E_RIMs": self.__E_RIMs,
+            "proc_E_RIMs": self.__proc_E_RIMs,
+            "E_RIMs_total": self.__E_RIMs_total,
+            "deltaE": self.__deltaE
         }
 
     @classmethod
@@ -173,6 +175,7 @@ class Jedi:
         """
         Reconstruct a Jedi object from a dictionary.
         Raises ValueError if required fields are missing or have incorrect types.
+        Make Jedi state readable from JSON with Jedi.read()
         """
         atoms0 = data["atoms0"]
         atomsF = data["atomsF"]
@@ -194,15 +197,17 @@ class Jedi:
 
         # Fill additional attributes if present
         for attr, key in [
+            ("_Jedi__energies", "energies"),
             ("_Jedi__H", "hessian"),
             ("_Jedi__B", "bmatrix"),
             ("_Jedi__delta_q", "delta_q"),
             ("_Jedi__rim_list", "rim_list"),
-            ("_Jedi__indices", "indices"),
-            ("_Jedi__E_RIMs", "E_RIMS"),
-            ("_Jedi__proc_E_RIMs", "proc_E_RIMS"),
             ("_Jedi__custom_bonds", "custom_bonds"),
-            ("_Jedi__energies", "energies"),
+            ("_Jedi__indices", "indices"),
+            ("_Jedi__E_RIMs", "E_RIMs"),
+            ("_Jedi__proc_E_RIMs", "proc_E_RIMs"),
+            ("_Jedi__E_RIMs_total", "E_RIMs_total"),
+            ("_Jedi__deltaE", "deltaE"),
         ]:
             if key in data and data[key] is not None:
                 setattr(cl, attr, data[key])
