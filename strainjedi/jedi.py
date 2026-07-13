@@ -61,7 +61,7 @@ class Jedi:
         self.__energies = epot  # optional energies of the geometries (legacy)
         self.__deltaE: float = 0.0  # energy difference between geometries
 
-        self.__proc_E_RIMs = None  # list of procentual energy stored in single RIMs
+        self.__proc_E_RIMs = None  # list of percentual energy stored in single RIMs
         self.__part_rim_list = None  # rim list for election of atoms (legacy/unused)
         self.__E_RIMs = None  # list of energies stored in the rims
         self.__E_RIMs_total = None  # sum of E_rims
@@ -228,7 +228,7 @@ class Jedi:
             indices:
                 list of indices of a substructure if desired
             ase_units: boolean
-                flag to get eV for energies å fo lengths and degree for angles otherwise it is kcal/mol, Bohr and radians
+                flag to get eV for energies, Å for lengths and degree for angles, otherwise it is kcal/mol, Bohr and radians
         Returns:
             Indices, strain, energy in every RIM
         """
@@ -277,11 +277,11 @@ class Jedi:
 
     def get_energies(self) -> float:
         """
-        Returns the difference in potential energies of self.atoms0 and self.atomsF in kcal/mol.
+        Returns the difference in potential energies of self.atoms0 and self.atomsF in Hartree.
         """
         e0 = self.__atoms0.get_potential_energy()  # [eV]
         eF = self.__atomsF.get_potential_energy()  # [eV]
-        return eF - e0
+        return (eF - e0) / ase.units.Hartree
 
     def visualize(
         self,
@@ -560,6 +560,14 @@ class Jedi:
                 1D or 2Darray with atom indices, [[i,j]...]
         """
         self.__custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
+
+        # recalculate rim_list, B and delta_q
+        self.__rim_list = rics.intersect(
+            rics.calculate(self.__atoms0, self.__indices, self.__custom_bonds),
+            rics.calculate(self.__atomsF, self.__indices, self.__custom_bonds),
+        )
+        self.__B = bmatrix.calculate(self.__atoms0, self.__rim_list)
+        self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
 
     def set_bond_params(self, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_WAALS_FACTOR):
         """

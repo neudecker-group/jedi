@@ -1,4 +1,5 @@
 import ase.units
+import ase.vibrations
 import numpy as np
 from numpy.typing import NDArray
 
@@ -89,7 +90,7 @@ def get_hbonds(mol, *, covf=constants.COVALENCY_FACTOR, vdwf=constants.VAN_DER_W
     return hbonds
 
 
-def validate_hessian(modes, atoms0) -> tuple[NDArray, bool]:
+def validate_hessian(modes: ase.vibrations.VibrationsData, atoms0) -> tuple[NDArray, bool]:
     """
     Validate and, if necessary, reorder a Hessian matrix to match an Atoms object.
 
@@ -162,8 +163,8 @@ def _convert_units(use_ase_units: bool, rim_list, E_RIMs, deltaE=None, delta_q=N
 
     This function performs unit conversions for redundant internal coordinate
     (RIC) analysis outputs, including coordinate displacements and energy
-    decompositions. It supports switching between ASE-native units and
-    chemistry-friendly units (kcal/mol and Å/degrees).
+    decompositions. It supports switching between ASE-native units (eV, Å and degrees) and
+    chemistry-friendly units (kcal/mol, Bohr and radians).
 
     Important
     ---------
@@ -174,7 +175,7 @@ def _convert_units(use_ase_units: bool, rim_list, E_RIMs, deltaE=None, delta_q=N
     ----------
     use_ase_units : bool
         If True, convert outputs to ASE units (Å for lengths, degrees for
-        angles, Hartree for energies). If False, convert to chemical units
+        angles, eV for energies). If False, convert to chemical units
         (Bohr for lengths, radians for angles, kcal/mol for energies).
     rim_list : sequence of numpy.ndarray
         RIC definition used to determine how many entries correspond to bond
@@ -205,7 +206,7 @@ def _convert_units(use_ase_units: bool, rim_list, E_RIMs, deltaE=None, delta_q=N
 
     - Length-like coordinates (bonds and custom bonds) use Bohr ↔ Å.
     - Angular coordinates use radians ↔ degrees.
-    - Energies are converted between Hartree and kcal/mol using ASE constants.
+    - Energies are converted between eV and kcal/mol using ASE constants.
     """
     if use_ase_units:
         b = rim_list[0].shape[0] + rim_list[1].shape[0]
@@ -219,12 +220,15 @@ def _convert_units(use_ase_units: bool, rim_list, E_RIMs, deltaE=None, delta_q=N
         E_RIMs = E_RIMs * ase.units.Hartree
         if E_RIMs_total is not None:
             E_RIMs_total = E_RIMs_total * ase.units.Hartree
+        if deltaE is not None:
+            deltaE = deltaE * ase.units.Hartree
 
     else:
-        E_RIMs = E_RIMs / ase.units.kcal * ase.units.mol * ase.units.Hartree
+        E_conversion = ase.units.mol / ase.units.kcal * ase.units.Hartree
+        E_RIMs = E_RIMs * E_conversion
         if E_RIMs_total is not None:
-            E_RIMs_total = E_RIMs_total * ase.units.mol / ase.units.kcal * ase.units.Hartree
+            E_RIMs_total = E_RIMs_total * E_conversion
         if deltaE is not None:
-            deltaE = deltaE * ase.units.mol / ase.units.kcal
+            deltaE = deltaE * E_conversion
 
     return E_RIMs, deltaE, delta_q, E_RIMs_total
