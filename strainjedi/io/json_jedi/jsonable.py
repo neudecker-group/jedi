@@ -4,8 +4,10 @@ from .jsonio import read_json as _read_json
 
 # Make Jedi JSONable, similar to ASE's workaround
 
+
 def write_json(self, fd):
     _write_json(fd, self)
+
 
 @classmethod
 def read_json(cls, fd):
@@ -15,6 +17,7 @@ def read_json(cls, fd):
         raise TypeError(...)
 
     return obj
+
 
 def jsonable(name):
 

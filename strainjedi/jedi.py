@@ -173,7 +173,7 @@ class Jedi:
             "proc_E_RIMs": self.__proc_E_RIMs,
             "E_RIMs_total": self.__E_RIMs_total,
             "deltaE": self.__deltaE,
-            "proc_geom_RIMs": self.__proc_geom_RIMs
+            "proc_geom_RIMs": self.__proc_geom_RIMs,
         }
 
     @classmethod
@@ -214,7 +214,7 @@ class Jedi:
             ("_Jedi__proc_E_RIMs", "proc_E_RIMs"),
             ("_Jedi__E_RIMs_total", "E_RIMs_total"),
             ("_Jedi__deltaE", "deltaE"),
-            ("_Jedi__proc_geom_RIMs", "proc_geom_RIMs")
+            ("_Jedi__proc_geom_RIMs", "proc_geom_RIMs"),
         ]:
             if key in data and data[key] is not None:
                 setattr(cl, attr, data[key])
