@@ -120,7 +120,9 @@ class TestGetEnergy:
     def test_energies_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
         np.testing.assert_allclose(
-            np.array(j.get_energies() / ase.units.kcal * ase.units.mol * ase.units.Hartree), deds_ref["energies"][0], atol=1e-05
+            np.array(j.get_energies() / ase.units.kcal * ase.units.mol * ase.units.Hartree),
+            deds_ref["energies"][0],
+            atol=1e-05,
         )
 
 
