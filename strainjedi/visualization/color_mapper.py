@@ -214,7 +214,7 @@ class ColorMapper:
                     regular_to_remove.add(original_tuple)
 
                 elif is_custom:
-                    energy = translate.get(original_tuple, np.nan)
+                    energy = ctranslate.get(original_tuple, np.nan)
                     pbc_split_bonds.append(
                         {
                             "atom_index": atom_i,
