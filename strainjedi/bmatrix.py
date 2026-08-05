@@ -349,20 +349,21 @@ def _bond_angle_derivatives(u, v):
 
     angle = ase.geometry.get_angles(u, v)  # angle between v and u
 
-    if angle == 180 or angle == 0:  # an auxiliary vector is used if linear angles are existing
-        (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v], cell=None, pbc=None)
+    tolerance = 5e-6
+    if np.abs(np.radians(angle) - np.pi) < tolerance or np.abs(np.radians(angle)) < tolerance:   #an auxilliary vector is used if linear angles are existing
+        (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v],cell=None,pbc=None)
         nu = u / lu
         nv = v / lv
-        if (np.arccos(np.dot(nu, (np.array([1, -1, 1]))))) == np.pi:
+        if np.abs((np.arccos(np.dot(nu, (np.array([1, -1, 1]))))) - np.pi) < tolerance:
             w = np.cross(nu, ([-1, 1, 1]))
         else:
             w = np.cross(nu, ([1, -1, 1]))
 
         nw = w / np.linalg.norm(w)
-        d_ba1 = (np.cross(nu, nw)) / np.linalg.norm(u)
-        d_ba2 = (-1 * ((np.cross(nu, nw)) / np.linalg.norm(u))) + (-1 * ((np.cross(nw, nv)) / np.linalg.norm(v)))
-        d_ba3 = (np.cross(nw, nv)) / np.linalg.norm(v)
-        d_ba = np.array([[d_ba1[0], d_ba2[0], d_ba3[0]]])
+        d_ba1 = (((np.cross(nu, nw))/np.linalg.norm(u)))
+        d_ba2 = (-1 * ((np.cross(nu, nw))/np.linalg.norm(u))) + (-1 * ((np.cross(nw, nv))/np.linalg.norm(v))) # equation to calculate dBA/dx [1]
+        d_ba3 = ((np.cross(nw, nv))/np.linalg.norm(v))
+        d_ba=np.array([[d_ba1[0], d_ba2[0], d_ba3[0]]])
 
     else:
         d_ba = np.radians(ase.geometry.get_angles_derivatives(u, v))
