@@ -190,11 +190,16 @@ class Jedi:
         if "modes" in data and isinstance(data["modes"], ase.vibrations.VibrationsData):
             modes = data["modes"]
         elif "hessian" in data:
+            hessian = data["hessian"]
             indices = data.get("indices", None)
-            if indices is not None:
+            n_atoms = len(atoms0)
+
+            if hessian.shape == (3 * n_atoms, 3 * n_atoms):
+                modes = ase.vibrations.VibrationsData.from_2d(atoms0, data["hessian"])
+            elif indices is not None:
                 modes = ase.vibrations.VibrationsData.from_2d(atoms0, data["hessian"], indices)
             else:
-                modes = ase.vibrations.VibrationsData.from_2d(atoms0, data["hessian"])
+                raise ValueError("Hessian has wrong shape.")
         else:
             raise ValueError("No valid vibration data ('modes' or 'hessian') found in the dictionary!")
 
