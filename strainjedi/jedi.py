@@ -351,6 +351,13 @@ class Jedi:
                 UserWarning,
             )
 
+        if split_bonds and visualizer != "mpl":
+            warnings.warn(
+                "'split_bonds=True' only works for the Matplotlib Visualizer. "
+                "Set 'split_bonds=False' to be sure, all bonds are visualized.",
+                UserWarning,
+            )
+
         energy_unit = "eV" if ase_units else "kcal/mol"
 
         valid_modes = ["bl", "ba", "da", "all"]
