@@ -34,12 +34,12 @@ We will modify the code thusly:
    jedi = Jedi(mol, mol2, hessian)
    jedi.add_custom_bonds(get_hbonds(mol)) # and this line
    jedi.run()
-   jedi.visualize(show=True, show_indices=True)
+   jedi.visualize(show=True, show_indices=True, single_mode="all")
 
-We successfully added hydrogen bonds for consideration. You will also notice that the atoms in the visualisation now carry a number on them (by means of ``show_indices=True``).
+We successfully added hydrogen bonds for consideration. They are visualised with dotted lines. You will also notice that the atoms in the visualisation now carry a number on them (by means of ``show_indices=True``).
 This will serve useful in the second part of this tutorial, where we add custom interactions between molecules.
 
-.. image:: show_indices.png
+.. image:: custom_bonds_example.png
    :align: center
    :alt: JEDI visualisation window showing cytosine and guanine as arranged in DNA; cytosine to the left, guanine to the right. Each atom carries an index number, uniquely identifying it.
 
