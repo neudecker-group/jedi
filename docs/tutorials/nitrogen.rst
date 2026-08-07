@@ -6,19 +6,60 @@ In this introductory tutorial, we will explore how to
 
 #. create a molecular structure,
 #. perform a geometry optimization,
-#. obtain the Hessian,
+#. obtain the Hessian
 
-and finally how to start a JEDI analysis and interpret its results.
+in the ASE framework, and finally how to start a JEDI analysis and interpret its results.
 
 We will use nitrogen as a minimal system with only two atoms and one bond, as it contains all essential ingredients for a strain analysis.
 EMT is used for convenience because it is fast, readily available in ASE, and sufficient to illustrate the workflow, even though it is not necessarily quantitative.
+
+Complete Example
+================
+
+Here, you find the whole code example to test.
+Below, every step is discussed in detail.
+
+.. code-block:: python
+
+   from ase import Atoms
+   from ase.calculators.emt import EMT
+   from ase.optimize import BFGS
+   from ase.vibrations import Vibrations
+   from strainjedi.jedi import Jedi
+
+   # Create a structure
+   atoms = Atoms('N2', [(0, 0, 0), (0, 0, 1.1)])
+
+   # Set up calculator
+   atoms.calc = EMT()
+
+   # Optimize geometry
+   BFGS(atoms).run(fmax=0.01)
+
+   # Calculate vibrational modes (Hessian)
+   vib = Vibrations(atoms)
+   vib.run()
+   modes = vib.get_vibrations()
+
+   # Create a distorted structure based on the optimised geometry
+   atoms_distorted = atoms.copy()
+   atoms_distorted.positions[1][2] += 0.1
+
+   atoms_distorted.calc = EMT()
+   atoms_distorted.get_potential_energy()
+
+   # Run JEDI analysis
+   jedi = Jedi(atoms, atoms_distorted, modes)
+   jedi.run()
+
+   # Open visualisation window
+   jedi.visualize(show=True, single_mode='bl')
 
 Creating the Structure
 ======================
 
 First, we will need a structure to analyse: as discussed, we choose a nitrogen molecule for that.
-The ``Atoms`` object from ASE aids us in defining the structure: Two nitrogen atoms, and they are some distance apart.
-It's not highly relevant how far apart the individual atoms are at this point, as we will optimise the geometry later anyway --- they just need to be *some* distance apart.
+The ``Atoms`` object from ASE aids us in defining the structure: Two nitrogen atoms, and a reasonable starting distance between the atoms for the later conducted optimisation.
 
 .. code-block:: python
 
@@ -57,7 +98,7 @@ Further, by setting :code:`fmax=0.01`, we ask ASE to optimise the structure quit
 Calculating the Hessian
 -----------------------
 
-Now that we performed a geometry optimisation by means of BFGS, we can obtain the Hessian of the relaxed structure.
+Now that we performed a geometry optimisation by means of BFGS, we can obtain the Hessian of the relaxed structure as a ``VibrationsData`` object.
 
 .. code-block:: python
 
@@ -97,11 +138,11 @@ Running the JEDI Analysis
 
 JEDI takes three inputs:
 
-- equilibrium geometry (with Hessian),
-- strained geometry,
-- strained-state energy.
+- equilibrium geometry and energy as an ``Atoms`` object,
+- strained geometry and energy as an ``Atoms`` object,
+- Hessian of the equilibrium geometry as a ``VibrationsData`` object.
 
-From these, it performs the coordinate transformation of the Hessian, evaluates the strain distribution in internal coordinates, and computes the harmonic strain energy for later comparison with the electronic energy difference.
+From these, it performs the coordinate transformation of the Hessian, evaluates the strain distribution in internal coordinates, and computes the harmonic strain energy.
 
 .. code-block:: python
 
@@ -117,28 +158,27 @@ Running the discussed code should yield a printout to your console similar to th
 
 .. code-block:: text
 
-   Step     Time              Energy          fmax
-   BFGS:    0 14:47:05        0.440344        3.251800
-   BFGS:    1 14:47:05        0.264361        0.347497
-   BFGS:    2 14:47:05        0.262860        0.080535
-   BFGS:    3 14:47:05        0.262777        0.001453
-   
-   
-   ********************************************************************************
-   *                                JEDI ANALYSIS                                 *
-   *                       Judgement of Energy DIstribution                       *
-   ********************************************************************************
-                                    version 1.0.0                                  
-                Strain Energy (kcal/mol) Deviation (%)  
-   Ab Initio         3.9509            -        
-   JEDI              4.5019          -95.81     
-      RIC No.     RIC type      indices   delta_q (a.u.) Percentage  Energy (kcal/mol)
-         1          bond        N0  N1       0.1890       100.00       4.5019    
+         Step     Time          Energy          fmax
+   BFGS:    0 11:31:04        0.440344        3.251800
+   BFGS:    1 11:31:04        0.264361        0.347497
+   BFGS:    2 11:31:04        0.262860        0.080535
+   BFGS:    3 11:31:04        0.262777        0.001453
 
+
+   ************************************************************************************************************************
+   *                                                    JEDI ANALYSIS                                                     *
+   *                                           Judgement of Energy DIstribution                                           *
+   ************************************************************************************************************************
+                                                        version 1.1.0
+                       Strain Energy (kcal/mol)     Deviation (%)
+   Ab Initio                    3.9509                    -
+   JEDI                         4.5019                  13.95
+         RIC No.             RIC type            indices          delta_q (a.u.)        Percentage      Energy (kcal/mol)
+            1                  bond               N0  N1              0.1890              100.00              4.5019
 
 For this system, strain is confined to the N–N stretching coordinate due to the absence of additional internal degrees of freedom.
-Key outputs are the strain energy and its decomposition in internal coordinates, along with the comparison between harmonic and electronic energy differences.
-For a well-converged calculation, both energy measures should agree within numerical accuracy.
+Key outputs are the strain energy and its decomposition in internal coordinates, along with the comparison between harmonic and ab initio energy differences (from electronic structure calculations).
+This deviation is a measure for the applicability of the harmonic approximation to the deformation experiment.
 
 Visualisation
 -------------
@@ -148,50 +188,11 @@ Add the following line to the end of the above code and re-run the script.
 
 .. code-block:: python
 
-   jedi.visualise(show=True)
+   jedi.visualise(show=True, single_mode='bl')
 
 This will launch a Matplotlib window visualising the strain distribution in the molecule after the analysis is finished.
+Setting `single_mode` to `'bl'` ensures that only the energy distribution across bonds is considered, since the molecule contains no angles or dihedral angles.
+
 
 .. image:: vis_nitrogen.png
    :alt: Terminal showing JEDI strain-energy analysis alongside a visualization window. The terminal displays ASE BFGS optimization output, followed by strain energy comparison results indicating a single N–N bond carrying 100% of the strain energy. The plot shows a diatomic molecule with the bond highlighted in red and a kcal/mol color bar indicating strain energy distribution.
-
-Complete Example
-================
-
-For easy copy-pasting, below is the code as discussed on this page, after some formatting.
-
-.. code-block:: python
-
-   from ase import Atoms
-   from ase.calculators.emt import EMT
-   from ase.optimize import BFGS
-   from ase.vibrations import Vibrations
-   from strainjedi.jedi import Jedi
-   
-   # Create a structure
-   atoms = Atoms('N2', [(0, 0, 0), (0, 0, 1.1)])
-   
-   # Set up calculator
-   atoms.calc = EMT()
-   
-   # Optimize geometry
-   BFGS(atoms).run(fmax=0.01)
-   
-   # Calculate vibrational modes (Hessian)
-   vib = Vibrations(atoms)
-   vib.run()
-   modes = vib.get_vibrations()
-   
-   # Create a distorted structure based on the optimised geometry
-   atoms_distorted = atoms.copy()
-   atoms_distorted.positions[1][2] += 0.1
-
-   atoms_distorted.calc = EMT()
-   atoms_distorted.get_potential_energy()
-   
-   # Run JEDI analysis
-   jedi = Jedi(atoms, atoms_distorted, modes)
-   jedi.run()
-
-   # Open visualisation window
-   jedi.visualize(show=True)
