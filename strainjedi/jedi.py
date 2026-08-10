@@ -571,9 +571,9 @@ class Jedi:
             bonds:
                 1D or 2Darray with atom indices, [[i,j]...]
         """
-        #ToDo: sanity check for user input
-        #sort bonds array
         bonds = np.atleast_2d(bonds)
+
+        # sort bonds array
         bonds = np.sort(bonds, axis=1)
         idx = np.lexsort((bonds[:, 1], bonds[:, 0]))
         bonds = bonds[idx]
