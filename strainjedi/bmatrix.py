@@ -349,19 +349,25 @@ def _bond_angle_derivatives(u, v):
 
     angle = ase.geometry.get_angles(u, v)  # angle between v and u
 
-    if angle == 180 or angle == 0:  # an auxiliary vector is used if linear angles are existing
+    tolerance = 5e-6
+    if np.abs(np.radians(angle) - np.pi) < tolerance or np.abs(np.radians(angle)) < tolerance:
         (u, v), (lu, lv) = ase.geometry.conditional_find_mic([u, v], cell=None, pbc=None)
         nu = u / lu
         nv = v / lv
-        if (np.arccos(np.dot(nu, (np.array([1, -1, 1]))))) == np.pi:
-            w = np.cross(nu, ([-1, 1, 1]))
+
+        # Normalize auxiliary vector and check collinearity (parallel or anti-parallel)
+        aux_normalized = np.array([1, -1, 1]) / np.sqrt(3)
+        arccos_val = np.arccos(np.clip(np.dot(nu, aux_normalized), -1, 1))
+        # If nu is parallel (arccos ≈ 0) or anti-parallel (arccos ≈ π) to auxiliary, swap
+        if np.abs(arccos_val) < tolerance or np.abs(arccos_val - np.pi) < tolerance:
+            w = np.cross(nu, [-1, 1, 1])
         else:
-            w = np.cross(nu, ([1, -1, 1]))
+            w = np.cross(nu, [1, -1, 1])
 
         nw = w / np.linalg.norm(w)
-        d_ba1 = (np.cross(nu, nw)) / np.linalg.norm(u)
-        d_ba2 = (-1 * ((np.cross(nu, nw)) / np.linalg.norm(u))) + (-1 * ((np.cross(nw, nv)) / np.linalg.norm(v)))
-        d_ba3 = (np.cross(nw, nv)) / np.linalg.norm(v)
+        d_ba1 = np.cross(nu, nw) / np.linalg.norm(u)
+        d_ba2 = (-np.cross(nu, nw) / np.linalg.norm(u)) + (-np.cross(nw, nv) / np.linalg.norm(v))
+        d_ba3 = np.cross(nw, nv) / np.linalg.norm(v)
         d_ba = np.array([[d_ba1[0], d_ba2[0], d_ba3[0]]])
 
     else:
