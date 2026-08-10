@@ -565,13 +565,20 @@ class Jedi:
             self.__custom_bonds = custom_bonds  # restore the user input
 
     def add_custom_bonds(self, bonds: NDArray) -> None:
-        """Add custom bonds after creating the object.
+        """Add custom bonds for non-covalent interactions after creating the object.
 
         Args:
             bonds:
                 1D or 2Darray with atom indices, [[i,j]...]
         """
-        self.__custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
+        bonds = np.atleast_2d(bonds)
+
+        # sort bonds array
+        bonds = np.sort(bonds, axis=1)
+        idx = np.lexsort((bonds[:, 1], bonds[:, 0]))
+        bonds = bonds[idx]
+
+        self.__custom_bonds = bonds
 
         # recalculate rim_list, B and delta_q
         self.__rim_list = rics.intersect(
