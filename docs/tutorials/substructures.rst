@@ -2,17 +2,14 @@
 Analysing Substructures
 =======================
 
-When analysing large structures, but you're really only interested in small parts of the whole thing, it might be more useful to instead resort to a partial analysis.
-On the previous page, we introduced the concept of *atom indices* --- this will receive another use here.
+When analysing large structures, but you're really only interested in small parts of the whole, it might be more useful to instead resort to a partial analysis.
 
 We will use the biphenyl molecule to illustrate a partial analysis.
 To start, there are two approaches to be considered:
 
 #. You performed a frequency analysis on the entire structure, or
-#. you did so only on parts of the molecule
+#. you did so only on parts of the molecule to save computational resources
 
-The first approach might be easier to reason about, so we will start with that one.
-To follow along, see :ref:`download`.
 Of note: because ASE does not have a reader that converts VASP ``freq.xml`` to a :external+ase:class:`~ase.vibrations.VibrationsData` object, we have provided the Hessian as a textual representation as well.
 Hence, to ensure you have working code in order to follow along, we will load the Hessian using said textual representation.
 
@@ -49,9 +46,8 @@ Most of the code should already be familiar to you --- what might be unfamiliar 
 We want to use this opportunity to give some insight as to why that is: for starters, the ``read_vasp_xml()`` function returns a Python *Iterator*, which is not an accepted type in either JEDI or ``VibrationsData``.
 Therefore, to actually receive something meaningful out of that iterator, we call ``next()`` on it, which will return the next item.
 
-Secondly, as mentioned in the intro for this tutorial, ASE has no reader that can convert a VASP frequency analysis to a VibrationsData object (or we did not find it, contributions welcome!).
+Secondly, as mentioned in the intro for this tutorial, ASE has no reader that can convert a VASP frequency analysis to a VibrationsData object after a finished calculation outside the ASE framework.
 So, we provided the Hessian as a text representation, because NumPy provides a mechanism to load that back in via ``np.loadtxt()`` as something ASE can work with.
-There is a takeaway to be had here, which we will leave as an exercise to the inclined reader.
 
 With that tangent out of the way, you will notice one glaring issue: JEDI still analysed the entire structure!
 Let's fix that by providing the indices we are actually interested in, which is the benzene ring with the strained C-H bond.
