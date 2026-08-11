@@ -46,3 +46,4 @@ We will explore how to obtain a valid ``Atoms`` and ``VibrationsData`` object fr
    periodic-boundary-conditions
    molecular-dynamics
    vmd
+   json_io
