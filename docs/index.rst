@@ -2,7 +2,7 @@
 JEDI --- Judgement of Energy Distribution
 =========================================
 
-The JEDI analysis is a quantum chemical analysis tool for the distribution of strain in mechanically deformed systems.
+The JEDI analysis is a quantum-chemical analysis tool for the distribution of strain in mechanically deformed systems.
 It is implemented in the Python_ programming language, with support for Python 3.10 and upwards.
 The code is made available under the Open Source :git:`MIT License <LICENSE>`.
 

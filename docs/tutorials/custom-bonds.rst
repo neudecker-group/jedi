@@ -1,7 +1,7 @@
 .. _custom-bonds:
 
 =================
-Customising Bonds
+Customizing Bonds
 =================
 
 By default, JEDI constructs its redundant internal coordinates from the molecular connectivity.
@@ -44,6 +44,10 @@ This will serve useful in the second part of this tutorial, where we add custom 
    :alt: JEDI visualisation window showing cytosine and guanine as arranged in DNA; cytosine to the left, guanine to the right. Each atom carries an index number, uniquely identifying it.
 
 .. _anything-else:
+
+.. caution::
+   In JEDI, as in ASE, atom indices are zero-based, following Python's indexing convention.
+   When comparing results with other tools that use atom indices starting at 1, keep this difference in mind.
 
 Adding Other Bonds
 ==================
