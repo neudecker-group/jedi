@@ -34,7 +34,6 @@ class MatplotlibVisualizer:
             ax.set_yticks([])
             ax.set_zticks([])
 
-
             self.plot_bonds(ax, pos)
             self.plot_atoms(ax, pos, show_indices)
 
