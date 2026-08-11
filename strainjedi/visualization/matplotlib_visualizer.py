@@ -34,6 +34,7 @@ class MatplotlibVisualizer:
             ax.set_yticks([])
             ax.set_zticks([])
 
+
             self.plot_bonds(ax, pos)
             self.plot_atoms(ax, pos, show_indices)
 
@@ -47,6 +48,7 @@ class MatplotlibVisualizer:
 
             # plt.tight_layout()
             if show:
+                fig.canvas.manager.set_window_title(f"Mode: {self.mode}")
                 plt.show()
             else:
                 self.output_dir.mkdir(parents=True, exist_ok=True)
