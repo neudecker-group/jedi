@@ -45,3 +45,4 @@ We will explore how to obtain a valid ``Atoms`` and ``VibrationsData`` object fr
    substructures
    periodic-boundary-conditions
    molecular-dynamics
+   vmd
