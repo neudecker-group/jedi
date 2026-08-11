@@ -73,7 +73,7 @@ Alternatively, from your console:
    uv run ty check
 
 We also configured this one as a GitHub workflow that checks your submission --- running ``ty`` from your console might result in stricter output than the workflow.
-Here, we ask you to employ your best judgement when prioritising (or ignoring) type checker errors.
+Here, we ask you to employ your best judgement when prioritizing (or ignoring) type checker errors.
 
 Testing
 ^^^^^^^
@@ -155,7 +155,7 @@ It should be written in the imperative mood and be descriptive of what precisely
    -Update README.md
    +readme: fix broken link to website
 
-If you find yourself struggling to concisely summarise your changes in the header, consider splitting them up into multiple commits or perhaps even multiple PRs if appropriate.
+If you find yourself struggling to concisely summarize your changes in the header, consider splitting them up into multiple commits or perhaps even multiple PRs if appropriate.
 
 The body can be used for more sophisticated changes, e.g. to give rationale for the change.
 Like the header, the body should be wrapped to 72 characters as well, but if you paste logs or other pre-formatted output, please do not wrap those lines.

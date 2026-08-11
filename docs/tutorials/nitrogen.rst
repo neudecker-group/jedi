@@ -59,7 +59,7 @@ Creating the Structure
 ======================
 
 First, we will need a structure to analyse: as discussed, we choose a nitrogen molecule for that.
-The ``Atoms`` object from ASE aids us in defining the structure: Two nitrogen atoms, and a reasonable starting distance between the atoms for the later conducted optimisation.
+The ``Atoms`` object from ASE aids us in defining the structure: Two nitrogen atoms, and a reasonable starting distance between the atoms for the later conducted optimization.
 
 .. code-block:: python
 
@@ -70,7 +70,7 @@ The ``Atoms`` object from ASE aids us in defining the structure: Two nitrogen at
 Selecting a Calculator
 ======================
 
-JEDI itself does not perform geometry optimisations and instead relies on established calculators to do the "hard work" up front.
+JEDI itself does not perform geometry optimizations and instead relies on established calculators to do the "hard work" up front.
 Here, we attach an EMT calculator to the structure.
 
 
@@ -84,9 +84,9 @@ Here, we attach an EMT calculator to the structure.
 Optimizing the Geometry
 -----------------------
 
-Just attaching a calculator doesn't do much by itself for our purposes, but it enables us to ask for an optimisation.
+Just attaching a calculator doesn't do much by itself for our purposes, but it enables us to ask for an optimization.
 In this case, we use the `BFGS algorithm <https://wikipedia.org/wiki/Broyden-Fletcher-Goldfarb-Shanno_algorithm>`_ as implemented by ASE.
-Further, by setting :code:`fmax=0.01`, we ask ASE to optimise the structure quite well by restricting the maximum allowable force on all individual atoms.
+Further, by setting :code:`fmax=0.01`, we ask ASE to optimize the structure quite well by restricting the maximum allowable force on all individual atoms.
 
 .. code-block:: python
 
@@ -98,7 +98,7 @@ Further, by setting :code:`fmax=0.01`, we ask ASE to optimise the structure quit
 Calculating the Hessian
 -----------------------
 
-Now that we performed a geometry optimisation by means of BFGS, we can obtain the Hessian of the relaxed structure as a ``VibrationsData`` object.
+Now that we performed a geometry optimization by means of BFGS, we can obtain the Hessian of the relaxed structure as a ``VibrationsData`` object.
 
 .. code-block:: python
 
@@ -112,7 +112,7 @@ Creating a Strained Structure
 =============================
 
 JEDI operates on a pair of geometries: a relaxed reference structure and a strained configuration.
-The strained structure can originate from MD snapshots, constrained optimisations, or experimental geometries.
+The strained structure can originate from MD snapshots, constrained optimizations, or experimental geometries.
 Here, we simply introduce a small Cartesian displacement to generate a test strain field.
 
 .. code-block:: python
@@ -183,14 +183,14 @@ This deviation is a measure for the applicability of the harmonic approximation 
 Visualisation
 -------------
 
-While terminal/text output is useful for storing and later analysis, it is decidedly hard to interpret; for that reason, we provide a simple way to visualise the results via Matplotlib.
+While terminal/text output is useful for storing and later analysis, it is decidedly hard to interpret; for that reason, we provide a simple way to visualize the results via Matplotlib.
 Add the following line to the end of the above code and re-run the script.
 
 .. code-block:: python
 
    jedi.visualise(show=True, single_mode='bl')
 
-This will launch a Matplotlib window visualising the strain distribution in the molecule after the analysis is finished.
+This will launch a Matplotlib window visualizing the strain distribution in the molecule after the analysis is finished.
 Setting `single_mode` to `'bl'` ensures that only the energy distribution across bonds is considered, since the molecule contains no angles or dihedral angles.
 
 

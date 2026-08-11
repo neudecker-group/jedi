@@ -14,7 +14,7 @@ Before We Start
 JEDI currently provides helpers to read in Gaussian, ORCA, and Q-Chem output files.
 If the calculator of your choice is missing, please let us know!
 
-You will, of course, need the output of both geometry optimisations and the frequency analysis of the relaxed structure.
+You will, of course, need the output of both geometry optimizations and the frequency analysis of the relaxed structure.
 Refer to your calculator's manual on how to obtain those.
 
 For the below examples, we will assume your output files are all in an ``output/`` directory next to your script.
@@ -80,7 +80,7 @@ The Hessian is the result of a frequency analysis, which we will save under ``fr
 Putting it Together
 ===================
 
-From here on, starting a JEDI analysis is just as straightforward as introduced: Construct the Jedi object, call ``run()`` and, optionally, visualise the result.
+From here on, starting a JEDI analysis is just as straightforward as introduced: Construct the Jedi object, call ``run()`` and, optionally, visualize the result.
 
 .. tabs::
 

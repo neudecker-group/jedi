@@ -66,7 +66,7 @@ The actual JEDI analysis is at the very end of this file.
 Create The Structure
 ====================
 
-First, we will start by creating our nitrogen atom and perform a basic geometry optimisation.
+First, we will start by creating our nitrogen atom and perform a basic geometry optimization.
 Do note that this is to provide a self-contained example; as established previously, it is just as possible to use an :ref:`existing calculator <existing-calculators>`.
 
 .. code-block:: python
@@ -128,8 +128,8 @@ Then, also obtain the necessary inputs (the Hessian).
    hessian = vib.get_vibrations()
 
 Finally, we can start a JEDI analysis for all time steps.
-To avoid creating a lot (and we really mean a lot!) of visualisation windows, we will instead store them inside a ``moldyn_vis`` directory.
-Also, let's tell the visualiser to only create figures pertaining to the bond length.
+To avoid creating a lot (and we really mean a lot!) of visualization windows, we will instead store them inside a ``moldyn_vis`` directory.
+Also, let's tell the visualizer to only create figures pertaining to the bond length.
 
 .. code-block:: python
 

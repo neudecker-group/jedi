@@ -2,7 +2,7 @@
 Analysing Substructures
 =======================
 
-When analysing large structures, but you're really only interested in small parts of the whole, it might be more useful to instead resort to a partial analysis.
+When analyzing large structures, but you're really only interested in small parts of the whole, it might be more useful to instead resort to a partial analysis.
 
 We will use the biphenyl molecule to illustrate a partial analysis.
 To start, there are two approaches to be considered:
@@ -35,11 +35,11 @@ Assuming you performed a frequency analysis on the entire structure, but are onl
    jedi.run()
    jedi.visualize(show=True, show_indices=True)
 
-Running this script opens our trusted visualisation window as shown below.
+Running this script opens our trusted visualization window as shown below.
 
 .. image:: biphenyl_full.png
    :align: center
-   :alt: JEDI visualisation of the analysis of a biphenyl molecule. All the bonds are colour-coded, indicating an analysis of the full structure.
+   :alt: JEDI visualization of the analysis of a biphenyl molecule. All the bonds are color-coded, indicating an analysis of the full structure.
 
 Most of the code should already be familiar to you --- what might be unfamiliar is the ``next()`` call around :external+ase:func:`~ase.io.vasp.read_vasp_xml`, and ``np.loadtxt()``.
 
@@ -49,7 +49,7 @@ Therefore, to actually receive something meaningful out of that iterator, we cal
 Secondly, as mentioned in the intro for this tutorial, ASE has no reader that can convert a VASP frequency analysis to a VibrationsData object after a finished calculation outside the ASE framework.
 So, we provided the Hessian as a text representation, because NumPy provides a mechanism to load that back in via ``np.loadtxt()`` as something ASE can work with.
 
-With that tangent out of the way, you will notice one glaring issue: JEDI still analysed the entire structure!
+With that tangent out of the way, you will notice one glaring issue: JEDI still analyzed the entire structure!
 Let's fix that by providing the indices we are actually interested in, which is the benzene ring with the strained C-H bond.
 From the image, it's clear that the atoms with the indices 6 to 11, and 17 to 21 do not (significantly) contribute to the strain, so we will ignore those.
 
@@ -63,7 +63,7 @@ And execute the script again.
 
 .. image:: biphenyl_partial.png
    :align: center
-   :alt: JEDI visualisation of the analysis of a biphenyl molecule. One benzene ring is coloured black, indicating that those bonds were not considered during analysis.
+   :alt: JEDI visualization of the analysis of a biphenyl molecule. One benzene ring is colored black, indicating that those bonds were not considered during analysis.
 
 .. _partial-hessian:
 
@@ -100,7 +100,7 @@ Enter the ``partial_hessian`` directory of the :ref:`archive provided below <sub
    jedi.visualize(show=True, show_indices=True)
 
 Here, several things had to happen; in order to make ASE happy about the partial Hessian, we needed to fix the atoms we are not interested in (``ignored_atoms``) and setting that constraint on ``mol`` and ``mol2``.
-Secondly, we needed to tell ``VibrationsData`` to expect a partial Hessian as well --- this time, however, for the atoms we want to analyse (``interesting_atoms``).
+Secondly, we needed to tell ``VibrationsData`` to expect a partial Hessian as well --- this time, however, for the atoms we want to analyze (``interesting_atoms``).
 And, finally, tell Jedi via ``partial_analysis()`` to perform that analysis only on the atoms we are interested in.
 
 Conclusion

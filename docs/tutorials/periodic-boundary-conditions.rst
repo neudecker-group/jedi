@@ -3,7 +3,7 @@ Periodic Boundary Conditions
 ============================
 
 As long as the unit cell's shape is constant through the analysis, you may also use periodic boundary conditions (PBC).
-In this small tutorial we will emphasise the changes necessary to JEDI's callsites (i.e. the methods and functions you use), as well as how to add additional dipole interactions.
+In this small tutorial we will emphasize the changes necessary to JEDI's callsites (i.e. the methods and functions you use), as well as how to add additional dipole interactions.
 
 To follow along, we have provided some sample data in the :ref:`archive below <pbc_download>`.
 How to start a calculation will not be discussed here --- we will only focus on how to use JEDI for PBCs.
@@ -42,11 +42,11 @@ Add this line after you created the ``jedi`` object, but before you call ``jedi.
    jedi.add_custom_bonds(get_hbonds(mol, extra_hpartners=("C")))
 
 This tells JEDI to consider carbon atoms as possible donors, as well as the "classic" hydrogen bond partners.
-Finally, we see in our visualisation window the following unit cell (atom indices turned on for visibility):
+Finally, we see in our visualization window the following unit cell (atom indices turned on for visibility):
 
 .. image:: pbc_full.png
    :align: center
-   :alt: JEDI analysis visualisation of a HCN unit cell under PBC. One hydrogen bond is stretched, indicated by its red colouring.
+   :alt: JEDI analysis visualization of a HCN unit cell under PBC. One hydrogen bond is stretched, indicated by its red colouring.
 
 Of course, partial analyses are also possible.
 However, at this stage, we want to leave that as an exercise to the reader --- in case you wish for a refresher, refer to the section on :ref:`Partial Hessians <partial-hessian>`.
