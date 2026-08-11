@@ -13,7 +13,7 @@ Basic Analysis
 
 For these examples, we picked a crystal of HCN --- it exhibits strong intermolecular interactions with small molecules.
 In essence, using JEDI for PBC is not much different from a standard JEDI analysis.
-What's new here are the ``box=True`` and ``split_bonds=True`` paramaters; they will aid us in clearly identifying the unit cell.
+What's new here are the ``box=True`` and ``split_bonds=True`` parameters; they will aid us in clearly identifying the unit cell.
 
 .. code-block:: python
 
