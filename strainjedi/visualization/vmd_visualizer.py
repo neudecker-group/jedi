@@ -98,7 +98,7 @@ class VMDVisualizer:
             lines.append("mol addrep top")
             lines.append(f"mol modstyle {i + 1} top cpk")
             lines.append(f"mol modcolor {i + 1} top {{colorid {colorID}}}")
-            lines.append(f"mol modselect {i + 1} top {{name {symbol}}}")
+            lines.append(f"mol modselect {i + 1} top {{name {symbol}}}\n")
 
         # Bond representations
         bonds = self.visualization_data[self.mode]["bond_data"]["bonds"]
