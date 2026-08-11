@@ -43,11 +43,11 @@ This will serve useful in the second part of this tutorial, where we add custom 
    :align: center
    :alt: JEDI visualisation window showing cytosine and guanine as arranged in DNA; cytosine to the left, guanine to the right. Each atom carries an index number, uniquely identifying it.
 
-.. _anything-else:
-
 .. caution::
    In JEDI, as in ASE, atom indices are zero-based, following Python's indexing convention.
    When comparing results with other tools that use atom indices starting at 1, keep this difference in mind.
+
+.. _anything-else:
 
 Adding Other Bonds
 ==================

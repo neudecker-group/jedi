@@ -23,5 +23,5 @@ You can also specify the path and the JSON file name.
    print(E_RIMs)
    j.visualize(show=True)
 
-With ``Jedi.read()``, you can reinitiate the ``Jedi`` object using with the saved analysis results.
+With ``Jedi.read()``, you can reinitiate the ``Jedi`` object using the saved analysis results.
 Now you can access the relevant results and plot or visualize them.

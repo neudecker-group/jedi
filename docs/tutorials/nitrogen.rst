@@ -82,8 +82,7 @@ Here, we attach an EMT calculator to the structure.
 
 
 Optimizing the Geometry
------------------------
-
+=======================
 Just attaching a calculator doesn't do much by itself for our purposes, but it enables us to ask for an optimization.
 In this case, we use the `BFGS algorithm <https://wikipedia.org/wiki/Broyden-Fletcher-Goldfarb-Shanno_algorithm>`_ as implemented by ASE.
 Further, by setting :code:`fmax=0.01`, we ask ASE to optimize the structure quite well by restricting the maximum allowable force on all individual atoms.
@@ -96,7 +95,7 @@ Further, by setting :code:`fmax=0.01`, we ask ASE to optimize the structure quit
 
 
 Calculating the Hessian
------------------------
+=======================
 
 Now that we performed a geometry optimization by means of BFGS, we can obtain the Hessian of the relaxed structure as a ``VibrationsData`` object.
 
@@ -181,7 +180,7 @@ Key outputs are the strain energy and its decomposition in internal coordinates,
 This deviation is a measure for the applicability of the harmonic approximation to the deformation experiment.
 
 Visualisation
--------------
+=============
 
 While terminal/text output is useful for storing and later analysis, it is decidedly hard to interpret; for that reason, we provide a simple way to visualize the results via Matplotlib.
 Add the following line to the end of the above code and re-run the script.
@@ -191,7 +190,7 @@ Add the following line to the end of the above code and re-run the script.
    jedi.visualise(show=True, single_mode='bl')
 
 This will launch a Matplotlib window visualizing the strain distribution in the molecule after the analysis is finished.
-Setting `single_mode` to `'bl'` ensures that only the energy distribution across bonds is considered, since the molecule contains no angles or dihedral angles.
+Setting ``single_mode`` to ``'bl'`` ensures that only the energy distribution across bonds is considered, since the molecule contains no angles or dihedral angles.
 
 
 .. image:: vis_nitrogen.png
