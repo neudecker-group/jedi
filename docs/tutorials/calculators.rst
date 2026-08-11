@@ -4,8 +4,9 @@
 Reading Existing Calculators
 ============================
 
-On the previous page, we created a nitrogen molecule programmatically by hand, entirely within our script.
-In practise, however, JEDI is often used with geometries and Hessians obtained from external quantum-chemical programs.
+On the previous page, we created a nitrogen molecule and deformed it with ASE.
+However, JEDI can also be used with geometries and Hessians obtained from external quantum-chemical programs.
+This allows you to use different deformation methods, such as constrained geometry optimizations with COGEF, the application of mechanical forces with EFEI, or hydrostatic pressure with X-HCFF, as implemented in specialized quantum-chemical programs.
 Hence, on this page, we will cover a few calculators and how to read their output into JEDI.
 
 Before We Start
