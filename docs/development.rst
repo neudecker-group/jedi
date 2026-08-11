@@ -116,7 +116,7 @@ Then, to build the documentation:
 
 .. code-block::
 
-   uv run sphinx-build -a -b html docs docs/_builds/
+   uv run sphinx-build -a -b html docs docs/_build/
 
 This will rebuild all pages and generate HTML into ``docs/_build/``.
 Finally, you can start a simple HTTP server to preview the changes:
