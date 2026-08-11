@@ -132,8 +132,8 @@ class ColorMapper:
 
     def add_unanalyzed_bonds(self, E_array):
 
-        self.indices = np.arange(0, len(self.atomsF))
-        full_rims = rics.calculate(self.atomsF, self.indices, self.custom_bonds)
+        full_indices = np.arange(0, len(self.atomsF))
+        full_rims = rics.calculate(self.atomsF, full_indices, self.custom_bonds)
         analyzed_bonds = {tuple(sorted([int(b[0]), int(b[1])])) for b in E_array[:, :2]}
 
         unanalyzed = []
