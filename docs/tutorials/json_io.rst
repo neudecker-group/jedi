@@ -25,3 +25,7 @@ You can also specify the path and the JSON file name.
 
 With ``Jedi.read()``, you can reinitiate the ``Jedi`` object using the saved analysis results.
 Now you can access the relevant results and plot or visualize them.
+
+.. hint::
+   Internally, JEDI saves energies in Hartree, distances in Bohr and angles in radians.
+   If you want to use other units for plotting, etc., feel free to convert them using the `ASE constants <https://docs.ase-lib.org/ase/units.html#module-ase.units>`_.

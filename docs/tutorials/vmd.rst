@@ -4,7 +4,7 @@
 Visual Molecular Dynamics
 =========================
 
-For a more beautiful visualisation and the option to render your picture, you can use the Visual Molecular Dynamics (VMD) program together with JEDI.
+For a more beautiful visualization and the option to render your picture, you can use the Visual Molecular Dynamics (VMD) program together with JEDI.
 VMD can be downloaded from the `official website <https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD>`_.
 To generate the VMD scripts for your JEDI analysis, use the :func:`~strainjedi.visualize` method and set the ``visualizer`` to ``"vmd"``.
 It is also possible to use a different color gradient than green to red by using one of the available ``colormap`` options.

@@ -2,7 +2,7 @@
 Periodic Boundary Conditions
 ============================
 
-As long as the unit cell's shape is constant through the analysis, you may also use periodic boundary conditions (PBC).
+As long as the unit cell's shape and volume are constant through the analysis, you may also use periodic boundary conditions (PBC).
 In this small tutorial we will emphasize the changes necessary to JEDI's callsites (i.e. the methods and functions you use), as well as how to add additional dipole interactions.
 
 To follow along, we have provided some sample data in the :ref:`archive below <pbc_download>`.
