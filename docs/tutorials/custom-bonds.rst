@@ -36,12 +36,12 @@ We will modify the code thusly:
    jedi.run()
    jedi.visualize(show=True, show_indices=True, single_mode="all")
 
-We successfully added hydrogen bonds for consideration. They are visualized with dotted lines. You will also notice that the atoms in the visualization now carry a number on them (by means of ``show_indices=True``).
+We successfully added hydrogen bonds for consideration. They are visualized with dotted lines. You will also notice that the atoms in the visualization now carry their atom indices (by means of ``show_indices=True``).
 This will serve useful in the second part of this tutorial, where we add custom interactions between molecules.
 
 .. image:: custom_bonds_example.png
    :align: center
-   :alt: JEDI visualisation window showing cytosine and guanine as arranged in DNA; cytosine to the left, guanine to the right. Each atom carries an index number, uniquely identifying it.
+   :alt: JEDI visualization window showing cytosine and guanine as arranged in DNA; cytosine to the left, guanine to the right. Each atom carries an index number, uniquely identifying it.
 
 .. caution::
    In JEDI, as in ASE, atom indices are zero-based, following Python's indexing convention.
@@ -54,33 +54,32 @@ Adding Other Bonds
 
 To add hydrogen bonds, we used the ``get_hbonds()`` helper function in combination with :func:`~strainjedi.Jedi.add_custom_bonds`.
 Of course, we can also add any other custom bond using the ``add_custom_bonds()`` function alone.
-First, we will investigate the structure ``get_hbonds()`` returns (and thus ``add_custom_bonds()`` expects): it is a list of lists, containing pairs of atom indices you wish to connect.
+For that, we have to define a `NumPy array <https://numpy.org/doc/stable/reference/arrays.ndarray.html>`_ using the atom indices for our chosen custom bond(s).
 
->>> from strainjedi.io.gaussian import read_gaussian_out
->>> from strainjedi.utils import get_hbonds
->>> mol = read_gaussian_out("output/opt")
->>> hbonds = get_hbonds(mol)
->>> print(hbonds)
-[[13 21]
- [15 20]
- [10 27]]
+.. code-block:: python
+   :emphasize-lines: 3,10,11,12
 
-From here on out, it should become clear how to add custom interactions for any pair of atoms in your structure.
-First, you need to find the indices of the atoms you want to connect as JEDI sees them; using the visualization with ``show_indices=True`` can help here.
-Then, after you created the Jedi object, but before you start the analysis, you make a call to ``jedi.add_custom_bonds()`` as illustrated above.
-Finally, you can start the analysis with your additional bonds set.
+   from strainjedi.io.gaussian import get_vibrations, read_gaussian_out
+   from strainjedi.jedi import Jedi
+   import numpy as np # add this line
 
-.. hint::
+   mol = read_gaussian_out("output/opt")
+   mol2 = read_gaussian_out("output/dist")
+   hessian = get_vibrations("output/freq", mol)
 
-   Strictly speaking, ``add_custom_bonds()`` expects a numpy array.
-   To satisfy your type-checker, you can call ``np.asarray()`` with your nested list of atom indices.
+   jedi = Jedi(mol, mol2, hessian)
+   c_bond = np.array([15, 20]) # for one custom bond
+   c_bonds = np.array([[15, 20], [13, 21]]) # just add a square bracket separated by a comma for more custom bonds
+   jedi.add_custom_bonds(c_bonds) # you can test c_bond and c_bonds
+   jedi.run()
+   jedi.visualize(show=True, show_indices=True, single_mode="all")
 
 Conclusion
 ==========
 
 This concludes this tutorial on adding custom interactions like hydrogen bonds.
 At this stage we want to reiterate that JEDI itself does not perform geometry optimizations.
-This mechanism serves to add connectivity which cannot be determined from the geometry (e.g. as an ``xyz`` file) alone.
+This mechanism serves to add long-range interactions that aren't accounted for by the redundant internal coordinates.
 
 Put briefly, if the distance between two atoms is more than the sum of their covalent radii, JEDI considers them not bonded.
-These are the atoms you may have to connect via a custom bond, potentially in your calculator of choice as well.
+These are the atoms you may have to connect via a custom bond.
