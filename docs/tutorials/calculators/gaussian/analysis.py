@@ -1,9 +1,10 @@
-from strainjedi.io.gaussian import get_vibrations, read_gaussian_out
+from strainjedi.io import read_output
+from strainjedi.io.adapter import to_atoms, to_vibrations
 from strainjedi.jedi import Jedi
 
-mol = read_gaussian_out("output/opt")
-mol2 = read_gaussian_out("output/dist")
-hessian = get_vibrations("output/freq", mol)
+mol = to_atoms(read_output("output/opt.log"))
+mol2 = to_atoms(read_output("output/dist.log"))
+hessian = to_vibrations(read_output("output/freq.log"), mol)
 
 jedi = Jedi(mol, mol2, hessian)
 jedi.run()
