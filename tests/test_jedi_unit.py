@@ -114,13 +114,13 @@ class TestGetDeltaQ:
 
 class TestGetEnergy:
     """
-    Tests for get_energies() method.
+    Tests for get_deltaE() method.
     """
 
     def test_energies_reference(self, deds_jedi_fresh, deds_ref):
         j = copy.deepcopy(deds_jedi_fresh)
         np.testing.assert_allclose(
-            np.array(j.get_energies() / ase.units.kcal * ase.units.mol * ase.units.Hartree),
+            np.array(j.get_deltaE() / ase.units.kcal * ase.units.mol * ase.units.Hartree),
             deds_ref["energies"][0],
             atol=1e-05,
         )

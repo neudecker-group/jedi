@@ -20,7 +20,7 @@ class Jedi:
         atomsF: ase.atoms.Atoms,
         modes: ase.vibrations.VibrationsData,
         epot: NDArray | None = None,
-    ):  # indices=None
+    ):
         """
         atoms0: class
             Atoms object of relaxed structure with calculated energy.
@@ -29,7 +29,7 @@ class Jedi:
         modes: class
             ase.vibrations.VibrationsData object with hessian of relaxed structure.
         epot: np.array or None
-            Vector containing (f - i) endiff., final, initial energy or None. Default: None.
+            Vector containing initial and final energy in eV or None. Default: None.
         """
         # validate the Hessian's atom order (must match atoms0); if not, permute Hessian to match.
         hessian, ok = utils.validate_hessian(modes, atoms0)
@@ -58,8 +58,8 @@ class Jedi:
         self.__B = bmatrix.calculate(self.__atoms0, self.__rim_list)
         self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
 
-        self.__energies = epot  # optional energies of the geometries (legacy)
-        self.__deltaE: float = 0.0  # energy difference between geometries
+        self.__energies = epot  # optional energies of the geometries
+        self.__deltaE = self.get_deltaE()  # energy difference between geometries
 
         self.__proc_E_RIMs = None  # list of percentual energy stored in single RIMs
         self.__part_rim_list = None  # rim list for election of atoms (legacy/unused)
@@ -226,6 +226,20 @@ class Jedi:
 
         return cl
 
+    def get_deltaE(self) -> float:
+        """
+        Returns the difference in potential energies of self.atoms0 and self.atomsF or the user-provided energies in Hartree.
+        """
+        if self.__energies is None:  # get energies from ASE calculator
+            e0 = self.__atoms0.get_potential_energy()  # [eV]
+            eF = self.__atomsF.get_potential_energy()  # [eV]
+
+        else:
+            e0 = self.__energies[0]  # [eV]
+            eF = self.__energies[1]  # [eV]
+
+        return (eF - e0) / ase.units.Hartree
+
     def run(self, indices=None, ase_units=False, printout: bool = True):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
@@ -243,8 +257,6 @@ class Jedi:
             raise ValueError(
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
             )
-
-        self.__deltaE = self.get_energies()
 
         (
             self.__proc_E_RIMs,
@@ -279,14 +291,6 @@ class Jedi:
                 self.__E_RIMs,
                 ase_units=ase_units,
             )
-
-    def get_energies(self) -> float:
-        """
-        Returns the difference in potential energies of self.atoms0 and self.atomsF in Hartree.
-        """
-        e0 = self.__atoms0.get_potential_energy()  # [eV]
-        eF = self.__atomsF.get_potential_energy()  # [eV]
-        return (eF - e0) / ase.units.Hartree
 
     def visualize(
         self,
@@ -454,8 +458,6 @@ class Jedi:
         self.__B = bmatrix.restrict(self.__B, indices)
 
         self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, rim_list)
-
-        self.__deltaE = self.get_energies()
 
         (
             self.__proc_E_RIMs,
