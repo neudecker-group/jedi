@@ -27,13 +27,12 @@ def read_energies(filename: str) -> np.ndarray:
         raise ValueError(f"'{filename}' must contain initial, final energy in Eh.")
 
     e_i, e_f = lines[0], lines[1]
-    de = e_f - e_i
 
     # Print a warning if initial and final state energy are interchanged.
     if e_i > e_f:
-        print(f"Warning: E_i > E_f by {de * Hartree * mol / kcal:.2f} kcal/mol. You may want to change this...")
+        print(f"Warning: E_i > E_f by {(e_f - e_i) * Hartree:.2f} eV. You may want to change this...")
 
-    return np.array([de, e_i, e_f])
+    return np.array([e_i, e_f])
 
 
 def parse_orca_hess(filename: str) -> np.ndarray:

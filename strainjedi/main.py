@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import numpy as np
-
 from strainjedi.io.parser import jedi_parser, read_energies, parse_orca_hess
 from strainjedi.io.calculator import build_calc
 
 from ase import io
-from ase.units import Hartree, kcal, mol
+from ase.units import Hartree
 from ase.vibrations import Vibrations
 from ase.vibrations.data import VibrationsData
 
@@ -31,14 +29,15 @@ def main() -> None:
 
     # Parse init. and final state energy from file
     if args.energies:
-        # Energies still in Hartree; convert to kcal/mol for JEDI analysis
+        # Energies still in Hartree; convert to eV for JEDI analysis
         e_ = read_energies(args.energies)
-        energies_kcal = e_ * Hartree * mol / kcal
+        energies_eV = e_ * Hartree
+        de = energies_eV[1] - energies_eV[0]
 
-        print(f"Init. {args.xyzi} ({nati} atoms), Erel: 0.0 kcal/mol")
-        print(f"Final {args.xyzf}: E: {energies_kcal[0]:.1f} kcal/mol")
+        print(f"Init. {args.xyzi} ({nati} atoms), Erel: 0.0 eV")
+        print(f"Final {args.xyzf}: E: {de:.1f} eV")
     else:
-        energies_kcal = None
+        energies_eV = None
 
     # Parse Hessian from ORCA output and initialize ASE VibDat object
     if args.hessi:
@@ -51,7 +50,7 @@ def main() -> None:
 
     # Handle cases where either H or E was not provided via CL:
     # -> Use orca input file to build ASE calc. and follow conventional jedi usage as in docs.
-    if (energies_kcal is None) or (h4d is None):
+    if (energies_eV is None) or (h4d is None):
         print(
             f"Either Hessian or energies not provided via CL. Using {args.oinp} to generate ASE calculator and determine internally."
         )
@@ -78,17 +77,16 @@ def main() -> None:
         h4d = vib.get_vibrations()
 
     # Handle Energies
-    if energies_kcal is None:
+    if energies_eV is None:
         print(f"No energies found. Trying to compute with {args.oinp}")
 
         e_i = ati.get_potential_energy()  # Energy in eV
         e_f = atf.get_potential_energy()
 
         de = e_f - e_i
-        energies_kcal = np.array([x * mol / kcal for x in [de, e_i, e_f]])
 
-        print(f"Init. {args.xyzi} ({nati} atoms), Erel: 0.0 kcal/mol")
-        print(f"Final {args.xyzf}: E: {energies_kcal[0]:.1f} kcal/mol (from ASE)")
+        print(f"Init. {args.xyzi} ({nati} atoms), Erel: 0.0 eV")
+        print(f"Final {args.xyzf}: E: {de:.1f} eV (from ASE)")
 
     # Delete calculators to avoid calling it in jedi.run
     ati.calc = None
@@ -98,7 +96,7 @@ def main() -> None:
         ati,
         atf,
         h4d,
-        epot=energies_kcal,
+        epot=energies_eV,
     )
     jedi.run()
 
