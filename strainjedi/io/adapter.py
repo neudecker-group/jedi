@@ -18,7 +18,7 @@ from ase.calculators.singlepoint import SinglePointCalculator
 from ase.vibrations.data import VibrationsData
 
 from strainjedi.constants import BOHR_ANG, HARTREE_EV, HESSIAN_AU_TO_ASE
-from strainjedi.io.types import MissingBlock, QCOutput
+from strainjedi.io.types import MissingBlock, ParseError, QCOutput
 
 
 def to_atoms(out: QCOutput) -> Atoms:
@@ -39,7 +39,11 @@ def to_atoms(out: QCOutput) -> Atoms:
     )
 
     if out.masses is not None:
-        atoms.set_masses(out.masses)
+        # A partial-Hessian job reports masses only for the atoms it covers, so they are
+        # scattered into place and ASE's defaults stand for the rest.
+        masses = atoms.get_masses()
+        masses[out.hessian_indices if out.hessian_indices is not None else slice(None)] = out.masses
+        atoms.set_masses(masses)
 
     if out.energy is not None:
         atoms.calc = SinglePointCalculator(atoms, energy=out.energy * HARTREE_EV)
@@ -71,16 +75,34 @@ def to_vibrations(
     Args:
         out: Parsed output containing a Hessian.
         atoms: Structure to attach it to. Defaults to the one in ``out``; pass the optimised
-            geometry explicitly when the Hessian came from a separate file.
-        indices: Which atoms the Hessian covers, for a partial frequency analysis. Derived
-            from ``atoms``' ``FixAtoms`` constraints when the Hessian is too small to be a
-            full one -- keyed off the actual shape rather than guessed.
+            geometry explicitly when the Hessian came from a separate file. Its elements must
+            appear in the same order as in ``out`` -- see below.
+        indices: Which atoms the Hessian covers, for a partial frequency analysis. Taken from
+            ``out`` when the file said so, otherwise derived from ``atoms``' ``FixAtoms``
+            constraints if the Hessian is too small to be a full one.
+
+    Raises:
+        ParseError: If ``atoms`` does not have the same elements in the same order as ``out``.
+            Q-Chem reorders the molecule for a partial-Hessian job -- H2O2 comes back as
+            O,H,O,H rather than O,O,H,H -- so pairing that Hessian with the structure from the
+            optimisation would silently misassign every force constant. Refusing is the point:
+            a loud failure beats a plausible wrong answer.
     """
     if out.hessian is None:
         raise MissingBlock("Hessian", source=out.source)
 
     if atoms is None:
         atoms = to_atoms(out)
+    elif not np.array_equal(atoms.numbers, out.numbers):
+        raise ParseError(
+            f"cannot attach the Hessian from '{out.source}' to this structure: the file has "
+            f"elements {[int(z) for z in out.numbers]} but the structure has "
+            f"{[int(z) for z in atoms.numbers]}. Programs reorder atoms for partial-Hessian "
+            f"jobs, so use the geometry from the same file, or reorder the structure to match."
+        )
+
+    if indices is None:
+        indices = out.hessian_indices
 
     if indices is None and out.hessian.shape[0] != 3 * len(atoms):
         indices = unconstrained_indices(atoms)

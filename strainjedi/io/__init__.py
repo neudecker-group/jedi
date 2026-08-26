@@ -39,6 +39,7 @@ from strainjedi.io.types import (
     ProgramNotDetected,
     QCOutput,
 )
+from strainjedi.io.validate import imaginary_frequencies
 
 __all__ = [
     "MissingBlock",
@@ -47,6 +48,7 @@ __all__ = [
     "ProgramNotDetected",
     "QCOutput",
     "detect_program",
+    "imaginary_frequencies",
     "read_energy",
     "read_geometry",
     "read_hessian",

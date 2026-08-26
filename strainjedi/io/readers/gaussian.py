@@ -16,6 +16,7 @@ import numpy as np
 
 from strainjedi.constants import BOHR_ANG
 from strainjedi.io import scan
+from strainjedi.io.report import warn_imaginary_frequencies
 from strainjedi.io.types import MissingBlock, ParseError, QCOutput
 
 MAGIC = (b"Entering Gaussian System", b"Gaussian, Inc.")
@@ -28,6 +29,8 @@ ANCHORS = {
     "energy": ["SCF Done:", "Energy=", "E(CORR)=", "EUMP2 ="],
     "hessian": ["Force constants in Cartesian coordinates:"],
     "masses": [re.compile(r"^\s*Atom\s+\d+\s+has atomic number\s+\d+\s+and mass\s")],
+    "frequencies": ["Frequencies --"],
+    "imaginary": [re.compile(r"(\d+)\s+imaginary frequencies\s*\(negative Signs\)")],
 }
 
 FCHK_FIELDS = {
@@ -107,6 +110,21 @@ def read_geometry(lines: list[str]) -> tuple[np.ndarray, np.ndarray, np.ndarray,
         raise ParseError("found a geometry header but no atom rows under it")
 
     return np.array(numbers), np.array(positions) / BOHR_ANG, cell / BOHR_ANG, pbc
+
+
+def count_imaginary(lines: list[str]) -> int | None:
+    """How many imaginary frequencies Gaussian reported, or None if it ran no frequency analysis.
+
+    Gaussian prints the count only when there are some, so an absent line means zero -- but
+    only once we have confirmed a vibrational analysis actually happened.
+    """
+    hits = scan.find_anchors(lines, ANCHORS["imaginary"])
+    if hits:
+        match = ANCHORS["imaginary"][0].search(lines[hits[-1]])
+        if match:
+            return int(match.group(1))
+
+    return 0 if scan.find_anchors(lines, ANCHORS["frequencies"]) else None
 
 
 def read_masses(lines: list[str], natoms: int) -> np.ndarray | None:
@@ -216,6 +234,8 @@ def read_output(path: Path | str) -> QCOutput:
         hessian = read_fchk(fchk).hessian
     if hessian is None and scan.find_anchors(lines, ANCHORS["hessian"]):
         hessian = read_hessian_log(lines)
+
+    warn_imaginary_frequencies(count_imaginary(lines), path)
 
     return QCOutput(
         numbers=numbers,

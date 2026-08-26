@@ -9,13 +9,14 @@ from __future__ import annotations
 from pathlib import Path
 from types import ModuleType
 
-from strainjedi.io.readers import gaussian, orca, qchem
+from strainjedi.io.readers import gaussian, orca, qchem, vasp
 from strainjedi.io.types import ProgramNotDetected
 
 READERS: dict[str, ModuleType] = {
     "orca": orca,
     "gaussian": gaussian,
     "qchem": qchem,
+    "vasp": vasp,
 }
 
 SUFFIXES: dict[str, str] = {
@@ -25,6 +26,11 @@ SUFFIXES: dict[str, str] = {
     ".log": "gaussian",
 }
 """Only unambiguous extensions. ``.out`` is deliberately absent."""
+
+FILENAMES: dict[str, str] = {
+    name: program for program, module in READERS.items() for name in getattr(module, "FILENAMES", ())
+}
+"""Whole-filename fallbacks, for output that carries no extension at all (VASP's OUTCAR)."""
 
 PROBE_BYTES = 65536
 """How much of the head to search. Every supported program prints its banner well inside this,
@@ -47,6 +53,10 @@ def detect_program(path: Path | str) -> str:
     suffix = SUFFIXES.get(path.suffix.lower())
     if suffix is not None:
         return suffix
+
+    by_name = FILENAMES.get(path.name)
+    if by_name is not None:
+        return by_name
 
     raise ProgramNotDetected(
         f"Could not tell which program wrote '{path}'. "

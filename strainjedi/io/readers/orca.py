@@ -16,6 +16,7 @@ import numpy as np
 from strainjedi.constants import BOHR_ANG
 from strainjedi.io import scan
 from strainjedi.io.elements import symbol_to_number
+from strainjedi.io.report import warn_imaginary_frequencies
 from strainjedi.io.types import MissingBlock, ParseError, QCOutput
 
 MAGIC = (b"* O   R   C   A *", b"$orca_hessian_file")
@@ -27,6 +28,7 @@ ANCHORS = {
     "energy": ["FINAL SINGLE POINT ENERGY"],
     "hessian": [re.compile(r"^\s*\$hessian\b")],
     "atoms": [re.compile(r"^\s*\$atoms\b")],
+    "frequencies": [re.compile(r"^\s*\$vibrational_frequencies\b")],
 }
 
 _HESS_FILE = re.compile(r"^\s*\$orca_hessian_file")
@@ -83,6 +85,26 @@ def read_geometry(lines: list[str]) -> tuple[np.ndarray, np.ndarray]:
         raise ParseError("found a geometry header but no atom rows under it")
 
     return np.array(numbers), np.array(positions) / BOHR_ANG
+
+
+def read_frequencies(lines: list[str]) -> np.ndarray | None:
+    """Harmonic frequencies in cm^-1 from a ``.hess``, or None if the block is absent.
+
+    Translations and rotations are printed as exact zeros and imaginary modes as negatives.
+    """
+    hits = scan.find_anchors(lines, ANCHORS["frequencies"])
+    if not hits:
+        return None
+
+    start = hits[0]
+    count = int(lines[start + 1].split()[0])
+    return np.array([scan.to_float(lines[start + 2 + i].split()[1]) for i in range(count)])
+
+
+def count_imaginary(lines: list[str]) -> int | None:
+    """How many imaginary frequencies the ``.hess`` reports, or None if it lists none at all."""
+    frequencies = read_frequencies(lines)
+    return None if frequencies is None else int((frequencies < 0).sum())
 
 
 def read_atoms_block(lines: list[str]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -142,6 +164,7 @@ def read_output(path: Path | str) -> QCOutput:
 
     if is_hess:
         numbers, positions, masses = read_atoms_block(lines)
+        warn_imaginary_frequencies(count_imaginary(lines), path)
         return QCOutput(
             numbers=numbers,
             positions=positions,

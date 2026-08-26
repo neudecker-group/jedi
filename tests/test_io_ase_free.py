@@ -25,12 +25,15 @@ ASE_FREE_MODULES = [
     "io/__init__.py",
     "io/elements.py",
     "io/registry.py",
+    "io/report.py",
     "io/scan.py",
     "io/types.py",
+    "io/validate.py",
     "io/readers/__init__.py",
     "io/readers/gaussian.py",
     "io/readers/orca.py",
     "io/readers/qchem.py",
+    "io/readers/vasp.py",
 ]
 
 ALLOWED_STRAINJEDI_IMPORTS = {
@@ -40,8 +43,10 @@ ALLOWED_STRAINJEDI_IMPORTS = {
     "strainjedi.io.elements",
     "strainjedi.io.readers",
     "strainjedi.io.registry",
+    "strainjedi.io.report",
     "strainjedi.io.scan",
     "strainjedi.io.types",
+    "strainjedi.io.validate",
 }
 """The ASE-free subset. Notably excludes strainjedi.io.adapter, which is ASE by design."""
 

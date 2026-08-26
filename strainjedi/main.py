@@ -50,6 +50,7 @@ def main() -> None:
     # (Hartree/Bohr^2); VibrationsData is defined in eV/Angstrom^2.
     if args.hessi:
         print(f"Reading Hessian from: {args.hessi}")
+        # read_hessian warns by itself if the structure is a saddle point.
         h2d = read_hessian(args.hessi)
 
         h4d = VibrationsData.from_2d(ati, h2d * HESSIAN_AU_TO_ASE)

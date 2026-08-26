@@ -10,11 +10,14 @@ from ase.calculators.orca import ORCA, OrcaProfile
 _CHARGE_MULT = re.compile(r"^\*\s*xyz(?:file)?\s+(-?\d+)\s+(\d+)", re.IGNORECASE)
 """ORCA accepts '*xyz 0 1' and '* xyz 0 1' alike, and ASE's own writer emits the first."""
 
-NO_END_BLOCKS = frozenset({"maxcore", "base", "moinp"})
-"""ORCA blocks that are a single line and are *not* closed by 'end'.
+_TOP_LEVEL = ("%", "!", "*")
+"""What can begin a top-level item, and therefore what ends the preceding ``%`` block.
 
-Treating '%maxcore 4000' as the start of a multi-line block makes a parser swallow the rest of
-the file, which is what the previous implementation did.
+Finding the end of a ``%`` block by looking for its ``end`` is harder than it appears: blocks
+nest, so ``%geom / POTENTIALS / ... / end / end`` closes twice, and single-line blocks such as
+``%maxcore 4000`` never close at all. Both shapes appear in real inputs. Since the block body
+is copied out verbatim -- and is therefore balanced however it was written -- it is enough to
+know where the block *stops*, and that is simply the next top-level line.
 """
 
 
@@ -43,21 +46,22 @@ def orca_input_to_ase(inpfile: str) -> tuple[str, str, int, int]:
     multiplicity = None
 
     for line in lines:
+        if line.startswith(_TOP_LEVEL):
+            in_block = False
+
         match = _CHARGE_MULT.match(line)
         if match:
             charge, multiplicity = int(match.group(1)), int(match.group(2))
             continue
 
-        if in_block:
-            block_lines.append(line)
-            if line.split()[-1].lower() == "end":
-                in_block = False
-            continue
-
         if line.startswith("%"):
             block_lines.append(line)
-            name = line[1:].split()[0].lower() if len(line) > 1 else ""
-            in_block = name not in NO_END_BLOCKS and line.split()[-1].lower() != "end"
+            in_block = True
+            continue
+
+        if in_block:
+            # Body of a % block, including any nested sub-block, copied through verbatim.
+            block_lines.append(line)
             continue
 
         if line.startswith("!"):

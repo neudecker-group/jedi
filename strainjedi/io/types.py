@@ -57,8 +57,13 @@ class QCOutput:
         positions: (N, 3) Cartesian coordinates in Bohr.
         energy: Total energy in Hartree, or None if the file has none.
         hessian: (3N, 3N) symmetric Cartesian Hessian in Hartree/Bohr^2, or None.
-        masses: (N,) atomic masses in amu *as the program itself reported them*, or None.
-            Needed to undo Q-Chem's mass weighting exactly rather than guessing isotopes.
+        masses: atomic masses in amu *as the program itself reported them*, or None. Needed to
+            undo Q-Chem's mass weighting exactly rather than guessing isotopes. One per atom,
+            or one per entry of `hessian_indices` when the Hessian is partial -- a program
+            that computes a partial Hessian only reports masses for the atoms it covers.
+        hessian_indices: which atoms `hessian` covers, indexing into `positions`, or None when
+            it covers all of them. A partial frequency analysis produces a Hessian smaller
+            than 3N, and this is what says which atoms moved.
         cell: (3, 3) lattice vectors in Bohr. All-zero for an isolated molecule.
         pbc: (3,) periodicity flags. JEDI needs these: `bmatrix` measures distances with the
             minimum-image convention, and the VMD visualiser draws the box.
@@ -75,21 +80,28 @@ class QCOutput:
     energy: float | None = None
     hessian: np.ndarray | None = None
     masses: np.ndarray | None = None
+    hessian_indices: np.ndarray | None = None
     cell: np.ndarray = field(default_factory=lambda: np.zeros((3, 3)))
     pbc: np.ndarray = field(default_factory=lambda: np.zeros(3, dtype=bool))
     version: tuple[int, ...] = ()
 
     def __post_init__(self) -> None:
         n = len(self.numbers)
+        covered = n if self.hessian_indices is None else len(self.hessian_indices)
 
         if self.positions.shape != (n, 3):
             raise ParseError(f"positions has shape {self.positions.shape}, expected {(n, 3)}")
 
-        if self.hessian is not None and self.hessian.shape != (3 * n, 3 * n):
-            raise ParseError(f"hessian has shape {self.hessian.shape}, expected {(3 * n, 3 * n)}")
+        if self.hessian_indices is not None:
+            out_of_range = [int(i) for i in self.hessian_indices if not 0 <= i < n]
+            if out_of_range:
+                raise ParseError(f"hessian_indices {out_of_range} are outside a {n}-atom structure")
 
-        if self.masses is not None and self.masses.shape != (n,):
-            raise ParseError(f"masses has shape {self.masses.shape}, expected {(n,)}")
+        if self.hessian is not None and self.hessian.shape != (3 * covered, 3 * covered):
+            raise ParseError(f"hessian has shape {self.hessian.shape}, expected {(3 * covered, 3 * covered)}")
+
+        if self.masses is not None and self.masses.shape != (covered,):
+            raise ParseError(f"masses has shape {self.masses.shape}, expected {(covered,)}")
 
         if self.cell.shape != (3, 3):
             raise ParseError(f"cell has shape {self.cell.shape}, expected (3, 3)")
@@ -100,3 +112,8 @@ class QCOutput:
     @property
     def natoms(self) -> int:
         return len(self.numbers)
+
+    @property
+    def is_partial_hessian(self) -> bool:
+        """Whether the Hessian covers only some of the atoms."""
+        return self.hessian_indices is not None
