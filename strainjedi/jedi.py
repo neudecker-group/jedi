@@ -29,7 +29,7 @@ class Jedi:
         modes: class
             ase.vibrations.VibrationsData object with hessian of relaxed structure.
         epot: np.array or None
-            Vector containing initial and final energy in eV or None. Default: None.
+            Vector containing (f - i) endiff., final, initial energy or None. Default: None.
         """
         # validate the Hessian's atom order (must match atoms0); if not, permute Hessian to match.
         hessian, ok = utils.validate_hessian(modes, atoms0)
@@ -58,7 +58,7 @@ class Jedi:
         self.__B = bmatrix.calculate(self.__atoms0, self.__rim_list)
         self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
 
-        self.__energies = epot  # optional energies of the geometries
+        self.__energies = epot  # optional energies of the geometries (legacy)
         self.__deltaE = self.get_deltaE()  # energy difference between geometries
 
         self.__proc_E_RIMs = None  # list of percentual energy stored in single RIMs
@@ -228,16 +228,10 @@ class Jedi:
 
     def get_deltaE(self) -> float:
         """
-        Returns the difference in potential energies of self.atoms0 and self.atomsF or the user-provided energies in Hartree.
+        Returns the difference in potential energies of self.atoms0 and self.atomsF.
         """
-        if self.__energies is None:  # get energies from ASE calculator
-            e0 = self.__atoms0.get_potential_energy()  # [eV]
-            eF = self.__atomsF.get_potential_energy()  # [eV]
-
-        else:
-            e0 = self.__energies[0]  # [eV]
-            eF = self.__energies[1]  # [eV]
-
+        e0 = self.__atoms0.get_potential_energy()  # [eV]
+        eF = self.__atomsF.get_potential_energy()  # [eV]
         return (eF - e0) / ase.units.Hartree
 
     def run(self, indices=None, ase_units=False, printout: bool = True):
