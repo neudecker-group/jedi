@@ -87,6 +87,37 @@ After you made your changes, please ensure the existing tests are still passing:
 If necessary, add new tests for your additions.
 They don't have to be perfect and/or cover every possible edge case, but by writing tests, you ensure you are thinking well about the solution.
 
+Quantum-Chemistry Test Fixtures
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The parsers in ``strainjedi.io`` are tested against real output files from ORCA, Q-Chem, and VASP.
+Those files live in a **separate, private repository**, mounted as a git submodule at ``tests/resources/io``.
+
+They are kept out of the public repository for licensing reasons.
+VASP echoes its POTCAR headers verbatim into every ``OUTCAR``, and those headers state that the file may not be copied or distributed without a valid VASP licence.
+Rather than judge each program's terms file by file, all quantum-chemistry output is held to the same rule.
+
+You do **not** need the submodule to work on JEDI.
+The submodule is declared with ``update = none``, so a plain clone --- and even ``git clone --recursive`` --- simply skips it, without authentication prompts or errors.
+Tests that need those files skip themselves and say so, while the sample outputs shipped with the documentation keep exercising the ORCA, Gaussian, and Q-Chem readers regardless:
+
+.. code-block::
+
+   143 passed, 26 skipped
+
+If you are a member of the ``neudecker-group`` organisation and want the full suite, fetch the submodule once:
+
+.. code-block::
+
+   git config submodule."tests/resources/io".update checkout
+   git submodule update --init
+
+The first line records your preference locally, so later ``git submodule update`` calls keep working without extra flags.
+Everyone else's clone is unaffected, since that setting lives in your ``.git/config`` rather than in the repository.
+
+Adding support for a new program version means adding its output files to the fixture repository and one row to ``CASES`` in ``tests/test_io_readers.py``.
+The inputs that generated the existing files, and notes on the settings that matter, are documented in the fixture repository's ``inputs/README.md``.
+
 Building
 ^^^^^^^^
 

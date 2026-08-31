@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from strainjedi.io.parser import jedi_parser, read_energies, parse_orca_hess
-from strainjedi.io.calculator import build_calc
-
+import numpy as np
 from ase import io
-from ase.units import Hartree
+from ase.calculators.singlepoint import SinglePointCalculator
+from ase.units import Hartree, kcal, mol
 from ase.vibrations import Vibrations
 from ase.vibrations.data import VibrationsData
 
+from strainjedi.calculators.build import build_calc
+from strainjedi.cli import jedi_parser, read_energies
+from strainjedi.constants import HESSIAN_AU_TO_ASE
+from strainjedi.io import read_hessian
 from strainjedi.jedi import Jedi
 
 
@@ -29,30 +32,37 @@ def main() -> None:
 
     # Parse init. and final state energy from file
     if args.energies:
-        # Energies still in Hartree; convert to eV for JEDI analysis
+        # Energies still in Hartree; convert to kcal/mol for JEDI analysis
         e_ = read_energies(args.energies)
-        energies_eV = e_ * Hartree
-        de = energies_eV[1] - energies_eV[0]
+        energies_kcal = e_ * Hartree * mol / kcal
 
-        print(f"Init. {args.xyzi} ({nati} atoms), Erel: 0.0 eV")
-        print(f"Final {args.xyzf}: E: {de:.1f} eV")
+        # Jedi reads the energies back off the structures via get_potential_energy(), so they
+        # have to be attached to the Atoms rather than only passed as epot.
+        ati.calc = SinglePointCalculator(ati, energy=e_[1] * Hartree)
+        atf.calc = SinglePointCalculator(atf, energy=e_[2] * Hartree)
+
+        print(f"Init. {args.xyzi} ({nati} atoms), Erel: 0.0 kcal/mol")
+        print(f"Final {args.xyzf}: E: {energies_kcal[0]:.1f} kcal/mol")
     else:
-        energies_eV = None
+        energies_kcal = None
 
-    # Parse Hessian from ORCA output and initialize ASE VibDat object
+    # Parse Hessian and initialize ASE VibDat object. read_hessian returns atomic units
+    # (Hartree/Bohr^2); VibrationsData is defined in eV/Angstrom^2.
     if args.hessi:
-        print(f"Reading ORCA Hessian from: {args.hessi}")
-        h2d = parse_orca_hess(args.hessi)
+        print(f"Reading Hessian from: {args.hessi}")
+        # read_hessian warns by itself if the structure is a saddle point.
+        h2d = read_hessian(args.hessi)
 
-        h4d = VibrationsData(atoms=ati, hessian=h2d.reshape(nati, 3, nati, 3))
+        h4d = VibrationsData.from_2d(ati, h2d * HESSIAN_AU_TO_ASE)
     else:
         h4d = None
 
     # Handle cases where either H or E was not provided via CL:
     # -> Use orca input file to build ASE calc. and follow conventional jedi usage as in docs.
-    if (energies_eV is None) or (h4d is None):
+    if (energies_kcal is None) or (h4d is None):
         print(
-            f"Either Hessian or energies not provided via CL. Using {args.oinp} to generate ASE calculator and determine internally."
+            f"Either Hessian or energies not provided via CL. "
+            f"Using {args.oinp} to generate ASE calculator and determine internally."
         )
 
         if not args.oinp:  # Requires input file
@@ -77,26 +87,28 @@ def main() -> None:
         h4d = vib.get_vibrations()
 
     # Handle Energies
-    if energies_eV is None:
+    if energies_kcal is None:
         print(f"No energies found. Trying to compute with {args.oinp}")
 
         e_i = ati.get_potential_energy()  # Energy in eV
         e_f = atf.get_potential_energy()
 
         de = e_f - e_i
+        energies_kcal = np.array([x * mol / kcal for x in [de, e_i, e_f]])
 
-        print(f"Init. {args.xyzi} ({nati} atoms), Erel: 0.0 eV")
-        print(f"Final {args.xyzf}: E: {de:.1f} eV (from ASE)")
+        print(f"Init. {args.xyzi} ({nati} atoms), Erel: 0.0 kcal/mol")
+        print(f"Final {args.xyzf}: E: {energies_kcal[0]:.1f} kcal/mol (from ASE)")
 
-    # Delete calculators to avoid calling it in jedi.run
-    ati.calc = None
-    atf.calc = None
+        # Freeze the computed energies onto the structures. Jedi calls get_potential_energy()
+        # again in run(), and a live file-IO calculator is neither needed nor wanted there.
+        ati.calc = SinglePointCalculator(ati, energy=e_i)
+        atf.calc = SinglePointCalculator(atf, energy=e_f)
 
     jedi = Jedi(
         ati,
         atf,
         h4d,
-        epot=energies_eV,
+        epot=energies_kcal,
     )
     jedi.run()
 
