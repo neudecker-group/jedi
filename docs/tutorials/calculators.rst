@@ -216,6 +216,6 @@ The calculator classes used to run these programs from ASE moved from ``strainje
 Downloads
 =========
 
-To run these examples, feel free to download the archive below; in there, you will find three folders for each respective calculator, containing the relevant files.
+To run these examples, feel free to download the archive below; in there, you will find four folders for each respective calculator, containing the relevant files.
 
 :download:`Calculator examples <../_static/downloads/calculators.zip>`
