@@ -89,7 +89,7 @@ Reading The Hessian
 As discussed earlier, JEDI also needs a Hessian to reason about which structural elements have higher significance when judging strain distribution.
 The Hessian is the result of a frequency analysis, which we will save under ``freq``.
 
-Pass ``mol`` along as well, so the Hessian is attached to the optimised structure rather than to whichever geometry happened to sit in the frequency file.
+Pass ``mol`` along as well, so the Hessian is attached to the optimized structure rather than to whichever geometry happened to sit in the frequency file.
 
 .. tabs::
 

@@ -58,7 +58,7 @@ Of course, we can also add any other custom bond using the ``add_custom_bonds()`
 For that, we have to define a `NumPy array <https://numpy.org/doc/stable/reference/arrays.ndarray.html>`_ using the atom indices for our chosen custom bond(s).
 
 .. code-block:: python
-   :emphasize-lines: 3,10,11,12
+   :emphasize-lines: 4,11,12,13
 
    from strainjedi.io import read_output
    from strainjedi.io.adapter import to_atoms

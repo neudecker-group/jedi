@@ -33,7 +33,7 @@ What's new here are the ``box=True`` and ``split_bonds=True`` parameters; they w
 
 However, with this approach there is one caveat: we're not including the dipole interactions.
 We can fix that quite easily by using an already familiar function, :func:`~strainjedi.utils.get_hbonds`, but in a different setting.
-Of course, you need not do this if you are not interested in such dipole interactions inside your PBC scenario.
+Of course, you don't need to do this if you are not interested in such dipole interactions inside your PBC scenario.
 
 Add this line after you created the ``jedi`` object, but before you call ``jedi.run()``:
 
