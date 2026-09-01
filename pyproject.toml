@@ -60,7 +60,11 @@ types = [
 [tool.setuptools]
 packages = [
     "strainjedi",
+    "strainjedi.calculators",
     "strainjedi.io",
+    "strainjedi.io.json_jedi",
+    "strainjedi.io.readers",
+    "strainjedi.visualization",
 ]
 
 [tool.pytest]

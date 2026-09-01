@@ -20,7 +20,7 @@ class Jedi:
         atomsF: ase.atoms.Atoms,
         modes: ase.vibrations.VibrationsData,
         epot: NDArray | None = None,
-    ):  # indices=None
+    ):
         """
         atoms0: class
             Atoms object of relaxed structure with calculated energy.
@@ -59,7 +59,7 @@ class Jedi:
         self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, self.__rim_list)
 
         self.__energies = epot  # optional energies of the geometries (legacy)
-        self.__deltaE: float = 0.0  # energy difference between geometries
+        self.__deltaE = self.get_deltaE()  # energy difference between geometries
 
         self.__proc_E_RIMs = None  # list of percentual energy stored in single RIMs
         self.__part_rim_list = None  # rim list for election of atoms (legacy/unused)
@@ -226,6 +226,14 @@ class Jedi:
 
         return cl
 
+    def get_deltaE(self) -> float:
+        """
+        Returns the difference in potential energies of self.atoms0 and self.atomsF.
+        """
+        e0 = self.__atoms0.get_potential_energy()  # [eV]
+        eF = self.__atomsF.get_potential_energy()  # [eV]
+        return (eF - e0) / ase.units.Hartree
+
     def run(self, indices=None, ase_units=False, printout: bool = True):
         """Runs the analysis. Calls all necessary functions to get the needed values.
 
@@ -243,8 +251,6 @@ class Jedi:
             raise ValueError(
                 "Hessian has not the fitting shape, possibly a partial hessian. Please try partial_analysis"
             )
-
-        self.__deltaE = self.get_energies()
 
         (
             self.__proc_E_RIMs,
@@ -279,14 +285,6 @@ class Jedi:
                 self.__E_RIMs,
                 ase_units=ase_units,
             )
-
-    def get_energies(self) -> float:
-        """
-        Returns the difference in potential energies of self.atoms0 and self.atomsF in Hartree.
-        """
-        e0 = self.__atoms0.get_potential_energy()  # [eV]
-        eF = self.__atomsF.get_potential_energy()  # [eV]
-        return (eF - e0) / ase.units.Hartree
 
     def visualize(
         self,
@@ -455,8 +453,6 @@ class Jedi:
 
         self.__q0, self.__qF, self.__delta_q = rics.subtract(self.__atoms0, self.__atomsF, rim_list)
 
-        self.__deltaE = self.get_energies()
-
         (
             self.__proc_E_RIMs,
             self.__E_RIMs,
@@ -565,13 +561,20 @@ class Jedi:
             self.__custom_bonds = custom_bonds  # restore the user input
 
     def add_custom_bonds(self, bonds: NDArray) -> None:
-        """Add custom bonds after creating the object.
+        """Add custom bonds for non-covalent interactions after creating the object.
 
         Args:
             bonds:
                 1D or 2Darray with atom indices, [[i,j]...]
         """
-        self.__custom_bonds = np.atleast_2d(bonds)  # additional bonds for analysis of non-covalent interactions
+        bonds = np.atleast_2d(bonds)
+
+        # sort bonds array
+        bonds = np.sort(bonds, axis=1)
+        idx = np.lexsort((bonds[:, 1], bonds[:, 0]))
+        bonds = bonds[idx]
+
+        self.__custom_bonds = bonds
 
         # recalculate rim_list, B and delta_q
         self.__rim_list = rics.intersect(

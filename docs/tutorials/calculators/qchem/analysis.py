@@ -1,9 +1,10 @@
-from strainjedi.io.qchem import get_vibrations, read
+from strainjedi.io import read_output
+from strainjedi.io.adapter import to_atoms, to_vibrations
 from strainjedi.jedi import Jedi
 
-mol = read("output/opt.out")
-mol2 = read("output/dist.out")
-hessian = get_vibrations("output/freq", mol)
+mol = to_atoms(read_output("output/opt.out"))
+mol2 = to_atoms(read_output("output/dist.out"))
+hessian = to_vibrations(read_output("output/freq.out"), mol)
 
 jedi = Jedi(mol, mol2, hessian)
 jedi.run()
