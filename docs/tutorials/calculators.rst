@@ -4,8 +4,9 @@
 Reading Existing Calculators
 ============================
 
-On the previous page, we created a nitrogen molecule programmatically by hand, entirely within our script.
-In practise, however, JEDI is often used with geometries and Hessians obtained from external quantum-chemical programs.
+On the previous page, we created a nitrogen molecule and deformed it with ASE.
+However, JEDI can also be used with geometries and Hessians obtained from external quantum-chemical programs.
+This allows you to use different deformation methods, such as constrained geometry optimizations with COGEF, the application of mechanical forces with EFEI, or hydrostatic pressure with X-HCFF, as implemented in specialized quantum-chemical programs.
 Hence, on this page, we will cover a few calculators and how to read their output into JEDI.
 
 Before We Start
@@ -14,7 +15,7 @@ Before We Start
 JEDI currently provides helpers to read in Gaussian, ORCA, Q-Chem, and VASP output files.
 If the calculator of your choice is missing, please let us know!
 
-You will, of course, need the output of both geometry optimisations and the frequency analysis of the relaxed structure.
+You will, of course, need the output of both geometry optimizations and the frequency analysis of the relaxed structure.
 Refer to your calculator's manual on how to obtain those.
 Most programs have to be asked for the Hessian explicitly:
 
@@ -88,7 +89,7 @@ Reading The Hessian
 As discussed earlier, JEDI also needs a Hessian to reason about which structural elements have higher significance when judging strain distribution.
 The Hessian is the result of a frequency analysis, which we will save under ``freq``.
 
-Pass ``mol`` along as well, so the Hessian is attached to the optimised structure rather than to whichever geometry happened to sit in the frequency file.
+Pass ``mol`` along as well, so the Hessian is attached to the optimized structure rather than to whichever geometry happened to sit in the frequency file.
 
 .. tabs::
 
@@ -111,7 +112,7 @@ Pass ``mol`` along as well, so the Hessian is attached to the optimised structur
 Putting it Together
 ===================
 
-From here on, starting a JEDI analysis is just as straightforward as introduced: Construct the Jedi object, call ``run()`` and, optionally, visualise the result.
+From here on, starting a JEDI analysis is just as straightforward as introduced: Construct the Jedi object, call ``run()`` and, optionally, visualize the result.
 
 .. tabs::
 
@@ -215,6 +216,6 @@ The calculator classes used to run these programs from ASE moved from ``strainje
 Downloads
 =========
 
-To run these examples, feel free to download the archive below; in there, you will find three folders for each respective calculator, containing the relevant files.
+To run these examples, feel free to download the archive below; in there, you will find four folders for each respective calculator, containing the relevant files.
 
 :download:`Calculator examples <../_static/downloads/calculators.zip>`
