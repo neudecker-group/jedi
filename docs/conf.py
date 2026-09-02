@@ -118,3 +118,4 @@ def zip_dirs(dirs: list[str], out: str):
 zip_dirs(["tutorials/calculators"], "_static/downloads/calculators.zip")
 zip_dirs(["tutorials/substructures"], "_static/downloads/substructures.zip")
 zip_dirs(["tutorials/pbc"], "_static/downloads/pbc.zip")
+zip_dirs(["tutorials/vmd"], "_static/downloads/vmd.zip")

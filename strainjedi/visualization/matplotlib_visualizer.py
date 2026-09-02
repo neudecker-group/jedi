@@ -47,6 +47,7 @@ class MatplotlibVisualizer:
 
             # plt.tight_layout()
             if show:
+                fig.canvas.manager.set_window_title(f"Mode: {self.mode}")
                 plt.show()
             else:
                 self.output_dir.mkdir(parents=True, exist_ok=True)

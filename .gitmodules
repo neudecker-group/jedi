@@ -1,0 +1,4 @@
+[submodule "tests/resources/io"]
+	path = tests/resources/io
+	url = https://github.com/neudecker-group/jedi_qc_outputs.git
+	update = none

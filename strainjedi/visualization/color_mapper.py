@@ -132,8 +132,8 @@ class ColorMapper:
 
     def add_unanalyzed_bonds(self, E_array):
 
-        self.j.indices = np.arange(0, len(self.atomsF))
-        full_rims = rics.calculate(self.atomsF, self.indices, self.custom_bonds)
+        full_indices = np.arange(0, len(self.atomsF))
+        full_rims = rics.calculate(self.atomsF, full_indices, self.custom_bonds)
         analyzed_bonds = {tuple(sorted([int(b[0]), int(b[1])])) for b in E_array[:, :2]}
 
         unanalyzed = []
@@ -214,7 +214,7 @@ class ColorMapper:
                     regular_to_remove.add(original_tuple)
 
                 elif is_custom:
-                    energy = translate.get(original_tuple, np.nan)
+                    energy = ctranslate.get(original_tuple, np.nan)
                     pbc_split_bonds.append(
                         {
                             "atom_index": atom_i,

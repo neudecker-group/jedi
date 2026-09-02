@@ -145,7 +145,7 @@ def calculate(mol, indices, custom_bonds):
     cutoff = ase.neighborlist.natural_cutoffs(mol, mult=constants.COVALENCY_FACTOR)
     bonds = np.vstack(ase.neighborlist.neighbor_list("ij", a=mol, cutoff=cutoff)).T  # determine covalent bonds
 
-    bonds = bonds[bonds[:, 0] < bonds[:, 1]]  # remove double metioned
+    bonds = bonds[bonds[:, 0] < bonds[:, 1]]  # remove double mentioned
     bonds, counts = np.unique(bonds, return_counts=True, axis=0)
     if not np.all(counts == 1):
         print(
@@ -234,9 +234,8 @@ def calculate(mol, indices, custom_bonds):
 
     da = np.asarray(da_rows, dtype=int)
     rim_list.append(np.atleast_2d(da) if da.size > 0 else np.array([]))
-    rim_list_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in rim_list]
 
-    return rim_list_sorted
+    return rim_list
     # TODO: return RICS(...) instead.
 
 
@@ -336,9 +335,8 @@ def intersect(rics0, ricsF):
             )  # get the rims that exist in both structures
             rim_l = rim_l[ind.argsort(kind="stable")]
             common_rims[i] = rim_l.view(rics0[i].dtype).reshape(-1, rics0[i].shape[1])
-    common_rims_sorted = [arr if arr.size == 0 else np.sort(arr, axis=1, kind="mergesort") for arr in common_rims]
 
-    return common_rims_sorted
+    return common_rims
     # TODO: return RICS(..) instead.
 
 

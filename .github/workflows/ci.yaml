@@ -28,7 +28,7 @@ jobs:
           while IFS= read -r file; do
             [[ -z "$file" ]] && continue
             [[ "$file" =~ \.py$ ]] && python_changed=1
-          done <<< "$(git diff --name-only "$BASE_SHA:-origin/main}...HEAD")"
+          done <<< "$(git diff --name-only "${BASE_SHA:-origin/main}...HEAD")"
 
           # convert 1/empty to true/false respectively for GHA output
           out() { [[ "$2" ]] && echo "$1=true" || echo "$1=false"; }
